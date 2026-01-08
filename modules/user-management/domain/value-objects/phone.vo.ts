@@ -88,7 +88,6 @@ export class Phone {
   }
 
   isMobile(): boolean {
-    // This is a simplified check - in real app you'd use a phone number service
     if (this.isUSNumber()) {
       const firstThree = this.value.startsWith("+1")
         ? this.value.slice(2, 5)
@@ -99,6 +98,6 @@ export class Phone {
       return mobileAreaCodes.includes(firstThree);
     }
 
-    return false; // Default for non-US numbers
+    return false;
   }
 }
