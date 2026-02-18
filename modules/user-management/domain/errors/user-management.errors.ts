@@ -89,7 +89,19 @@ export class AddressNotFoundError extends Error {
 export class PaymentMethodNotFoundError extends Error {
   readonly statusCode = 404;
   constructor(paymentMethodId?: string) {
-    super(paymentMethodId ? `Payment method '${paymentMethodId}' not found` : "Payment method not found");
+    super(
+      paymentMethodId
+        ? `Payment method '${paymentMethodId}' not found`
+        : "Payment method not found",
+    );
     this.name = "PaymentMethodNotFoundError";
+  }
+}
+
+export class EmailAlreadyVerifiedError extends Error {
+  readonly statusCode = 400;
+  constructor() {
+    super("Email is already verified");
+    this.name = "EmailAlreadyVerifiedError";
   }
 }
