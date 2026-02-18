@@ -642,4 +642,43 @@ export class PaymentMethodsController {
       });
     }
   }
+
+  async setDefaultPaymentMethod(
+    request: FastifyRequest<{
+      Params: { paymentMethodId: string };
+    }>,
+    reply: FastifyReply,
+  ): Promise<void> {
+    try {
+      const userId = (request as any).user?.userId;
+      const { paymentMethodId } = request.params;
+
+      if (!userId) {
+        reply.status(401).send({ success: false, error: "Authentication required" });
+        return;
+      }
+
+      if (!paymentMethodId) {
+        reply.status(400).send({ success: false, error: "Payment Method ID is required", errors: ["paymentMethodId"] });
+        return;
+      }
+
+      if (!this.paymentMethodService) {
+        reply.status(500).send({ success: false, error: "Payment method service not available" });
+        return;
+      }
+
+      await this.paymentMethodService.setDefaultPaymentMethod(paymentMethodId, userId);
+
+      reply.status(200).send({
+        success: true,
+        message: "Default payment method updated successfully",
+      });
+    } catch (error) {
+      reply.status(500).send({
+        success: false,
+        error: "Internal server error while setting default payment method",
+      });
+    }
+  }
 }
