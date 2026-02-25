@@ -1,3 +1,11 @@
+export class DomainValidationError extends Error {
+  readonly statusCode = 400;
+  constructor(message: string) {
+    super(message);
+    this.name = "DomainValidationError";
+  }
+}
+
 export class UserNotFoundError extends Error {
   readonly statusCode = 404;
   constructor(identifier?: string) {
@@ -103,5 +111,21 @@ export class EmailAlreadyVerifiedError extends Error {
   constructor() {
     super("Email is already verified");
     this.name = "EmailAlreadyVerifiedError";
+  }
+}
+
+export class UserInactiveError extends Error {
+  readonly statusCode = 403;
+  constructor() {
+    super("Account is inactive. Please contact support to reactivate your account.");
+    this.name = "UserInactiveError";
+  }
+}
+
+export class InvalidOperationError extends Error {
+  readonly statusCode = 422;
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidOperationError";
   }
 }
