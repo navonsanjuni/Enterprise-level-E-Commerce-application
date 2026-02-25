@@ -1,6 +1,7 @@
 import { UserId } from "../value-objects/user-id.vo";
 import { Currency } from "../value-objects/currency.vo";
 import { Locale } from "../value-objects/locale.vo";
+import { InvalidOperationError } from "../errors/user-management.errors";
 
 export class UserProfile {
   private constructor(
@@ -94,7 +95,7 @@ export class UserProfile {
   // Address management
   setDefaultAddress(addressId: string): void {
     if (!addressId) {
-      throw new Error("Address ID is required");
+      throw new InvalidOperationError("Address ID is required");
     }
 
     this.defaultAddressId = addressId;
@@ -111,7 +112,7 @@ export class UserProfile {
   // Payment method management
   setDefaultPaymentMethod(paymentMethodId: string): void {
     if (!paymentMethodId) {
-      throw new Error("Payment method ID is required");
+      throw new InvalidOperationError("Payment method ID is required");
     }
 
     this.defaultPaymentMethodId = paymentMethodId;
@@ -139,7 +140,7 @@ export class UserProfile {
   // Preferences management
   updatePreference(key: string, value: any): void {
     if (!key) {
-      throw new Error("Preference key is required");
+      throw new InvalidOperationError("Preference key is required");
     }
 
     this.preferences = {
@@ -154,7 +155,7 @@ export class UserProfile {
 
   removePreference(key: string): void {
     if (!key) {
-      throw new Error("Preference key is required");
+      throw new InvalidOperationError("Preference key is required");
     }
 
     const { [key]: removed, ...remainingPreferences } = this.preferences;
@@ -168,7 +169,7 @@ export class UserProfile {
   // Style preferences management
   updateStylePreference(category: string, preferences: any): void {
     if (!category) {
-      throw new Error("Style category is required");
+      throw new InvalidOperationError("Style category is required");
     }
 
     this.stylePreferences = {
@@ -213,7 +214,7 @@ export class UserProfile {
   // Size preferences management
   updatePreferredSize(category: string, size: string): void {
     if (!category || !size) {
-      throw new Error("Category and size are required");
+      throw new InvalidOperationError("Category and size are required");
     }
 
     this.preferredSizes = {

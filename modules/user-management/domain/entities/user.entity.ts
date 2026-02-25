@@ -4,6 +4,7 @@ import { Phone } from "../value-objects/phone.vo";
 import {
   InvalidPasswordError,
   EmailAlreadyVerifiedError,
+  InvalidOperationError,
 } from "../errors/user-management.errors";
 import { UserRole } from "../enums/user-role.enum";
 import { UserStatus } from "../enums/user-status.enum";
@@ -261,10 +262,10 @@ export class User {
 
   verifyPhone(): void {
     if (!this.phone) {
-      throw new Error("Cannot verify phone: no phone number set");
+      throw new InvalidOperationError("Cannot verify phone: no phone number set");
     }
     if (this.phoneVerified) {
-      throw new Error("Phone is already verified");
+      throw new InvalidOperationError("Phone is already verified");
     }
     this.phoneVerified = true;
     this.touch();
@@ -290,7 +291,7 @@ export class User {
 
   unblock(): void {
     if (this.status !== UserStatus.BLOCKED) {
-      throw new Error("User is not blocked");
+      throw new InvalidOperationError("User is not blocked");
     }
     this.status = UserStatus.ACTIVE;
     this.touch();
@@ -298,7 +299,7 @@ export class User {
 
   convertFromGuest(email: string, passwordHash: string): void {
     if (!this.isGuest) {
-      throw new Error("User is not a guest");
+      throw new InvalidOperationError("User is not a guest");
     }
     this.email = new Email(email);
     this.passwordHash = passwordHash;
