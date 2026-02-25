@@ -1,10 +1,9 @@
 import "fastify";
-import { PrismaClient } from "@prisma/client";
 
 declare module "fastify" {
-  interface FastifyInstance {
-    prisma: PrismaClient;
-  }
+  // prisma is declared in plugins/db.ts
+  // signToken/verifyToken/authenticate are declared in plugins/auth.ts
+  // config is declared in plugins/config.ts
 
   interface FastifyRequest {
     user: {
