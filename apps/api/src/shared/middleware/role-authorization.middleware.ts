@@ -26,10 +26,11 @@ export function requireRole(allowedRoles: string[]) {
 
 // Common role presets for athletic shoes e-commerce
 export const RolePermissions = {
-  ADMIN_ONLY: requireRole(["ADMIN", "SUPER_ADMIN"]),
-  STAFF_LEVEL: requireRole(["ADMIN", "SUPER_ADMIN", "STAFF"]),
-  CUSTOMER_CARE: requireRole(["ADMIN", "SUPER_ADMIN", "STAFF", "CUSTOMER_CARE"]),
-  AUTHENTICATED: requireRole(["ADMIN", "SUPER_ADMIN", "STAFF", "CUSTOMER_CARE", "CUSTOMER"]),
+  ADMIN_ONLY: requireRole(["ADMIN"]),
+  STAFF_LEVEL: requireRole(["ADMIN", "INVENTORY_STAFF", "CUSTOMER_SERVICE", "ANALYST"]),
+  CUSTOMER_CARE: requireRole(["ADMIN", "CUSTOMER_SERVICE"]),
+  VENDOR_ACCESS: requireRole(["ADMIN", "VENDOR"]),
+  AUTHENTICATED: requireRole(["ADMIN", "INVENTORY_STAFF", "CUSTOMER_SERVICE", "ANALYST", "VENDOR", "CUSTOMER"]),
 };
 
 export function hasRole(request: FastifyRequest, allowedRoles: string[]): boolean {
