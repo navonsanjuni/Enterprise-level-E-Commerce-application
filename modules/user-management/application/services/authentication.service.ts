@@ -10,9 +10,11 @@ import {
   UserAlreadyExistsError,
   InvalidCredentialsError,
   UserBlockedError,
+  UserInactiveError,
   InvalidPasswordError,
   EmailAlreadyVerifiedError,
 } from "../../domain/errors/user-management.errors.js";
+import { UserStatus } from "../../domain/enums/user-status.enum.js";
 
 export interface LoginCredentials {
   email: string;
@@ -111,12 +113,12 @@ export class AuthenticationService {
       throw new InvalidCredentialsError();
     }
 
-    if (user.getStatus() === "blocked") {
+    if (user.getStatus() === UserStatus.BLOCKED) {
       throw new UserBlockedError();
     }
 
-    if (user.getStatus() === "inactive") {
-      throw new Error("Account is inactive"); // TODO: Add UserInactiveError
+    if (user.getStatus() === UserStatus.INACTIVE) {
+      throw new UserInactiveError();
     }
 
     return this.generateAuthResult(user);
@@ -174,7 +176,7 @@ export class AuthenticationService {
         throw new UserNotFoundError(payload.userId);
       }
 
-      if (user.getStatus() === "blocked") {
+      if (user.getStatus() === UserStatus.BLOCKED) {
         throw new UserBlockedError();
       }
 
@@ -212,7 +214,7 @@ export class AuthenticationService {
         throw new UserNotFoundError(payload.userId);
       }
 
-      if (user.getStatus() === "blocked") {
+      if (user.getStatus() === UserStatus.BLOCKED) {
         throw new UserBlockedError();
       }
 
