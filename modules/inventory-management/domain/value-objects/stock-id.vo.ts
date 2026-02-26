@@ -1,6 +1,3 @@
-// Stock ID is a composite key (variantId + locationId)
-// We'll store it as a string representation for simplicity
-
 export class StockId {
   private constructor(
     private readonly variantId: string,
