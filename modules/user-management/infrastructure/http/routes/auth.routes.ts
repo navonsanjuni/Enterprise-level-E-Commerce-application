@@ -5,7 +5,7 @@ import {
   LoginUserRequest,
   RefreshTokenRequest,
 } from "../controllers/auth.controller";
-import { authenticate } from "../middleware/auth.middleware";
+import { authenticate } from "@/api/src/shared/middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
