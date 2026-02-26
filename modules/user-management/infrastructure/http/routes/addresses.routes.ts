@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { AddressesController } from "../controllers/addresses.controller";
+import { authenticate } from "../middleware/auth.middleware";
 
 const addressObject = {
   type: "object",
@@ -50,6 +51,7 @@ export async function registerAddressRoutes(
 ) {
   // GET /users/me/addresses
   fastify.get("/users/me/addresses", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Addresses"],
       summary: "List addresses",
@@ -71,6 +73,7 @@ export async function registerAddressRoutes(
 
   // POST /users/me/addresses
   fastify.post("/users/me/addresses", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Addresses"],
       summary: "Add a new address",
@@ -97,6 +100,7 @@ export async function registerAddressRoutes(
 
   // PATCH /users/me/addresses/:addressId
   fastify.patch("/users/me/addresses/:addressId", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Addresses"],
       summary: "Update an address",
@@ -123,6 +127,7 @@ export async function registerAddressRoutes(
 
   // DELETE /users/me/addresses/:addressId
   fastify.delete("/users/me/addresses/:addressId", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Addresses"],
       summary: "Delete an address",
@@ -144,6 +149,7 @@ export async function registerAddressRoutes(
 
   // POST /users/me/addresses/:addressId/set-default
   fastify.post("/users/me/addresses/:addressId/set-default", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Addresses"],
       summary: "Set default address",

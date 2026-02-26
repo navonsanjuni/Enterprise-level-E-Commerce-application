@@ -398,6 +398,7 @@ export async function registerAuthRoutes(
             type: "object",
             properties: {
               success: { type: "boolean" },
+              statusCode: { type: "number" },
               message: { type: "string" },
             },
           },
@@ -430,6 +431,7 @@ export async function registerAuthRoutes(
             type: "object",
             properties: {
               success: { type: "boolean" },
+              statusCode: { type: "number" },
               message: { type: "string" },
             },
           },

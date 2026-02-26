@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { ProfileController } from "../controllers/profile.controller";
+import { authenticate } from "../middleware/auth.middleware";
 
 const profileData = {
   type: "object",
@@ -55,6 +56,7 @@ export async function registerProfileRoutes(
 ) {
   // GET /users/me/profile
   fastify.get("/users/me/profile", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Profile"],
       summary: "Get current user profile",
@@ -76,6 +78,7 @@ export async function registerProfileRoutes(
 
   // PATCH /users/me/profile
   fastify.patch("/users/me/profile", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Profile"],
       summary: "Update current user profile",

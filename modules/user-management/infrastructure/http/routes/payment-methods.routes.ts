@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { PaymentMethodsController } from "../controllers/payment-methods.controller";
+import { authenticate } from "../middleware/auth.middleware";
 
 const paymentMethodObject = {
   type: "object",
@@ -44,6 +45,7 @@ export async function registerPaymentMethodRoutes(
 ) {
   // GET /users/me/payment-methods
   fastify.get("/users/me/payment-methods", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Payment Methods"],
       summary: "List payment methods",
@@ -65,6 +67,7 @@ export async function registerPaymentMethodRoutes(
 
   // POST /users/me/payment-methods
   fastify.post("/users/me/payment-methods", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Payment Methods"],
       summary: "Add a payment method",
@@ -91,6 +94,7 @@ export async function registerPaymentMethodRoutes(
 
   // PATCH /users/me/payment-methods/:paymentMethodId
   fastify.patch("/users/me/payment-methods/:paymentMethodId", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Payment Methods"],
       summary: "Update a payment method",
@@ -117,6 +121,7 @@ export async function registerPaymentMethodRoutes(
 
   // DELETE /users/me/payment-methods/:paymentMethodId
   fastify.delete("/users/me/payment-methods/:paymentMethodId", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Payment Methods"],
       summary: "Remove a payment method",
@@ -138,6 +143,7 @@ export async function registerPaymentMethodRoutes(
 
   // POST /users/me/payment-methods/:paymentMethodId/set-default
   fastify.post("/users/me/payment-methods/:paymentMethodId/set-default", {
+    preHandler: [authenticate],
     schema: {
       tags: ["Payment Methods"],
       summary: "Set default payment method",
