@@ -1,7 +1,10 @@
 import { IUserRepository } from "../../domain/repositories/iuser.repository";
 import { UserRole, UserStatus } from "../../domain/entities/user.entity";
-import { IQuery, IQueryHandler } from "./get-user-profile.query";
-import { CommandResult } from "../commands/register-user.command";
+import {
+  IQuery,
+  IQueryHandler,
+  QueryResult,
+} from "@/api/src/shared/application";
 
 export interface ListUsersQuery extends IQuery {
   search?: string;
@@ -39,11 +42,11 @@ export interface ListUsersResult {
 
 export class ListUsersHandler implements IQueryHandler<
   ListUsersQuery,
-  CommandResult<ListUsersResult>
+  QueryResult<ListUsersResult>
 > {
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async handle(query: ListUsersQuery): Promise<CommandResult<ListUsersResult>> {
+  async handle(query: ListUsersQuery): Promise<QueryResult<ListUsersResult>> {
     try {
       const page = query.page || 1;
       const limit = query.limit || 20;
@@ -51,16 +54,14 @@ export class ListUsersHandler implements IQueryHandler<
       const sortOrder = query.sortOrder || "desc";
 
       if (page < 1) {
-        return CommandResult.failure<ListUsersResult>(
+        return QueryResult.failure<ListUsersResult>(
           "Page number must be greater than 0",
-          ["page"],
         );
       }
 
       if (limit < 1 || limit > 100) {
-        return CommandResult.failure<ListUsersResult>(
+        return QueryResult.failure<ListUsersResult>(
           "Limit must be between 1 and 100",
-          ["limit"],
         );
       }
 
@@ -78,7 +79,7 @@ export class ListUsersHandler implements IQueryHandler<
 
       const totalPages = Math.ceil(total / limit);
 
-      return CommandResult.success<ListUsersResult>({
+      return QueryResult.success<ListUsersResult>({
         users,
         pagination: { total, page, limit, totalPages },
       });
@@ -86,13 +87,12 @@ export class ListUsersHandler implements IQueryHandler<
       console.error("[ListUsersHandler] Error:", error);
 
       if (error instanceof Error) {
-        return CommandResult.failure<ListUsersResult>(
+        return QueryResult.failure<ListUsersResult>(
           "Failed to retrieve users list",
-          [error.message],
         );
       }
 
-      return CommandResult.failure<ListUsersResult>(
+      return QueryResult.failure<ListUsersResult>(
         "An unexpected error occurred while retrieving users",
       );
     }

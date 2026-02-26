@@ -1,19 +1,9 @@
 import { UserProfileService } from "../services/user-profile.service";
 import {
-  ICommand,
-  ICommandHandler,
-  CommandResult,
-} from "../commands/register-user.command";
-
-// Query interfaces
-export interface IQuery {
-  readonly queryId?: string;
-  readonly timestamp?: Date;
-}
-
-export interface IQueryHandler<TQuery extends IQuery, TResult = any> {
-  handle(query: TQuery): Promise<TResult>;
-}
+  IQuery,
+  IQueryHandler,
+  QueryResult,
+} from "@/api/src/shared/application";
 
 export interface GetUserProfileQuery extends IQuery {
   userId: string;
@@ -32,19 +22,17 @@ export interface UserProfileResult {
 
 export class GetUserProfileHandler implements IQueryHandler<
   GetUserProfileQuery,
-  CommandResult<UserProfileResult>
+  QueryResult<UserProfileResult>
 > {
   constructor(private readonly userProfileService: UserProfileService) {}
 
   async handle(
     query: GetUserProfileQuery,
-  ): Promise<CommandResult<UserProfileResult>> {
+  ): Promise<QueryResult<UserProfileResult>> {
     try {
       // Validate query
       if (!query.userId) {
-        return CommandResult.failure<UserProfileResult>("User ID is required", [
-          "userId",
-        ]);
+        return QueryResult.failure<UserProfileResult>("User ID is required");
       }
 
       // Get profile through service
@@ -53,7 +41,7 @@ export class GetUserProfileHandler implements IQueryHandler<
       );
 
       if (!profile) {
-        return CommandResult.failure<UserProfileResult>(
+        return QueryResult.failure<UserProfileResult>(
           "User profile not found",
         );
       }
@@ -81,16 +69,15 @@ export class GetUserProfileHandler implements IQueryHandler<
         preferredSizes: result.preferredSizes,
       });
 
-      return CommandResult.success<UserProfileResult>(result);
+      return QueryResult.success<UserProfileResult>(result);
     } catch (error) {
       if (error instanceof Error) {
-        return CommandResult.failure<UserProfileResult>(
-          "Failed to retrieve user profile",
-          [error.message],
+        return QueryResult.failure<UserProfileResult>(
+          `Failed to retrieve user profile: ${error.message}`,
         );
       }
 
-      return CommandResult.failure<UserProfileResult>(
+      return QueryResult.failure<UserProfileResult>(
         "An unexpected error occurred while retrieving profile",
       );
     }

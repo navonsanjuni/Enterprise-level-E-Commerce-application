@@ -2,8 +2,11 @@ import {
   AddressManagementService,
   AddressResponseDto,
 } from "../services/address-management.service";
-import { CommandResult } from "../commands/register-user.command";
-import { IQuery, IQueryHandler } from "./get-user-profile.query";
+import {
+  IQuery,
+  IQueryHandler,
+  QueryResult,
+} from "@/api/src/shared/application";
 
 export interface ListAddressesQuery extends IQuery {
   userId: string;
@@ -40,20 +43,17 @@ export interface ListAddressesResult {
 
 export class ListAddressesHandler implements IQueryHandler<
   ListAddressesQuery,
-  CommandResult<ListAddressesResult>
+  QueryResult<ListAddressesResult>
 > {
   constructor(private readonly addressService: AddressManagementService) {}
 
   async handle(
     query: ListAddressesQuery,
-  ): Promise<CommandResult<ListAddressesResult>> {
+  ): Promise<QueryResult<ListAddressesResult>> {
     try {
       // Validate query
       if (!query.userId) {
-        return CommandResult.failure<ListAddressesResult>(
-          "User ID is required",
-          ["userId"],
-        );
+        return QueryResult.failure<ListAddressesResult>("User ID is required");
       }
 
       // Get addresses through service with pagination
@@ -124,16 +124,15 @@ export class ListAddressesHandler implements IQueryHandler<
         totalCount: totalCount,
       };
 
-      return CommandResult.success<ListAddressesResult>(result);
+      return QueryResult.success<ListAddressesResult>(result);
     } catch (error) {
       if (error instanceof Error) {
-        return CommandResult.failure<ListAddressesResult>(
+        return QueryResult.failure<ListAddressesResult>(
           "Failed to retrieve addresses",
-          [error.message],
         );
       }
 
-      return CommandResult.failure<ListAddressesResult>(
+      return QueryResult.failure<ListAddressesResult>(
         "An unexpected error occurred while retrieving addresses",
       );
     }

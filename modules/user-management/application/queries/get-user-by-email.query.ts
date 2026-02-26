@@ -1,47 +1,46 @@
 import { AuthenticationService } from "../services/authentication.service";
+import {
+  IQuery,
+  IQueryHandler,
+  QueryResult,
+} from "@/api/src/shared/application";
 
-export interface GetUserByEmailQuery {
+export interface GetUserByEmailQuery extends IQuery {
   email: string;
-  timestamp: Date;
 }
 
 export interface GetUserByEmailResult {
-  success: boolean;
-  data?: {
-    userId: string;
-    emailVerified: boolean;
-  } | null;
-  error?: string;
-  errors?: string[];
+  userId: string;
+  emailVerified: boolean;
 }
 
-export class GetUserByEmailHandler {
+export class GetUserByEmailHandler
+  implements IQueryHandler<GetUserByEmailQuery, QueryResult<GetUserByEmailResult | null>>
+{
   constructor(private readonly authService: AuthenticationService) {}
 
-  async handle(query: GetUserByEmailQuery): Promise<GetUserByEmailResult> {
+  async handle(
+    query: GetUserByEmailQuery,
+  ): Promise<QueryResult<GetUserByEmailResult | null>> {
     try {
-      // Validate query
       if (!query.email) {
-        return {
-          success: false,
-          error: "Email is required",
-          errors: ["email"],
-        };
+        return QueryResult.failure<GetUserByEmailResult | null>(
+          "Email is required",
+        );
       }
 
-      // Delegate to authentication service
       const user = await this.authService.getUserByEmail(query.email);
 
-      return {
-        success: true,
-        data: user,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Failed to get user by email",
-        errors: [],
-      };
+      return QueryResult.success<GetUserByEmailResult | null>(user);
+    } catch (error) {
+      if (error instanceof Error) {
+        return QueryResult.failure<GetUserByEmailResult | null>(
+          error.message || "Failed to get user by email",
+        );
+      }
+      return QueryResult.failure<GetUserByEmailResult | null>(
+        "An unexpected error occurred while retrieving user by email",
+      );
     }
   }
 }

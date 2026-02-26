@@ -1,6 +1,9 @@
 import { PaymentMethodService } from "../services/payment-method.service";
-import { IQuery, IQueryHandler } from "./get-user-profile.query";
-import { CommandResult } from "../commands/register-user.command";
+import {
+  IQuery,
+  IQueryHandler,
+  QueryResult,
+} from "@/api/src/shared/application";
 
 export interface ListPaymentMethodsQuery extends IQuery {
   userId: string;
@@ -27,19 +30,18 @@ export interface PaymentMethodsListResult {
 
 export class ListPaymentMethodsHandler implements IQueryHandler<
   ListPaymentMethodsQuery,
-  CommandResult<PaymentMethodsListResult>
+  QueryResult<PaymentMethodsListResult>
 > {
   constructor(private readonly paymentMethodService: PaymentMethodService) {}
 
   async handle(
     query: ListPaymentMethodsQuery,
-  ): Promise<CommandResult<PaymentMethodsListResult>> {
+  ): Promise<QueryResult<PaymentMethodsListResult>> {
     try {
       // Validate query
       if (!query.userId) {
-        return CommandResult.failure<PaymentMethodsListResult>(
+        return QueryResult.failure<PaymentMethodsListResult>(
           "User ID is required",
-          ["userId"],
         );
       }
 
@@ -68,16 +70,15 @@ export class ListPaymentMethodsHandler implements IQueryHandler<
         totalCount: paymentMethodResults.length,
       };
 
-      return CommandResult.success<PaymentMethodsListResult>(result);
+      return QueryResult.success<PaymentMethodsListResult>(result);
     } catch (error) {
       if (error instanceof Error) {
-        return CommandResult.failure<PaymentMethodsListResult>(
+        return QueryResult.failure<PaymentMethodsListResult>(
           "Failed to retrieve payment methods",
-          [error.message],
         );
       }
 
-      return CommandResult.failure<PaymentMethodsListResult>(
+      return QueryResult.failure<PaymentMethodsListResult>(
         "An unexpected error occurred while retrieving payment methods",
       );
     }
