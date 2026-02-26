@@ -17,8 +17,6 @@ interface InventoryTransactionDatabaseRow {
 
 export class InventoryTransactionRepositoryImpl implements IInventoryTransactionRepository {
   constructor(private readonly prisma: PrismaClient) {}
-
-  // Hydration: Database row � Entity
   private toEntity(row: InventoryTransactionDatabaseRow): InventoryTransaction {
     return InventoryTransaction.reconstitute({
       invTxnId: TransactionId.create(row.invTxnId),

@@ -17,8 +17,6 @@ interface StockAlertDatabaseRow {
 
 export class StockAlertRepositoryImpl implements IStockAlertRepository {
   constructor(private readonly prisma: PrismaClient) {}
-
-  // Hydration: Database row � Entity
   private toEntity(row: StockAlertDatabaseRow): StockAlert {
     return StockAlert.reconstitute({
       alertId: AlertId.create(row.alertId),

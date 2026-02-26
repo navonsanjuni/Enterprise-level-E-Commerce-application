@@ -12,8 +12,6 @@ interface PickupReservationDatabaseRow {
   expiresAt: Date;
 }
 
-// In-memory tracking for status (since we can't modify database)
-// In production, this could be stored in Redis or a separate table
 class ReservationStatusTracker {
   private static cancelledReservations = new Set<string>();
   private static fulfilledReservations = new Set<string>();
@@ -56,7 +54,6 @@ class ReservationStatusTracker {
 export class PickupReservationRepositoryImpl implements IPickupReservationRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  // Hydration: Database row → Entity
   private toEntity(row: PickupReservationDatabaseRow): PickupReservation {
     return PickupReservation.reconstitute({
       reservationId: ReservationId.create(row.reservationId),
@@ -76,7 +73,6 @@ export class PickupReservationRepositoryImpl implements IPickupReservationReposi
   async save(reservation: PickupReservation): Promise<void> {
     const reservationId = reservation.getReservationId().getValue();
 
-    // Update status tracking
     if (reservation.isCancelled()) {
       ReservationStatusTracker.markCancelled(reservationId);
     }
@@ -91,7 +87,6 @@ export class PickupReservationRepositoryImpl implements IPickupReservationReposi
       ReservationStatusTracker.markExpired(reservationId);
     }
 
-    // Save only the basic database fields (we keep the reservation record for history)
     await (this.prisma as any).pickupReservation.upsert({
       where: { reservationId },
       create: {
@@ -183,7 +178,6 @@ export class PickupReservationRepositoryImpl implements IPickupReservationReposi
       orderBy: { expiresAt: "asc" },
     });
 
-    // Filter to only expired reservations using status tracker and time-based expiration
     return reservations
       .map((r: PickupReservationDatabaseRow) => this.toEntity(r))
       .filter((r: PickupReservation) => r.isExpired());
@@ -194,7 +188,6 @@ export class PickupReservationRepositoryImpl implements IPickupReservationReposi
       orderBy: { expiresAt: "asc" },
     });
 
-    // Filter to only active reservations using status tracker
     return reservations
       .map((r: PickupReservationDatabaseRow) => this.toEntity(r))
       .filter((r: PickupReservation) => r.isActive());
@@ -205,7 +198,6 @@ export class PickupReservationRepositoryImpl implements IPickupReservationReposi
       orderBy: { expiresAt: "asc" },
     });
 
-    // Return all reservations mapped to entities
     return reservations.map((r: PickupReservationDatabaseRow) =>
       this.toEntity(r),
     );
@@ -243,7 +235,6 @@ export class PickupReservationRepositoryImpl implements IPickupReservationReposi
       },
     });
 
-    // Filter to active reservations and sum quantities
     return reservations
       .map((r: PickupReservationDatabaseRow) => this.toEntity(r))
       .filter((r: PickupReservation) => r.isActive())

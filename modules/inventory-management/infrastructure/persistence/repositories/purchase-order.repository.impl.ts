@@ -19,8 +19,6 @@ interface PurchaseOrderDatabaseRow {
 
 export class PurchaseOrderRepositoryImpl implements IPurchaseOrderRepository {
   constructor(private readonly prisma: PrismaClient) {}
-
-  // Hydration: Database row � Entity
   private toEntity(row: PurchaseOrderDatabaseRow): PurchaseOrder {
     return PurchaseOrder.reconstitute({
       poId: PurchaseOrderId.create(row.poId),

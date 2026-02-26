@@ -15,8 +15,6 @@ interface SupplierDatabaseRow {
 
 export class SupplierRepositoryImpl implements ISupplierRepository {
   constructor(private readonly prisma: PrismaClient) {}
-
-  // Hydration: Database row � Entity
   private toEntity(row: SupplierDatabaseRow): Supplier {
     return Supplier.reconstitute({
       supplierId: SupplierId.create(row.supplierId),
