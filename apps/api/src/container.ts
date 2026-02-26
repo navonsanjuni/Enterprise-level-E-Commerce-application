@@ -17,6 +17,33 @@ import { PaymentMethodService } from "../../../modules/user-management/applicati
 import { PasswordHasherService } from "../../../modules/user-management/application/services/password-hasher.service";
 import { VerificationService } from "../../../modules/user-management/application/services/verification.service";
 
+// Product Catalog — Repositories
+import {
+  ProductRepository,
+  ProductVariantRepository,
+  CategoryRepository,
+  MediaAssetRepository,
+  ProductTagRepository,
+  SizeGuideRepository,
+  EditorialLookRepository,
+  ProductMediaRepository,
+} from "../../../modules/product-catalog/infrastructure/persistence/repositories";
+
+// Product Catalog — Services
+import {
+  ProductManagementService,
+  CategoryManagementService,
+  MediaManagementService,
+  VariantManagementService,
+  ProductSearchService,
+  SlugGeneratorService,
+  ProductTagManagementService,
+  SizeGuideManagementService,
+  EditorialLookManagementService,
+  ProductMediaManagementService,
+  VariantMediaManagementService,
+} from "../../../modules/product-catalog/application/services";
+
 /**
  * Dependency Injection Container
  * Centralises all module wiring — repositories → services → ready to hand to routes.
@@ -51,8 +78,12 @@ export class Container {
     const addressRepository = new AddressRepository(prisma);
     const paymentMethodRepository = new PaymentMethodRepository(prisma);
     const verificationTokenRepository = new VerificationTokenRepository(prisma);
-    const verificationRateLimitRepository = new VerificationRateLimitRepository(prisma);
-    const verificationAuditLogRepository = new VerificationAuditLogRepository(prisma);
+    const verificationRateLimitRepository = new VerificationRateLimitRepository(
+      prisma,
+    );
+    const verificationAuditLogRepository = new VerificationAuditLogRepository(
+      prisma,
+    );
 
     // Shared services
     const passwordHasher = new PasswordHasherService();
@@ -91,13 +122,107 @@ export class Container {
       verificationAuditLogRepository,
     );
 
-    // Store services
+    // Store User Management services
     this.services.set("authService", authService);
     this.services.set("profileService", profileService);
     this.services.set("addressService", addressService);
     this.services.set("paymentMethodService", paymentMethodService);
     this.services.set("verificationService", verificationService);
     this.services.set("prisma", prisma);
+
+    // ============================================
+    // Product Catalog Module
+    // ============================================
+
+    // Repositories
+    const productRepository = new ProductRepository(prisma);
+    const productVariantRepository = new ProductVariantRepository(prisma);
+    const categoryRepository = new CategoryRepository(prisma);
+    const mediaAssetRepository = new MediaAssetRepository(prisma);
+    const productTagRepository = new ProductTagRepository(prisma);
+    const sizeGuideRepository = new SizeGuideRepository(prisma);
+    const editorialLookRepository = new EditorialLookRepository(prisma);
+    const productMediaRepository = new ProductMediaRepository(prisma);
+
+    // Services
+    const slugGeneratorService = new SlugGeneratorService();
+
+    const productManagementService = new ProductManagementService(
+      productRepository,
+    );
+
+    const categoryManagementService = new CategoryManagementService(
+      categoryRepository,
+      slugGeneratorService,
+    );
+
+    const mediaManagementService = new MediaManagementService(
+      mediaAssetRepository,
+    );
+
+    const variantManagementService = new VariantManagementService(
+      productVariantRepository,
+      productRepository,
+    );
+
+    const productSearchService = new ProductSearchService(
+      productRepository,
+      categoryRepository,
+    );
+
+    const productTagManagementService = new ProductTagManagementService(
+      productTagRepository,
+    );
+
+    const sizeGuideManagementService = new SizeGuideManagementService(
+      sizeGuideRepository,
+    );
+
+    const editorialLookManagementService = new EditorialLookManagementService(
+      editorialLookRepository,
+      mediaAssetRepository,
+      productRepository,
+    );
+
+    const productMediaManagementService = new ProductMediaManagementService(
+      productMediaRepository,
+      mediaAssetRepository,
+      productRepository,
+    );
+
+    // NOTE: VariantMediaManagementService requires a VariantMediaRepository
+    // implementation (infra/persistence/repositories/variant-media.repository.impl.ts)
+    // which is not yet created. Placeholder — wire once the impl exists.
+    const variantMediaManagementService = new VariantMediaManagementService(
+      productMediaRepository as any, // TODO: replace with VariantMediaRepositoryImpl once created
+      mediaAssetRepository,
+      productVariantRepository,
+      productRepository,
+    );
+
+    // Store Product Catalog services
+    this.services.set("productManagementService", productManagementService);
+    this.services.set("categoryManagementService", categoryManagementService);
+    this.services.set("mediaManagementService", mediaManagementService);
+    this.services.set("variantManagementService", variantManagementService);
+    this.services.set("productSearchService", productSearchService);
+    this.services.set(
+      "productTagManagementService",
+      productTagManagementService,
+    );
+    this.services.set("sizeGuideManagementService", sizeGuideManagementService);
+    this.services.set(
+      "editorialLookManagementService",
+      editorialLookManagementService,
+    );
+    this.services.set(
+      "productMediaManagementService",
+      productMediaManagementService,
+    );
+    this.services.set(
+      "variantMediaManagementService",
+      variantMediaManagementService,
+    );
   }
 
   get<T>(name: string): T {
@@ -113,7 +238,43 @@ export class Container {
       authService: this.get<AuthenticationService>("authService"),
       profileService: this.get<UserProfileService>("profileService"),
       addressService: this.get<AddressManagementService>("addressService"),
-      paymentMethodService: this.get<PaymentMethodService>("paymentMethodService"),
+      paymentMethodService: this.get<PaymentMethodService>(
+        "paymentMethodService",
+      ),
+      prisma: this.get<PrismaClient>("prisma"),
+    };
+  }
+
+  getProductCatalogServices() {
+    return {
+      productService: this.get<ProductManagementService>(
+        "productManagementService",
+      ),
+      productSearchService: this.get<ProductSearchService>(
+        "productSearchService",
+      ),
+      categoryService: this.get<CategoryManagementService>(
+        "categoryManagementService",
+      ),
+      variantService: this.get<VariantManagementService>(
+        "variantManagementService",
+      ),
+      mediaService: this.get<MediaManagementService>("mediaManagementService"),
+      productTagService: this.get<ProductTagManagementService>(
+        "productTagManagementService",
+      ),
+      sizeGuideService: this.get<SizeGuideManagementService>(
+        "sizeGuideManagementService",
+      ),
+      editorialLookService: this.get<EditorialLookManagementService>(
+        "editorialLookManagementService",
+      ),
+      productMediaService: this.get<ProductMediaManagementService>(
+        "productMediaManagementService",
+      ),
+      variantMediaService: this.get<VariantMediaManagementService>(
+        "variantMediaManagementService",
+      ),
       prisma: this.get<PrismaClient>("prisma"),
     };
   }
