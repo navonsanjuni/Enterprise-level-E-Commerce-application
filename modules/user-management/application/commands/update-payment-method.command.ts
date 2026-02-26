@@ -3,7 +3,7 @@ import {
   ICommand,
   ICommandHandler,
   CommandResult,
-} from "./register-user.command";
+} from "@/api/src/shared/application";
 
 export interface UpdatePaymentMethodCommand extends ICommand {
   paymentMethodId: string;

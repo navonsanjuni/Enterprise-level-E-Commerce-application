@@ -4,7 +4,7 @@ import {
   ICommand,
   ICommandHandler,
   CommandResult,
-} from "./register-user.command";
+} from "@/api/src/shared/application";
 
 export interface AddPaymentMethodCommand extends ICommand {
   userId: string;

@@ -7,7 +7,7 @@ import {
   ICommand,
   ICommandHandler,
   CommandResult,
-} from "./register-user.command";
+} from "@/api/src/shared/application";
 
 export interface LoginUserCommand extends ICommand {
   email: string;

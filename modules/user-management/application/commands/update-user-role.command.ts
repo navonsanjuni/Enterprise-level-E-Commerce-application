@@ -1,6 +1,10 @@
 import { IUserRepository } from "../../domain/repositories/iuser.repository";
 import { UserRole } from "../../domain/entities/user.entity";
-import { ICommand, ICommandHandler } from "./register-user.command";
+import {
+  ICommand,
+  ICommandHandler,
+  CommandResult,
+} from "@/api/src/shared/application";
 import { UserId } from "../../domain/value-objects/user-id.vo";
 
 export interface UpdateUserRoleCommand extends ICommand {
@@ -9,78 +13,58 @@ export interface UpdateUserRoleCommand extends ICommand {
   reason?: string;
 }
 
-export type UpdateUserRoleResult = {
-  success: boolean;
-  error?: string;
-  errors?: string[];
-  userId?: string;
-  newRole?: UserRole;
-};
+export interface UpdateUserRoleResult {
+  userId: string;
+  newRole: UserRole;
+}
 
-export class UpdateUserRoleHandler implements ICommandHandler<
-  UpdateUserRoleCommand,
-  UpdateUserRoleResult
-> {
+export class UpdateUserRoleHandler
+  implements ICommandHandler<UpdateUserRoleCommand, CommandResult<UpdateUserRoleResult>>
+{
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async handle(command: UpdateUserRoleCommand): Promise<UpdateUserRoleResult> {
+  async handle(
+    command: UpdateUserRoleCommand,
+  ): Promise<CommandResult<UpdateUserRoleResult>> {
     try {
-      // 1. Validate User ID
       let userId: UserId;
       try {
         userId = UserId.fromString(command.userId);
-      } catch (error) {
-        return {
-          success: false,
-          error: "Invalid User ID format",
-          errors: ["userId"],
-        };
+      } catch {
+        return CommandResult.failure<UpdateUserRoleResult>(
+          "Invalid User ID format",
+          ["userId"],
+        );
       }
 
-      // 2. Validate Role
       if (!Object.values(UserRole).includes(command.role)) {
-        return {
-          success: false,
-          error: `Invalid role. Must be one of: ${Object.values(UserRole).join(
-            ", ",
-          )}`,
-          errors: ["role"],
-        };
+        return CommandResult.failure<UpdateUserRoleResult>(
+          `Invalid role. Must be one of: ${Object.values(UserRole).join(", ")}`,
+          ["role"],
+        );
       }
 
-      // 3. Find User
       const user = await this.userRepository.findById(userId);
       if (!user) {
-        return {
-          success: false,
-          error: "User not found",
-          errors: ["userId"],
-        };
+        return CommandResult.failure<UpdateUserRoleResult>("User not found", [
+          "userId",
+        ]);
       }
 
-      // 4. Update Role
       user.updateRole(command.role);
-
-      // 5. Save Changes
       await this.userRepository.update(user);
 
-      return {
-        success: true,
+      return CommandResult.success<UpdateUserRoleResult>({
         userId: user.getId().getValue(),
         newRole: user.getRole(),
-      };
+      });
     } catch (error) {
-      console.error("[UpdateUserRoleHandler] Error:", error);
       if (error instanceof Error) {
-        return {
-          success: false,
-          error: error.message,
-        };
+        return CommandResult.failure<UpdateUserRoleResult>(error.message);
       }
-      return {
-        success: false,
-        error: "An unexpected error occurred while updating user role",
-      };
+      return CommandResult.failure<UpdateUserRoleResult>(
+        "An unexpected error occurred while updating user role",
+      );
     }
   }
 }

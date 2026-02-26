@@ -1,75 +1,72 @@
 import { AuthenticationService } from "../services/authentication.service";
+import {
+  ICommand,
+  ICommandHandler,
+  CommandResult,
+} from "@/api/src/shared/application";
 
-export interface ChangeEmailCommand {
+export interface ChangeEmailCommand extends ICommand {
   userId: string;
   newEmail: string;
   password: string;
-  timestamp: Date;
 }
 
 export interface ChangeEmailResult {
-  success: boolean;
-  data?: {
-    userId: string;
-    newEmail: string;
-    message: string;
-  };
-  error?: string;
-  errors?: string[];
+  userId: string;
+  newEmail: string;
+  message: string;
 }
 
-export class ChangeEmailHandler {
+export class ChangeEmailHandler
+  implements ICommandHandler<ChangeEmailCommand, CommandResult<ChangeEmailResult>>
+{
   constructor(private readonly authService: AuthenticationService) {}
 
-  async handle(command: ChangeEmailCommand): Promise<ChangeEmailResult> {
+  async handle(
+    command: ChangeEmailCommand,
+  ): Promise<CommandResult<ChangeEmailResult>> {
     try {
-      // Validate command
       if (!command.userId) {
-        return {
-          success: false,
-          error: "User ID is required",
-          errors: ["userId"],
-        };
+        return CommandResult.failure<ChangeEmailResult>(
+          "User ID is required",
+          ["userId"],
+        );
       }
 
       if (!command.newEmail) {
-        return {
-          success: false,
-          error: "New email is required",
-          errors: ["newEmail"],
-        };
+        return CommandResult.failure<ChangeEmailResult>(
+          "New email is required",
+          ["newEmail"],
+        );
       }
 
       if (!command.password) {
-        return {
-          success: false,
-          error: "Password is required for verification",
-          errors: ["password"],
-        };
+        return CommandResult.failure<ChangeEmailResult>(
+          "Password is required for verification",
+          ["password"],
+        );
       }
 
-      // Delegate to authentication service
       await this.authService.changeEmail(
         command.userId,
         command.newEmail,
         command.password,
       );
 
-      return {
-        success: true,
-        data: {
-          userId: command.userId,
-          newEmail: command.newEmail,
-          message:
-            "Email changed successfully. Please verify your new email address.",
-        },
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Failed to change email",
-        errors: [],
-      };
+      return CommandResult.success<ChangeEmailResult>({
+        userId: command.userId,
+        newEmail: command.newEmail,
+        message: "Email changed successfully. Please verify your new email address.",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return CommandResult.failure<ChangeEmailResult>(error.message, [
+          error.message,
+        ]);
+      }
+      return CommandResult.failure<ChangeEmailResult>(
+        "An unexpected error occurred while changing email",
+      );
     }
   }
 }

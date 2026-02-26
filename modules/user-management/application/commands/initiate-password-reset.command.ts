@@ -1,60 +1,57 @@
 import { AuthenticationService } from "../services/authentication.service";
+import {
+  ICommand,
+  ICommandHandler,
+  CommandResult,
+} from "@/api/src/shared/application";
 
-export interface InitiatePasswordResetCommand {
+export interface InitiatePasswordResetCommand extends ICommand {
   email: string;
-  timestamp: Date;
 }
 
 export interface InitiatePasswordResetResult {
-  success: boolean;
-  data?: {
-    exists: boolean;
-    token?: string;
-    userId?: string;
-    message: string;
-  };
-  error?: string;
-  errors?: string[];
+  exists: boolean;
+  token?: string;
+  userId?: string;
+  message: string;
 }
 
-export class InitiatePasswordResetHandler {
+export class InitiatePasswordResetHandler
+  implements ICommandHandler<InitiatePasswordResetCommand, CommandResult<InitiatePasswordResetResult>>
+{
   constructor(private readonly authService: AuthenticationService) {}
 
   async handle(
     command: InitiatePasswordResetCommand,
-  ): Promise<InitiatePasswordResetResult> {
+  ): Promise<CommandResult<InitiatePasswordResetResult>> {
     try {
-      // Validate command
       if (!command.email) {
-        return {
-          success: false,
-          error: "Email is required",
-          errors: ["email"],
-        };
+        return CommandResult.failure<InitiatePasswordResetResult>(
+          "Email is required",
+          ["email"],
+        );
       }
 
-      // Delegate to authentication service
-      const result = await this.authService.initiatePasswordReset(
-        command.email,
-      );
+      const result = await this.authService.initiatePasswordReset(command.email);
 
-      return {
-        success: true,
-        data: {
-          exists: result.exists,
-          token: result.token,
-          userId: result.userId,
-          message: result.exists
-            ? "Password reset initiated successfully"
-            : "If an account exists, reset instructions will be sent",
-        },
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Failed to initiate password reset",
-        errors: [],
-      };
+      return CommandResult.success<InitiatePasswordResetResult>({
+        exists: result.exists,
+        token: result.token,
+        userId: result.userId,
+        message: result.exists
+          ? "Password reset initiated successfully"
+          : "If an account exists, reset instructions will be sent",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return CommandResult.failure<InitiatePasswordResetResult>(
+          error.message,
+          [error.message],
+        );
+      }
+      return CommandResult.failure<InitiatePasswordResetResult>(
+        "An unexpected error occurred while initiating password reset",
+      );
     }
   }
 }

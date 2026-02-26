@@ -1,50 +1,50 @@
 import { AuthenticationService } from "../services/authentication.service";
+import {
+  ICommand,
+  ICommandHandler,
+  CommandResult,
+} from "@/api/src/shared/application";
 
-export interface VerifyEmailCommand {
+export interface VerifyEmailCommand extends ICommand {
   userId: string;
-  timestamp: Date;
 }
 
 export interface VerifyEmailResult {
-  success: boolean;
-  data?: {
-    userId: string;
-    message: string;
-  };
-  error?: string;
-  errors?: string[];
+  userId: string;
+  message: string;
 }
 
-export class VerifyEmailHandler {
+export class VerifyEmailHandler
+  implements ICommandHandler<VerifyEmailCommand, CommandResult<VerifyEmailResult>>
+{
   constructor(private readonly authService: AuthenticationService) {}
 
-  async handle(command: VerifyEmailCommand): Promise<VerifyEmailResult> {
+  async handle(
+    command: VerifyEmailCommand,
+  ): Promise<CommandResult<VerifyEmailResult>> {
     try {
-      // Validate command
       if (!command.userId) {
-        return {
-          success: false,
-          error: "User ID is required",
-          errors: ["userId"],
-        };
+        return CommandResult.failure<VerifyEmailResult>(
+          "User ID is required",
+          ["userId"],
+        );
       }
 
-      // Delegate to authentication service
       await this.authService.verifyEmail(command.userId);
 
-      return {
-        success: true,
-        data: {
-          userId: command.userId,
-          message: "Email verified successfully",
-        },
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Failed to verify email",
-        errors: [],
-      };
+      return CommandResult.success<VerifyEmailResult>({
+        userId: command.userId,
+        message: "Email verified successfully",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return CommandResult.failure<VerifyEmailResult>(error.message, [
+          error.message,
+        ]);
+      }
+      return CommandResult.failure<VerifyEmailResult>(
+        "An unexpected error occurred while verifying email",
+      );
     }
   }
 }

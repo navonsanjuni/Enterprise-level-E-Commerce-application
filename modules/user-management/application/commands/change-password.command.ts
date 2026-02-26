@@ -1,72 +1,70 @@
 import { AuthenticationService } from "../services/authentication.service";
+import {
+  ICommand,
+  ICommandHandler,
+  CommandResult,
+} from "@/api/src/shared/application";
 
-export interface ChangePasswordCommand {
+export interface ChangePasswordCommand extends ICommand {
   userId: string;
   currentPassword: string;
   newPassword: string;
-  timestamp: Date;
 }
 
 export interface ChangePasswordResult {
-  success: boolean;
-  data?: {
-    userId: string;
-    message: string;
-  };
-  error?: string;
-  errors?: string[];
+  userId: string;
+  message: string;
 }
 
-export class ChangePasswordHandler {
+export class ChangePasswordHandler
+  implements ICommandHandler<ChangePasswordCommand, CommandResult<ChangePasswordResult>>
+{
   constructor(private readonly authService: AuthenticationService) {}
 
-  async handle(command: ChangePasswordCommand): Promise<ChangePasswordResult> {
+  async handle(
+    command: ChangePasswordCommand,
+  ): Promise<CommandResult<ChangePasswordResult>> {
     try {
-      // Validate command
       if (!command.userId) {
-        return {
-          success: false,
-          error: "User ID is required",
-          errors: ["userId"],
-        };
+        return CommandResult.failure<ChangePasswordResult>(
+          "User ID is required",
+          ["userId"],
+        );
       }
 
       if (!command.currentPassword) {
-        return {
-          success: false,
-          error: "Current password is required",
-          errors: ["currentPassword"],
-        };
+        return CommandResult.failure<ChangePasswordResult>(
+          "Current password is required",
+          ["currentPassword"],
+        );
       }
 
       if (!command.newPassword) {
-        return {
-          success: false,
-          error: "New password is required",
-          errors: ["newPassword"],
-        };
+        return CommandResult.failure<ChangePasswordResult>(
+          "New password is required",
+          ["newPassword"],
+        );
       }
 
-      // Delegate to authentication service
       await this.authService.changePassword(
         command.userId,
         command.currentPassword,
         command.newPassword,
       );
 
-      return {
-        success: true,
-        data: {
-          userId: command.userId,
-          message: "Password changed successfully",
-        },
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Failed to change password",
-        errors: [],
-      };
+      return CommandResult.success<ChangePasswordResult>({
+        userId: command.userId,
+        message: "Password changed successfully",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return CommandResult.failure<ChangePasswordResult>(error.message, [
+          error.message,
+        ]);
+      }
+      return CommandResult.failure<ChangePasswordResult>(
+        "An unexpected error occurred while changing password",
+      );
     }
   }
 }

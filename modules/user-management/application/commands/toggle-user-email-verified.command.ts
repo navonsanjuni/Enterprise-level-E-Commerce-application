@@ -1,5 +1,9 @@
 import { IUserRepository } from "../../domain/repositories/iuser.repository";
-import { ICommand, ICommandHandler } from "./register-user.command";
+import {
+  ICommand,
+  ICommandHandler,
+  CommandResult,
+} from "@/api/src/shared/application";
 import { UserId } from "../../domain/value-objects/user-id.vo";
 
 export interface ToggleUserEmailVerifiedCommand extends ICommand {
@@ -8,66 +12,52 @@ export interface ToggleUserEmailVerifiedCommand extends ICommand {
   reason?: string;
 }
 
-export type ToggleUserEmailVerifiedResult = {
-  success: boolean;
-  error?: string;
-  userId?: string;
-  isVerified?: boolean;
-};
+export interface ToggleUserEmailVerifiedResult {
+  userId: string;
+  isVerified: boolean;
+}
 
-export class ToggleUserEmailVerifiedHandler implements ICommandHandler<
-  ToggleUserEmailVerifiedCommand,
-  ToggleUserEmailVerifiedResult
-> {
+export class ToggleUserEmailVerifiedHandler
+  implements ICommandHandler<ToggleUserEmailVerifiedCommand, CommandResult<ToggleUserEmailVerifiedResult>>
+{
   constructor(private readonly userRepository: IUserRepository) {}
 
   async handle(
     command: ToggleUserEmailVerifiedCommand,
-  ): Promise<ToggleUserEmailVerifiedResult> {
+  ): Promise<CommandResult<ToggleUserEmailVerifiedResult>> {
     try {
-      // 1. Validate User ID
       let userId: UserId;
       try {
         userId = UserId.fromString(command.userId);
-      } catch (error) {
-        return {
-          success: false,
-          error: "Invalid User ID format",
-        };
+      } catch {
+        return CommandResult.failure<ToggleUserEmailVerifiedResult>(
+          "Invalid User ID format",
+          ["userId"],
+        );
       }
 
-      // 2. Find User
       const user = await this.userRepository.findById(userId);
       if (!user) {
-        return {
-          success: false,
-          error: "User not found",
-        };
+        return CommandResult.failure<ToggleUserEmailVerifiedResult>(
+          "User not found",
+          ["userId"],
+        );
       }
 
-      // 3. Update Verification Status
       user.setEmailVerified(command.isVerified);
-
-      // 4. Save Changes
       await this.userRepository.update(user);
 
-      return {
-        success: true,
+      return CommandResult.success<ToggleUserEmailVerifiedResult>({
         userId: user.getId().getValue(),
         isVerified: user.isEmailVerified(),
-      };
+      });
     } catch (error) {
-      console.error("[ToggleUserEmailVerifiedHandler] Error:", error);
       if (error instanceof Error) {
-        return {
-          success: false,
-          error: error.message,
-        };
+        return CommandResult.failure<ToggleUserEmailVerifiedResult>(error.message);
       }
-      return {
-        success: false,
-        error: "An unexpected error occurred while toggling email verification",
-      };
+      return CommandResult.failure<ToggleUserEmailVerifiedResult>(
+        "An unexpected error occurred while toggling email verification",
+      );
     }
   }
 }

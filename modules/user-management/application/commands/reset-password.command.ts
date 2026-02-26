@@ -1,59 +1,58 @@
 import { AuthenticationService } from "../services/authentication.service";
+import {
+  ICommand,
+  ICommandHandler,
+  CommandResult,
+} from "@/api/src/shared/application";
 
-export interface ResetPasswordCommand {
+export interface ResetPasswordCommand extends ICommand {
   email: string;
   newPassword: string;
-  timestamp: Date;
 }
 
 export interface ResetPasswordResult {
-  success: boolean;
-  data?: {
-    email: string;
-    message: string;
-  };
-  error?: string;
-  errors?: string[];
+  email: string;
+  message: string;
 }
 
-export class ResetPasswordHandler {
+export class ResetPasswordHandler
+  implements ICommandHandler<ResetPasswordCommand, CommandResult<ResetPasswordResult>>
+{
   constructor(private readonly authService: AuthenticationService) {}
 
-  async handle(command: ResetPasswordCommand): Promise<ResetPasswordResult> {
+  async handle(
+    command: ResetPasswordCommand,
+  ): Promise<CommandResult<ResetPasswordResult>> {
     try {
-      // Validate command
       if (!command.email) {
-        return {
-          success: false,
-          error: "Email is required",
-          errors: ["email"],
-        };
+        return CommandResult.failure<ResetPasswordResult>(
+          "Email is required",
+          ["email"],
+        );
       }
 
       if (!command.newPassword) {
-        return {
-          success: false,
-          error: "New password is required",
-          errors: ["newPassword"],
-        };
+        return CommandResult.failure<ResetPasswordResult>(
+          "New password is required",
+          ["newPassword"],
+        );
       }
 
-      // Delegate to authentication service
       await this.authService.resetPassword(command.email, command.newPassword);
 
-      return {
-        success: true,
-        data: {
-          email: command.email,
-          message: "Password reset successfully",
-        },
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Failed to reset password",
-        errors: [],
-      };
+      return CommandResult.success<ResetPasswordResult>({
+        email: command.email,
+        message: "Password reset successfully",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return CommandResult.failure<ResetPasswordResult>(error.message, [
+          error.message,
+        ]);
+      }
+      return CommandResult.failure<ResetPasswordResult>(
+        "An unexpected error occurred while resetting password",
+      );
     }
   }
 }

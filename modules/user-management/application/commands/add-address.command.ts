@@ -10,7 +10,7 @@ import {
   ICommand,
   ICommandHandler,
   CommandResult,
-} from "./register-user.command";
+} from "@/api/src/shared/application";
 
 export interface AddAddressCommand extends ICommand {
   userId: string;
