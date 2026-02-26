@@ -75,23 +75,6 @@ export class SupplierManagementService {
     return updatedSupplier;
   }
 
-  async addContact(
-    supplierId: string,
-    contact: SupplierContact,
-  ): Promise<Supplier> {
-    const supplier = await this.supplierRepository.findById(
-      SupplierId.create(supplierId),
-    );
-
-    if (!supplier) {
-      throw new Error(`Supplier with ID ${supplierId} not found`);
-    }
-
-    const updatedSupplier = supplier.addContact(contact);
-    await this.supplierRepository.save(updatedSupplier);
-    return updatedSupplier;
-  }
-
   async deleteSupplier(supplierId: string): Promise<void> {
     const supplier = await this.supplierRepository.findById(
       SupplierId.create(supplierId),

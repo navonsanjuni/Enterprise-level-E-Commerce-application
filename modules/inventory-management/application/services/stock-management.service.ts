@@ -29,20 +29,17 @@ export class StockManagementService {
     );
 
     if (!stock) {
-      // Create new stock record
       stock = Stock.create({
         variantId,
         locationId,
         stockLevel: StockLevel.create(quantity, 0),
       });
     } else {
-      // Add to existing stock
       stock = stock.addStock(quantity);
     }
 
     await this.stockRepository.save(stock);
 
-    // Record transaction
     const transaction = InventoryTransaction.create({
       invTxnId: TransactionId.create(uuidv4()),
       variantId,
@@ -83,7 +80,6 @@ export class StockManagementService {
 
     await this.stockRepository.save(updatedStock);
 
-    // Record transaction
     const transaction = InventoryTransaction.create({
       invTxnId: TransactionId.create(uuidv4()),
       variantId,
@@ -109,7 +105,6 @@ export class StockManagementService {
       throw new Error("Transfer quantity must be greater than zero");
     }
 
-    // Remove from source location
     const fromStock = await this.stockRepository.findByVariantAndLocation(
       variantId,
       fromLocationId,
@@ -124,20 +119,17 @@ export class StockManagementService {
     const updatedFromStock = fromStock.removeStock(quantity);
     await this.stockRepository.save(updatedFromStock);
 
-    // Record outbound transaction
     const outboundTxn = InventoryTransaction.create({
       invTxnId: TransactionId.create(uuidv4()),
       variantId,
       locationId: fromLocationId,
       qtyDelta: -quantity,
       reason: TransactionReasonVO.create("adjustment"),
-
       referenceId: toLocationId,
       createdAt: new Date(),
     });
     await this.transactionRepository.save(outboundTxn);
 
-    // Add to destination location
     let toStock = await this.stockRepository.findByVariantAndLocation(
       variantId,
       toLocationId,
@@ -155,14 +147,12 @@ export class StockManagementService {
 
     await this.stockRepository.save(toStock);
 
-    // Record inbound transaction
     const inboundTxn = InventoryTransaction.create({
       invTxnId: TransactionId.create(uuidv4()),
       variantId,
       locationId: toLocationId,
       qtyDelta: quantity,
       reason: TransactionReasonVO.create("adjustment"),
-
       referenceId: fromLocationId,
       createdAt: new Date(),
     });
@@ -190,10 +180,6 @@ export class StockManagementService {
     const updatedStock = stock.reserveStock(quantity);
     await this.stockRepository.save(updatedStock);
 
-    // Note: Reservations don't create inventory transactions since they don't change on-hand quantity
-    // Only changes to on-hand stock (add, remove, adjust) create transactions
-    // Stock release for expired reservations is handled by ReservationExpiryHandler
-
     return updatedStock;
   }
 
@@ -216,7 +202,6 @@ export class StockManagementService {
     const updatedStock = stock.fulfillReservation(quantity);
     await this.stockRepository.save(updatedStock);
 
-    // Record order fulfillment transaction
     const transaction = InventoryTransaction.create({
       invTxnId: TransactionId.create(uuidv4()),
       variantId,
