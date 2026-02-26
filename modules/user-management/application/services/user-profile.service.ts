@@ -146,15 +146,6 @@ export class UserProfileService {
   ): Promise<UserProfileDto> {
     const userIdVo = UserId.fromString(userId);
 
-    console.log("[DEBUG] UpdateUserProfile called with:", {
-      userId,
-      dto: {
-        prefs: dto.prefs,
-        stylePreferences: dto.stylePreferences,
-        preferredSizes: dto.preferredSizes,
-      },
-    });
-
     // Verify user exists
     const user = await this.userRepository.findById(userIdVo);
     if (!user) {
@@ -187,7 +178,6 @@ export class UserProfileService {
     }
 
     let profile = await this.userProfileRepository.findByUserId(userIdVo);
-    console.log("[DEBUG] Existing profile found:", profile ? "YES" : "NO");
 
     if (!profile) {
       // Create profile if it doesn't exist
@@ -231,7 +221,6 @@ export class UserProfileService {
 
       if (dto.prefs !== undefined) {
         // Replace entire preferences object
-        console.log("[DEBUG] Updating preferences:", dto.prefs);
         profile!.setPreferences(dto.prefs);
       }
 
@@ -249,13 +238,11 @@ export class UserProfileService {
 
       if (dto.stylePreferences !== undefined) {
         // Replace entire style preferences object
-        console.log("[DEBUG] Updating stylePreferences:", dto.stylePreferences);
         profile!.setStylePreferences(dto.stylePreferences);
       }
 
       if (dto.preferredSizes !== undefined) {
         // Replace entire preferred sizes object
-        console.log("[DEBUG] Updating preferredSizes:", dto.preferredSizes);
         profile!.setPreferredSizes(dto.preferredSizes);
       }
 

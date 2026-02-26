@@ -1,10 +1,10 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
 import crypto from "crypto";
-import { IUserRepository } from "../../domain/repositories/iuser.repository.js";
-import { IPasswordHasherService } from "./password-hasher.service.js";
-import { Email } from "../../domain/value-objects/email.vo.js";
-import { UserId } from "../../domain/value-objects/user-id.vo.js";
-import { User } from "../../domain/entities/user.entity.js";
+import { IUserRepository } from "../../domain/repositories/iuser.repository";
+import { IPasswordHasherService } from "./password-hasher.service";
+import { Email } from "../../domain/value-objects/email.vo";
+import { UserId } from "../../domain/value-objects/user-id.vo";
+import { User } from "../../domain/entities/user.entity";
 import {
   UserNotFoundError,
   UserAlreadyExistsError,
@@ -13,8 +13,8 @@ import {
   UserInactiveError,
   InvalidPasswordError,
   EmailAlreadyVerifiedError,
-} from "../../domain/errors/user-management.errors.js";
-import { UserStatus } from "../../domain/enums/user-status.enum.js";
+} from "../../domain/errors/user-management.errors";
+import { UserStatus } from "../../domain/enums/user-status.enum";
 
 export interface LoginCredentials {
   email: string;
