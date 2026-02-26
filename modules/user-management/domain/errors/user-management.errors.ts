@@ -1,131 +1,111 @@
-export class DomainValidationError extends Error {
-  readonly statusCode = 400;
+import { DomainError } from "@/api/src/shared/domain/domain-error";
+
+export class DomainValidationError extends DomainError {
   constructor(message: string) {
-    super(message);
-    this.name = "DomainValidationError";
+    super(message, 400);
   }
 }
 
-export class UserNotFoundError extends Error {
-  readonly statusCode = 404;
+export class UserNotFoundError extends DomainError {
   constructor(identifier?: string) {
-    super(identifier ? `User '${identifier}' not found` : "User not found");
-    this.name = "UserNotFoundError";
+    super(
+      identifier ? `User '${identifier}' not found` : "User not found",
+      404,
+    );
   }
 }
 
-export class UserAlreadyExistsError extends Error {
-  readonly statusCode = 409;
+export class UserAlreadyExistsError extends DomainError {
   constructor(email: string) {
-    super(`User with email '${email}' already exists`);
-    this.name = "UserAlreadyExistsError";
+    super(`User with email '${email}' already exists`, 409);
   }
 }
 
-export class InvalidCredentialsError extends Error {
-  readonly statusCode = 401;
+export class InvalidCredentialsError extends DomainError {
   constructor() {
-    super("Invalid email or password");
-    this.name = "InvalidCredentialsError";
+    super("Invalid email or password", 401);
   }
 }
 
-export class UserBlockedError extends Error {
-  readonly statusCode = 403;
+export class UserBlockedError extends DomainError {
   constructor() {
-    super("Your account has been blocked. Please contact support.");
-    this.name = "UserBlockedError";
+    super("Your account has been blocked. Please contact support.", 403);
   }
 }
 
-export class EmailNotVerifiedError extends Error {
-  readonly statusCode = 403;
+export class EmailNotVerifiedError extends DomainError {
   constructor() {
-    super("Please verify your email address before proceeding.");
-    this.name = "EmailNotVerifiedError";
+    super("Please verify your email address before proceeding.", 403);
   }
 }
 
-export class InvalidVerificationTokenError extends Error {
-  readonly statusCode = 400;
+export class InvalidVerificationTokenError extends DomainError {
   constructor() {
-    super("Verification token is invalid or has expired");
-    this.name = "InvalidVerificationTokenError";
+    super("Verification token is invalid or has expired", 400);
   }
 }
 
-export class VerificationRateLimitError extends Error {
-  readonly statusCode = 429;
+export class VerificationRateLimitError extends DomainError {
   constructor() {
-    super("Too many verification attempts. Please try again later.");
-    this.name = "VerificationRateLimitError";
+    super("Too many verification attempts. Please try again later.", 429);
   }
 }
 
-export class InvalidPasswordError extends Error {
-  readonly statusCode = 400;
+export class InvalidPasswordError extends DomainError {
   constructor(message = "Password does not meet requirements") {
-    super(message);
-    this.name = "InvalidPasswordError";
+    super(message, 400);
   }
 }
 
-export class TwoFactorRequiredError extends Error {
-  readonly statusCode = 401;
+export class TwoFactorRequiredError extends DomainError {
   constructor() {
-    super("Two-factor authentication is required");
-    this.name = "TwoFactorRequiredError";
+    super("Two-factor authentication is required", 401);
   }
 }
 
-export class InvalidTwoFactorCodeError extends Error {
-  readonly statusCode = 401;
+export class InvalidTwoFactorCodeError extends DomainError {
   constructor() {
-    super("Invalid two-factor authentication code");
-    this.name = "InvalidTwoFactorCodeError";
+    super("Invalid two-factor authentication code", 401);
   }
 }
 
-export class AddressNotFoundError extends Error {
-  readonly statusCode = 404;
+export class AddressNotFoundError extends DomainError {
   constructor(addressId?: string) {
-    super(addressId ? `Address '${addressId}' not found` : "Address not found");
-    this.name = "AddressNotFoundError";
+    super(
+      addressId ? `Address '${addressId}' not found` : "Address not found",
+      404,
+    );
   }
 }
 
-export class PaymentMethodNotFoundError extends Error {
-  readonly statusCode = 404;
+export class PaymentMethodNotFoundError extends DomainError {
   constructor(paymentMethodId?: string) {
     super(
       paymentMethodId
         ? `Payment method '${paymentMethodId}' not found`
         : "Payment method not found",
+      404,
     );
-    this.name = "PaymentMethodNotFoundError";
   }
 }
 
-export class EmailAlreadyVerifiedError extends Error {
-  readonly statusCode = 400;
+export class EmailAlreadyVerifiedError extends DomainError {
   constructor() {
-    super("Email is already verified");
-    this.name = "EmailAlreadyVerifiedError";
+    super("Email is already verified", 400);
   }
 }
 
-export class UserInactiveError extends Error {
-  readonly statusCode = 403;
+export class UserInactiveError extends DomainError {
   constructor() {
-    super("Account is inactive. Please contact support to reactivate your account.");
-    this.name = "UserInactiveError";
+    super(
+      "Account is inactive. Please contact support to reactivate your account.",
+      403,
+    );
   }
 }
 
-export class InvalidOperationError extends Error {
-  readonly statusCode = 422;
+export class InvalidOperationError extends DomainError {
   constructor(message: string) {
-    super(message);
-    this.name = "InvalidOperationError";
+    super(message, 422);
   }
 }
