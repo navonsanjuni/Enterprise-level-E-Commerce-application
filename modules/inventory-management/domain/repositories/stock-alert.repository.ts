@@ -3,12 +3,9 @@ import { AlertId } from "../value-objects/alert-id.vo";
 import { AlertType } from "../value-objects/alert-type.vo";
 
 export interface IStockAlertRepository {
-  // Basic CRUD
   save(alert: StockAlert): Promise<void>;
   findById(alertId: AlertId): Promise<StockAlert | null>;
   delete(alertId: AlertId): Promise<void>;
-
-  // Queries
   findByVariant(variantId: string): Promise<StockAlert[]>;
   findActiveAlerts(): Promise<StockAlert[]>;
   findResolvedAlerts(): Promise<StockAlert[]>;
@@ -19,8 +16,6 @@ export interface IStockAlertRepository {
     offset?: number;
     includeResolved?: boolean;
   }): Promise<{ alerts: StockAlert[]; total: number }>;
-
-  // Specific queries
   findActiveAlertsByVariant(variantId: string): Promise<StockAlert[]>;
   hasActiveAlert(variantId: string, type: AlertType): Promise<boolean>;
 }

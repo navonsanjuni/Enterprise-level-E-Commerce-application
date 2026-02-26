@@ -2,11 +2,8 @@ import { InventoryTransaction } from "../entities/inventory-transaction.entity";
 import { TransactionId } from "../value-objects/transaction-id.vo";
 
 export interface IInventoryTransactionRepository {
-  // Basic CRUD
   save(transaction: InventoryTransaction): Promise<void>;
   findById(invTxnId: TransactionId): Promise<InventoryTransaction | null>;
-
-  // Queries
   findByVariant(
     variantId: string,
     options?: { limit?: number; offset?: number },
