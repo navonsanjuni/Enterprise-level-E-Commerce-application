@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -12,7 +12,7 @@ export interface UpdatePOItemCommand extends ICommand {
   orderedQty: number;
 }
 
-export class UpdatePOItemCommandHandler implements ICommandHandler<
+export class UpdatePOItemHandler implements ICommandHandler<
   UpdatePOItemCommand,
   CommandResult<PurchaseOrderItem>
 > {
@@ -59,4 +59,3 @@ export class UpdatePOItemCommandHandler implements ICommandHandler<
   }
 }
 
-export { UpdatePOItemCommandHandler as UpdatePOItemHandler };

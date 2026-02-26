@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -9,7 +9,7 @@ export interface DeletePurchaseOrderCommand extends ICommand {
   poId: string;
 }
 
-export class DeletePurchaseOrderCommandHandler implements ICommandHandler<
+export class DeletePurchaseOrderHandler implements ICommandHandler<
   DeletePurchaseOrderCommand,
   CommandResult<void>
 > {
@@ -41,4 +41,3 @@ export class DeletePurchaseOrderCommandHandler implements ICommandHandler<
   }
 }
 
-export { DeletePurchaseOrderCommandHandler as DeletePurchaseOrderHandler };

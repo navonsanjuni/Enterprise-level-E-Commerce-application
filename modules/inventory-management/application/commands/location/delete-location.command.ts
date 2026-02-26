@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -9,7 +9,7 @@ export interface DeleteLocationCommand extends ICommand {
   locationId: string;
 }
 
-export class DeleteLocationCommandHandler implements ICommandHandler<
+export class DeleteLocationHandler implements ICommandHandler<
   DeleteLocationCommand,
   CommandResult<void>
 > {
@@ -39,4 +39,3 @@ export class DeleteLocationCommandHandler implements ICommandHandler<
   }
 }
 
-export { DeleteLocationCommandHandler as DeleteLocationHandler };

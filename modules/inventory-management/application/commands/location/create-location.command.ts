@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -15,7 +15,7 @@ export interface CreateLocationCommand extends ICommand {
   address?: LocationAddress;
 }
 
-export class CreateLocationCommandHandler implements ICommandHandler<
+export class CreateLocationHandler implements ICommandHandler<
   CreateLocationCommand,
   CommandResult<Location>
 > {
@@ -62,4 +62,3 @@ export class CreateLocationCommandHandler implements ICommandHandler<
   }
 }
 
-export { CreateLocationCommandHandler as CreateLocationHandler };

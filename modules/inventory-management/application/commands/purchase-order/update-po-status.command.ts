@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -11,7 +11,7 @@ export interface UpdatePOStatusCommand extends ICommand {
   status: string;
 }
 
-export class UpdatePOStatusCommandHandler implements ICommandHandler<
+export class UpdatePOStatusHandler implements ICommandHandler<
   UpdatePOStatusCommand,
   CommandResult<PurchaseOrder>
 > {
@@ -69,4 +69,3 @@ export class UpdatePOStatusCommandHandler implements ICommandHandler<
   }
 }
 
-export { UpdatePOStatusCommandHandler as UpdatePOStatusHandler };

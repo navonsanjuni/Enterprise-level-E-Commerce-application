@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -9,7 +9,7 @@ export interface DeleteSupplierCommand extends ICommand {
   supplierId: string;
 }
 
-export class DeleteSupplierCommandHandler implements ICommandHandler<
+export class DeleteSupplierHandler implements ICommandHandler<
   DeleteSupplierCommand,
   CommandResult<void>
 > {
@@ -39,4 +39,3 @@ export class DeleteSupplierCommandHandler implements ICommandHandler<
   }
 }
 
-export { DeleteSupplierCommandHandler as DeleteSupplierHandler };

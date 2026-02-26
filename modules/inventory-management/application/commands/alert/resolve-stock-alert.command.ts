@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -10,7 +10,7 @@ export interface ResolveStockAlertCommand extends ICommand {
   alertId: string;
 }
 
-export class ResolveStockAlertCommandHandler implements ICommandHandler<
+export class ResolveStockAlertHandler implements ICommandHandler<
   ResolveStockAlertCommand,
   CommandResult<StockAlert>
 > {
@@ -44,4 +44,3 @@ export class ResolveStockAlertCommandHandler implements ICommandHandler<
   }
 }
 
-export { ResolveStockAlertCommandHandler as ResolveStockAlertHandler };

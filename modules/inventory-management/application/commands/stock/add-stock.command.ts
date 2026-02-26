@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -6,8 +6,6 @@ import {
 import { StockManagementService } from "../../services/stock-management.service";
 import { Stock } from "../../../domain/entities/stock.entity";
 
-export type { ICommand, ICommandHandler };
-export { CommandResult };
 
 export interface AddStockCommand extends ICommand {
   variantId: string;
@@ -16,7 +14,7 @@ export interface AddStockCommand extends ICommand {
   reason: string;
 }
 
-export class AddStockCommandHandler implements ICommandHandler<
+export class AddStockHandler implements ICommandHandler<
   AddStockCommand,
   CommandResult<Stock>
 > {
@@ -63,5 +61,3 @@ export class AddStockCommandHandler implements ICommandHandler<
   }
 }
 
-// Alias for backwards compatibility
-export { AddStockCommandHandler as AddStockHandler };

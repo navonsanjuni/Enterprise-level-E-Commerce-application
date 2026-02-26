@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -13,7 +13,7 @@ export interface FulfillReservationCommand extends ICommand {
   quantity: number;
 }
 
-export class FulfillReservationCommandHandler implements ICommandHandler<
+export class FulfillReservationHandler implements ICommandHandler<
   FulfillReservationCommand,
   CommandResult<Stock>
 > {
@@ -58,5 +58,3 @@ export class FulfillReservationCommandHandler implements ICommandHandler<
   }
 }
 
-// Alias for backwards compatibility
-export { FulfillReservationCommandHandler as FulfillReservationHandler };

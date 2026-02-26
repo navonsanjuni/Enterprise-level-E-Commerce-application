@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -14,7 +14,7 @@ export interface CreatePickupReservationCommand extends ICommand {
   expirationMinutes?: number;
 }
 
-export class CreatePickupReservationCommandHandler implements ICommandHandler<
+export class CreatePickupReservationHandler implements ICommandHandler<
   CreatePickupReservationCommand,
   CommandResult<PickupReservation>
 > {
@@ -76,4 +76,3 @@ export class CreatePickupReservationCommandHandler implements ICommandHandler<
   }
 }
 
-export { CreatePickupReservationCommandHandler as CreatePickupReservationHandler };

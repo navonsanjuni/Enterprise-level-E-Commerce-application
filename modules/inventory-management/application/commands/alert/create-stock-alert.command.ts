@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -11,7 +11,7 @@ export interface CreateStockAlertCommand extends ICommand {
   type: string;
 }
 
-export class CreateStockAlertCommandHandler implements ICommandHandler<
+export class CreateStockAlertHandler implements ICommandHandler<
   CreateStockAlertCommand,
   CommandResult<StockAlert>
 > {
@@ -57,4 +57,3 @@ export class CreateStockAlertCommandHandler implements ICommandHandler<
   }
 }
 
-export { CreateStockAlertCommandHandler as CreateStockAlertHandler };

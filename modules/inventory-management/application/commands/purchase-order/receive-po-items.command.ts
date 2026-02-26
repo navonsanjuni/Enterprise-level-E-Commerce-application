@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -18,7 +18,7 @@ export interface ReceivePOItemsResult {
   items: PurchaseOrderItem[];
 }
 
-export class ReceivePOItemsCommandHandler implements ICommandHandler<
+export class ReceivePOItemsHandler implements ICommandHandler<
   ReceivePOItemsCommand,
   CommandResult<ReceivePOItemsResult>
 > {
@@ -78,4 +78,3 @@ export class ReceivePOItemsCommandHandler implements ICommandHandler<
   }
 }
 
-export { ReceivePOItemsCommandHandler as ReceivePOItemsHandler };

@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -16,7 +16,7 @@ export interface UpdateSupplierCommand extends ICommand {
   contacts?: SupplierContact[];
 }
 
-export class UpdateSupplierCommandHandler implements ICommandHandler<
+export class UpdateSupplierHandler implements ICommandHandler<
   UpdateSupplierCommand,
   CommandResult<Supplier>
 > {
@@ -73,4 +73,3 @@ export class UpdateSupplierCommandHandler implements ICommandHandler<
   }
 }
 
-export { UpdateSupplierCommandHandler as UpdateSupplierHandler };

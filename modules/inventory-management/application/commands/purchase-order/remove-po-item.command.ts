@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -10,7 +10,7 @@ export interface RemovePOItemCommand extends ICommand {
   variantId: string;
 }
 
-export class RemovePOItemCommandHandler implements ICommandHandler<
+export class RemovePOItemHandler implements ICommandHandler<
   RemovePOItemCommand,
   CommandResult<void>
 > {
@@ -47,4 +47,3 @@ export class RemovePOItemCommandHandler implements ICommandHandler<
   }
 }
 
-export { RemovePOItemCommandHandler as RemovePOItemHandler };

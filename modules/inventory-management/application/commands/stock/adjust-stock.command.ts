@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -14,7 +14,7 @@ export interface AdjustStockCommand extends ICommand {
   reason: string;
 }
 
-export class AdjustStockCommandHandler implements ICommandHandler<
+export class AdjustStockHandler implements ICommandHandler<
   AdjustStockCommand,
   CommandResult<Stock>
 > {
@@ -68,5 +68,3 @@ export class AdjustStockCommandHandler implements ICommandHandler<
   }
 }
 
-// Alias for backwards compatibility
-export { AdjustStockCommandHandler as AdjustStockHandler };

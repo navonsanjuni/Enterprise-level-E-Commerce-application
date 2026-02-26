@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -11,7 +11,7 @@ export interface CreatePurchaseOrderCommand extends ICommand {
   eta?: Date;
 }
 
-export class CreatePurchaseOrderCommandHandler implements ICommandHandler<
+export class CreatePurchaseOrderHandler implements ICommandHandler<
   CreatePurchaseOrderCommand,
   CommandResult<PurchaseOrder>
 > {
@@ -49,4 +49,3 @@ export class CreatePurchaseOrderCommandHandler implements ICommandHandler<
   }
 }
 
-export { CreatePurchaseOrderCommandHandler as CreatePurchaseOrderHandler };

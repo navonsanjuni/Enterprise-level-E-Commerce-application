@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -14,7 +14,7 @@ export interface SetStockThresholdsCommand extends ICommand {
   safetyStock?: number;
 }
 
-export class SetStockThresholdsCommandHandler implements ICommandHandler<
+export class SetStockThresholdsHandler implements ICommandHandler<
   SetStockThresholdsCommand,
   CommandResult<Stock>
 > {
@@ -68,5 +68,3 @@ export class SetStockThresholdsCommandHandler implements ICommandHandler<
   }
 }
 
-// Alias for backwards compatibility
-export { SetStockThresholdsCommandHandler as SetStockThresholdsHandler };

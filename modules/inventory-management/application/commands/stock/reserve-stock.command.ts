@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -13,7 +13,7 @@ export interface ReserveStockCommand extends ICommand {
   quantity: number;
 }
 
-export class ReserveStockCommandHandler implements ICommandHandler<
+export class ReserveStockHandler implements ICommandHandler<
   ReserveStockCommand,
   CommandResult<Stock>
 > {
@@ -55,5 +55,3 @@ export class ReserveStockCommandHandler implements ICommandHandler<
   }
 }
 
-// Alias for backwards compatibility
-export { ReserveStockCommandHandler as ReserveStockHandler };

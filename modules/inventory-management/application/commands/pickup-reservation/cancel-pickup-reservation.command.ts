@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -9,7 +9,7 @@ export interface CancelPickupReservationCommand extends ICommand {
   reservationId: string;
 }
 
-export class CancelPickupReservationCommandHandler implements ICommandHandler<
+export class CancelPickupReservationHandler implements ICommandHandler<
   CancelPickupReservationCommand,
   CommandResult<void>
 > {
@@ -43,4 +43,3 @@ export class CancelPickupReservationCommandHandler implements ICommandHandler<
   }
 }
 
-export { CancelPickupReservationCommandHandler as CancelPickupReservationHandler };

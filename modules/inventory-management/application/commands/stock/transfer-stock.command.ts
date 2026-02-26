@@ -1,4 +1,4 @@
-import {
+﻿import {
   ICommand,
   ICommandHandler,
   CommandResult,
@@ -19,7 +19,7 @@ export interface TransferStockResult {
   toStock: Stock;
 }
 
-export class TransferStockCommandHandler implements ICommandHandler<
+export class TransferStockHandler implements ICommandHandler<
   TransferStockCommand,
   CommandResult<TransferStockResult>
 > {
@@ -80,5 +80,3 @@ export class TransferStockCommandHandler implements ICommandHandler<
   }
 }
 
-// Alias for backwards compatibility
-export { TransferStockCommandHandler as TransferStockHandler };
