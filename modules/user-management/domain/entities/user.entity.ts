@@ -8,11 +8,12 @@ import {
 } from "../errors/user-management.errors";
 import { UserRole } from "../enums/user-role.enum";
 import { UserStatus } from "../enums/user-status.enum";
+import { AggregateRoot } from "@/api/src/shared/domain/aggregate-root";
 
 export { UserRole } from "../enums/user-role.enum";
 export { UserStatus } from "../enums/user-status.enum";
 
-export class User {
+export class User extends AggregateRoot {
   private constructor(
     private readonly id: UserId,
     private email: Email,
@@ -31,7 +32,9 @@ export class User {
     private isGuest: boolean,
     private readonly createdAt: Date,
     private updatedAt: Date,
-  ) {}
+  ) {
+    super();
+  }
 
   // Factory methods
   static create(data: CreateUserData): User {
@@ -262,7 +265,9 @@ export class User {
 
   verifyPhone(): void {
     if (!this.phone) {
-      throw new InvalidOperationError("Cannot verify phone: no phone number set");
+      throw new InvalidOperationError(
+        "Cannot verify phone: no phone number set",
+      );
     }
     if (this.phoneVerified) {
       throw new InvalidOperationError("Phone is already verified");

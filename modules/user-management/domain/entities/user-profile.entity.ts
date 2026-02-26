@@ -46,14 +46,7 @@ export class UserProfile {
     );
   }
 
-  // Add this method to map database row to UserProfile
   static fromDatabaseRow(row: UserProfileRow): UserProfile {
-    console.log("[DEBUG ENTITY] fromDatabaseRow input:", {
-      prefs: row.prefs,
-      style_preferences: row.style_preferences,
-      preferred_sizes: row.preferred_sizes,
-    });
-
     return new UserProfile(
       UserId.fromString(row.user_id),
       row.default_address_id,
@@ -315,9 +308,8 @@ export class UserProfile {
     };
   }
 
-  // Add this method for database-compatible persistence
   toDatabaseRow(): UserProfileRow {
-    const row = {
+    return {
       user_id: this.userId.getValue(),
       default_address_id: this.defaultAddressId,
       default_payment_method_id: this.defaultPaymentMethodId,
@@ -327,14 +319,6 @@ export class UserProfile {
       style_preferences: this.stylePreferences,
       preferred_sizes: this.preferredSizes,
     };
-
-    console.log("[DEBUG ENTITY] toDatabaseRow output:", {
-      prefs: row.prefs,
-      style_preferences: row.style_preferences,
-      preferred_sizes: row.preferred_sizes,
-    });
-
-    return row;
   }
 
   equals(other: UserProfile): boolean {
