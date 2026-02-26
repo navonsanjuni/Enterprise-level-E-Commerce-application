@@ -2,6 +2,7 @@ import fp from "fastify-plugin";
 import { container } from "./container";
 import { registerUserManagementRoutes } from "../../../modules/user-management/infrastructure/http/routes/index";
 import { registerProductCatalogRoutes } from "../../../modules/product-catalog/infrastructure/http/routes";
+import { registerInventoryManagementRoutes } from "../../../modules/inventory-management/infrastructure/http/routes";
 
 export default fp(
   async (fastify) => {
@@ -20,6 +21,17 @@ export default fp(
     const productCatalogServices = container.getProductCatalogServices();
     await registerProductCatalogRoutes(fastify, productCatalogServices);
     fastify.log.info("✓ Product Catalog module registered");
+
+    // ============================================
+    // Inventory Management Module
+    // ============================================
+    const inventoryManagementServices =
+      container.getInventoryManagementServices();
+    await registerInventoryManagementRoutes(
+      fastify,
+      inventoryManagementServices,
+    );
+    fastify.log.info("✓ Inventory Management module registered");
 
     fastify.log.info("All modules registered successfully");
   },
