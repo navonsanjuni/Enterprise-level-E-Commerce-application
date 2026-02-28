@@ -1,12 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { SearchController } from "../controllers/search.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
-import { validateQuery } from "@/api/src/shared/http/validation";
-import {
-  searchProductsQuerySchema,
-  searchSuggestionsQuerySchema,
-  searchFiltersQuerySchema,
-} from "../validators/search.validator";
 
 export async function registerSearchRoutes(
   fastify: FastifyInstance,
@@ -16,7 +10,6 @@ export async function registerSearchRoutes(
   fastify.get(
     "/search",
     {
-      preHandler: [validateQuery(searchProductsQuerySchema)],
       schema: {
         description:
           "Full-text search across products with filtering and sorting",
@@ -101,7 +94,6 @@ export async function registerSearchRoutes(
   fastify.get(
     "/search/suggestions",
     {
-      preHandler: [validateQuery(searchSuggestionsQuerySchema)],
       schema: {
         description: "Get autocomplete suggestions for a search query",
         tags: ["Search"],
@@ -155,7 +147,6 @@ export async function registerSearchRoutes(
   fastify.get(
     "/search/filters",
     {
-      preHandler: [validateQuery(searchFiltersQuerySchema)],
       schema: {
         description: "Get available filters for search results",
         tags: ["Search"],

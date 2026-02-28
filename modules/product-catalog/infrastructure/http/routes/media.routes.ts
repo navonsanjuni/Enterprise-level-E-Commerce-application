@@ -1,12 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { MediaController } from "../controllers/media.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
-import { validateBody, validateQuery } from "@/api/src/shared/http/validation";
-import {
-  createMediaAssetSchema,
-  updateMediaAssetSchema,
-  listMediaAssetsQuerySchema,
-} from "../validators/media.validator";
 
 export async function registerMediaRoutes(
   fastify: FastifyInstance,
@@ -16,10 +10,7 @@ export async function registerMediaRoutes(
   fastify.get(
     "/media",
     {
-      preHandler: [
-        RolePermissions.STAFF_LEVEL,
-        validateQuery(listMediaAssetsQuerySchema),
-      ],
+      preHandler: [RolePermissions.STAFF_LEVEL],
       schema: {
         description:
           "Get paginated list of media assets with filtering options",
@@ -82,10 +73,7 @@ export async function registerMediaRoutes(
   fastify.post(
     "/media",
     {
-      preHandler: [
-        RolePermissions.ADMIN_ONLY,
-        validateBody(createMediaAssetSchema),
-      ],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new media asset",
         tags: ["Media"],
@@ -135,10 +123,7 @@ export async function registerMediaRoutes(
   fastify.put(
     "/media/:id",
     {
-      preHandler: [
-        RolePermissions.ADMIN_ONLY,
-        validateBody(updateMediaAssetSchema),
-      ],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update an existing media asset",
         tags: ["Media"],

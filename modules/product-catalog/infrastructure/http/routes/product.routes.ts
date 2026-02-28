@@ -1,12 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { ProductController } from "../controllers/product.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
-import { validateBody, validateQuery } from "@/api/src/shared/http/validation";
-import {
-  createProductSchema,
-  updateProductSchema,
-  listProductsQuerySchema,
-} from "../validators/product.validator";
 
 export async function registerProductRoutes(
   fastify: FastifyInstance,
@@ -16,7 +10,6 @@ export async function registerProductRoutes(
   fastify.get(
     "/products",
     {
-      preHandler: [validateQuery(listProductsQuerySchema)],
       schema: {
         description: "Get paginated list of products with filtering options",
         tags: ["Products"],
@@ -314,10 +307,7 @@ export async function registerProductRoutes(
   fastify.post(
     "/products",
     {
-      preHandler: [
-        RolePermissions.ADMIN_ONLY,
-        validateBody(createProductSchema),
-      ],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new product",
         tags: ["Products"],
@@ -410,10 +400,7 @@ export async function registerProductRoutes(
   fastify.put(
     "/products/:productId",
     {
-      preHandler: [
-        RolePermissions.ADMIN_ONLY,
-        validateBody(updateProductSchema),
-      ],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update an existing product",
         tags: ["Products"],

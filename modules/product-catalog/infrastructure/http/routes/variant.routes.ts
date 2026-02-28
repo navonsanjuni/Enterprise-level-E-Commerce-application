@@ -1,12 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { VariantController } from "../controllers/variant.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
-import { validateBody, validateQuery } from "@/api/src/shared/http/validation";
-import {
-  createVariantSchema,
-  updateVariantSchema,
-  listVariantsQuerySchema,
-} from "../validators/variant.validator";
 
 export async function registerVariantRoutes(
   fastify: FastifyInstance,
@@ -16,7 +10,6 @@ export async function registerVariantRoutes(
   fastify.get(
     "/products/:productId/variants",
     {
-      preHandler: [validateQuery(listVariantsQuerySchema)],
       schema: {
         description: "Get variants for a product",
         tags: ["Variants"],
@@ -73,10 +66,7 @@ export async function registerVariantRoutes(
   fastify.post(
     "/products/:productId/variants",
     {
-      preHandler: [
-        RolePermissions.ADMIN_ONLY,
-        validateBody(createVariantSchema),
-      ],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new variant for a product",
         tags: ["Variants"],
@@ -120,10 +110,7 @@ export async function registerVariantRoutes(
   fastify.put(
     "/variants/:id",
     {
-      preHandler: [
-        RolePermissions.ADMIN_ONLY,
-        validateBody(updateVariantSchema),
-      ],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update an existing variant",
         tags: ["Variants"],

@@ -1,13 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { CategoryController } from "../controllers/category.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
-import { validateBody, validateQuery } from "@/api/src/shared/http/validation";
-import {
-  createCategorySchema,
-  updateCategorySchema,
-  listCategoriesQuerySchema,
-  reorderCategoriesSchema,
-} from "../validators/category.validator";
 
 export async function registerCategoryRoutes(
   fastify: FastifyInstance,
@@ -17,7 +10,6 @@ export async function registerCategoryRoutes(
   fastify.get(
     "/categories",
     {
-      preHandler: [validateQuery(listCategoriesQuerySchema)],
       schema: {
         description: "Get paginated list of categories with filtering options",
         tags: ["Categories"],
@@ -133,10 +125,7 @@ export async function registerCategoryRoutes(
   fastify.post(
     "/categories/reorder",
     {
-      preHandler: [
-        RolePermissions.ADMIN_ONLY,
-        validateBody(reorderCategoriesSchema),
-      ],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Reorder categories by updating positions",
         tags: ["Categories"],
@@ -168,10 +157,7 @@ export async function registerCategoryRoutes(
   fastify.post(
     "/categories",
     {
-      preHandler: [
-        RolePermissions.ADMIN_ONLY,
-        validateBody(createCategorySchema),
-      ],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new category",
         tags: ["Categories"],
@@ -223,10 +209,7 @@ export async function registerCategoryRoutes(
   fastify.put(
     "/categories/:id",
     {
-      preHandler: [
-        RolePermissions.ADMIN_ONLY,
-        validateBody(updateCategorySchema),
-      ],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update an existing category",
         tags: ["Categories"],
