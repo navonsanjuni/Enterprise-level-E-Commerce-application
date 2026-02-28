@@ -13,6 +13,22 @@ const errorResponses = {
       errors: { type: "array", items: { type: "string" } },
     },
   },
+  401: {
+    description: "Unauthorized - authentication required",
+    type: "object",
+    properties: {
+      success: { type: "boolean", example: false },
+      error: { type: "string", example: "Authentication required" },
+    },
+  },
+  403: {
+    description: "Forbidden - insufficient permissions",
+    type: "object",
+    properties: {
+      success: { type: "boolean", example: false },
+      error: { type: "string", example: "Insufficient permissions" },
+    },
+  },
   404: {
     description: "Not found",
     type: "object",
@@ -65,7 +81,7 @@ export async function registerPurchaseOrderRoutes(
         },
       },
     },
-    controller.listPurchaseOrders.bind(controller),
+    controller.listPurchaseOrders.bind(controller) as any,
   );
 
   // Get purchase order
