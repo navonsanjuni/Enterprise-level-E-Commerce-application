@@ -1,57 +1,51 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import {
   CreatePurchaseOrderCommand,
-  CreatePurchaseOrderCommandHandler,
+  CreatePurchaseOrderHandler,
   AddPOItemCommand,
-  AddPOItemCommandHandler,
+  AddPOItemHandler,
   UpdatePOItemCommand,
-  UpdatePOItemCommandHandler,
+  UpdatePOItemHandler,
   RemovePOItemCommand,
-  RemovePOItemCommandHandler,
+  RemovePOItemHandler,
   UpdatePOStatusCommand,
-  UpdatePOStatusCommandHandler,
+  UpdatePOStatusHandler,
   ReceivePOItemsCommand,
-  ReceivePOItemsCommandHandler,
+  ReceivePOItemsHandler,
   DeletePurchaseOrderCommand,
-  DeletePurchaseOrderCommandHandler,
+  DeletePurchaseOrderHandler,
   GetPurchaseOrderQuery,
-  GetPurchaseOrderQueryHandler,
+  GetPurchaseOrderHandler,
   GetPOItemsQuery,
-  GetPOItemsQueryHandler,
+  GetPOItemsHandler,
   ListPurchaseOrdersQuery,
-  ListPurchaseOrdersQueryHandler,
+  ListPurchaseOrdersHandler,
 } from "../../../application";
 import { PurchaseOrderManagementService } from "../../../application/services/purchase-order-management.service";
 
 export class PurchaseOrderController {
-  private createPurchaseOrderHandler: CreatePurchaseOrderCommandHandler;
-  private addPOItemHandler: AddPOItemCommandHandler;
-  private updatePOItemHandler: UpdatePOItemCommandHandler;
-  private removePOItemHandler: RemovePOItemCommandHandler;
-  private updatePOStatusHandler: UpdatePOStatusCommandHandler;
-  private receivePOItemsHandler: ReceivePOItemsCommandHandler;
-  private deletePurchaseOrderHandler: DeletePurchaseOrderCommandHandler;
-  private getPurchaseOrderHandler: GetPurchaseOrderQueryHandler;
-  private getPOItemsHandler: GetPOItemsQueryHandler;
-  private listPurchaseOrdersHandler: ListPurchaseOrdersQueryHandler;
+  private createPurchaseOrderHandler: CreatePurchaseOrderHandler;
+  private addPOItemHandler: AddPOItemHandler;
+  private updatePOItemHandler: UpdatePOItemHandler;
+  private removePOItemHandler: RemovePOItemHandler;
+  private updatePOStatusHandler: UpdatePOStatusHandler;
+  private receivePOItemsHandler: ReceivePOItemsHandler;
+  private deletePurchaseOrderHandler: DeletePurchaseOrderHandler;
+  private getPurchaseOrderHandler: GetPurchaseOrderHandler;
+  private getPOItemsHandler: GetPOItemsHandler;
+  private listPurchaseOrdersHandler: ListPurchaseOrdersHandler;
 
   constructor(private readonly poService: PurchaseOrderManagementService) {
-    this.createPurchaseOrderHandler = new CreatePurchaseOrderCommandHandler(
-      poService,
-    );
-    this.addPOItemHandler = new AddPOItemCommandHandler(poService);
-    this.updatePOItemHandler = new UpdatePOItemCommandHandler(poService);
-    this.removePOItemHandler = new RemovePOItemCommandHandler(poService);
-    this.updatePOStatusHandler = new UpdatePOStatusCommandHandler(poService);
-    this.receivePOItemsHandler = new ReceivePOItemsCommandHandler(poService);
-    this.deletePurchaseOrderHandler = new DeletePurchaseOrderCommandHandler(
-      poService,
-    );
-    this.getPurchaseOrderHandler = new GetPurchaseOrderQueryHandler(poService);
-    this.getPOItemsHandler = new GetPOItemsQueryHandler(poService);
-    this.listPurchaseOrdersHandler = new ListPurchaseOrdersQueryHandler(
-      poService,
-    );
+    this.createPurchaseOrderHandler = new CreatePurchaseOrderHandler(poService);
+    this.addPOItemHandler = new AddPOItemHandler(poService);
+    this.updatePOItemHandler = new UpdatePOItemHandler(poService);
+    this.removePOItemHandler = new RemovePOItemHandler(poService);
+    this.updatePOStatusHandler = new UpdatePOStatusHandler(poService);
+    this.receivePOItemsHandler = new ReceivePOItemsHandler(poService);
+    this.deletePurchaseOrderHandler = new DeletePurchaseOrderHandler(poService);
+    this.getPurchaseOrderHandler = new GetPurchaseOrderHandler(poService);
+    this.getPOItemsHandler = new GetPOItemsHandler(poService);
+    this.listPurchaseOrdersHandler = new ListPurchaseOrdersHandler(poService);
   }
 
   async getPurchaseOrder(
@@ -64,21 +58,10 @@ export class PurchaseOrderController {
       const result = await this.getPurchaseOrderHandler.handle(query);
 
       if (result.success && result.data) {
-        // Convert createdAt and updatedAt to local timezone string (UTC+05:30)
         const data = result.data;
-        const toLocal = (date: any) => {
-          if (!date) return undefined;
-          const d = new Date(date);
-          // Convert to Asia/Kolkata (UTC+05:30) or use Intl API for formatting
-          return d.toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-        };
         return reply.code(200).send({
           success: true,
-          data: {
-            ...data,
-            createdAt: toLocal(data.createdAt),
-            updatedAt: toLocal(data.updatedAt),
-          },
+          data,
         });
       } else if (result.success && result.data === null) {
         return reply
@@ -88,7 +71,6 @@ export class PurchaseOrderController {
         return reply.code(400).send({
           success: false,
           error: result.error || "Failed to get purchase order",
-          errors: result.errors,
         });
       }
     } catch (error) {
@@ -111,11 +93,6 @@ export class PurchaseOrderController {
 
       if (result.success && result.data) {
         const po = result.data;
-        const toLocal = (date: any) => {
-          if (!date) return undefined;
-          const d = new Date(date);
-          return d.toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-        };
         return reply.code(201).send({
           success: true,
           data: {
@@ -123,8 +100,8 @@ export class PurchaseOrderController {
             supplierId: po.getSupplierId().getValue(),
             eta: po.getEta(),
             status: po.getStatus().getValue(),
-            createdAt: toLocal(po.getCreatedAt()),
-            updatedAt: toLocal(po.getUpdatedAt()),
+            createdAt: po.getCreatedAt(),
+            updatedAt: po.getUpdatedAt(),
           },
           message: "Purchase order created successfully",
         });
@@ -208,11 +185,6 @@ export class PurchaseOrderController {
             }
           }
         }
-        const toLocal = (date: any) => {
-          if (!date) return undefined;
-          const d = new Date(date);
-          return d.toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-        };
         return reply.code(201).send({
           success: true,
           data: {
@@ -220,8 +192,8 @@ export class PurchaseOrderController {
             supplierId: po.getSupplierId().getValue(),
             eta: po.getEta(),
             status: po.getStatus().getValue(),
-            createdAt: toLocal(po.getCreatedAt()),
-            updatedAt: toLocal(po.getUpdatedAt()),
+            createdAt: po.getCreatedAt(),
+            updatedAt: po.getUpdatedAt(),
             items: addedItems,
           },
           message: "Purchase order with items created successfully",
@@ -261,7 +233,6 @@ export class PurchaseOrderController {
         return reply.code(400).send({
           success: false,
           error: result.error || "Failed to list purchase orders",
-          errors: result.errors,
         });
       }
     } catch (error) {
@@ -287,7 +258,6 @@ export class PurchaseOrderController {
         return reply.code(400).send({
           success: false,
           error: result.error || "Failed to get PO items",
-          errors: result.errors,
         });
       }
     } catch (error) {

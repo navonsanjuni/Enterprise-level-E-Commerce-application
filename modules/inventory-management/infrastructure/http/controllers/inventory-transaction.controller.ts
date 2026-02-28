@@ -1,22 +1,21 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import {
   GetTransactionsByVariantQuery,
-  GetTransactionsByVariantQueryHandler,
+  GetTransactionsByVariantHandler,
   ListTransactionsQuery,
-  ListTransactionsQueryHandler,
+  ListTransactionsHandler,
 } from "../../../application";
 import { StockManagementService } from "../../../application/services/stock-management.service";
 
 export class InventoryTransactionController {
-  private getTransactionsByVariantHandler: GetTransactionsByVariantQueryHandler;
-  private listTransactionsHandler: ListTransactionsQueryHandler;
+  private getTransactionsByVariantHandler: GetTransactionsByVariantHandler;
+  private listTransactionsHandler: ListTransactionsHandler;
 
   constructor(private readonly stockService: StockManagementService) {
-    this.getTransactionsByVariantHandler =
-      new GetTransactionsByVariantQueryHandler(stockService);
-    this.listTransactionsHandler = new ListTransactionsQueryHandler(
+    this.getTransactionsByVariantHandler = new GetTransactionsByVariantHandler(
       stockService,
     );
+    this.listTransactionsHandler = new ListTransactionsHandler(stockService);
   }
 
   async getTransactionsByVariant(
@@ -38,9 +37,7 @@ export class InventoryTransactionController {
       if (result.success && result.data) {
         return reply.code(200).send({ success: true, data: result.data });
       } else {
-        return reply
-          .code(400)
-          .send({ success: false, error: result.error, errors: result.errors });
+        return reply.code(400).send({ success: false, error: result.error });
       }
     } catch (error) {
       request.log.error(error, "Failed to get transactions by variant");
@@ -65,9 +62,7 @@ export class InventoryTransactionController {
       if (result.success && result.data) {
         return reply.code(200).send({ success: true, data: result.data });
       } else {
-        return reply
-          .code(400)
-          .send({ success: false, error: result.error, errors: result.errors });
+        return reply.code(400).send({ success: false, error: result.error });
       }
     } catch (error) {
       request.log.error(error, "Failed to list transactions");

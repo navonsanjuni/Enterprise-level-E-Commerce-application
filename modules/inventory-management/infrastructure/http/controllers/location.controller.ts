@@ -1,38 +1,33 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import {
   CreateLocationCommand,
-  CreateLocationCommandHandler,
+  CreateLocationHandler,
   UpdateLocationCommand,
-  UpdateLocationCommandHandler,
+  UpdateLocationHandler,
   DeleteLocationCommand,
-  DeleteLocationCommandHandler,
+  DeleteLocationHandler,
   GetLocationQuery,
-  GetLocationQueryHandler,
+  GetLocationHandler,
   ListLocationsQuery,
-  ListLocationsQueryHandler,
+  ListLocationsHandler,
+  LocationResult,
 } from "../../../application";
 import { LocationManagementService } from "../../../application/services/location-management.service";
 
 export class LocationController {
-  private createLocationHandler: CreateLocationCommandHandler;
-  private updateLocationHandler: UpdateLocationCommandHandler;
-  private deleteLocationHandler: DeleteLocationCommandHandler;
-  private getLocationHandler: GetLocationQueryHandler;
-  private listLocationsHandler: ListLocationsQueryHandler;
+  private createLocationHandler: CreateLocationHandler;
+  private updateLocationHandler: UpdateLocationHandler;
+  private deleteLocationHandler: DeleteLocationHandler;
+  private getLocationHandler: GetLocationHandler;
+  private listLocationsHandler: ListLocationsHandler;
 
   constructor(private readonly locationService: LocationManagementService) {
     // Initialize CQRS handlers
-    this.createLocationHandler = new CreateLocationCommandHandler(
-      locationService,
-    );
-    this.updateLocationHandler = new UpdateLocationCommandHandler(
-      locationService,
-    );
-    this.deleteLocationHandler = new DeleteLocationCommandHandler(
-      locationService,
-    );
-    this.getLocationHandler = new GetLocationQueryHandler(locationService);
-    this.listLocationsHandler = new ListLocationsQueryHandler(locationService);
+    this.createLocationHandler = new CreateLocationHandler(locationService);
+    this.updateLocationHandler = new UpdateLocationHandler(locationService);
+    this.deleteLocationHandler = new DeleteLocationHandler(locationService);
+    this.getLocationHandler = new GetLocationHandler(locationService);
+    this.listLocationsHandler = new ListLocationsHandler(locationService);
   }
 
   async getLocation(
@@ -62,7 +57,6 @@ export class LocationController {
         return reply.code(400).send({
           success: false,
           error: result.error || "Failed to get location",
-          errors: result.errors,
         });
       }
     } catch (error) {
@@ -70,7 +64,6 @@ export class LocationController {
       return reply.code(500).send({
         success: false,
         error: "Internal server error",
-        message: "Failed to retrieve location",
       });
     }
   }
@@ -94,20 +87,22 @@ export class LocationController {
 
       if (result.success && result.data) {
         // Map address fields for API response
-        const mappedLocations = result.data.locations.map((loc) => ({
-          locationId: loc.locationId,
-          type: loc.type,
-          name: loc.name,
-          address: loc.address
-            ? {
-                street: loc.address.addressLine1 || undefined,
-                city: loc.address.city || undefined,
-                state: loc.address.state || undefined,
-                postalCode: loc.address.postalCode || undefined,
-                country: loc.address.country || undefined,
-              }
-            : null,
-        }));
+        const mappedLocations = result.data.locations.map(
+          (loc: LocationResult) => ({
+            locationId: loc.locationId,
+            type: loc.type,
+            name: loc.name,
+            address: loc.address
+              ? {
+                  street: loc.address.addressLine1 || undefined,
+                  city: loc.address.city || undefined,
+                  state: loc.address.state || undefined,
+                  postalCode: loc.address.postalCode || undefined,
+                  country: loc.address.country || undefined,
+                }
+              : null,
+          }),
+        );
         return reply.code(200).send({
           success: true,
           data: {
@@ -119,7 +114,6 @@ export class LocationController {
         return reply.code(400).send({
           success: false,
           error: result.error || "Failed to list locations",
-          errors: result.errors,
         });
       }
     } catch (error) {
@@ -127,7 +121,6 @@ export class LocationController {
       return reply.code(500).send({
         success: false,
         error: "Internal server error",
-        message: "Failed to retrieve locations",
       });
     }
   }
@@ -146,13 +139,6 @@ export class LocationController {
             country: body.address.country,
           }
         : undefined;
-
-      // Debug log: address before handler
-      // eslint-disable-next-line no-console
-      console.log(
-        "[LocationController.createLocation] address to handler:",
-        address,
-      );
 
       const command: CreateLocationCommand = {
         type: body.type,
@@ -195,7 +181,6 @@ export class LocationController {
       return reply.code(500).send({
         success: false,
         error: "Internal server error",
-        message: "Failed to create location",
       });
     }
   }
@@ -241,7 +226,6 @@ export class LocationController {
       return reply.code(500).send({
         success: false,
         error: "Internal server error",
-        message: "Failed to update location",
       });
     }
   }
@@ -276,7 +260,6 @@ export class LocationController {
       return reply.code(500).send({
         success: false,
         error: "Internal server error",
-        message: "Failed to delete location",
       });
     }
   }

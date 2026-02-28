@@ -1,38 +1,32 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import {
   CreateSupplierCommand,
-  CreateSupplierCommandHandler,
+  CreateSupplierHandler,
   UpdateSupplierCommand,
-  UpdateSupplierCommandHandler,
+  UpdateSupplierHandler,
   DeleteSupplierCommand,
-  DeleteSupplierCommandHandler,
+  DeleteSupplierHandler,
   GetSupplierQuery,
-  GetSupplierQueryHandler,
+  GetSupplierHandler,
   ListSuppliersQuery,
-  ListSuppliersQueryHandler,
+  ListSuppliersHandler,
 } from "../../../application";
 import { SupplierManagementService } from "../../../application/services/supplier-management.service";
 
 export class SupplierController {
-  private createSupplierHandler: CreateSupplierCommandHandler;
-  private updateSupplierHandler: UpdateSupplierCommandHandler;
-  private deleteSupplierHandler: DeleteSupplierCommandHandler;
-  private getSupplierHandler: GetSupplierQueryHandler;
-  private listSuppliersHandler: ListSuppliersQueryHandler;
+  private createSupplierHandler: CreateSupplierHandler;
+  private updateSupplierHandler: UpdateSupplierHandler;
+  private deleteSupplierHandler: DeleteSupplierHandler;
+  private getSupplierHandler: GetSupplierHandler;
+  private listSuppliersHandler: ListSuppliersHandler;
 
   constructor(private readonly supplierService: SupplierManagementService) {
     // Initialize CQRS handlers
-    this.createSupplierHandler = new CreateSupplierCommandHandler(
-      supplierService,
-    );
-    this.updateSupplierHandler = new UpdateSupplierCommandHandler(
-      supplierService,
-    );
-    this.deleteSupplierHandler = new DeleteSupplierCommandHandler(
-      supplierService,
-    );
-    this.getSupplierHandler = new GetSupplierQueryHandler(supplierService);
-    this.listSuppliersHandler = new ListSuppliersQueryHandler(supplierService);
+    this.createSupplierHandler = new CreateSupplierHandler(supplierService);
+    this.updateSupplierHandler = new UpdateSupplierHandler(supplierService);
+    this.deleteSupplierHandler = new DeleteSupplierHandler(supplierService);
+    this.getSupplierHandler = new GetSupplierHandler(supplierService);
+    this.listSuppliersHandler = new ListSuppliersHandler(supplierService);
   }
 
   async getSupplier(
@@ -62,7 +56,6 @@ export class SupplierController {
         return reply.code(400).send({
           success: false,
           error: result.error || "Failed to get supplier",
-          errors: result.errors,
         });
       }
     } catch (error) {
@@ -70,7 +63,6 @@ export class SupplierController {
       return reply.code(500).send({
         success: false,
         error: "Internal server error",
-        message: "Failed to retrieve supplier",
       });
     }
   }
@@ -100,7 +92,6 @@ export class SupplierController {
         return reply.code(400).send({
           success: false,
           error: result.error || "Failed to list suppliers",
-          errors: result.errors,
         });
       }
     } catch (error) {
@@ -108,7 +99,6 @@ export class SupplierController {
       return reply.code(500).send({
         success: false,
         error: "Internal server error",
-        message: "Failed to retrieve suppliers",
       });
     }
   }
@@ -150,7 +140,6 @@ export class SupplierController {
       return reply.code(500).send({
         success: false,
         error: "Internal server error",
-        message: "Failed to create supplier",
       });
     }
   }
@@ -197,7 +186,6 @@ export class SupplierController {
       return reply.code(500).send({
         success: false,
         error: "Internal server error",
-        message: "Failed to update supplier",
       });
     }
   }
@@ -232,7 +220,6 @@ export class SupplierController {
       return reply.code(500).send({
         success: false,
         error: "Internal server error",
-        message: "Failed to delete supplier",
       });
     }
   }
