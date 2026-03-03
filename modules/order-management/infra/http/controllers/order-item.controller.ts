@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
+import { ResponseHelper } from "@/api/src/shared/response.helper";
 import {
   AddOrderItemCommandHandler,
   AddOrderItemCommand,
@@ -81,25 +82,14 @@ export class OrderItemController {
 
       const result = await this.addOrderItemHandler.handle(command);
 
-      if (result.success) {
-        return reply.code(201).send({
-          success: true,
-          data: result.data?.toData(),
-          message: "Item added successfully",
-        });
-      } else {
-        return reply.code(400).send({
-          success: false,
-          error: result.error,
-          errors: result.errors,
-        });
-      }
+      return ResponseHelper.fromCommand(
+        reply,
+        result,
+        "Item added successfully",
+        201,
+      );
     } catch (error) {
-      request.log.error(error, "Order item controller error");
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -113,23 +103,9 @@ export class OrderItemController {
       const query: GetOrderItemsQuery = { orderId };
       const result = await this.getOrderItemsHandler.handle(query);
 
-      if (result.success) {
-        return reply.code(200).send({
-          success: true,
-          data: result.data,
-        });
-      } else {
-        return reply.code(404).send({
-          success: false,
-          error: result.error,
-        });
-      }
+      return ResponseHelper.fromQuery(reply, result, "Order items retrieved");
     } catch (error) {
-      request.log.error(error, "Order item controller error");
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -143,23 +119,14 @@ export class OrderItemController {
       const query: GetOrderItemQuery = { itemId };
       const result = await this.getOrderItemHandler.handle(query);
 
-      if (result.success) {
-        return reply.code(200).send({
-          success: true,
-          data: result.data,
-        });
-      } else {
-        return reply.code(404).send({
-          success: false,
-          error: result.error,
-        });
-      }
+      return ResponseHelper.fromQuery(
+        reply,
+        result,
+        "Order item retrieved",
+        "Order item not found",
+      );
     } catch (error) {
-      request.log.error(error, "Order item controller error");
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -181,25 +148,13 @@ export class OrderItemController {
 
       const result = await this.updateOrderItemHandler.handle(command);
 
-      if (result.success) {
-        return reply.code(200).send({
-          success: true,
-          data: result.data?.toData(),
-          message: "Item updated successfully",
-        });
-      } else {
-        return reply.code(400).send({
-          success: false,
-          error: result.error,
-          errors: result.errors,
-        });
-      }
+      return ResponseHelper.fromCommand(
+        reply,
+        result,
+        "Item updated successfully",
+      );
     } catch (error) {
-      request.log.error(error, "Order item controller error");
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -217,24 +172,13 @@ export class OrderItemController {
 
       const result = await this.removeOrderItemHandler.handle(command);
 
-      if (result.success) {
-        return reply.code(200).send({
-          success: true,
-          message: "Item removed successfully",
-        });
-      } else {
-        return reply.code(400).send({
-          success: false,
-          error: result.error,
-          errors: result.errors,
-        });
-      }
+      return ResponseHelper.fromCommand(
+        reply,
+        result,
+        "Item removed successfully",
+      );
     } catch (error) {
-      request.log.error(error, "Order item controller error");
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 }

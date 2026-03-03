@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
+import { ResponseHelper } from "@/api/src/shared/response.helper";
 import {
   CreateOrderCommand,
   CreateOrderHandler,
@@ -40,11 +41,10 @@ export class OrderController {
       const { orderId } = request.params;
 
       if (!orderId || typeof orderId !== "string") {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: "Order ID is required and must be a valid string",
-        });
+        return ResponseHelper.badRequest(
+          reply,
+          "Order ID is required and must be a valid string",
+        );
       }
 
       // Create query
@@ -72,30 +72,22 @@ export class OrderController {
           requesterId &&
           result.data.userId !== requesterId
         ) {
-          return reply.code(403).send({
-            success: false,
-            error: "Forbidden",
-            message: "You are not allowed to view this order",
-          });
+          return ResponseHelper.forbidden(
+            reply,
+            "You are not allowed to view this order",
+          );
         }
 
-        return reply.code(200).send({
-          success: true,
-          data: result.data,
-        });
+        return ResponseHelper.ok(reply, "Order retrieved", result.data);
       } else {
-        return reply.code(404).send({
-          success: false,
-          error: result.error || "Order not found",
-        });
+        return ResponseHelper.notFound(
+          reply,
+          result.error || "Order not found",
+        );
       }
     } catch (error) {
       request.log.error(error, "Failed to get order");
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-        message: "Failed to retrieve order",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -107,11 +99,10 @@ export class OrderController {
       const { orderNumber } = request.params;
 
       if (!orderNumber || typeof orderNumber !== "string") {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: "Order number is required and must be a valid string",
-        });
+        return ResponseHelper.badRequest(
+          reply,
+          "Order number is required and must be a valid string",
+        );
       }
 
       // Create query
@@ -139,30 +130,22 @@ export class OrderController {
           requesterId &&
           result.data.userId !== requesterId
         ) {
-          return reply.code(403).send({
-            success: false,
-            error: "Forbidden",
-            message: "You are not allowed to view this order",
-          });
+          return ResponseHelper.forbidden(
+            reply,
+            "You are not allowed to view this order",
+          );
         }
 
-        return reply.code(200).send({
-          success: true,
-          data: result.data,
-        });
+        return ResponseHelper.ok(reply, "Order retrieved", result.data);
       } else {
-        return reply.code(404).send({
-          success: false,
-          error: result.error || "Order not found",
-        });
+        return ResponseHelper.notFound(
+          reply,
+          result.error || "Order not found",
+        );
       }
     } catch (error) {
       request.log.error(error, "Failed to get order by order number");
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-        message: "Failed to retrieve order",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -176,38 +159,31 @@ export class OrderController {
 
       // Validation: Either authenticated user OR guest token required
       if (!authenticatedUserId && !orderData.guestToken) {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: "Order requires either authentication or guest token",
-        });
+        return ResponseHelper.badRequest(
+          reply,
+          "Order requires either authentication or guest token",
+        );
       }
 
       // Security: Don't allow both authentication AND guest token
       if (authenticatedUserId && orderData.guestToken) {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: "Authenticated users cannot use guest checkout",
-        });
+        return ResponseHelper.badRequest(
+          reply,
+          "Authenticated users cannot use guest checkout",
+        );
       }
 
       if (!orderData.items || orderData.items.length === 0) {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: "Order items are required",
-        });
+        return ResponseHelper.badRequest(reply, "Order items are required");
       }
 
       // Validate items
       for (const item of orderData.items) {
         if (!item.variantId || item.quantity <= 0) {
-          return reply.code(400).send({
-            success: false,
-            error: "Bad Request",
-            message: "Each item must have a valid variantId and quantity > 0",
-          });
+          return ResponseHelper.badRequest(
+            reply,
+            "Each item must have a valid variantId and quantity > 0",
+          );
         }
       }
 
@@ -226,30 +202,22 @@ export class OrderController {
       if (result.success && result.data) {
         const order = result.data;
 
-        return reply.code(201).send({
-          success: true,
-          data: {
-            orderId: order.getOrderId().toString(),
-            orderNumber: order.getOrderNumber().toString(),
-            status: order.getStatus().toString(),
-            createdAt: order.getCreatedAt().toISOString(),
-          },
-          message: "Order created successfully",
+        return ResponseHelper.created(reply, "Order created successfully", {
+          orderId: order.getOrderId().toString(),
+          orderNumber: order.getOrderNumber().toString(),
+          status: order.getStatus().toString(),
+          createdAt: order.getCreatedAt().toISOString(),
         });
       } else {
-        return reply.code(400).send({
-          success: false,
-          error: result.error || "Order creation failed",
-          errors: result.errors,
-        });
+        return ResponseHelper.badRequest(
+          reply,
+          result.error || "Order creation failed",
+          result.errors,
+        );
       }
     } catch (error) {
       request.log.error(error, "Failed to create order");
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-        message: "Failed to create order",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -288,10 +256,10 @@ export class OrderController {
         filterUserId = undefined;
       } else {
         if (!authenticatedUserId) {
-          return reply.code(401).send({
-            success: false,
-            message: "Authentication required to list orders",
-          });
+          return ResponseHelper.unauthorized(
+            reply,
+            "Authentication required to list orders",
+          );
         }
         filterUserId = authenticatedUserId;
       }
@@ -308,17 +276,18 @@ export class OrderController {
       });
 
       // Handle empty or undefined results
-      if (!queryResult.success || !queryResult.data || !queryResult.data.items) {
-        return reply.code(200).send({
-          success: true,
-          data: {
-            orders: [],
-            pagination: {
-              total: 0,
-              page,
-              limit,
-              totalPages: 0,
-            },
+      if (
+        !queryResult.success ||
+        !queryResult.data ||
+        !queryResult.data.items
+      ) {
+        return ResponseHelper.ok(reply, "Orders retrieved", {
+          orders: [],
+          pagination: {
+            total: 0,
+            page,
+            limit,
+            totalPages: 0,
           },
         });
       }
@@ -372,25 +341,18 @@ export class OrderController {
         }),
       );
 
-      return reply.code(200).send({
-        success: true,
-        data: {
-          orders,
-          pagination: {
-            total: result.totalCount,
-            page: result.page,
-            limit: result.limit,
-            totalPages: result.totalPages,
-          },
+      return ResponseHelper.ok(reply, "Orders retrieved", {
+        orders,
+        pagination: {
+          total: result.totalCount,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages,
         },
       });
     } catch (error) {
       request.log.error(error, "Failed to list orders");
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-        message: "Failed to retrieve orders",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -407,19 +369,11 @@ export class OrderController {
 
       // Validate inputs
       if (!orderId) {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: "Order ID is required",
-        });
+        return ResponseHelper.badRequest(reply, "Order ID is required");
       }
 
       if (!status) {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: "Status is required",
-        });
+        return ResponseHelper.badRequest(reply, "Status is required");
       }
 
       const order = await this.orderManagementService.updateOrderStatus(
@@ -428,20 +382,13 @@ export class OrderController {
       );
 
       if (!order) {
-        return reply.code(404).send({
-          success: false,
-          error: "Order not found",
-        });
+        return ResponseHelper.notFound(reply, "Order not found");
       }
 
-      return reply.code(200).send({
-        success: true,
-        data: {
-          orderId: order.getOrderId().toString(),
-          status: order.getStatus().toString(),
-          updatedAt: order.getUpdatedAt(),
-        },
-        message: "Order status updated successfully",
+      return ResponseHelper.ok(reply, "Order status updated successfully", {
+        orderId: order.getOrderId().toString(),
+        status: order.getStatus().toString(),
+        updatedAt: order.getUpdatedAt(),
       });
     } catch (error) {
       request.log.error(error, "Failed to update order status");
@@ -459,26 +406,14 @@ export class OrderController {
           errorMessage.includes("Cannot transition") ||
           errorMessage.includes("without shipments")
         ) {
-          return reply.code(400).send({
-            success: false,
-            error: "Bad Request",
-            message: errorMessage,
-          });
+          return ResponseHelper.badRequest(reply, errorMessage);
         }
 
         // Return all other errors with message for debugging
-        return reply.code(500).send({
-          success: false,
-          error: "Internal server error",
-          message: errorMessage,
-        });
+        return ResponseHelper.error(reply, error);
       }
 
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-        message: "Failed to update order status",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -505,20 +440,13 @@ export class OrderController {
       );
 
       if (!order) {
-        return reply.code(404).send({
-          success: false,
-          error: "Order not found",
-        });
+        return ResponseHelper.notFound(reply, "Order not found");
       }
 
-      return reply.code(200).send({
-        success: true,
-        data: {
-          orderId: order.getOrderId().toString(),
-          totals: order.getTotals().toJSON(),
-          updatedAt: order.getUpdatedAt(),
-        },
-        message: "Order totals updated successfully",
+      return ResponseHelper.ok(reply, "Order totals updated successfully", {
+        orderId: order.getOrderId().toString(),
+        totals: order.getTotals().toJSON(),
+        updatedAt: order.getUpdatedAt(),
       });
     } catch (error) {
       request.log.error(error, "Failed to update order totals");
@@ -533,19 +461,11 @@ export class OrderController {
           errorMessage.includes("Invalid") ||
           errorMessage.includes("required")
         ) {
-          return reply.code(400).send({
-            success: false,
-            error: "Bad Request",
-            message: errorMessage,
-          });
+          return ResponseHelper.badRequest(reply, errorMessage);
         }
       }
 
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-        message: "Failed to update order totals",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -559,38 +479,23 @@ export class OrderController {
       const order = await this.orderManagementService.markOrderAsPaid(orderId);
 
       if (!order) {
-        return reply.code(404).send({
-          success: false,
-          error: "Order not found",
-        });
+        return ResponseHelper.notFound(reply, "Order not found");
       }
 
-      return reply.code(200).send({
-        success: true,
-        data: {
-          orderId: order.getOrderId().toString(),
-          status: order.getStatus().toString(),
-          updatedAt: order.getUpdatedAt(),
-        },
-        message: "Order marked as paid successfully",
+      return ResponseHelper.ok(reply, "Order marked as paid successfully", {
+        orderId: order.getOrderId().toString(),
+        status: order.getStatus().toString(),
+        updatedAt: order.getUpdatedAt(),
       });
     } catch (error) {
       request.log.error(error, "Failed to mark order as paid");
 
       // Handle business rule violations
       if (error instanceof Error && error.message.includes("Cannot mark")) {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: error.message,
-        });
+        return ResponseHelper.badRequest(reply, error.message);
       }
 
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-        message: "Failed to mark order as paid",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -605,38 +510,27 @@ export class OrderController {
         await this.orderManagementService.markOrderAsFulfilled(orderId);
 
       if (!order) {
-        return reply.code(404).send({
-          success: false,
-          error: "Order not found",
-        });
+        return ResponseHelper.notFound(reply, "Order not found");
       }
 
-      return reply.code(200).send({
-        success: true,
-        data: {
+      return ResponseHelper.ok(
+        reply,
+        "Order marked as fulfilled successfully",
+        {
           orderId: order.getOrderId().toString(),
           status: order.getStatus().toString(),
           updatedAt: order.getUpdatedAt(),
         },
-        message: "Order marked as fulfilled successfully",
-      });
+      );
     } catch (error) {
       request.log.error(error, "Failed to mark order as fulfilled");
 
       // Handle business rule violations
       if (error instanceof Error && error.message.includes("Cannot mark")) {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: error.message,
-        });
+        return ResponseHelper.badRequest(reply, error.message);
       }
 
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-        message: "Failed to mark order as fulfilled",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -650,38 +544,23 @@ export class OrderController {
       const order = await this.orderManagementService.cancelOrder(orderId);
 
       if (!order) {
-        return reply.code(404).send({
-          success: false,
-          error: "Order not found",
-        });
+        return ResponseHelper.notFound(reply, "Order not found");
       }
 
-      return reply.code(200).send({
-        success: true,
-        data: {
-          orderId: order.getOrderId().toString(),
-          status: order.getStatus().toString(),
-          updatedAt: order.getUpdatedAt(),
-        },
-        message: "Order cancelled successfully",
+      return ResponseHelper.ok(reply, "Order cancelled successfully", {
+        orderId: order.getOrderId().toString(),
+        status: order.getStatus().toString(),
+        updatedAt: order.getUpdatedAt(),
       });
     } catch (error) {
       request.log.error(error, "Failed to cancel order");
 
       // Handle business rule violations
       if (error instanceof Error && error.message.includes("Cannot")) {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: error.message,
-        });
+        return ResponseHelper.badRequest(reply, error.message);
       }
 
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-        message: "Failed to cancel order",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -695,16 +574,10 @@ export class OrderController {
       const deleted = await this.orderManagementService.deleteOrder(orderId);
 
       if (!deleted) {
-        return reply.code(404).send({
-          success: false,
-          error: "Order not found",
-        });
+        return ResponseHelper.notFound(reply, "Order not found");
       }
 
-      return reply.code(200).send({
-        success: true,
-        message: "Order deleted successfully",
-      });
+      return ResponseHelper.ok(reply, "Order deleted successfully");
     } catch (error) {
       request.log.error(error, "Failed to delete order");
 
@@ -714,18 +587,10 @@ export class OrderController {
         (error.message.includes("Cannot delete") ||
           error.message.includes("constraint"))
       ) {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: error.message,
-        });
+        return ResponseHelper.badRequest(reply, error.message);
       }
 
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-        message: "Failed to delete order",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 
@@ -745,20 +610,17 @@ export class OrderController {
 
       // Validate inputs
       if (!orderNumber && !trackingNumber) {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message: "Either order number or tracking number is required",
-        });
+        return ResponseHelper.badRequest(
+          reply,
+          "Either order number or tracking number is required",
+        );
       }
 
       if (orderNumber && !contact) {
-        return reply.code(400).send({
-          success: false,
-          error: "Bad Request",
-          message:
-            "Email or phone number is required when tracking by order number",
-        });
+        return ResponseHelper.badRequest(
+          reply,
+          "Email or phone number is required when tracking by order number",
+        );
       }
 
       // Track by order number + contact verification
@@ -770,11 +632,10 @@ export class OrderController {
         const result = await this.getOrderHandler.handle(query);
 
         if (!result.success || !result.data) {
-          return reply.code(404).send({
-            success: false,
-            error: "Order not found",
-            message: `No order found with the provided order number: ${orderNumber}. Please check and try again.`,
-          });
+          return ResponseHelper.notFound(
+            reply,
+            `No order found with the provided order number: ${orderNumber}. Please check and try again.`,
+          );
         }
 
         const order = result.data;
@@ -801,12 +662,10 @@ export class OrderController {
           contact === shippingPhone;
 
         if (!contactMatches) {
-          return reply.code(403).send({
-            success: false,
-            error: "Forbidden",
-            message:
-              "The email or phone number does not match our records for this order.",
-          });
+          return ResponseHelper.forbidden(
+            reply,
+            "The email or phone number does not match our records for this order.",
+          );
         }
 
         // Get shipment information
@@ -814,20 +673,17 @@ export class OrderController {
           order.orderId as string,
         );
 
-        return reply.code(200).send({
-          success: true,
-          data: {
-            orderId: order.orderId,
-            orderNumber: order.orderNumber,
-            status: order.status,
-            items: order.items,
-            totals: order.totals,
-            shipments: shipments || [],
-            billingAddress: billingAddress || {},
-            shippingAddress: shippingAddress || {},
-            createdAt: order.createdAt,
-            updatedAt: order.updatedAt,
-          },
+        return ResponseHelper.ok(reply, "Order tracking retrieved", {
+          orderId: order.orderId,
+          orderNumber: order.orderNumber,
+          status: order.status,
+          items: order.items,
+          totals: order.totals,
+          shipments: shipments || [],
+          billingAddress: billingAddress || {},
+          shippingAddress: shippingAddress || {},
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt,
         });
       }
 
@@ -835,25 +691,17 @@ export class OrderController {
       if (trackingNumber) {
         // TODO: Implement tracking number lookup
         // This would search shipments table for the tracking number
-        return reply.code(501).send({
-          success: false,
-          error: "Not Implemented",
-          message: "Tracking by tracking number is not yet implemented",
-        });
+        return ResponseHelper.success(
+          reply,
+          501,
+          "Tracking by tracking number is not yet implemented",
+        );
       }
 
-      return reply.code(400).send({
-        success: false,
-        error: "Bad Request",
-        message: "Invalid tracking request",
-      });
+      return ResponseHelper.badRequest(reply, "Invalid tracking request");
     } catch (error) {
       request.log.error(error, "Failed to track order");
-      return reply.code(500).send({
-        success: false,
-        error: "Internal server error",
-        message: "Failed to track order. Please try again later.",
-      });
+      return ResponseHelper.error(reply, error);
     }
   }
 }
