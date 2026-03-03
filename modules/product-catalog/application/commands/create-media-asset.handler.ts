@@ -3,10 +3,17 @@ import { MediaAsset } from "../../domain/entities/media-asset.entity";
 import { MediaManagementService } from "../services/media-management.service";
 import { CreateMediaAssetCommand } from "./create-media-asset.command";
 
-export class CreateMediaAssetHandler implements ICommandHandler<CreateMediaAssetCommand, CommandResult<MediaAsset>> {
-  constructor(private readonly mediaManagementService: MediaManagementService) {}
+export class CreateMediaAssetHandler implements ICommandHandler<
+  CreateMediaAssetCommand,
+  CommandResult<MediaAsset>
+> {
+  constructor(
+    private readonly mediaManagementService: MediaManagementService,
+  ) {}
 
-  async handle(command: CreateMediaAssetCommand): Promise<CommandResult<MediaAsset>> {
+  async handle(
+    command: CreateMediaAssetCommand,
+  ): Promise<CommandResult<MediaAsset>> {
     try {
       const asset = await this.mediaManagementService.createAsset({
         storageKey: command.storageKey,
@@ -18,7 +25,6 @@ export class CreateMediaAssetHandler implements ICommandHandler<CreateMediaAsset
         focalX: command.focalX,
         focalY: command.focalY,
         renditions: command.renditions || {},
-        version: command.version || 1,
       });
       return CommandResult.success<MediaAsset>(asset);
     } catch (error) {

@@ -3,14 +3,20 @@ import { Category } from "../../domain/entities/category.entity";
 import { CategoryManagementService } from "../services/category-management.service";
 import { CreateCategoryCommand } from "./create-category.command";
 
-export class CreateCategoryHandler implements ICommandHandler<CreateCategoryCommand, CommandResult<Category>> {
-  constructor(private readonly categoryManagementService: CategoryManagementService) {}
+export class CreateCategoryHandler implements ICommandHandler<
+  CreateCategoryCommand,
+  CommandResult<Category>
+> {
+  constructor(
+    private readonly categoryManagementService: CategoryManagementService,
+  ) {}
 
-  async handle(command: CreateCategoryCommand): Promise<CommandResult<Category>> {
+  async handle(
+    command: CreateCategoryCommand,
+  ): Promise<CommandResult<Category>> {
     try {
       const category = await this.categoryManagementService.createCategory({
         name: command.name,
-        slug: command.slug,
         parentId: command.parentId,
         position: command.position,
       });
