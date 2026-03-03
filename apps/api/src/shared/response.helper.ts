@@ -1,5 +1,7 @@
 import { FastifyReply } from "fastify";
 import { ZodError } from "zod";
+import { CommandResult } from "./application/command-result";
+import { QueryResult } from "./application/query-result";
 
 export interface SuccessResponse<T = any> {
   success: true;
@@ -13,6 +15,7 @@ export interface ErrorResponse {
   statusCode: number;
   message: string;
   error?: string;
+  errors?: string[];
 }
 
 export class ResponseHelper {
@@ -88,6 +91,57 @@ export class ResponseHelper {
     message: string = "Resource not found",
   ): FastifyReply {
     return reply.status(404).send({ success: false, statusCode: 404, message });
+  }
+
+  static badRequest(
+    reply: FastifyReply,
+    message: string,
+    errors?: string[],
+  ): FastifyReply {
+    return reply.status(400).send({
+      success: false,
+      statusCode: 400,
+      message,
+      ...(errors && errors.length > 0 ? { errors } : {}),
+    });
+  }
+
+  // Handles CommandResult directly — maps success/failure to the correct HTTP response
+  static fromCommand<T>(
+    reply: FastifyReply,
+    result: CommandResult<T>,
+    successMessage: string,
+    statusCode: 200 | 201 = 200,
+  ): FastifyReply {
+    if (result.success) {
+      return ResponseHelper.success(reply, statusCode, successMessage, result.data);
+    }
+    return reply.status(400).send({
+      success: false,
+      statusCode: 400,
+      message: result.error ?? "Request failed",
+      ...(result.errors && result.errors.length > 0 ? { errors: result.errors } : {}),
+    });
+  }
+
+  // Handles QueryResult directly — maps success/failure to the correct HTTP response
+  static fromQuery<T>(
+    reply: FastifyReply,
+    result: QueryResult<T>,
+    successMessage: string,
+    notFoundMessage?: string,
+  ): FastifyReply {
+    if (result.success) {
+      if (result.data === null && notFoundMessage) {
+        return ResponseHelper.notFound(reply, notFoundMessage);
+      }
+      return ResponseHelper.ok(reply, successMessage, result.data ?? undefined);
+    }
+    return reply.status(400).send({
+      success: false,
+      statusCode: 400,
+      message: result.error ?? "Request failed",
+    });
   }
 
   static created<T>(
