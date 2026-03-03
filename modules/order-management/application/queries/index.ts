@@ -1,70 +1,57 @@
-// Order Queries
-export { GetOrderQuery, GetOrderHandler, OrderResult } from "./get-order.query";
-export {
-  GetOrderByNumberQuery,
-  GetOrderByNumberQueryHandler,
-} from "./get-order-by-number.query";
-export {
+// Query interfaces
+export type { GetOrderQuery, OrderResult } from "./get-order.query";
+export type { GetOrderByNumberQuery } from "./get-order-by-number.query";
+export type {
   ListOrdersQuery,
-  ListOrdersQueryHandler,
   PaginatedOrdersResult,
 } from "./list-orders.query";
-export {
+export type {
   GetOrderAddressesQuery,
-  GetOrderAddressesHandler,
   OrderAddressResult,
 } from "./get-order-addresses.query";
-
-// Order Shipment Queries
-export {
+export type {
   GetOrderShipmentsQuery,
-  GetOrderShipmentsHandler,
+  ShipmentResult,
 } from "./get-order-shipments.query";
-export { GetShipmentQuery, GetShipmentHandler } from "./get-shipment.query";
-
-// Order Status History Queries
-export {
+export type { GetShipmentQuery } from "./get-shipment.query";
+export type {
   GetOrderStatusHistoryQuery,
-  GetOrderStatusHistoryHandler,
+  StatusHistoryResult,
 } from "./get-order-status-history.query";
-
-// Order Events Queries
-export {
+export type {
   GetOrderEventsQuery,
-  GetOrderEventsHandler,
+  OrderEventResult,
 } from "./get-order-events.query";
-export {
-  GetOrderEventQuery,
-  GetOrderEventHandler,
-} from "./get-order-event.query";
-
-// Order Items Queries
-export { GetOrderItemQuery, GetOrderItemHandler } from "./get-order-item.query";
-export {
-  GetOrderItemsQuery,
-  GetOrderItemsHandler,
-} from "./get-order-items.query";
-
-// Backorder Queries
-export {
-  GetBackorderQuery,
-  GetBackorderHandler,
-  BackorderResult,
-} from "./get-backorder.query";
-export {
+export type { GetOrderEventQuery } from "./get-order-event.query";
+export type {
+  GetOrderItemQuery,
+  OrderItemResult,
+} from "./get-order-item.query";
+export type { GetOrderItemsQuery } from "./get-order-items.query";
+export type { GetBackorderQuery, BackorderResult } from "./get-backorder.query";
+export type {
   ListBackordersQuery,
-  ListBackordersHandler,
   ListBackordersResult,
 } from "./list-backorders.query";
-
-// Preorder Queries
-export {
-  GetPreorderQuery,
-  GetPreorderHandler,
-  PreorderResult,
-} from "./get-preorder.query";
-export {
+export type { GetPreorderQuery, PreorderResult } from "./get-preorder.query";
+export type {
   ListPreordersQuery,
-  ListPreordersHandler,
   ListPreordersResult,
 } from "./list-preorders.query";
+
+// Query handlers
+export { GetOrderHandler } from "./get-order.handler";
+export { GetOrderByNumberQueryHandler } from "./get-order-by-number.handler";
+export { ListOrdersQueryHandler } from "./list-orders.handler";
+export { GetOrderAddressesHandler } from "./get-order-addresses.handler";
+export { GetOrderShipmentsHandler } from "./get-order-shipments.handler";
+export { GetShipmentHandler } from "./get-shipment.handler";
+export { GetOrderStatusHistoryHandler } from "./get-order-status-history.handler";
+export { GetOrderEventsHandler } from "./get-order-events.handler";
+export { GetOrderEventHandler } from "./get-order-event.handler";
+export { GetOrderItemHandler } from "./get-order-item.handler";
+export { GetOrderItemsHandler } from "./get-order-items.handler";
+export { GetBackorderHandler } from "./get-backorder.handler";
+export { ListBackordersHandler } from "./list-backorders.handler";
+export { GetPreorderHandler } from "./get-preorder.handler";
+export { ListPreordersHandler } from "./list-preorders.handler";
