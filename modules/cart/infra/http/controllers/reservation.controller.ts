@@ -9,26 +9,26 @@ import {
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
 // Request interfaces
-interface CreateReservationRequest {
+export interface CreateReservationRequest {
   cartId: string;
   variantId: string;
   quantity: number;
   durationMinutes?: number;
 }
 
-interface ExtendReservationRequest {
+export interface ExtendReservationRequest {
   additionalMinutes: number;
 }
 
-interface RenewReservationRequest {
+export interface RenewReservationRequest {
   durationMinutes?: number;
 }
 
-interface AdjustReservationRequest {
+export interface AdjustReservationRequest {
   newQuantity: number;
 }
 
-interface BulkReservationRequest {
+export interface BulkReservationRequest {
   cartId: string;
   items: Array<{
     variantId: string;
@@ -37,12 +37,12 @@ interface BulkReservationRequest {
   durationMinutes?: number;
 }
 
-interface CheckAvailabilityRequest {
+export interface CheckAvailabilityRequest {
   variantId: string;
   requestedQuantity: number;
 }
 
-interface ReservationQueryParams {
+export interface ReservationQueryParams {
   status?: "active" | "expiring_soon" | "expired" | "recently_expired";
   thresholdMinutes?: number;
 }
@@ -52,8 +52,12 @@ export class ReservationController {
   private getReservationsHandler: GetReservationsHandler;
 
   constructor(private readonly reservationService: ReservationService) {
-    this.createReservationHandler = new CreateReservationHandler(reservationService);
-    this.getReservationsHandler = new GetReservationsHandler(reservationService);
+    this.createReservationHandler = new CreateReservationHandler(
+      reservationService,
+    );
+    this.getReservationsHandler = new GetReservationsHandler(
+      reservationService,
+    );
   }
 
   async createReservation(
@@ -71,7 +75,12 @@ export class ReservationController {
       };
 
       const result = await this.createReservationHandler.handle(command);
-      return ResponseHelper.fromCommand(reply, result, "Reservation created successfully", 201);
+      return ResponseHelper.fromCommand(
+        reply,
+        result,
+        "Reservation created successfully",
+        201,
+      );
     } catch (error) {
       request.log.error(error, "Failed to create reservation");
       return ResponseHelper.error(reply, error);
@@ -85,7 +94,8 @@ export class ReservationController {
     try {
       const { reservationId } = request.params;
 
-      const reservation = await this.reservationService.getReservation(reservationId);
+      const reservation =
+        await this.reservationService.getReservation(reservationId);
 
       if (!reservation) {
         return ResponseHelper.notFound(reply, "Reservation not found");
@@ -125,9 +135,14 @@ export class ReservationController {
   ) {
     try {
       const { variantId } = request.params;
-      const reservations = await this.reservationService.getVariantReservations(variantId);
+      const reservations =
+        await this.reservationService.getVariantReservations(variantId);
 
-      return ResponseHelper.ok(reply, "Variant reservations retrieved", reservations);
+      return ResponseHelper.ok(
+        reply,
+        "Variant reservations retrieved",
+        reservations,
+      );
     } catch (error) {
       request.log.error(error, "Failed to get variant reservations");
       return ResponseHelper.error(reply, error);
@@ -150,7 +165,11 @@ export class ReservationController {
         additionalMinutes,
       });
 
-      return ResponseHelper.ok(reply, "Reservation extended successfully", reservation);
+      return ResponseHelper.ok(
+        reply,
+        "Reservation extended successfully",
+        reservation,
+      );
     } catch (error) {
       request.log.error(error, "Failed to extend reservation");
       return ResponseHelper.error(reply, error);
@@ -173,7 +192,11 @@ export class ReservationController {
         durationMinutes,
       });
 
-      return ResponseHelper.ok(reply, "Reservation renewed successfully", reservation);
+      return ResponseHelper.ok(
+        reply,
+        "Reservation renewed successfully",
+        reservation,
+      );
     } catch (error) {
       request.log.error(error, "Failed to renew reservation");
       return ResponseHelper.error(reply, error);
@@ -187,7 +210,8 @@ export class ReservationController {
     try {
       const { reservationId } = request.params;
 
-      const success = await this.reservationService.releaseReservation(reservationId);
+      const success =
+        await this.reservationService.releaseReservation(reservationId);
 
       if (!success) {
         return ResponseHelper.notFound(reply, "Reservation not found");
@@ -221,7 +245,11 @@ export class ReservationController {
         return ResponseHelper.notFound(reply, "Reservation not found");
       }
 
-      return ResponseHelper.ok(reply, "Reservation adjusted successfully", reservation);
+      return ResponseHelper.ok(
+        reply,
+        "Reservation adjusted successfully",
+        reservation,
+      );
     } catch (error) {
       request.log.error(error, "Failed to adjust reservation");
       return ResponseHelper.error(reply, error);
@@ -235,7 +263,10 @@ export class ReservationController {
     try {
       const { variantId, requestedQuantity } = request.query;
 
-      const availability = await this.reservationService.checkAvailability(variantId, requestedQuantity);
+      const availability = await this.reservationService.checkAvailability(
+        variantId,
+        requestedQuantity,
+      );
 
       return ResponseHelper.ok(reply, "Availability checked", availability);
     } catch (error) {
@@ -250,9 +281,13 @@ export class ReservationController {
   ) {
     try {
       const { variantId } = request.params;
-      const totalReserved = await this.reservationService.getTotalReservedQuantity(variantId);
+      const totalReserved =
+        await this.reservationService.getTotalReservedQuantity(variantId);
 
-      return ResponseHelper.ok(reply, "Total reserved quantity retrieved", { variantId, totalReserved });
+      return ResponseHelper.ok(reply, "Total reserved quantity retrieved", {
+        variantId,
+        totalReserved,
+      });
     } catch (error) {
       request.log.error(error, "Failed to get total reserved quantity");
       return ResponseHelper.error(reply, error);
@@ -265,9 +300,13 @@ export class ReservationController {
   ) {
     try {
       const { variantId } = request.params;
-      const activeReserved = await this.reservationService.getActiveReservedQuantity(variantId);
+      const activeReserved =
+        await this.reservationService.getActiveReservedQuantity(variantId);
 
-      return ResponseHelper.ok(reply, "Active reserved quantity retrieved", { variantId, activeReserved });
+      return ResponseHelper.ok(reply, "Active reserved quantity retrieved", {
+        variantId,
+        activeReserved,
+      });
     } catch (error) {
       request.log.error(error, "Failed to get active reserved quantity");
       return ResponseHelper.error(reply, error);
@@ -302,8 +341,13 @@ export class ReservationController {
 
   async getReservationStatistics(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const statistics = await this.reservationService.getReservationStatistics();
-      return ResponseHelper.ok(reply, "Reservation statistics retrieved", statistics);
+      const statistics =
+        await this.reservationService.getReservationStatistics();
+      return ResponseHelper.ok(
+        reply,
+        "Reservation statistics retrieved",
+        statistics,
+      );
     } catch (error) {
       request.log.error(error, "Failed to get reservation statistics");
       return ResponseHelper.error(reply, error);
@@ -317,7 +361,8 @@ export class ReservationController {
     try {
       const { status } = request.query;
 
-      const reservations = await this.reservationService.getReservationsByStatus(status!);
+      const reservations =
+        await this.reservationService.getReservationsByStatus(status!);
 
       return ResponseHelper.ok(reply, "Reservations retrieved", reservations);
     } catch (error) {
@@ -333,9 +378,14 @@ export class ReservationController {
     try {
       const { variantId } = request.params;
 
-      const result = await this.reservationService.resolveReservationConflicts(variantId);
+      const result =
+        await this.reservationService.resolveReservationConflicts(variantId);
 
-      return ResponseHelper.ok(reply, `Resolved ${result.resolved} conflict(s)`, result);
+      return ResponseHelper.ok(
+        reply,
+        `Resolved ${result.resolved} conflict(s)`,
+        result,
+      );
     } catch (error) {
       request.log.error(error, "Failed to resolve reservation conflicts");
       return ResponseHelper.error(reply, error);
@@ -344,9 +394,14 @@ export class ReservationController {
 
   async optimizeReservations(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const optimizedCount = await this.reservationService.optimizeReservations();
+      const optimizedCount =
+        await this.reservationService.optimizeReservations();
 
-      return ResponseHelper.ok(reply, `Successfully optimized ${optimizedCount} reservation(s)`, { optimizedCount });
+      return ResponseHelper.ok(
+        reply,
+        `Successfully optimized ${optimizedCount} reservation(s)`,
+        { optimizedCount },
+      );
     } catch (error) {
       request.log.error(error, "Failed to optimize reservations");
       return ResponseHelper.error(reply, error);
