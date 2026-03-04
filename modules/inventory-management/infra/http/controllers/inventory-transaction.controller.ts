@@ -8,6 +8,19 @@ import {
 import { StockManagementService } from "../../../application/services/stock-management.service";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
+export interface TransactionsByVariantQuerystring {
+  locationId?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface ListTransactionsQuerystring {
+  variantId?: string;
+  locationId?: string;
+  limit?: number;
+  offset?: number;
+}
+
 export class InventoryTransactionController {
   private getTransactionsByVariantHandler: GetTransactionsByVariantHandler;
   private listTransactionsHandler: ListTransactionsHandler;
@@ -20,12 +33,15 @@ export class InventoryTransactionController {
   }
 
   async getTransactionsByVariant(
-    request: FastifyRequest<{ Params: { variantId: string } }>,
+    request: FastifyRequest<{
+      Params: { variantId: string };
+      Querystring: TransactionsByVariantQuerystring;
+    }>,
     reply: FastifyReply,
   ) {
     try {
       const { variantId } = request.params;
-      const queryParams = request.query as any;
+      const queryParams = request.query;
       const query: GetTransactionsByVariantQuery = {
         variantId,
         locationId: queryParams.locationId,
@@ -40,9 +56,12 @@ export class InventoryTransactionController {
     }
   }
 
-  async listTransactions(request: FastifyRequest, reply: FastifyReply) {
+  async listTransactions(
+    request: FastifyRequest<{ Querystring: ListTransactionsQuerystring }>,
+    reply: FastifyReply,
+  ) {
     try {
-      const queryParams = request.query as any;
+      const queryParams = request.query;
       const query: ListTransactionsQuery = {
         variantId: queryParams.variantId,
         locationId: queryParams.locationId,

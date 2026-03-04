@@ -24,6 +24,44 @@ import {
 import { PurchaseOrderManagementService } from "../../../application/services/purchase-order-management.service";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
+export interface CreatePOBody {
+  supplierId: string;
+  eta?: string;
+}
+
+export interface CreatePOWithItemsBody {
+  supplierId: string;
+  eta?: string;
+  items: Array<{ variantId: string; orderedQty: number }>;
+}
+
+export interface ListPOQuerystring {
+  limit?: number;
+  offset?: number;
+  status?: string;
+  supplierId?: string;
+  sortBy?: "createdAt" | "updatedAt" | "eta";
+  sortOrder?: "asc" | "desc";
+}
+
+export interface UpdatePOStatusBody {
+  status: string;
+}
+
+export interface ReceivePOItemsBody {
+  locationId: string;
+  items: Array<{ variantId: string; receivedQty: number }>;
+}
+
+export interface AddPOItemBody {
+  variantId: string;
+  orderedQty: number;
+}
+
+export interface UpdatePOItemBody {
+  orderedQty: number;
+}
+
 export class PurchaseOrderController {
   private createPurchaseOrderHandler: CreatePurchaseOrderHandler;
   private addPOItemHandler: AddPOItemHandler;
@@ -68,9 +106,12 @@ export class PurchaseOrderController {
     }
   }
 
-  async createPurchaseOrder(request: FastifyRequest, reply: FastifyReply) {
+  async createPurchaseOrder(
+    request: FastifyRequest<{ Body: CreatePOBody }>,
+    reply: FastifyReply,
+  ) {
     try {
-      const body = request.body as any;
+      const body = request.body;
       const command: CreatePurchaseOrderCommand = {
         supplierId: body.supplierId,
         eta: body.eta ? new Date(body.eta) : undefined,
@@ -103,11 +144,11 @@ export class PurchaseOrderController {
   }
 
   async createPurchaseOrderWithItems(
-    request: FastifyRequest,
+    request: FastifyRequest<{ Body: CreatePOWithItemsBody }>,
     reply: FastifyReply,
   ) {
     try {
-      const body = request.body as any;
+      const body = request.body;
       const errors: string[] = [];
 
       // Validation
@@ -186,9 +227,12 @@ export class PurchaseOrderController {
     }
   }
 
-  async listPurchaseOrders(request: FastifyRequest, reply: FastifyReply) {
+  async listPurchaseOrders(
+    request: FastifyRequest<{ Querystring: ListPOQuerystring }>,
+    reply: FastifyReply,
+  ) {
     try {
-      const query = request.query as any;
+      const query = request.query;
       const listQuery: ListPurchaseOrdersQuery = {
         limit: query.limit ? Number(query.limit) : undefined,
         offset: query.offset ? Number(query.offset) : undefined,
@@ -228,12 +272,12 @@ export class PurchaseOrderController {
   }
 
   async addPOItem(
-    request: FastifyRequest<{ Params: { poId: string } }>,
+    request: FastifyRequest<{ Params: { poId: string }; Body: AddPOItemBody }>,
     reply: FastifyReply,
   ) {
     try {
       const { poId } = request.params;
-      const body = request.body as any;
+      const body = request.body;
       const command: AddPOItemCommand = {
         poId,
         variantId: body.variantId,
@@ -253,12 +297,15 @@ export class PurchaseOrderController {
   }
 
   async updatePOItem(
-    request: FastifyRequest<{ Params: { poId: string; variantId: string } }>,
+    request: FastifyRequest<{
+      Params: { poId: string; variantId: string };
+      Body: UpdatePOItemBody;
+    }>,
     reply: FastifyReply,
   ) {
     try {
       const { poId, variantId } = request.params;
-      const body = request.body as any;
+      const body = request.body;
       const command: UpdatePOItemCommand = {
         poId,
         variantId,
@@ -296,12 +343,15 @@ export class PurchaseOrderController {
   }
 
   async updatePOStatus(
-    request: FastifyRequest<{ Params: { poId: string } }>,
+    request: FastifyRequest<{
+      Params: { poId: string };
+      Body: UpdatePOStatusBody;
+    }>,
     reply: FastifyReply,
   ) {
     try {
       const { poId } = request.params;
-      const body = request.body as any;
+      const body = request.body;
       const command: UpdatePOStatusCommand = { poId, status: body.status };
 
       const result = await this.updatePOStatusHandler.handle(command);
@@ -323,12 +373,15 @@ export class PurchaseOrderController {
   }
 
   async receivePOItems(
-    request: FastifyRequest<{ Params: { poId: string } }>,
+    request: FastifyRequest<{
+      Params: { poId: string };
+      Body: ReceivePOItemsBody;
+    }>,
     reply: FastifyReply,
   ) {
     try {
       const { poId } = request.params;
-      const body = request.body as any;
+      const body = request.body;
       const command: ReceivePOItemsCommand = {
         poId,
         locationId: body.locationId,
