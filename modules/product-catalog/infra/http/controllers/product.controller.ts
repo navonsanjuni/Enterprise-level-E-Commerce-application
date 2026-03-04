@@ -18,7 +18,7 @@ import { ProductSearchService } from "../../../application/services/product-sear
 import { PrismaClient } from "@prisma/client";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
-interface CreateProductRequest {
+export interface CreateProductRequest {
   title: string;
   brand?: string;
   shortDesc?: string;
@@ -36,9 +36,9 @@ interface CreateProductRequest {
   tags?: string[];
 }
 
-interface UpdateProductRequest extends Partial<CreateProductRequest> {}
+export interface UpdateProductRequest extends Partial<CreateProductRequest> {}
 
-interface ProductQueryParams {
+export interface ProductQueryParams {
   page?: number;
   limit?: number;
   status?: "draft" | "published" | "scheduled" | "archived";

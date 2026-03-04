@@ -7,21 +7,21 @@ import {
 import { SizeGuideQueryOptions } from "../../../domain/repositories/size-guide.repository";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
-interface CreateSizeGuideRequest {
+export interface CreateSizeGuideRequest {
   title: string;
   bodyHtml?: string;
   region: Region;
   category?: string;
 }
 
-interface UpdateSizeGuideRequest {
+export interface UpdateSizeGuideRequest {
   title?: string;
   bodyHtml?: string;
   region?: Region;
   category?: string;
 }
 
-interface SizeGuideQueryParams {
+export interface SizeGuideQueryParams {
   page?: number;
   limit?: number;
   region?: Region;
@@ -31,20 +31,20 @@ interface SizeGuideQueryParams {
   sortOrder?: "asc" | "desc";
 }
 
-interface BulkCreateSizeGuidesRequest {
+export interface BulkCreateSizeGuidesRequest {
   guides: CreateSizeGuideRequest[];
 }
 
-interface BulkDeleteSizeGuidesRequest {
+export interface BulkDeleteSizeGuidesRequest {
   ids: string[];
 }
 
-interface RegionalSizeGuideRequest extends Omit<
+export interface RegionalSizeGuideRequest extends Omit<
   CreateSizeGuideRequest,
   "region"
 > {}
 
-interface CategorySizeGuideRequest extends Omit<
+export interface CategorySizeGuideRequest extends Omit<
   CreateSizeGuideRequest,
   "category" | "region"
 > {}

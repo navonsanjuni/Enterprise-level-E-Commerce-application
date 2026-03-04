@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { ProductSearchService } from "../../../application/services/product-search.service";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
-interface SearchQueryParams {
+export interface SearchQueryParams {
   q: string;
   page?: number;
   limit?: number;
@@ -16,7 +16,7 @@ interface SearchQueryParams {
   sortOrder?: "asc" | "desc";
 }
 
-interface SearchSuggestionsQueryParams {
+export interface SearchSuggestionsQueryParams {
   q: string;
   limit?: number;
   type?: "products" | "categories" | "brands" | "all";

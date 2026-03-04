@@ -2,15 +2,15 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { CategoryManagementService } from "../../../application/services/category-management.service";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
-interface CreateCategoryRequest {
+export interface CreateCategoryRequest {
   name: string;
   parentId?: string;
   position?: number;
 }
 
-interface UpdateCategoryRequest extends Partial<CreateCategoryRequest> {}
+export interface UpdateCategoryRequest extends Partial<CreateCategoryRequest> {}
 
-interface CategoryQueryParams {
+export interface CategoryQueryParams {
   page?: number;
   limit?: number;
   parentId?: string;

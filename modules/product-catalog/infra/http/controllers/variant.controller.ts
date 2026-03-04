@@ -3,7 +3,7 @@ import { VariantManagementService } from "../../../application/services/variant-
 import { PrismaClient } from "@prisma/client";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
-interface CreateVariantRequest {
+export interface CreateVariantRequest {
   sku: string;
   size?: string;
   color?: string;
@@ -16,9 +16,9 @@ interface CreateVariantRequest {
   restockEta?: string;
 }
 
-interface UpdateVariantRequest extends Partial<CreateVariantRequest> {}
+export interface UpdateVariantRequest extends Partial<CreateVariantRequest> {}
 
-interface VariantQueryParams {
+export interface VariantQueryParams {
   page?: number;
   limit?: number;
   size?: string;
