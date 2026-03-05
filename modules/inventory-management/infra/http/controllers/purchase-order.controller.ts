@@ -2,6 +2,8 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import {
   CreatePurchaseOrderCommand,
   CreatePurchaseOrderHandler,
+  CreatePurchaseOrderWithItemsCommand,
+  CreatePurchaseOrderWithItemsHandler,
   AddPOItemCommand,
   AddPOItemHandler,
   UpdatePOItemCommand,
@@ -20,6 +22,12 @@ import {
   GetPOItemsHandler,
   ListPurchaseOrdersQuery,
   ListPurchaseOrdersHandler,
+  GetOverduePurchaseOrdersQuery,
+  GetOverduePurchaseOrdersHandler,
+  GetPendingReceivalQuery,
+  GetPendingReceivalHandler,
+  UpdatePOEtaCommand,
+  UpdatePOEtaHandler,
 } from "../../../application";
 import { PurchaseOrderManagementService } from "../../../application/services/purchase-order-management.service";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
@@ -62,8 +70,13 @@ export interface UpdatePOItemBody {
   orderedQty: number;
 }
 
+export interface UpdatePOEtaBody {
+  eta: string;
+}
+
 export class PurchaseOrderController {
   private createPurchaseOrderHandler: CreatePurchaseOrderHandler;
+  private createPurchaseOrderWithItemsHandler: CreatePurchaseOrderWithItemsHandler;
   private addPOItemHandler: AddPOItemHandler;
   private updatePOItemHandler: UpdatePOItemHandler;
   private removePOItemHandler: RemovePOItemHandler;
@@ -73,9 +86,14 @@ export class PurchaseOrderController {
   private getPurchaseOrderHandler: GetPurchaseOrderHandler;
   private getPOItemsHandler: GetPOItemsHandler;
   private listPurchaseOrdersHandler: ListPurchaseOrdersHandler;
+  private getOverduePurchaseOrdersHandler: GetOverduePurchaseOrdersHandler;
+  private getPendingReceivalHandler: GetPendingReceivalHandler;
+  private updatePOEtaHandler: UpdatePOEtaHandler;
 
   constructor(private readonly poService: PurchaseOrderManagementService) {
     this.createPurchaseOrderHandler = new CreatePurchaseOrderHandler(poService);
+    this.createPurchaseOrderWithItemsHandler =
+      new CreatePurchaseOrderWithItemsHandler(poService);
     this.addPOItemHandler = new AddPOItemHandler(poService);
     this.updatePOItemHandler = new UpdatePOItemHandler(poService);
     this.removePOItemHandler = new RemovePOItemHandler(poService);
@@ -85,6 +103,11 @@ export class PurchaseOrderController {
     this.getPurchaseOrderHandler = new GetPurchaseOrderHandler(poService);
     this.getPOItemsHandler = new GetPOItemsHandler(poService);
     this.listPurchaseOrdersHandler = new ListPurchaseOrdersHandler(poService);
+    this.getOverduePurchaseOrdersHandler = new GetOverduePurchaseOrdersHandler(
+      poService,
+    );
+    this.getPendingReceivalHandler = new GetPendingReceivalHandler(poService);
+    this.updatePOEtaHandler = new UpdatePOEtaHandler(poService);
   }
 
   async getPurchaseOrder(
@@ -149,73 +172,20 @@ export class PurchaseOrderController {
   ) {
     try {
       const body = request.body;
-      const errors: string[] = [];
-
-      // Validation
-      if (!body.supplierId || body.supplierId.trim().length === 0) {
-        errors.push("supplierId: Supplier ID is required");
-      }
-
-      if (!Array.isArray(body.items) || body.items.length === 0) {
-        errors.push("items: At least one item is required");
-      } else {
-        // Validate each item
-        body.items.forEach((item: any, index: number) => {
-          if (!item.variantId || item.variantId.trim().length === 0) {
-            errors.push(`items[${index}].variantId: Variant ID is required`);
-          }
-          if (!item.orderedQty || item.orderedQty <= 0) {
-            errors.push(
-              `items[${index}].orderedQty: Ordered quantity must be greater than 0`,
-            );
-          }
-        });
-      }
-
-      if (body.eta && isNaN(Date.parse(body.eta))) {
-        errors.push("eta: Invalid date format");
-      }
-
-      if (errors.length > 0) {
-        return ResponseHelper.badRequest(reply, "Validation failed", errors);
-      }
-
-      const command: CreatePurchaseOrderCommand = {
+      const command: CreatePurchaseOrderWithItemsCommand = {
         supplierId: body.supplierId,
         eta: body.eta ? new Date(body.eta) : undefined,
+        items: body.items,
       };
 
-      const result = await this.createPurchaseOrderHandler.handle(command);
+      const result =
+        await this.createPurchaseOrderWithItemsHandler.handle(command);
 
       if (result.success && result.data) {
-        const po = result.data;
-        // Add items if provided
-        const items = Array.isArray(body.items) ? body.items : [];
-        const addedItems = [];
-        for (const item of items) {
-          if (item.variantId && item.orderedQty) {
-            const addItemResult = await this.addPOItemHandler.handle({
-              poId: po.getPoId().getValue(),
-              variantId: item.variantId,
-              orderedQty: item.orderedQty,
-            });
-            if (addItemResult.success && addItemResult.data) {
-              addedItems.push(addItemResult.data);
-            }
-          }
-        }
         return ResponseHelper.created(
           reply,
           "Purchase order with items created successfully",
-          {
-            poId: po.getPoId().getValue(),
-            supplierId: po.getSupplierId().getValue(),
-            eta: po.getEta(),
-            status: po.getStatus().getValue(),
-            createdAt: po.getCreatedAt(),
-            updatedAt: po.getUpdatedAt(),
-            items: addedItems,
-          },
+          result.data,
         );
       }
       return ResponseHelper.badRequest(
@@ -393,6 +363,68 @@ export class PurchaseOrderController {
         reply,
         result,
         "Items received successfully",
+      );
+    } catch (error) {
+      return ResponseHelper.error(reply, error);
+    }
+  }
+
+  async getOverduePurchaseOrders(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const query: GetOverduePurchaseOrdersQuery = {};
+      const result = await this.getOverduePurchaseOrdersHandler.handle(query);
+      return ResponseHelper.fromQuery(
+        reply,
+        result,
+        "Overdue purchase orders retrieved",
+      );
+    } catch (error) {
+      return ResponseHelper.error(reply, error);
+    }
+  }
+
+  async getPendingReceival(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const query: GetPendingReceivalQuery = {};
+      const result = await this.getPendingReceivalHandler.handle(query);
+      return ResponseHelper.fromQuery(
+        reply,
+        result,
+        "Pending receival purchase orders retrieved",
+      );
+    } catch (error) {
+      return ResponseHelper.error(reply, error);
+    }
+  }
+
+  async updatePOEta(
+    request: FastifyRequest<{
+      Params: { poId: string };
+      Body: UpdatePOEtaBody;
+    }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const { poId } = request.params;
+      const { eta } = request.body;
+      const command: UpdatePOEtaCommand = {
+        poId,
+        eta: new Date(eta),
+      };
+
+      const result = await this.updatePOEtaHandler.handle(command);
+
+      if (result.success && result.data) {
+        const po = result.data;
+        return ResponseHelper.ok(reply, "ETA updated successfully", {
+          poId: po.getPoId().getValue(),
+          eta: po.getEta(),
+          status: po.getStatus().getValue(),
+        });
+      }
+      return ResponseHelper.badRequest(
+        reply,
+        result.error || "Failed to update ETA",
       );
     } catch (error) {
       return ResponseHelper.error(reply, error);

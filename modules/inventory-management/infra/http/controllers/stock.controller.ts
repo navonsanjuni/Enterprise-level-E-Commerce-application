@@ -22,9 +22,12 @@ import {
   GetTotalAvailableStockHandler,
   ListStocksQuery,
   ListStocksHandler,
+  GetLowStockItemsQuery,
+  GetLowStockItemsHandler,
+  GetOutOfStockItemsQuery,
+  GetOutOfStockItemsHandler,
 } from "../../../application";
 import { StockManagementService } from "../../../application/services/stock-management.service";
-import { PickupReservationService } from "../../../application/services/pickup-reservation.service";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
 export interface ListStocksQuerystring {
@@ -97,11 +100,10 @@ export class StockController {
   private getStockStatsHandler: GetStockStatsHandler;
   private getTotalAvailableStockHandler: GetTotalAvailableStockHandler;
   private listStocksHandler: ListStocksHandler;
+  private getLowStockItemsHandler: GetLowStockItemsHandler;
+  private getOutOfStockItemsHandler: GetOutOfStockItemsHandler;
 
-  constructor(
-    private readonly stockService: StockManagementService,
-    private readonly reservationService?: PickupReservationService,
-  ) {
+  constructor(private readonly stockService: StockManagementService) {
     // Initialize command handlers
     this.addStockHandler = new AddStockHandler(stockService);
     this.adjustStockHandler = new AdjustStockHandler(stockService);
@@ -122,6 +124,10 @@ export class StockController {
       stockService,
     );
     this.listStocksHandler = new ListStocksHandler(stockService);
+    this.getLowStockItemsHandler = new GetLowStockItemsHandler(stockService);
+    this.getOutOfStockItemsHandler = new GetOutOfStockItemsHandler(
+      stockService,
+    );
   }
 
   async getStats(request: FastifyRequest, reply: FastifyReply) {
@@ -235,6 +241,34 @@ export class StockController {
 
       const result = await this.listStocksHandler.handle(query);
       return ResponseHelper.fromQuery(reply, result, "Stocks retrieved");
+    } catch (error) {
+      return ResponseHelper.error(reply, error);
+    }
+  }
+
+  async getLowStockItems(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const query: GetLowStockItemsQuery = {};
+      const result = await this.getLowStockItemsHandler.handle(query);
+      return ResponseHelper.fromQuery(
+        reply,
+        result,
+        "Low stock items retrieved",
+      );
+    } catch (error) {
+      return ResponseHelper.error(reply, error);
+    }
+  }
+
+  async getOutOfStockItems(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const query: GetOutOfStockItemsQuery = {};
+      const result = await this.getOutOfStockItemsHandler.handle(query);
+      return ResponseHelper.fromQuery(
+        reply,
+        result,
+        "Out of stock items retrieved",
+      );
     } catch (error) {
       return ResponseHelper.error(reply, error);
     }
