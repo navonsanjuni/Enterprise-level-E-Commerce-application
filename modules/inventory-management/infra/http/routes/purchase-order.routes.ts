@@ -7,6 +7,7 @@ import {
   CreatePOWithItemsBody,
   UpdatePOStatusBody,
   ReceivePOItemsBody,
+  UpdatePOEtaBody,
 } from "../controllers/purchase-order.controller";
 
 const errorResponses = {
@@ -88,6 +89,44 @@ export async function registerPurchaseOrderRoutes(
       },
     },
     controller.listPurchaseOrders.bind(controller),
+  );
+
+  // Get overdue purchase orders
+  fastify.get(
+    "/purchase-orders/overdue",
+    {
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
+      schema: {
+        description: "Get all overdue purchase orders (Staff/Admin only)",
+        tags: ["Purchase Orders"],
+        summary: "Get Overdue Purchase Orders",
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: { description: "Overdue purchase orders" },
+          ...errorResponses,
+        },
+      },
+    },
+    controller.getOverduePurchaseOrders.bind(controller),
+  );
+
+  // Get pending receival purchase orders
+  fastify.get(
+    "/purchase-orders/pending-receival",
+    {
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
+      schema: {
+        description: "Get purchase orders pending receival (Staff/Admin only)",
+        tags: ["Purchase Orders"],
+        summary: "Get Pending Receival",
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: { description: "Pending receival purchase orders" },
+          ...errorResponses,
+        },
+      },
+    },
+    controller.getPendingReceival.bind(controller),
   );
 
   // Get purchase order
@@ -250,6 +289,44 @@ export async function registerPurchaseOrderRoutes(
       },
     },
     controller.updatePOStatus.bind(controller),
+  );
+
+  // Update PO ETA
+  fastify.put<{ Params: { poId: string }; Body: UpdatePOEtaBody }>(
+    "/purchase-orders/:poId/eta",
+    {
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
+      schema: {
+        description:
+          "Update purchase order estimated arrival (Staff/Admin only)",
+        tags: ["Purchase Orders"],
+        summary: "Update PO ETA",
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: "object",
+          properties: {
+            poId: { type: "string", format: "uuid" },
+          },
+          required: ["poId"],
+        },
+        body: {
+          type: "object",
+          required: ["eta"],
+          properties: {
+            eta: {
+              type: "string",
+              format: "date-time",
+              description: "New estimated arrival date and time",
+            },
+          },
+        },
+        response: {
+          200: { description: "ETA updated successfully" },
+          ...errorResponses,
+        },
+      },
+    },
+    controller.updatePOEta.bind(controller),
   );
 
   // Receive PO items

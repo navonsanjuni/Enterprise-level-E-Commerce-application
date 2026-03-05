@@ -160,6 +160,44 @@ export async function registerStockRoutes(
     controller.getStats.bind(controller),
   );
 
+  // Get low stock items
+  fastify.get(
+    "/stocks/low-stock",
+    {
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
+      schema: {
+        description: "Get all items with low stock levels (Staff/Admin only)",
+        tags: ["Stock Management"],
+        summary: "Get Low Stock Items",
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: { description: "Low stock items" },
+          ...errorResponses,
+        },
+      },
+    },
+    controller.getLowStockItems.bind(controller),
+  );
+
+  // Get out of stock items
+  fastify.get(
+    "/stocks/out-of-stock",
+    {
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
+      schema: {
+        description: "Get all items that are out of stock (Staff/Admin only)",
+        tags: ["Stock Management"],
+        summary: "Get Out Of Stock Items",
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: { description: "Out of stock items" },
+          ...errorResponses,
+        },
+      },
+    },
+    controller.getOutOfStockItems.bind(controller),
+  );
+
   // Get stock by variant and location
   fastify.get<{ Params: GetStockParams }>(
     "/stocks/:variantId/:locationId",

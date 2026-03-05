@@ -56,7 +56,7 @@ export async function registerPickupReservationRoutes(
 ): Promise<void> {
   // List reservations
   fastify.get<{ Querystring: ListReservationsQuerystring }>(
-    "/reservations",
+    "/pickup-reservations",
     {
       preHandler: [authenticate],
       schema: {
@@ -83,7 +83,7 @@ export async function registerPickupReservationRoutes(
 
   // Get reservation
   fastify.get<{ Params: { reservationId: string } }>(
-    "/reservations/:reservationId",
+    "/pickup-reservations/:reservationId",
     {
       preHandler: [authenticate],
       schema: {
@@ -109,7 +109,7 @@ export async function registerPickupReservationRoutes(
 
   // Create reservation
   fastify.post<{ Body: CreateReservationBody }>(
-    "/reservations",
+    "/pickup-reservations",
     {
       preHandler: [authenticate],
       schema: {
@@ -139,7 +139,7 @@ export async function registerPickupReservationRoutes(
 
   // Cancel reservation
   fastify.delete<{ Params: { reservationId: string } }>(
-    "/reservations/:reservationId",
+    "/pickup-reservations/:reservationId",
     {
       preHandler: [authenticate],
       schema: {
