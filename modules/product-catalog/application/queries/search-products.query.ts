@@ -11,6 +11,7 @@ export interface SearchProductsQuery extends IQuery {
   minPrice?: number;
   maxPrice?: number;
   brand?: string;
+  tags?: string[];
   status?: "draft" | "published" | "scheduled" | "archived";
   sortBy?: "relevance" | "price" | "title" | "createdAt" | "publishAt";
   sortOrder?: "asc" | "desc";
