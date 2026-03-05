@@ -229,6 +229,61 @@ export async function registerCartRoutes(
     cartController.getCart.bind(cartController),
   );
 
+  // Get cart summary
+  fastify.get<{
+    Params: { cartId: string };
+    Querystring: CartQueryParams;
+  }>(
+    "/carts/:cartId/summary",
+    {
+      preHandler: [optionalAuth, extractGuestToken, requireCartAuth],
+      schema: {
+        description:
+          "Get cart summary (totals, item count, etc.). Requires either Authorization header or X-Guest-Token header.",
+        tags: ["Cart"],
+        summary: "Get Cart Summary",
+        security: [{ bearerAuth: [] }],
+        headers: {
+          type: "object",
+          properties: {
+            "X-Guest-Token": {
+              type: "string",
+              description: "Guest token for unauthenticated users",
+              pattern: "^[a-f0-9]{64}$",
+            },
+          },
+        },
+        params: {
+          type: "object",
+          required: ["cartId"],
+          properties: {
+            cartId: { type: "string", format: "uuid" },
+          },
+        },
+        response: {
+          200: {
+            description: "Cart summary retrieved",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: true },
+              data: { type: "object", additionalProperties: true },
+            },
+          },
+          404: {
+            description: "Cart not found",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              error: { type: "string", example: "Cart not found" },
+            },
+          },
+          ...authErrorResponses,
+        },
+      },
+    },
+    cartController.getCartSummary.bind(cartController),
+  );
+
   // Get active cart by user ID
   fastify.get<{ Params: { userId: string } }>(
     "/users/:userId/cart",
