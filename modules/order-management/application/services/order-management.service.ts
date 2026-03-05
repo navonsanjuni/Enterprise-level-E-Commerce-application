@@ -20,10 +20,12 @@ import { OrderSource } from "../../domain/value-objects/order-source.vo";
 import { Currency } from "../../domain/value-objects/currency.vo";
 import { ProductSnapshot } from "../../domain/value-objects/product-snapshot.vo";
 import { AddressSnapshot } from "../../domain/value-objects/address-snapshot.vo";
-import { VariantManagementService } from "../../../product-catalog/application/services/variant-management.service";
-import { ProductManagementService } from "../../../product-catalog/application/services/product-management.service";
-import { ProductMediaManagementService } from "../../../product-catalog/application/services/product-media-management.service";
-import { StockManagementService } from "../../../inventory-management/application/services/stock-management.service";
+import {
+  IExternalVariantService,
+  IExternalProductService,
+  IExternalProductMediaService,
+  IExternalStockService,
+} from "../../domain/external-services";
 import { OrderEventService } from "./order-event.service";
 
 export interface CreateOrderData {
@@ -48,10 +50,10 @@ export class OrderManagementService {
     private readonly orderItemRepository: IOrderItemRepository,
     private readonly orderShipmentRepository: IOrderShipmentRepository,
     private readonly orderStatusHistoryRepository: IOrderStatusHistoryRepository,
-    private readonly variantManagementService: VariantManagementService,
-    private readonly productManagementService: ProductManagementService,
-    private readonly productMediaService: ProductMediaManagementService,
-    private readonly stockManagementService: StockManagementService,
+    private readonly variantManagementService: IExternalVariantService,
+    private readonly productManagementService: IExternalProductService,
+    private readonly productMediaService: IExternalProductMediaService,
+    private readonly stockManagementService: IExternalStockService,
     private readonly orderEventService: OrderEventService,
   ) {}
 
@@ -165,8 +167,7 @@ export class OrderManagementService {
       }),
     );
 
-    const defaultLocationId =
-      data.locationId || (this.getDefaultWarehouseId());
+    const defaultLocationId = data.locationId || this.getDefaultWarehouseId();
     for (const item of orderItems) {
       const stock = await this.stockManagementService.getStock(
         item.variantId,
