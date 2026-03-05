@@ -79,7 +79,11 @@ import { CartManagementService } from "../../../modules/cart/application/service
 import { ReservationService } from "../../../modules/cart/application/services/reservation.service";
 import { CheckoutService } from "../../../modules/cart/application/services/checkout.service";
 import { CheckoutOrderService } from "../../../modules/cart/application/services/checkout-order.service";
-import type { IProductSnapshotFactory } from "../../../modules/cart/domain/external-services";
+import { CheckoutCompletionPortImpl } from "../../../modules/cart/infra/persistence/checkout-completion.port.impl";
+import type {
+  IProductSnapshotFactory,
+  IExternalStockService,
+} from "../../../modules/cart/domain/external-services";
 
 // Admin — Services (required by CartManagementService and CheckoutService)
 import { SettingsService } from "../../../modules/admin/application/services/settings.service";
@@ -98,6 +102,10 @@ import {
 
 // Order Management — Value Objects (used by cart adapter)
 import { ProductSnapshot } from "../../../modules/order-management/domain/value-objects/product-snapshot.vo";
+import { OrderId } from "../../../modules/order-management/domain/value-objects/order-id.vo";
+
+// Inventory Management — Value Objects (used by stock service adapter)
+import { LocationType } from "../../../modules/inventory-management/domain/value-objects/location-type.vo";
 
 // Order Management — Services
 import { OrderManagementService } from "../../../modules/order-management/application/services/order-management.service";
@@ -375,13 +383,31 @@ export class Container {
     // Cart Module
     // ============================================
 
-    // Repositories (ReservationRepositoryImpl optionally takes stockManagementService)
+    // Repositories
     const cartRepository = new CartRepositoryImpl(prisma);
+    const checkoutRepository = new CheckoutRepositoryImpl(prisma);
+
+    const checkoutCompletionPort = new CheckoutCompletionPortImpl(prisma);
+
+    // Port adapter: wraps stock service + adds warehouse lookup via location repository
+    const stockServiceAdapter: IExternalStockService = {
+      adjustStock: (...args) => stockManagementService.adjustStock(...args),
+      getTotalAvailableStock: (variantId) =>
+        stockManagementService.getTotalAvailableStock(variantId),
+      async findWarehouseId() {
+        const locations = await locationRepository.findByType(
+          LocationType.WAREHOUSE,
+        );
+        return locations.length > 0
+          ? locations[0].getLocationId().getValue()
+          : null;
+      },
+    };
+
     const reservationRepository = new ReservationRepositoryImpl(
       prisma,
-      stockManagementService,
+      stockServiceAdapter,
     );
-    const checkoutRepository = new CheckoutRepositoryImpl(prisma);
 
     // Services
     const settingsService = new SettingsService();
@@ -409,11 +435,11 @@ export class Container {
     );
 
     const checkoutOrderService = new CheckoutOrderService(
-      prisma,
+      checkoutCompletionPort,
       checkoutRepository,
       cartRepository,
       reservationRepository,
-      stockManagementService,
+      stockServiceAdapter,
       productRepository,
       productVariantRepository,
       {
@@ -506,14 +532,13 @@ export class Container {
       prisma,
     );
 
-    // Port adapter: cross-module Order ownership lookup
+    // Port adapter: cross-module Order ownership lookup via order-management repository
     const orderQueryPort: IExternalOrderQueryPort = {
       async findOrderOwner(orderId: string) {
-        const order = await (prisma as any).order.findUnique({
-          where: { id: orderId },
-          select: { userId: true },
-        });
-        return order ? { userId: order.userId } : null;
+        const order = await orderRepository.findById(
+          OrderId.fromString(orderId),
+        );
+        return order ? { userId: order.getUserId() ?? null } : null;
       },
     };
 
