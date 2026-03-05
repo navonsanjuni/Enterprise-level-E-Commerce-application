@@ -25,11 +25,5 @@ export { UpdateCategoryHandler } from "./update-category.handler";
 export type { DeleteCategoryCommand } from "./delete-category.command";
 export { DeleteCategoryHandler } from "./delete-category.handler";
 
-export type { CreateProductTagCommand } from "./create-product-tag.command";
-export { CreateProductTagHandler } from "./create-product-tag.handler";
-
-export type { CreateMediaAssetCommand } from "./create-media-asset.command";
-export { CreateMediaAssetHandler } from "./create-media-asset.handler";
-
-export type { AssociateProductMediaCommand } from "./associate-product-media.command";
-export { AssociateProductMediaHandler } from "./associate-product-media.handler";
+export type { ReorderCategoriesCommand } from "./reorder-categories.command";
+export { ReorderCategoriesHandler } from "./reorder-categories.handler";
