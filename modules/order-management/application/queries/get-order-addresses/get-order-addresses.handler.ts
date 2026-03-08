@@ -17,16 +17,10 @@ export class GetOrderAddressesHandler implements IQueryHandler<
     query: GetOrderAddressesQuery,
   ): Promise<QueryResult<OrderAddressResult>> {
     try {
-      // Get order addresses
+      // Get order addresses (service throws if not found)
       const orderAddress = await this.orderManagementService.getOrderAddress(
         query.orderId,
       );
-
-      if (!orderAddress) {
-        return QueryResult.failure<OrderAddressResult>(
-          "Order addresses not found",
-        );
-      }
 
       const result: OrderAddressResult = {
         orderId: orderAddress.getOrderId(),

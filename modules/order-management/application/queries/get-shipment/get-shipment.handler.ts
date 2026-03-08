@@ -10,14 +10,10 @@ export class GetShipmentHandler implements IQueryHandler<
 
   async handle(query: GetShipmentQuery): Promise<QueryResult<ShipmentResult>> {
     try {
-      // Get shipment
+      // Get shipment (service throws if not found)
       const shipment = await this.shipmentService.getShipmentById(
         query.shipmentId,
       );
-
-      if (!shipment) {
-        return QueryResult.failure<ShipmentResult>("Shipment not found");
-      }
 
       const result: ShipmentResult = {
         shipmentId: shipment.getShipmentId(),

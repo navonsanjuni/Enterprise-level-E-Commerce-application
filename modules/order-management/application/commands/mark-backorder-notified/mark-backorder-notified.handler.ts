@@ -13,13 +13,10 @@ export class MarkBackorderNotifiedCommandHandler implements ICommandHandler<
     command: MarkBackorderNotifiedCommand,
   ): Promise<CommandResult<Backorder>> {
     try {
+      // Service throws if not found
       const backorder = await this.backorderService.markAsNotified(
         command.orderItemId,
       );
-
-      if (!backorder) {
-        return CommandResult.failure<Backorder>("Backorder not found");
-      }
 
       return CommandResult.success(backorder);
     } catch (error) {

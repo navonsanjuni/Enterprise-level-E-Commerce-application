@@ -13,10 +13,6 @@ export class MarkOrderAsPaidCommandHandler implements ICommandHandler<
     try {
       const order = await this.orderService.markOrderAsPaid(command.orderId);
 
-      if (!order) {
-        return CommandResult.failure<Order>("Order not found");
-      }
-
       return CommandResult.success(order);
     } catch (error) {
       return CommandResult.failure<Order>(

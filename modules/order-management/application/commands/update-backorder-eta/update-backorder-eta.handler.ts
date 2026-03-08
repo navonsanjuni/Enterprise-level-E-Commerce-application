@@ -13,14 +13,11 @@ export class UpdateBackorderEtaCommandHandler implements ICommandHandler<
     command: UpdateBackorderEtaCommand,
   ): Promise<CommandResult<Backorder>> {
     try {
+      // Service throws if not found
       const backorder = await this.backorderService.updatePromisedEta(
         command.orderItemId,
         command.promisedEta,
       );
-
-      if (!backorder) {
-        return CommandResult.failure<Backorder>("Backorder not found");
-      }
 
       return CommandResult.success(backorder);
     } catch (error) {

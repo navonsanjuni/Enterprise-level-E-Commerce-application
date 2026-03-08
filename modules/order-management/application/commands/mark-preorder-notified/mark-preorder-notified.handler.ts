@@ -13,13 +13,10 @@ export class MarkPreorderNotifiedCommandHandler implements ICommandHandler<
     command: MarkPreorderNotifiedCommand,
   ): Promise<CommandResult<Preorder>> {
     try {
+      // Service throws if not found
       const preorder = await this.preorderService.markAsNotified(
         command.orderItemId,
       );
-
-      if (!preorder) {
-        return CommandResult.failure<Preorder>("Preorder not found");
-      }
 
       return CommandResult.success(preorder);
     } catch (error) {

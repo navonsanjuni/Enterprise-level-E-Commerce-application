@@ -18,10 +18,6 @@ export class UpdateOrderStatusCommandHandler implements ICommandHandler<
         command.status,
       );
 
-      if (!order) {
-        return CommandResult.failure<Order>("Order not found");
-      }
-
       return CommandResult.success(order);
     } catch (error) {
       return CommandResult.failure<Order>(

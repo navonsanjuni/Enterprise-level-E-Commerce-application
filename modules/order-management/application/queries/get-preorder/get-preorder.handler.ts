@@ -10,14 +10,10 @@ export class GetPreorderHandler implements IQueryHandler<
 
   async handle(query: GetPreorderQuery): Promise<QueryResult<PreorderResult>> {
     try {
-      // Get preorder
+      // Get preorder (service throws if not found)
       const preorder = await this.preorderService.getPreorderByOrderItemId(
         query.orderItemId,
       );
-
-      if (!preorder) {
-        return QueryResult.failure<PreorderResult>("Preorder not found");
-      }
 
       const result: PreorderResult = {
         orderItemId: preorder.getOrderItemId(),

@@ -13,14 +13,11 @@ export class UpdatePreorderReleaseDateCommandHandler implements ICommandHandler<
     command: UpdatePreorderReleaseDateCommand,
   ): Promise<CommandResult<Preorder>> {
     try {
+      // Service throws if not found
       const preorder = await this.preorderService.updateReleaseDate(
         command.orderItemId,
         command.releaseDate,
       );
-
-      if (!preorder) {
-        return CommandResult.failure<Preorder>("Preorder not found");
-      }
 
       return CommandResult.success(preorder);
     } catch (error) {

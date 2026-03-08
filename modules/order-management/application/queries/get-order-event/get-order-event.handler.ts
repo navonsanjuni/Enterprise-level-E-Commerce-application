@@ -12,11 +12,8 @@ export class GetOrderEventHandler implements IQueryHandler<
     query: GetOrderEventQuery,
   ): Promise<QueryResult<OrderEventResult | null>> {
     try {
+      // Get event (service throws if not found)
       const event = await this.orderEventService.getEventById(query.eventId);
-
-      if (!event) {
-        return QueryResult.failure("Event not found");
-      }
 
       // Convert entity to plain object
       const result: OrderEventResult = {

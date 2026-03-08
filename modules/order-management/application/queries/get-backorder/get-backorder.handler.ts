@@ -12,14 +12,10 @@ export class GetBackorderHandler implements IQueryHandler<
     query: GetBackorderQuery,
   ): Promise<QueryResult<BackorderResult>> {
     try {
-      // Get backorder
+      // Get backorder (service throws if not found)
       const backorder = await this.backorderService.getBackorderByOrderItemId(
         query.orderItemId,
       );
-
-      if (!backorder) {
-        return QueryResult.failure<BackorderResult>("Backorder not found");
-      }
 
       const result: BackorderResult = {
         orderItemId: backorder.getOrderItemId(),

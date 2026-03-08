@@ -20,21 +20,12 @@ export class GetOrderHandler implements IQueryHandler<
         );
       }
 
-      // Get order by ID or order number
-      let order: Order | null;
-      if (query.orderId) {
-        order = await this.orderManagementService.getOrderById(query.orderId);
-      } else if (query.orderNumber) {
-        order = await this.orderManagementService.getOrderByOrderNumber(
-          query.orderNumber,
-        );
-      } else {
-        order = null;
-      }
-
-      if (!order) {
-        return QueryResult.failure<OrderResult>("Order not found");
-      }
+      // Get order by ID or order number (service throws if not found)
+      const order: Order = query.orderId
+        ? await this.orderManagementService.getOrderById(query.orderId)
+        : await this.orderManagementService.getOrderByOrderNumber(
+            query.orderNumber!,
+          );
 
       // Get address and shipments explicitly since they might be loaded differently
       const address = await this.orderManagementService.getOrderAddress(
