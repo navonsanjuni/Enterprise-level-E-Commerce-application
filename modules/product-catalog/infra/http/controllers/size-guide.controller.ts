@@ -1,4 +1,5 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { SizeGuideManagementService } from "../../../application/services/size-guide-management.service";
 import {
   Region,
@@ -61,7 +62,7 @@ export class SizeGuideController {
   ) {}
 
   async getSizeGuides(
-    request: FastifyRequest<{ Querystring: SizeGuideQueryParams }>,
+    request: AuthenticatedRequest<{ Querystring: SizeGuideQueryParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -147,7 +148,7 @@ export class SizeGuideController {
   }
 
   async getSizeGuide(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -168,7 +169,7 @@ export class SizeGuideController {
   }
 
   async createSizeGuide(
-    request: FastifyRequest<{ Body: CreateSizeGuideRequest }>,
+    request: AuthenticatedRequest<{ Body: CreateSizeGuideRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -201,7 +202,7 @@ export class SizeGuideController {
   }
 
   async updateSizeGuide(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { id: string };
       Body: UpdateSizeGuideRequest;
     }>,
@@ -242,7 +243,7 @@ export class SizeGuideController {
   }
 
   async deleteSizeGuide(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -259,7 +260,7 @@ export class SizeGuideController {
   }
 
   async getRegionalSizeGuides(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { region: string };
       Querystring: Omit<SizeGuideQueryParams, "region">;
     }>,
@@ -336,7 +337,7 @@ export class SizeGuideController {
   }
 
   async createRegionalSizeGuide(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { region: string };
       Body: RegionalSizeGuideRequest;
     }>,
@@ -375,7 +376,7 @@ export class SizeGuideController {
   }
 
   async getGeneralSizeGuides(
-    request: FastifyRequest<{ Params: { region: string } }>,
+    request: AuthenticatedRequest<{ Params: { region: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -403,7 +404,7 @@ export class SizeGuideController {
   }
 
   async createCategorySizeGuide(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { category: string; region: string };
       Body: CategorySizeGuideRequest;
     }>,
@@ -443,7 +444,7 @@ export class SizeGuideController {
   }
 
   async updateSizeGuideContent(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { id: string };
       Body: { htmlContent: string };
     }>,
@@ -472,7 +473,7 @@ export class SizeGuideController {
   }
 
   async clearSizeGuideContent(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -493,7 +494,7 @@ export class SizeGuideController {
     }
   }
 
-  async getSizeGuideStats(request: FastifyRequest, reply: FastifyReply) {
+  async getSizeGuideStats(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const stats = await this.sizeGuideManagementService.getSizeGuideStats();
       return ResponseHelper.ok(
@@ -507,7 +508,7 @@ export class SizeGuideController {
     }
   }
 
-  async getAvailableRegions(request: FastifyRequest, reply: FastifyReply) {
+  async getAvailableRegions(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const regions =
         await this.sizeGuideManagementService.getAvailableRegions();
@@ -524,7 +525,7 @@ export class SizeGuideController {
   }
 
   async getAvailableCategories(
-    request: FastifyRequest<{ Querystring: { region?: string } }>,
+    request: AuthenticatedRequest<{ Querystring: { region?: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -552,7 +553,7 @@ export class SizeGuideController {
   }
 
   async createBulkSizeGuides(
-    request: FastifyRequest<{ Body: BulkCreateSizeGuidesRequest }>,
+    request: AuthenticatedRequest<{ Body: BulkCreateSizeGuidesRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -585,7 +586,7 @@ export class SizeGuideController {
   }
 
   async deleteBulkSizeGuides(
-    request: FastifyRequest<{ Body: BulkDeleteSizeGuidesRequest }>,
+    request: AuthenticatedRequest<{ Body: BulkDeleteSizeGuidesRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -606,7 +607,7 @@ export class SizeGuideController {
   }
 
   async validateUniqueness(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Querystring: ValidateSizeGuideQueryParams;
     }>,
     reply: FastifyReply,

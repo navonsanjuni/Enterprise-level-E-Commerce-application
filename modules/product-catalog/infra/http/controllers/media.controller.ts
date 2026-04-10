@@ -1,4 +1,5 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { MediaManagementService } from "../../../application/services/media-management.service";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 import { MediaAssetNotFoundError } from "../../../domain/errors/product-catalog.errors";
@@ -47,7 +48,7 @@ export class MediaController {
   ) {}
 
   async getMediaAssets(
-    request: FastifyRequest<{ Querystring: MediaAssetQueryParams }>,
+    request: AuthenticatedRequest<{ Querystring: MediaAssetQueryParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -123,7 +124,7 @@ export class MediaController {
   }
 
   async getMediaAsset(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -151,7 +152,7 @@ export class MediaController {
   }
 
   async createMediaAsset(
-    request: FastifyRequest<{ Body: CreateMediaAssetRequest }>,
+    request: AuthenticatedRequest<{ Body: CreateMediaAssetRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -181,7 +182,7 @@ export class MediaController {
   }
 
   async updateMediaAsset(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { id: string };
       Body: UpdateMediaAssetRequest;
     }>,
@@ -208,7 +209,7 @@ export class MediaController {
   }
 
   async deleteMediaAsset(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {

@@ -40,6 +40,14 @@ export class EditorialLookDeletedEvent extends DomainEvent {
   getPayload(): Record<string, unknown> { return { lookId: this.lookId }; }
 }
 
+export interface CreateEditorialLookData {
+  title: string;
+  storyHtml?: string;
+  heroAssetId?: string;
+  publishedAt?: Date;
+  productIds?: string[];
+}
+
 export interface EditorialLookProps {
   id: EditorialLookId;
   title: string;

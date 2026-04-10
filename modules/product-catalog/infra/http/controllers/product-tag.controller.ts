@@ -1,4 +1,5 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { ProductTagManagementService } from "../../../application/services/product-tag-management.service";
 import { ProductTagQueryOptions } from "../../../domain/repositories/product-tag.repository";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
@@ -33,7 +34,7 @@ export class ProductTagController {
   ) {}
 
   async getTags(
-    request: FastifyRequest<{ Querystring: TagQueryParams }>,
+    request: AuthenticatedRequest<{ Querystring: TagQueryParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -86,7 +87,7 @@ export class ProductTagController {
   }
 
   async getTag(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -103,7 +104,7 @@ export class ProductTagController {
   }
 
   async getTagByName(
-    request: FastifyRequest<{ Params: { name: string } }>,
+    request: AuthenticatedRequest<{ Params: { name: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -122,7 +123,7 @@ export class ProductTagController {
   }
 
   async createTag(
-    request: FastifyRequest<{ Body: CreateTagRequest }>,
+    request: AuthenticatedRequest<{ Body: CreateTagRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -148,7 +149,7 @@ export class ProductTagController {
   }
 
   async updateTag(
-    request: FastifyRequest<{ Params: { id: string }; Body: UpdateTagRequest }>,
+    request: AuthenticatedRequest<{ Params: { id: string }; Body: UpdateTagRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -178,7 +179,7 @@ export class ProductTagController {
   }
 
   async deleteTag(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -208,7 +209,7 @@ export class ProductTagController {
   }
 
   async getTagSuggestions(
-    request: FastifyRequest<{ Querystring: { query: string; limit?: number } }>,
+    request: AuthenticatedRequest<{ Querystring: { query: string; limit?: number } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -227,7 +228,7 @@ export class ProductTagController {
     }
   }
 
-  async getTagStats(request: FastifyRequest, reply: FastifyReply) {
+  async getTagStats(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const stats = await this.productTagManagementService.getTagStats();
       return ResponseHelper.ok(reply, "Tag statistics retrieved successfully", stats);
@@ -238,7 +239,7 @@ export class ProductTagController {
   }
 
   async getMostUsedTags(
-    request: FastifyRequest<{ Querystring: { limit?: number } }>,
+    request: AuthenticatedRequest<{ Querystring: { limit?: number } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -256,7 +257,7 @@ export class ProductTagController {
   }
 
   async createBulkTags(
-    request: FastifyRequest<{ Body: BulkCreateTagsRequest }>,
+    request: AuthenticatedRequest<{ Body: BulkCreateTagsRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -277,7 +278,7 @@ export class ProductTagController {
   }
 
   async deleteBulkTags(
-    request: FastifyRequest<{ Body: BulkDeleteTagsRequest }>,
+    request: AuthenticatedRequest<{ Body: BulkDeleteTagsRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -298,7 +299,7 @@ export class ProductTagController {
   }
 
   async validateTag(
-    request: FastifyRequest<{ Params: { name: string } }>,
+    request: AuthenticatedRequest<{ Params: { name: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -321,7 +322,7 @@ export class ProductTagController {
 
   // Product Tag Association Methods
   async getProductTags(
-    request: FastifyRequest<{ Params: { productId: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -339,7 +340,7 @@ export class ProductTagController {
   }
 
   async associateProductTags(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string };
       Body: { tagIds: string[] };
     }>,
@@ -363,7 +364,7 @@ export class ProductTagController {
   }
 
   async removeProductTag(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string; tagId: string };
     }>,
     reply: FastifyReply,
@@ -382,7 +383,7 @@ export class ProductTagController {
   }
 
   async getTagProducts(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { tagId: string };
       Querystring: { page?: number; limit?: number };
     }>,

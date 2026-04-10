@@ -1,11 +1,13 @@
 import { FastifyInstance } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { SearchController } from "../controllers/search.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { validateQuery } from "../validation/validator";
 import {
   searchQuerySchema,
   searchSuggestionsQuerySchema,
   searchFiltersQuerySchema,
-} from "../schemas/search.schema";
+} from "../validation/search.schema";
 
 export async function registerSearchRoutes(
   fastify: FastifyInstance,
@@ -15,10 +17,27 @@ export async function registerSearchRoutes(
   fastify.get(
     "/search",
     {
+      preHandler: [validateQuery(searchQuerySchema)],
       schema: {
         description: "Full-text search across products with filtering and sorting",
         tags: ["Search"],
         summary: "Search Products",
+        querystring: {
+          type: "object",
+          required: ["q"],
+          properties: {
+            q: { type: "string", minLength: 2 },
+            page: { type: "integer", minimum: 1, default: 1 },
+            limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+            category: { type: "string" },
+            brand: { type: "string" },
+            minPrice: { type: "number", minimum: 0 },
+            maxPrice: { type: "number", minimum: 0 },
+            status: { type: "string", enum: ["draft", "published", "scheduled"] },
+            sortBy: { type: "string", enum: ["relevance", "price", "title", "createdAt"], default: "relevance" },
+            sortOrder: { type: "string", enum: ["asc", "desc"], default: "desc" },
+          },
+        },
         response: {
           200: {
             type: "object",
@@ -39,20 +58,27 @@ export async function registerSearchRoutes(
         },
       },
     },
-    async (request, reply) => {
-      const query = searchQuerySchema.parse(request.query);
-      return controller.searchProducts({ ...request, query } as any, reply);
-    },
+    (request, reply) => controller.searchProducts(request as AuthenticatedRequest, reply),
   );
 
   // GET /search/suggestions — Get search suggestions (public)
   fastify.get(
     "/search/suggestions",
     {
+      preHandler: [validateQuery(searchSuggestionsQuerySchema)],
       schema: {
         description: "Get autocomplete suggestions for a search query",
         tags: ["Search"],
         summary: "Get Search Suggestions",
+        querystring: {
+          type: "object",
+          required: ["q"],
+          properties: {
+            q: { type: "string", minLength: 1 },
+            limit: { type: "integer", minimum: 1, maximum: 20, default: 5 },
+            type: { type: "string", enum: ["products", "categories", "brands", "all"], default: "all" },
+          },
+        },
         response: {
           200: {
             type: "object",
@@ -64,10 +90,7 @@ export async function registerSearchRoutes(
         },
       },
     },
-    async (request, reply) => {
-      const query = searchSuggestionsQuerySchema.parse(request.query);
-      return controller.getSearchSuggestions({ ...request, query } as any, reply);
-    },
+    (request, reply) => controller.getSearchSuggestions(request as AuthenticatedRequest, reply),
   );
 
   // GET /search/popular — Get popular searches (public)
@@ -80,23 +103,27 @@ export async function registerSearchRoutes(
         summary: "Get Popular Searches",
       },
     },
-    controller.getPopularSearches.bind(controller),
+    (request, reply) => controller.getPopularSearches(request as AuthenticatedRequest, reply),
   );
 
   // GET /search/filters — Get available search filters (public)
   fastify.get(
     "/search/filters",
     {
+      preHandler: [validateQuery(searchFiltersQuerySchema)],
       schema: {
         description: "Get available filters for search results",
         tags: ["Search"],
         summary: "Get Search Filters",
+        querystring: {
+          type: "object",
+          properties: {
+            q: { type: "string" },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const query = searchFiltersQuerySchema.parse(request.query);
-      return controller.getSearchFilters({ ...request, query } as any, reply);
-    },
+    (request, reply) => controller.getSearchFilters(request as AuthenticatedRequest, reply),
   );
 
   // GET /search/stats — Get search statistics (Staff+)
@@ -111,6 +138,6 @@ export async function registerSearchRoutes(
         security: [{ bearerAuth: [] }],
       },
     },
-    controller.getSearchStats.bind(controller),
+    (request, reply) => controller.getSearchStats(request as AuthenticatedRequest, reply),
   );
 }

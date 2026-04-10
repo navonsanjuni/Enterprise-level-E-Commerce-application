@@ -1,6 +1,8 @@
 import { FastifyInstance } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { ProductMediaController } from "../controllers/product-media.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { validateBody, validateParams, validateQuery } from "../validation/validator";
 import {
   productMediaParamsSchema,
   productMediaAssetParamsSchema,
@@ -8,7 +10,7 @@ import {
   addMediaToProductSchema,
   setProductCoverImageSchema,
   reorderProductMediaSchema,
-} from "../schemas/product-media.schema";
+} from "../validation/product-media.schema";
 
 export async function registerProductMediaRoutes(
   fastify: FastifyInstance,
@@ -18,11 +20,20 @@ export async function registerProductMediaRoutes(
   fastify.get(
     "/products/:productId/media",
     {
+      preValidation: [validateParams(productMediaParamsSchema)],
+      preHandler: [validateQuery(getProductMediaQuerySchema)],
       schema: {
         description: "Get all media assets associated with a product",
         tags: ["Product Media"],
         summary: "Get Product Media",
         params: { type: "object", required: ["productId"], properties: { productId: { type: "string", format: "uuid" } } },
+        querystring: {
+          type: "object",
+          properties: {
+            includeAssetDetails: { type: "boolean", default: true },
+            sortBy: { type: "string", enum: ["position", "createdAt"], default: "position" },
+          },
+        },
         response: {
           200: {
             type: "object",
@@ -43,80 +54,106 @@ export async function registerProductMediaRoutes(
         },
       },
     },
-    async (request, reply) => {
-      const params = productMediaParamsSchema.parse(request.params);
-      const query = getProductMediaQuerySchema.parse(request.query);
-      return controller.getProductMedia({ ...request, params, query } as any, reply);
-    },
+    (request, reply) => controller.getProductMedia(request as AuthenticatedRequest, reply),
   );
 
   // POST /products/:productId/media/cover — Set cover image (Admin only, before general POST)
   fastify.post(
     "/products/:productId/media/cover",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(productMediaParamsSchema)],
+      preHandler: [validateBody(setProductCoverImageSchema), RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Set a media asset as the product cover/primary image",
         tags: ["Product Media"],
         summary: "Set Product Cover Image",
         security: [{ bearerAuth: [] }],
         params: { type: "object", required: ["productId"], properties: { productId: { type: "string", format: "uuid" } } },
+        body: {
+          type: "object",
+          required: ["assetId"],
+          properties: { assetId: { type: "string", format: "uuid" } },
+        },
         response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
       },
     },
-    async (request, reply) => {
-      const params = productMediaParamsSchema.parse(request.params);
-      const body = setProductCoverImageSchema.parse(request.body);
-      return controller.setProductCoverImage({ ...request, params, body } as any, reply);
-    },
+    (request, reply) => controller.setProductCoverImage(request as AuthenticatedRequest, reply),
   );
 
   // POST /products/:productId/media/reorder — Reorder product media (Admin only)
   fastify.post(
     "/products/:productId/media/reorder",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(productMediaParamsSchema)],
+      preHandler: [validateBody(reorderProductMediaSchema), RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Reorder media assets for a product",
         tags: ["Product Media"],
         summary: "Reorder Product Media",
         security: [{ bearerAuth: [] }],
         params: { type: "object", required: ["productId"], properties: { productId: { type: "string", format: "uuid" } } },
+        body: {
+          type: "object",
+          required: ["reorderData"],
+          properties: {
+            reorderData: {
+              type: "array",
+              minItems: 1,
+              items: {
+                type: "object",
+                required: ["assetId", "position"],
+                properties: { assetId: { type: "string", format: "uuid" }, position: { type: "integer", minimum: 1 } },
+              },
+            },
+          },
+        },
         response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
       },
     },
-    async (request, reply) => {
-      const params = productMediaParamsSchema.parse(request.params);
-      const body = reorderProductMediaSchema.parse(request.body);
-      return controller.reorderProductMedia({ ...request, params, body } as any, reply);
-    },
+    (request, reply) => controller.reorderProductMedia(request as AuthenticatedRequest, reply),
   );
 
   // POST /products/:productId/media — Add media to product (Admin only)
   fastify.post(
     "/products/:productId/media",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(productMediaParamsSchema)],
+      preHandler: [validateBody(addMediaToProductSchema), RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Add/attach a media asset to a product",
         tags: ["Product Media"],
         summary: "Add Media to Product",
         security: [{ bearerAuth: [] }],
         params: { type: "object", required: ["productId"], properties: { productId: { type: "string", format: "uuid" } } },
-        response: { 201: { type: "object", properties: { success: { type: "boolean" }, data: { type: "object", properties: { productMediaId: { type: "string" } } }, message: { type: "string" } } } },
+        body: {
+          type: "object",
+          required: ["assetId"],
+          properties: {
+            assetId: { type: "string", format: "uuid" },
+            position: { type: "integer", minimum: 1 },
+            isCover: { type: "boolean" },
+          },
+        },
+        response: {
+          201: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: { type: "object", properties: { productMediaId: { type: "string" } } },
+              message: { type: "string" },
+            },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const params = productMediaParamsSchema.parse(request.params);
-      const body = addMediaToProductSchema.parse(request.body);
-      return controller.addMediaToProduct({ ...request, params, body } as any, reply);
-    },
+    (request, reply) => controller.addMediaToProduct(request as AuthenticatedRequest, reply),
   );
 
   // DELETE /products/:productId/media/:assetId — Remove media from product (Admin only)
   fastify.delete(
     "/products/:productId/media/:assetId",
     {
+      preValidation: [validateParams(productMediaAssetParamsSchema)],
       preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Remove a media asset from a product",
@@ -131,9 +168,6 @@ export async function registerProductMediaRoutes(
         response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
       },
     },
-    async (request, reply) => {
-      const params = productMediaAssetParamsSchema.parse(request.params);
-      return controller.removeMediaFromProduct({ ...request, params } as any, reply);
-    },
+    (request, reply) => controller.removeMediaFromProduct(request as AuthenticatedRequest, reply),
   );
 }

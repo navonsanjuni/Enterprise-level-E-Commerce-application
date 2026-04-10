@@ -1,6 +1,12 @@
 import { FastifyInstance } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { SizeGuideController } from "../controllers/size-guide.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import {
+  validateBody,
+  validateParams,
+  validateQuery,
+} from "../validation/validator";
 import {
   sizeGuideParamsSchema,
   regionParamsSchema,
@@ -13,35 +19,61 @@ import {
   bulkDeleteSizeGuidesSchema,
   regionalSizeGuideSchema,
   sizeGuideResponseSchema,
-} from "../schemas/size-guide.schema";
+} from "../validation/size-guide.schema";
 
 export async function registerSizeGuideRoutes(
   fastify: FastifyInstance,
   controller: SizeGuideController,
 ): Promise<void> {
+  const guideSchema = sizeGuideResponseSchema;
+
   // GET /size-guides — List size guides (public)
   fastify.get(
     "/size-guides",
     {
+      preHandler: [validateQuery(listSizeGuidesSchema)],
       schema: {
         description: "Get paginated list of size guides with filtering options",
         tags: ["Size Guides"],
         summary: "List Size Guides",
+        querystring: {
+          type: "object",
+          properties: {
+            page: { type: "integer", minimum: 1, default: 1 },
+            limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+            region: { type: "string", enum: ["UK", "US", "EU"] },
+            category: { type: "string" },
+            hasContent: { type: "boolean" },
+            sortBy: {
+              type: "string",
+              enum: ["title", "region", "category"],
+              default: "title",
+            },
+            sortOrder: {
+              type: "string",
+              enum: ["asc", "desc"],
+              default: "asc",
+            },
+          },
+        },
         response: {
           200: {
             type: "object",
             properties: {
               success: { type: "boolean" },
-              data: { type: "object", properties: { guides: { type: "array", items: sizeGuideResponseSchema }, meta: { type: "object" } } },
+              data: {
+                type: "object",
+                properties: {
+                  guides: { type: "array", items: guideSchema },
+                  meta: { type: "object" },
+                },
+              },
             },
           },
         },
       },
     },
-    async (request, reply) => {
-      const query = listSizeGuidesSchema.parse(request.query);
-      return controller.getSizeGuides({ ...request, query } as any, reply);
-    },
+    (request, reply) => controller.getSizeGuides(request as AuthenticatedRequest, reply),
   );
 
   // GET /size-guides/stats — Get size guide statistics (Staff+, before /:id)
@@ -56,7 +88,7 @@ export async function registerSizeGuideRoutes(
         security: [{ bearerAuth: [] }],
       },
     },
-    controller.getSizeGuideStats.bind(controller),
+    (request, reply) => controller.getSizeGuideStats(request as AuthenticatedRequest, reply),
   );
 
   // GET /size-guides/regions — Get available regions (public, before /:id)
@@ -69,7 +101,7 @@ export async function registerSizeGuideRoutes(
         summary: "Get Available Regions",
       },
     },
-    controller.getAvailableRegions.bind(controller),
+    (request, reply) => controller.getAvailableRegions(request as AuthenticatedRequest, reply),
   );
 
   // GET /size-guides/categories — Get available categories (public, before /:id)
@@ -82,7 +114,8 @@ export async function registerSizeGuideRoutes(
         summary: "Get Available Categories",
       },
     },
-    controller.getAvailableCategories.bind(controller),
+    (request, reply) =>
+      controller.getAvailableCategories(request as AuthenticatedRequest, reply),
   );
 
   // GET /size-guides/general — Get general (non-regional) size guides (public, before /:id)
@@ -95,219 +128,371 @@ export async function registerSizeGuideRoutes(
         summary: "Get General Size Guides",
       },
     },
-    controller.getGeneralSizeGuides.bind(controller),
+    (request, reply) => controller.getGeneralSizeGuides(request as AuthenticatedRequest, reply),
   );
 
   // GET /size-guides/validate — Validate size guide uniqueness (public, before /:id)
   fastify.get(
     "/size-guides/validate",
     {
+      preHandler: [validateQuery(validateSizeGuideSchema)],
       schema: {
-        description: "Validate size guide uniqueness for a region/category combination",
+        description:
+          "Validate size guide uniqueness for a region/category combination",
         tags: ["Size Guides"],
         summary: "Validate Size Guide Uniqueness",
-        querystring: { type: "object", required: ["region"], properties: { region: { type: "string", enum: ["UK", "US", "EU"] }, category: { type: "string" } } },
+        querystring: {
+          type: "object",
+          required: ["region"],
+          properties: {
+            region: { type: "string", enum: ["UK", "US", "EU"] },
+            category: { type: "string" },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const query = validateSizeGuideSchema.parse(request.query);
-      return controller.validateUniqueness({ ...request, query } as any, reply);
-    },
+    (request, reply) => controller.validateUniqueness(request as AuthenticatedRequest, reply),
   );
 
   // GET /size-guides/region/:region — Get size guides by region (public)
   fastify.get(
     "/size-guides/region/:region",
     {
+      preValidation: [validateParams(regionParamsSchema)],
       schema: {
         description: "Get size guides for a specific region",
         tags: ["Size Guides"],
         summary: "Get Regional Size Guides",
-        params: { type: "object", required: ["region"], properties: { region: { type: "string", enum: ["UK", "US", "EU"] } } },
+        params: {
+          type: "object",
+          required: ["region"],
+          properties: { region: { type: "string", enum: ["UK", "US", "EU"] } },
+        },
       },
     },
-    async (request, reply) => {
-      const params = regionParamsSchema.parse(request.params);
-      const query = listSizeGuidesSchema.parse(request.query);
-      return controller.getRegionalSizeGuides({ ...request, params, query } as any, reply);
-    },
+    (request, reply) => controller.getRegionalSizeGuides(request as AuthenticatedRequest, reply),
   );
 
   // GET /size-guides/:id — Get size guide by ID (public)
   fastify.get(
     "/size-guides/:id",
     {
+      preValidation: [validateParams(sizeGuideParamsSchema)],
       schema: {
         description: "Get size guide by ID",
         tags: ["Size Guides"],
         summary: "Get Size Guide",
-        params: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, data: sizeGuideResponseSchema } } },
+        params: {
+          type: "object",
+          required: ["id"],
+          properties: { id: { type: "string", format: "uuid" } },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: { success: { type: "boolean" }, data: guideSchema },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const params = sizeGuideParamsSchema.parse(request.params);
-      return controller.getSizeGuide({ ...request, params } as any, reply);
-    },
+    (request, reply) => controller.getSizeGuide(request as AuthenticatedRequest, reply),
   );
 
   // POST /size-guides/bulk — Bulk create size guides (Admin only, before POST /size-guides)
   fastify.post(
     "/size-guides/bulk",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [
+        validateBody(bulkCreateSizeGuidesSchema),
+        RolePermissions.ADMIN_ONLY,
+      ],
       schema: {
         description: "Bulk create size guides",
         tags: ["Size Guides"],
         summary: "Bulk Create Size Guides",
         security: [{ bearerAuth: [] }],
-        response: { 201: { type: "object", properties: { success: { type: "boolean" }, data: { type: "array", items: sizeGuideResponseSchema } } } },
+        body: {
+          type: "object",
+          required: ["guides"],
+          properties: {
+            guides: {
+              type: "array",
+              minItems: 1,
+              items: {
+                type: "object",
+                required: ["title", "region"],
+                properties: {
+                  title: { type: "string" },
+                  bodyHtml: { type: "string" },
+                  region: { type: "string", enum: ["UK", "US", "EU"] },
+                  category: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        response: {
+          201: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: { type: "array", items: guideSchema },
+            },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const body = bulkCreateSizeGuidesSchema.parse(request.body);
-      return controller.createBulkSizeGuides({ ...request, body } as any, reply);
-    },
+    (request, reply) => controller.createBulkSizeGuides(request as AuthenticatedRequest, reply),
   );
 
   // POST /size-guides/region/:region — Create regional size guide (Admin only)
   fastify.post(
     "/size-guides/region/:region",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(regionParamsSchema)],
+      preHandler: [
+        validateBody(regionalSizeGuideSchema),
+        RolePermissions.ADMIN_ONLY,
+      ],
       schema: {
         description: "Create a size guide for a specific region",
         tags: ["Size Guides"],
         summary: "Create Regional Size Guide",
         security: [{ bearerAuth: [] }],
-        params: { type: "object", required: ["region"], properties: { region: { type: "string", enum: ["UK", "US", "EU"] } } },
-        response: { 201: { type: "object", properties: { success: { type: "boolean" }, data: sizeGuideResponseSchema } } },
+        params: {
+          type: "object",
+          required: ["region"],
+          properties: { region: { type: "string", enum: ["UK", "US", "EU"] } },
+        },
+        body: {
+          type: "object",
+          required: ["title"],
+          properties: {
+            title: { type: "string" },
+            bodyHtml: { type: "string" },
+            category: { type: "string" },
+          },
+        },
+        response: {
+          201: {
+            type: "object",
+            properties: { success: { type: "boolean" }, data: guideSchema },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const params = regionParamsSchema.parse(request.params);
-      const body = regionalSizeGuideSchema.parse(request.body);
-      return controller.createRegionalSizeGuide({ ...request, params, body } as any, reply);
-    },
+    (request, reply) =>
+      controller.createRegionalSizeGuide(request as AuthenticatedRequest, reply),
   );
 
   // POST /size-guides — Create size guide (Admin only)
   fastify.post(
     "/size-guides",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [
+        validateBody(createSizeGuideSchema),
+        RolePermissions.ADMIN_ONLY,
+      ],
       schema: {
         description: "Create a new size guide",
         tags: ["Size Guides"],
         summary: "Create Size Guide",
         security: [{ bearerAuth: [] }],
-        response: { 201: { type: "object", properties: { success: { type: "boolean" }, data: sizeGuideResponseSchema } } },
+        body: {
+          type: "object",
+          required: ["title", "region"],
+          properties: {
+            title: { type: "string" },
+            bodyHtml: { type: "string" },
+            region: { type: "string", enum: ["UK", "US", "EU"] },
+            category: { type: "string" },
+          },
+        },
+        response: {
+          201: {
+            type: "object",
+            properties: { success: { type: "boolean" }, data: guideSchema },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const body = createSizeGuideSchema.parse(request.body);
-      return controller.createSizeGuide({ ...request, body } as any, reply);
-    },
+    (request, reply) => controller.createSizeGuide(request as AuthenticatedRequest, reply),
   );
 
   // PUT /size-guides/:id/content — Update size guide content (Admin only)
   fastify.put(
     "/size-guides/:id/content",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(sizeGuideParamsSchema)],
+      preHandler: [
+        validateBody(updateSizeGuideContentSchema),
+        RolePermissions.ADMIN_ONLY,
+      ],
       schema: {
         description: "Update only the HTML content of a size guide",
         tags: ["Size Guides"],
         summary: "Update Size Guide Content",
         security: [{ bearerAuth: [] }],
-        params: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        params: {
+          type: "object",
+          required: ["id"],
+          properties: { id: { type: "string", format: "uuid" } },
+        },
+        body: {
+          type: "object",
+          required: ["htmlContent"],
+          properties: { htmlContent: { type: "string" } },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+            },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const params = sizeGuideParamsSchema.parse(request.params);
-      const body = updateSizeGuideContentSchema.parse(request.body);
-      return controller.updateSizeGuideContent({ ...request, params, body } as any, reply);
-    },
+    (request, reply) =>
+      controller.updateSizeGuideContent(request as AuthenticatedRequest, reply),
   );
 
   // PUT /size-guides/:id — Update size guide (Admin only)
   fastify.put(
     "/size-guides/:id",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(sizeGuideParamsSchema)],
+      preHandler: [
+        validateBody(updateSizeGuideSchema),
+        RolePermissions.ADMIN_ONLY,
+      ],
       schema: {
         description: "Update an existing size guide",
         tags: ["Size Guides"],
         summary: "Update Size Guide",
         security: [{ bearerAuth: [] }],
-        params: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, data: sizeGuideResponseSchema } } },
+        params: {
+          type: "object",
+          required: ["id"],
+          properties: { id: { type: "string", format: "uuid" } },
+        },
+        body: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            bodyHtml: { type: "string" },
+            region: { type: "string", enum: ["UK", "US", "EU"] },
+            category: { type: "string" },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: { success: { type: "boolean" }, data: guideSchema },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const params = sizeGuideParamsSchema.parse(request.params);
-      const body = updateSizeGuideSchema.parse(request.body);
-      return controller.updateSizeGuide({ ...request, params, body } as any, reply);
-    },
+    (request, reply) => controller.updateSizeGuide(request as AuthenticatedRequest, reply),
   );
 
   // DELETE /size-guides/bulk — Bulk delete size guides (Admin only)
   fastify.delete(
     "/size-guides/bulk",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [
+        validateBody(bulkDeleteSizeGuidesSchema),
+        RolePermissions.ADMIN_ONLY,
+      ],
       schema: {
         description: "Bulk delete size guides",
         tags: ["Size Guides"],
         summary: "Bulk Delete Size Guides",
         security: [{ bearerAuth: [] }],
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        body: {
+          type: "object",
+          required: ["ids"],
+          properties: {
+            ids: {
+              type: "array",
+              minItems: 1,
+              maxItems: 100,
+              items: { type: "string", format: "uuid" },
+            },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+            },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const body = bulkDeleteSizeGuidesSchema.parse(request.body);
-      return controller.deleteBulkSizeGuides({ ...request, body } as any, reply);
-    },
+    (request, reply) => controller.deleteBulkSizeGuides(request as AuthenticatedRequest, reply),
   );
 
   // DELETE /size-guides/:id/content — Clear size guide content (Admin only)
   fastify.delete(
     "/size-guides/:id/content",
     {
+      preValidation: [validateParams(sizeGuideParamsSchema)],
       preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Clear the HTML content of a size guide",
         tags: ["Size Guides"],
         summary: "Clear Size Guide Content",
         security: [{ bearerAuth: [] }],
-        params: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        params: {
+          type: "object",
+          required: ["id"],
+          properties: { id: { type: "string", format: "uuid" } },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+            },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const params = sizeGuideParamsSchema.parse(request.params);
-      return controller.clearSizeGuideContent({ ...request, params } as any, reply);
-    },
+    (request, reply) => controller.clearSizeGuideContent(request as AuthenticatedRequest, reply),
   );
 
   // DELETE /size-guides/:id — Delete size guide (Admin only)
   fastify.delete(
     "/size-guides/:id",
     {
+      preValidation: [validateParams(sizeGuideParamsSchema)],
       preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Delete a size guide",
         tags: ["Size Guides"],
         summary: "Delete Size Guide",
         security: [{ bearerAuth: [] }],
-        params: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        params: {
+          type: "object",
+          required: ["id"],
+          properties: { id: { type: "string", format: "uuid" } },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+            },
+          },
+        },
       },
     },
-    async (request, reply) => {
-      const params = sizeGuideParamsSchema.parse(request.params);
-      return controller.deleteSizeGuide({ ...request, params } as any, reply);
-    },
+    (request, reply) => controller.deleteSizeGuide(request as AuthenticatedRequest, reply),
   );
 }

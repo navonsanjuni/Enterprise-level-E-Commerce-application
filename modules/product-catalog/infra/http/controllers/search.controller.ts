@@ -1,4 +1,5 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import {
   SearchProductsQuery,
   SearchProductsHandler,
@@ -65,7 +66,7 @@ export class SearchController {
   }
 
   async searchProducts(
-    request: FastifyRequest<{ Querystring: SearchQueryParams }>,
+    request: AuthenticatedRequest<{ Querystring: SearchQueryParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -106,7 +107,7 @@ export class SearchController {
   }
 
   async getSearchSuggestions(
-    request: FastifyRequest<{ Querystring: SearchSuggestionsQueryParams }>,
+    request: AuthenticatedRequest<{ Querystring: SearchSuggestionsQueryParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -125,7 +126,7 @@ export class SearchController {
     }
   }
 
-  async getPopularSearches(request: FastifyRequest, reply: FastifyReply) {
+  async getPopularSearches(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const query: GetPopularSearchesQuery = {};
       const result = await this.getPopularSearchesHandler.handle(query);
@@ -137,7 +138,7 @@ export class SearchController {
   }
 
   async getSearchFilters(
-    request: FastifyRequest<{ Querystring: SearchFiltersQueryParams }>,
+    request: AuthenticatedRequest<{ Querystring: SearchFiltersQueryParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -155,7 +156,7 @@ export class SearchController {
     }
   }
 
-  async getSearchStats(request: FastifyRequest, reply: FastifyReply) {
+  async getSearchStats(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const query: GetSearchStatsQuery = {};
       const result = await this.getSearchStatsHandler.handle(query);

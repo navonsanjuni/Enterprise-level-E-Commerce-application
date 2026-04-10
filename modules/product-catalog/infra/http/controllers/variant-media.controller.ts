@@ -1,4 +1,5 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import {
   VariantMediaManagementService,
   VariantMediaServiceQueryOptions,
@@ -37,7 +38,7 @@ export class VariantMediaController {
   ) {}
 
   async getVariantMedia(
-    request: FastifyRequest<{ Params: { variantId: string } }>,
+    request: AuthenticatedRequest<{ Params: { variantId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -59,7 +60,7 @@ export class VariantMediaController {
   }
 
   async addMediaToVariant(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { variantId: string };
       Body: AddMediaToVariantRequest;
     }>,
@@ -98,7 +99,7 @@ export class VariantMediaController {
   }
 
   async removeMediaFromVariant(
-    request: FastifyRequest<{ Params: { variantId: string; assetId: string } }>,
+    request: AuthenticatedRequest<{ Params: { variantId: string; assetId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -121,7 +122,7 @@ export class VariantMediaController {
   }
 
   async removeAllVariantMedia(
-    request: FastifyRequest<{ Params: { variantId: string } }>,
+    request: AuthenticatedRequest<{ Params: { variantId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -141,7 +142,7 @@ export class VariantMediaController {
   }
 
   async setVariantMedia(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { variantId: string };
       Body: SetVariantMediaRequest;
     }>,
@@ -165,7 +166,7 @@ export class VariantMediaController {
   }
 
   async addMediaToMultipleVariants(
-    request: FastifyRequest<{ Body: AddMediaToMultipleVariantsRequest }>,
+    request: AuthenticatedRequest<{ Body: AddMediaToMultipleVariantsRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -188,7 +189,7 @@ export class VariantMediaController {
   }
 
   async addMultipleMediaToVariant(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { variantId: string };
       Body: { assetIds: string[] };
     }>,
@@ -215,7 +216,7 @@ export class VariantMediaController {
   }
 
   async duplicateVariantMedia(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { sourceVariantId: string; targetVariantId: string };
     }>,
     reply: FastifyReply,
@@ -237,7 +238,7 @@ export class VariantMediaController {
   }
 
   async getProductVariantMedia(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string };
       Querystring: VariantMediaQueryParams;
     }>,
@@ -266,7 +267,7 @@ export class VariantMediaController {
   }
 
   async copyProductVariantMedia(
-    request: FastifyRequest<{ Body: CopyProductVariantMediaRequest }>,
+    request: AuthenticatedRequest<{ Body: CopyProductVariantMediaRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -290,7 +291,7 @@ export class VariantMediaController {
   }
 
   async getVariantsUsingAsset(
-    request: FastifyRequest<{ Params: { assetId: string } }>,
+    request: AuthenticatedRequest<{ Params: { assetId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -312,7 +313,7 @@ export class VariantMediaController {
   }
 
   async getAssetUsageCount(
-    request: FastifyRequest<{ Params: { assetId: string } }>,
+    request: AuthenticatedRequest<{ Params: { assetId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -334,7 +335,7 @@ export class VariantMediaController {
   }
 
   async getColorVariantMedia(
-    request: FastifyRequest<{ Params: { productId: string; color: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string; color: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -359,7 +360,7 @@ export class VariantMediaController {
   }
 
   async getSizeVariantMedia(
-    request: FastifyRequest<{ Params: { productId: string; size: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string; size: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -384,7 +385,7 @@ export class VariantMediaController {
   }
 
   async getUnusedAssets(
-    request: FastifyRequest<{ Querystring: { productId?: string } }>,
+    request: AuthenticatedRequest<{ Querystring: { productId?: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -407,7 +408,7 @@ export class VariantMediaController {
   }
 
   async validateVariantMedia(
-    request: FastifyRequest<{ Params: { variantId: string } }>,
+    request: AuthenticatedRequest<{ Params: { variantId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -431,7 +432,7 @@ export class VariantMediaController {
   }
 
   async getVariantMediaStatistics(
-    request: FastifyRequest<{ Params: { variantId: string } }>,
+    request: AuthenticatedRequest<{ Params: { variantId: string } }>,
     reply: FastifyReply,
   ) {
     try {

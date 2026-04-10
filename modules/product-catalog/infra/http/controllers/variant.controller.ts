@@ -1,14 +1,15 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import {
-  CreateProductVariantCommand,
+  CreateProductVariantInput,
   CreateProductVariantHandler,
-  UpdateProductVariantCommand,
+  UpdateProductVariantInput,
   UpdateProductVariantHandler,
-  DeleteProductVariantCommand,
+  DeleteProductVariantInput,
   DeleteProductVariantHandler,
-  ListVariantsQuery,
+  ListVariantsInput,
   ListVariantsHandler,
-  GetVariantQuery,
+  GetVariantInput,
   GetVariantHandler,
 } from "../../../application";
 import { VariantManagementService } from "../../../application/services/variant-management.service";
@@ -55,14 +56,14 @@ export class VariantController {
   }
 
   async getVariants(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string };
       Querystring: VariantQueryParams;
     }>,
     reply: FastifyReply,
   ) {
     try {
-      const query: ListVariantsQuery = {
+      const query: ListVariantsInput = {
         productId: request.params.productId,
         page: request.query.page,
         limit: request.query.limit,
@@ -82,11 +83,11 @@ export class VariantController {
   }
 
   async getVariant(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { variantId: string } }>,
     reply: FastifyReply,
   ) {
     try {
-      const query: GetVariantQuery = { variantId: request.params.id };
+      const query: GetVariantInput = { variantId: request.params.variantId };
       const result = await this.getVariantHandler.handle(query);
       return ResponseHelper.ok(reply, "Variant retrieved successfully", result);
     } catch (error) {
@@ -96,7 +97,7 @@ export class VariantController {
   }
 
   async createVariant(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string };
       Body: CreateVariantRequest;
     }>,
@@ -106,7 +107,7 @@ export class VariantController {
       const { productId } = request.params;
       const body = request.body;
 
-      const command: CreateProductVariantCommand = {
+      const command: CreateProductVariantInput = {
         productId,
         sku: body.sku,
         size: body.size,
@@ -130,8 +131,8 @@ export class VariantController {
   }
 
   async updateVariant(
-    request: FastifyRequest<{
-      Params: { id: string };
+    request: AuthenticatedRequest<{
+      Params: { variantId: string };
       Body: UpdateVariantRequest;
     }>,
     reply: FastifyReply,
@@ -139,8 +140,8 @@ export class VariantController {
     try {
       const body = request.body;
 
-      const command: UpdateProductVariantCommand = {
-        variantId: request.params.id,
+      const command: UpdateProductVariantInput = {
+        variantId: request.params.variantId,
         sku: body.sku,
         size: body.size,
         color: body.color,
@@ -163,11 +164,11 @@ export class VariantController {
   }
 
   async deleteVariant(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { variantId: string } }>,
     reply: FastifyReply,
   ) {
     try {
-      const command: DeleteProductVariantCommand = { variantId: request.params.id };
+      const command: DeleteProductVariantCommand = { variantId: request.params.variantId };
       const result = await this.deleteVariantHandler.handle(command);
       return ResponseHelper.fromCommand(reply, result, "Variant deleted successfully");
     } catch (error) {

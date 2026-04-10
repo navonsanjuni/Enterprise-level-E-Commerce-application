@@ -1,4 +1,5 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import {
   ProductMediaManagementService,
   ProductMediaServiceQueryOptions,
@@ -38,7 +39,7 @@ export class ProductMediaController {
   ) {}
 
   async getProductMedia(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string };
       Querystring: ProductMediaQueryParams;
     }>,
@@ -63,7 +64,7 @@ export class ProductMediaController {
   }
 
   async addMediaToProduct(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string };
       Body: AddMediaToProductRequest;
     }>,
@@ -102,7 +103,7 @@ export class ProductMediaController {
   }
 
   async removeMediaFromProduct(
-    request: FastifyRequest<{ Params: { productId: string; assetId: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string; assetId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -122,7 +123,7 @@ export class ProductMediaController {
   }
 
   async removeAllProductMedia(
-    request: FastifyRequest<{ Params: { productId: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -139,7 +140,7 @@ export class ProductMediaController {
   }
 
   async setProductCoverImage(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string };
       Body: SetProductCoverImageRequest;
     }>,
@@ -163,7 +164,7 @@ export class ProductMediaController {
   }
 
   async removeCoverImage(
-    request: FastifyRequest<{ Params: { productId: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -180,7 +181,7 @@ export class ProductMediaController {
   }
 
   async reorderProductMedia(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string };
       Body: ReorderProductMediaRequest;
     }>,
@@ -204,7 +205,7 @@ export class ProductMediaController {
   }
 
   async moveMediaPosition(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string };
       Body: MoveMediaPositionRequest;
     }>,
@@ -229,7 +230,7 @@ export class ProductMediaController {
   }
 
   async setProductMedia(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string };
       Body: SetProductMediaRequest;
     }>,
@@ -253,7 +254,7 @@ export class ProductMediaController {
   }
 
   async duplicateProductMedia(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { sourceProductId: string; targetProductId: string };
     }>,
     reply: FastifyReply,
@@ -275,7 +276,7 @@ export class ProductMediaController {
   }
 
   async getProductsUsingAsset(
-    request: FastifyRequest<{ Params: { assetId: string } }>,
+    request: AuthenticatedRequest<{ Params: { assetId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -293,7 +294,7 @@ export class ProductMediaController {
   }
 
   async getAssetUsageCount(
-    request: FastifyRequest<{ Params: { assetId: string } }>,
+    request: AuthenticatedRequest<{ Params: { assetId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -311,7 +312,7 @@ export class ProductMediaController {
   }
 
   async compactProductMediaPositions(
-    request: FastifyRequest<{ Params: { productId: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -330,7 +331,7 @@ export class ProductMediaController {
   }
 
   async validateProductMedia(
-    request: FastifyRequest<{ Params: { productId: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -350,7 +351,7 @@ export class ProductMediaController {
   }
 
   async getProductMediaStatistics(
-    request: FastifyRequest<{ Params: { productId: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string } }>,
     reply: FastifyReply,
   ) {
     try {

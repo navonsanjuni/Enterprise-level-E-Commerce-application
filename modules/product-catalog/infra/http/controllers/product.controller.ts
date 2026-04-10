@@ -1,16 +1,17 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import {
-  CreateProductCommand,
+  CreateProductInput,
   CreateProductHandler,
-  UpdateProductCommand,
+  UpdateProductInput,
   UpdateProductHandler,
-  DeleteProductCommand,
+  DeleteProductInput,
   DeleteProductHandler,
-  GetProductQuery,
+  GetProductInput,
   GetProductHandler,
-  ListProductsQuery,
+  ListProductsInput,
   ListProductsHandler,
-  SearchProductsQuery,
+  SearchProductsInput,
   SearchProductsHandler,
 } from "../../../application";
 import { ProductManagementService } from "../../../application/services/product-management.service";
@@ -80,7 +81,7 @@ export class ProductController {
   }
 
   async listProducts(
-    request: FastifyRequest<{ Querystring: ProductQueryParams }>,
+    request: AuthenticatedRequest<{ Querystring: ProductQueryParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -102,7 +103,7 @@ export class ProductController {
       const currentLimit = Math.min(100, Math.max(1, limit));
 
       if (search) {
-        const searchQuery: SearchProductsQuery = {
+        const searchQuery: SearchProductsInput = {
           searchTerm: search,
           page: currentPage,
           limit: currentLimit,
@@ -119,10 +120,10 @@ export class ProductController {
         };
 
         const searchResult = await this.searchProductsHandler.handle(searchQuery);
-        products = searchResult.products;
+        products = searchResult.items;
         totalCount = searchResult.totalCount;
       } else {
-        const query: ListProductsQuery = {
+        const query: ListProductsInput = {
           page: currentPage,
           limit: currentLimit,
           status,
@@ -134,7 +135,7 @@ export class ProductController {
         };
 
         const result = await this.listProductsHandler.handle(query);
-        products = result.products;
+        products = result.items;
         totalCount = result.totalCount;
       }
 
@@ -186,13 +187,13 @@ export class ProductController {
   }
 
   async getProduct(
-    request: FastifyRequest<{ Params: { productId: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string } }>,
     reply: FastifyReply,
   ) {
     try {
       const { productId } = request.params;
 
-      const query: GetProductQuery = { productId };
+      const query: GetProductInput ={ productId };
       const productData = await this.getProductHandler.handle(query);
 
       const mediaEnrichment =
@@ -219,18 +220,18 @@ export class ProductController {
   }
 
   async getProductBySlug(
-    request: FastifyRequest<{ Params: { slug: string } }>,
+    request: AuthenticatedRequest<{ Params: { slug: string } }>,
     reply: FastifyReply,
   ) {
     try {
       const { slug } = request.params;
 
-      const query: GetProductQuery = { slug };
+      const query: GetProductInput ={ slug };
       const productData = await this.getProductHandler.handle(query);
 
       const enrichment =
         await this.productManagementService.getSingleProductEnrichment(
-          productData.productId,
+          productData.id,
         );
 
       const productWithDetails = {
@@ -252,13 +253,13 @@ export class ProductController {
   }
 
   async createProduct(
-    request: FastifyRequest<{ Body: CreateProductRequest }>,
+    request: AuthenticatedRequest<{ Body: CreateProductRequest }>,
     reply: FastifyReply,
   ) {
     try {
       const productData = request.body;
 
-      const command: CreateProductCommand = {
+      const command: CreateProductInput = {
         title: productData.title,
         brand: productData.brand,
         shortDesc: productData.shortDesc,
@@ -293,7 +294,7 @@ export class ProductController {
   }
 
   async updateProduct(
-    request: FastifyRequest<{
+    request: AuthenticatedRequest<{
       Params: { productId: string };
       Body: UpdateProductRequest;
     }>,
@@ -303,7 +304,7 @@ export class ProductController {
       const { productId: id } = request.params;
       const updateData = request.body;
 
-      const command: UpdateProductCommand = {
+      const command: UpdateProductInput = {
         productId: id,
         title: updateData.title,
         brand: updateData.brand,
@@ -338,13 +339,13 @@ export class ProductController {
   }
 
   async deleteProduct(
-    request: FastifyRequest<{ Params: { productId: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string } }>,
     reply: FastifyReply,
   ) {
     try {
       const { productId: id } = request.params;
 
-      const command: DeleteProductCommand = { productId: id };
+      const command: DeleteProductInput = { productId: id };
       const result = await this.deleteProductHandler.handle(command);
 
       return ResponseHelper.fromCommand(

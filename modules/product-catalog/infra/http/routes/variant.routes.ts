@@ -1,6 +1,8 @@
 import { FastifyInstance } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { VariantController } from "../controllers/variant.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { validateBody, validateParams, validateQuery } from "../validation/validator";
 import {
   listVariantsSchema,
   createVariantSchema,
@@ -8,7 +10,7 @@ import {
   variantParamsSchema,
   variantByProductParamsSchema,
   variantResponseSchema,
-} from "../schemas/variant.schema";
+} from "../validation/variant.schema";
 
 export async function registerVariantRoutes(
   fastify: FastifyInstance,
@@ -18,6 +20,8 @@ export async function registerVariantRoutes(
   fastify.get(
     "/products/:productId/variants",
     {
+      preValidation: [validateParams(variantByProductParamsSchema)],
+      preHandler: [validateQuery(listVariantsSchema)],
       schema: {
         description: "Get variants for a product",
         tags: ["Variants"],
@@ -34,17 +38,14 @@ export async function registerVariantRoutes(
         },
       },
     },
-    async (request, reply) => {
-      const params = variantByProductParamsSchema.parse(request.params);
-      const query = listVariantsSchema.parse(request.query);
-      return controller.getVariants({ ...request, params, query } as any, reply);
-    },
+    (request, reply) => controller.getVariants(request as AuthenticatedRequest, reply),
   );
 
   // GET /variants/:variantId — Get variant by ID (public)
   fastify.get(
     "/variants/:variantId",
     {
+      preValidation: [validateParams(variantParamsSchema)],
       schema: {
         description: "Get variant by ID",
         tags: ["Variants"],
@@ -53,58 +54,81 @@ export async function registerVariantRoutes(
         response: { 200: { type: "object", properties: { success: { type: "boolean" }, data: variantResponseSchema } } },
       },
     },
-    async (request, reply) => {
-      const params = variantParamsSchema.parse(request.params);
-      return controller.getVariant({ ...request, params } as any, reply);
-    },
+    (request, reply) => controller.getVariant(request as AuthenticatedRequest, reply),
   );
 
   // POST /products/:productId/variants — Create variant (Admin only)
   fastify.post(
     "/products/:productId/variants",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(variantByProductParamsSchema)],
+      preHandler: [validateBody(createVariantSchema), RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new variant for a product",
         tags: ["Variants"],
         summary: "Create Variant",
         security: [{ bearerAuth: [] }],
         params: { type: "object", required: ["productId"], properties: { productId: { type: "string", format: "uuid" } } },
+        body: {
+          type: "object",
+          required: ["sku"],
+          properties: {
+            sku: { type: "string" },
+            size: { type: "string" },
+            color: { type: "string" },
+            barcode: { type: "string" },
+            weightG: { type: "integer", minimum: 0 },
+            dims: { type: "object" },
+            taxClass: { type: "string" },
+            allowBackorder: { type: "boolean" },
+            allowPreorder: { type: "boolean" },
+            restockEta: { type: "string", format: "date-time" },
+          },
+        },
         response: { 201: { type: "object", properties: { success: { type: "boolean" }, data: variantResponseSchema } } },
       },
     },
-    async (request, reply) => {
-      const params = variantByProductParamsSchema.parse(request.params);
-      const body = createVariantSchema.parse(request.body);
-      return controller.createVariant({ ...request, params, body } as any, reply);
-    },
+    (request, reply) => controller.createVariant(request as AuthenticatedRequest, reply),
   );
 
   // PUT /variants/:variantId — Update variant (Admin only)
   fastify.put(
     "/variants/:variantId",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(variantParamsSchema)],
+      preHandler: [validateBody(updateVariantSchema), RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update an existing variant",
         tags: ["Variants"],
         summary: "Update Variant",
         security: [{ bearerAuth: [] }],
         params: { type: "object", required: ["variantId"], properties: { variantId: { type: "string", format: "uuid" } } },
+        body: {
+          type: "object",
+          properties: {
+            sku: { type: "string" },
+            size: { type: "string" },
+            color: { type: "string" },
+            barcode: { type: "string" },
+            weightG: { type: "integer", minimum: 0 },
+            dims: { type: "object" },
+            taxClass: { type: "string" },
+            allowBackorder: { type: "boolean" },
+            allowPreorder: { type: "boolean" },
+            restockEta: { type: "string", format: "date-time" },
+          },
+        },
         response: { 200: { type: "object", properties: { success: { type: "boolean" }, data: variantResponseSchema } } },
       },
     },
-    async (request, reply) => {
-      const params = variantParamsSchema.parse(request.params);
-      const body = updateVariantSchema.parse(request.body);
-      return controller.updateVariant({ ...request, params, body } as any, reply);
-    },
+    (request, reply) => controller.updateVariant(request as AuthenticatedRequest, reply),
   );
 
   // DELETE /variants/:variantId — Delete variant (Admin only)
   fastify.delete(
     "/variants/:variantId",
     {
+      preValidation: [validateParams(variantParamsSchema)],
       preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Delete a variant",
@@ -115,9 +139,6 @@ export async function registerVariantRoutes(
         response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
       },
     },
-    async (request, reply) => {
-      const params = variantParamsSchema.parse(request.params);
-      return controller.deleteVariant({ ...request, params } as any, reply);
-    },
+    (request, reply) => controller.deleteVariant(request as AuthenticatedRequest, reply),
   );
 }

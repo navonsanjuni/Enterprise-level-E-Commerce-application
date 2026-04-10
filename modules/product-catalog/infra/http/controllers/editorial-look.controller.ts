@@ -1,4 +1,5 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { EditorialLookManagementService } from "../../../application/services/editorial-look-management.service";
 import { CreateEditorialLookData } from "../../../domain/entities/editorial-look.entity";
 import { EditorialLookQueryOptions } from "../../../domain/repositories/editorial-look.repository";
@@ -27,7 +28,6 @@ export interface EditorialLookQueryParams {
   scheduled?: boolean;
   draft?: boolean;
   hasContent?: boolean;
-  hasHeroImage?: boolean;
   includeUnpublished?: boolean;
   sortBy?: "title" | "publishedAt" | "id";
   sortOrder?: "asc" | "desc";
@@ -82,7 +82,7 @@ export class EditorialLookController {
   ) {}
 
   async getEditorialLooks(
-    request: FastifyRequest<{ Querystring: EditorialLookQueryParams }>,
+    request: AuthenticatedRequest<{ Querystring: EditorialLookQueryParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -93,7 +93,6 @@ export class EditorialLookController {
         scheduled,
         draft,
         hasContent,
-        hasHeroImage,
         sortBy = "id",
         sortOrder = "desc",
       } = request.query;
@@ -139,7 +138,7 @@ export class EditorialLookController {
   }
 
   async getEditorialLook(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -152,7 +151,7 @@ export class EditorialLookController {
   }
 
   async createEditorialLook(
-    request: FastifyRequest<{ Body: CreateEditorialLookRequest }>,
+    request: AuthenticatedRequest<{ Body: CreateEditorialLookRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -173,7 +172,7 @@ export class EditorialLookController {
   }
 
   async updateEditorialLook(
-    request: FastifyRequest<{ Params: { id: string }; Body: UpdateEditorialLookRequest }>,
+    request: AuthenticatedRequest<{ Params: { id: string }; Body: UpdateEditorialLookRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -197,7 +196,7 @@ export class EditorialLookController {
   }
 
   async deleteEditorialLook(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -210,7 +209,7 @@ export class EditorialLookController {
   }
 
   async publishEditorialLook(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -223,7 +222,7 @@ export class EditorialLookController {
   }
 
   async unpublishEditorialLook(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -236,7 +235,7 @@ export class EditorialLookController {
   }
 
   async schedulePublication(
-    request: FastifyRequest<{ Params: { id: string }; Body: SchedulePublicationRequest }>,
+    request: AuthenticatedRequest<{ Params: { id: string }; Body: SchedulePublicationRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -251,7 +250,7 @@ export class EditorialLookController {
     }
   }
 
-  async getReadyToPublishLooks(request: FastifyRequest, reply: FastifyReply) {
+  async getReadyToPublishLooks(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const looks = await this.editorialLookManagementService.getReadyToPublishLooks();
       return ResponseHelper.ok(reply, "Ready to publish looks retrieved successfully", looks.map(toLookResponse));
@@ -261,7 +260,7 @@ export class EditorialLookController {
     }
   }
 
-  async processScheduledPublications(request: FastifyRequest, reply: FastifyReply) {
+  async processScheduledPublications(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const result = await this.editorialLookManagementService.processScheduledPublications();
       return ResponseHelper.ok(reply, `${result.published.length} editorial looks published successfully`, {
@@ -275,7 +274,7 @@ export class EditorialLookController {
   }
 
   async setHeroImage(
-    request: FastifyRequest<{ Params: { id: string }; Body: SetHeroImageRequest }>,
+    request: AuthenticatedRequest<{ Params: { id: string }; Body: SetHeroImageRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -288,7 +287,7 @@ export class EditorialLookController {
   }
 
   async removeHeroImage(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -301,7 +300,7 @@ export class EditorialLookController {
   }
 
   async getLooksByHeroAsset(
-    request: FastifyRequest<{ Params: { assetId: string } }>,
+    request: AuthenticatedRequest<{ Params: { assetId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -314,7 +313,7 @@ export class EditorialLookController {
   }
 
   async addProductToLook(
-    request: FastifyRequest<{ Params: { id: string; productId: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string; productId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -327,7 +326,7 @@ export class EditorialLookController {
   }
 
   async removeProductFromLook(
-    request: FastifyRequest<{ Params: { id: string; productId: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string; productId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -340,7 +339,7 @@ export class EditorialLookController {
   }
 
   async setLookProducts(
-    request: FastifyRequest<{ Params: { id: string }; Body: SetLookProductsRequest }>,
+    request: AuthenticatedRequest<{ Params: { id: string }; Body: SetLookProductsRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -353,7 +352,7 @@ export class EditorialLookController {
   }
 
   async getLookProducts(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -366,7 +365,7 @@ export class EditorialLookController {
   }
 
   async getProductLooks(
-    request: FastifyRequest<{ Params: { productId: string } }>,
+    request: AuthenticatedRequest<{ Params: { productId: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -379,7 +378,7 @@ export class EditorialLookController {
   }
 
   async getLooksByProduct(
-    request: FastifyRequest<{ Params: { productId: string }; Querystring: EditorialLookQueryParams }>,
+    request: AuthenticatedRequest<{ Params: { productId: string }; Querystring: EditorialLookQueryParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -402,7 +401,7 @@ export class EditorialLookController {
   }
 
   async updateStoryContent(
-    request: FastifyRequest<{ Params: { id: string }; Body: UpdateStoryContentRequest }>,
+    request: AuthenticatedRequest<{ Params: { id: string }; Body: UpdateStoryContentRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -415,7 +414,7 @@ export class EditorialLookController {
   }
 
   async clearStoryContent(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -427,7 +426,7 @@ export class EditorialLookController {
     }
   }
 
-  async getEditorialLookStats(request: FastifyRequest, reply: FastifyReply) {
+  async getEditorialLookStats(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const stats = await this.editorialLookManagementService.getEditorialLookStats();
       return ResponseHelper.ok(reply, "Editorial look statistics retrieved successfully", stats);
@@ -438,7 +437,7 @@ export class EditorialLookController {
   }
 
   async getPopularProducts(
-    request: FastifyRequest<{ Querystring: { limit?: number } }>,
+    request: AuthenticatedRequest<{ Querystring: { limit?: number } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -453,7 +452,7 @@ export class EditorialLookController {
   }
 
   async createBulkEditorialLooks(
-    request: FastifyRequest<{ Body: BulkCreateEditorialLooksRequest }>,
+    request: AuthenticatedRequest<{ Body: BulkCreateEditorialLooksRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -473,7 +472,7 @@ export class EditorialLookController {
   }
 
   async deleteBulkEditorialLooks(
-    request: FastifyRequest<{ Body: BulkDeleteEditorialLooksRequest }>,
+    request: AuthenticatedRequest<{ Body: BulkDeleteEditorialLooksRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -486,7 +485,7 @@ export class EditorialLookController {
   }
 
   async publishBulkEditorialLooks(
-    request: FastifyRequest<{ Body: BulkPublishEditorialLooksRequest }>,
+    request: AuthenticatedRequest<{ Body: BulkPublishEditorialLooksRequest }>,
     reply: FastifyReply,
   ) {
     try {
@@ -499,7 +498,7 @@ export class EditorialLookController {
   }
 
   async validateForPublication(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -512,7 +511,7 @@ export class EditorialLookController {
   }
 
   async duplicateEditorialLook(
-    request: FastifyRequest<{ Params: { id: string }; Body: DuplicateEditorialLookRequest }>,
+    request: AuthenticatedRequest<{ Params: { id: string }; Body: DuplicateEditorialLookRequest }>,
     reply: FastifyReply,
   ) {
     try {
