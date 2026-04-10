@@ -26,12 +26,7 @@ export class ProfileController {
         timestamp: new Date(),
       };
       const result = await this.getProfileHandler.handle(query);
-      return ResponseHelper.fromQuery(
-        reply,
-        result,
-        "Profile retrieved",
-        "User profile not found",
-      );
+      return ResponseHelper.ok(reply, "Profile retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -110,12 +105,7 @@ export class ProfileController {
       const { userId } = request.params;
       const query: GetUserProfileInput = { userId, timestamp: new Date() };
       const result = await this.getProfileHandler.handle(query);
-      return ResponseHelper.fromQuery(
-        reply,
-        result,
-        "Profile retrieved",
-        "User profile not found",
-      );
+      return ResponseHelper.ok(reply, "Profile retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

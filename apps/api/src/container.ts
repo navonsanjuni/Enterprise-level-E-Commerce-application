@@ -310,7 +310,7 @@ export class Container {
     const profileController = new ProfileController(getProfileHandler, updateProfileHandler);
     const addressesController = new AddressesController(addAddressHandler, updateAddressHandler, deleteAddressHandler, listAddressesHandler);
     const paymentMethodsController = new PaymentMethodsController(addPaymentMethodHandler, updatePaymentMethodHandler, deletePaymentMethodHandler, setDefaultPaymentMethodHandler, listPaymentMethodsHandler);
-    const usersController = new UsersController(getProfileHandler, getUserDetailsHandler, listUsersHandler, updateUserStatusHandler, updateUserRoleHandler, deleteUserHandler, toggleUserEmailVerifiedHandler);
+    const usersController = new UsersController(getUserDetailsHandler, listUsersHandler, updateUserStatusHandler, updateUserRoleHandler, deleteUserHandler, toggleUserEmailVerifiedHandler);
 
     // Store controllers
     this.services.set("authController", authController);

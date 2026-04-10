@@ -6,8 +6,20 @@ import {
 import {
   MediaAsset,
   MediaAssetId,
-  CreateMediaAssetData,
 } from "../../domain/entities/media-asset.entity";
+
+/** Input shape for creating/updating a media asset — mirrors MediaAsset.create() params */
+type CreateMediaAssetInput = {
+  storageKey: string;
+  mime: string;
+  width?: number;
+  height?: number;
+  bytes?: number;
+  altText?: string;
+  focalX?: number;
+  focalY?: number;
+  renditions?: Record<string, any>;
+};
 import {
   MediaAssetNotFoundError,
   DomainValidationError,
@@ -50,7 +62,7 @@ export interface MediaAssetFilters {
 export class MediaManagementService {
   constructor(private readonly mediaAssetRepository: IMediaAssetRepository) {}
 
-  async createAsset(data: CreateMediaAssetData): Promise<MediaAsset> {
+  async createAsset(data: CreateMediaAssetInput): Promise<MediaAsset> {
     // Check if storage key already exists
     const existingAsset = await this.mediaAssetRepository.findByStorageKey(
       data.storageKey,
@@ -255,7 +267,7 @@ export class MediaManagementService {
 
   async updateAsset(
     id: string,
-    updateData: Partial<CreateMediaAssetData>,
+    updateData: Partial<CreateMediaAssetInput>,
   ): Promise<MediaAsset> {
     const assetId = MediaAssetId.fromString(id);
     const asset = await this.mediaAssetRepository.findById(assetId);
@@ -515,7 +527,7 @@ export class MediaManagementService {
       );
     }
 
-    const duplicateData: CreateMediaAssetData = {
+    const duplicateData: CreateMediaAssetInput = {
       storageKey: newStorageKey,
       mime: originalAsset.getMime(),
       width: originalAsset.getWidth() || undefined,

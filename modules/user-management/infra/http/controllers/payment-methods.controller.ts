@@ -93,11 +93,7 @@ export class PaymentMethodsController {
       const { userId } = request.params;
       const query: ListPaymentMethodsInput = { userId, timestamp: new Date() };
       const result = await this.listPaymentMethodsHandler.handle(query);
-      return ResponseHelper.fromQuery(
-        reply,
-        result,
-        "Payment methods retrieved",
-      );
+      return ResponseHelper.ok(reply, "Payment methods retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -213,11 +209,7 @@ export class PaymentMethodsController {
         timestamp: new Date(),
       };
       const result = await this.listPaymentMethodsHandler.handle(query);
-      return ResponseHelper.fromQuery(
-        reply,
-        result,
-        "Payment methods retrieved",
-      );
+      return ResponseHelper.ok(reply, "Payment methods retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

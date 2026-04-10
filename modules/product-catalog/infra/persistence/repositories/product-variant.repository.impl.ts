@@ -9,22 +9,22 @@ import { VariantId } from "../../../domain/value-objects/variant-id.vo";
 import { ProductId } from "../../../domain/value-objects/product-id.vo";
 import { SKU } from "../../../domain/value-objects/sku.vo";
 
-function mapRow(variantData: any): ProductVariant {
-  return ProductVariant.fromDatabaseRow({
-    variant_id: variantData.id,
-    product_id: variantData.productId,
-    sku: variantData.sku,
-    size: variantData.size,
-    color: variantData.color,
-    barcode: variantData.barcode,
-    weight_g: variantData.weightG,
-    dims: variantData.dims as any,
-    tax_class: variantData.taxClass,
-    allow_backorder: variantData.allowBackorder,
-    allow_preorder: variantData.allowPreorder,
-    restock_eta: variantData.restockEta,
-    created_at: variantData.createdAt,
-    updated_at: variantData.updatedAt,
+function mapRow(row: any): ProductVariant {
+  return ProductVariant.reconstitute({
+    id: VariantId.fromString(row.id),
+    productId: ProductId.fromString(row.productId),
+    sku: SKU.fromString(row.sku),
+    size: row.size,
+    color: row.color,
+    barcode: row.barcode,
+    weightG: row.weightG,
+    dims: row.dims as any,
+    taxClass: row.taxClass,
+    allowBackorder: row.allowBackorder,
+    allowPreorder: row.allowPreorder,
+    restockEta: row.restockEta,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   });
 }
 
@@ -32,25 +32,25 @@ export class ProductVariantRepository implements IProductVariantRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async save(variant: ProductVariant): Promise<void> {
-    const data = variant.toDatabaseRow();
+    const dto = ProductVariant.toDTO(variant);
 
     await this.prisma.productVariant.create({
       data: {
-        id: data.variant_id,
-        productId: data.product_id,
-        sku: data.sku,
+        id: dto.id,
+        productId: dto.productId,
+        sku: dto.sku,
         price: 0,
-        size: data.size,
-        color: data.color,
-        barcode: data.barcode,
-        weightG: data.weight_g,
-        dims: data.dims as any,
-        taxClass: data.tax_class,
-        allowBackorder: data.allow_backorder,
-        allowPreorder: data.allow_preorder,
-        restockEta: data.restock_eta,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
+        size: dto.size,
+        color: dto.color,
+        barcode: dto.barcode,
+        weightG: dto.weightG,
+        dims: dto.dims as any,
+        taxClass: dto.taxClass,
+        allowBackorder: dto.allowBackorder,
+        allowPreorder: dto.allowPreorder,
+        restockEta: dto.restockEta,
+        createdAt: dto.createdAt,
+        updatedAt: dto.updatedAt,
       },
     });
   }
@@ -166,22 +166,22 @@ export class ProductVariantRepository implements IProductVariantRepository {
   }
 
   async update(variant: ProductVariant): Promise<void> {
-    const data = variant.toDatabaseRow();
+    const dto = ProductVariant.toDTO(variant);
 
     await this.prisma.productVariant.update({
-      where: { id: data.variant_id },
+      where: { id: dto.id },
       data: {
-        sku: data.sku,
-        size: data.size,
-        color: data.color,
-        barcode: data.barcode,
-        weightG: data.weight_g,
-        dims: data.dims as any,
-        taxClass: data.tax_class,
-        allowBackorder: data.allow_backorder,
-        allowPreorder: data.allow_preorder,
-        restockEta: data.restock_eta,
-        updatedAt: data.updated_at,
+        sku: dto.sku,
+        size: dto.size,
+        color: dto.color,
+        barcode: dto.barcode,
+        weightG: dto.weightG,
+        dims: dto.dims as any,
+        taxClass: dto.taxClass,
+        allowBackorder: dto.allowBackorder,
+        allowPreorder: dto.allowPreorder,
+        restockEta: dto.restockEta,
+        updatedAt: dto.updatedAt,
       },
     });
   }

@@ -5,8 +5,23 @@ import {
 import { IProductRepository } from "../../domain/repositories/product.repository";
 import {
   ProductVariant,
-  CreateVariantData,
 } from "../../domain/entities/product-variant.entity";
+
+/** Input shape for creating/updating a variant — mirrors ProductVariant.create() params */
+type CreateVariantInput = {
+  productId: string;
+  sku?: string;
+  autoSkuValue?: string;
+  size?: string;
+  color?: string;
+  barcode?: string;
+  weightG?: number;
+  dims?: Record<string, any>;
+  taxClass?: string;
+  allowBackorder?: boolean;
+  allowPreorder?: boolean;
+  restockEta?: Date;
+};
 import { VariantId } from "../../domain/value-objects/variant-id.vo";
 import { ProductId } from "../../domain/value-objects/product-id.vo";
 import { SKU } from "../../domain/value-objects/sku.vo";
@@ -43,7 +58,7 @@ export class VariantManagementService {
 
   async createVariant(
     productId: string,
-    data: Omit<CreateVariantData, "productId">,
+    data: Omit<CreateVariantInput, "productId">,
   ): Promise<ProductVariant> {
     // Verify product exists
     const product = await this.productRepository.findById(
@@ -76,7 +91,7 @@ export class VariantManagementService {
       }
     }
 
-    const variantData: CreateVariantData = {
+    const variantData: CreateVariantInput = {
       ...data,
       productId,
     };
@@ -240,7 +255,7 @@ export class VariantManagementService {
 
   async updateVariant(
     id: string,
-    updateData: Partial<CreateVariantData>,
+    updateData: Partial<CreateVariantInput>,
   ): Promise<ProductVariant> {
     const variantId = VariantId.fromString(id);
     const variant = await this.productVariantRepository.findById(variantId);
@@ -395,7 +410,7 @@ export class VariantManagementService {
       throw new SkuAlreadyExistsError(newSku);
     }
 
-    const duplicateData: CreateVariantData = {
+    const duplicateData: CreateVariantInput = {
       productId: originalVariant.getProductId().getValue(),
       sku: newSku,
       size: originalVariant.getSize() || undefined,

@@ -7,8 +7,26 @@ import {
 import { IProductTagRepository } from "../../domain/repositories/product-tag.repository";
 import {
   Product,
-  CreateProductData,
 } from "../../domain/entities/product.entity";
+
+/** Input shape for creating/updating a product — mirrors Product.create() params */
+type CreateProductInput = {
+  title: string;
+  brand?: string;
+  shortDesc?: string;
+  longDescHtml?: string;
+  status?: import("../../domain/enums/product-status.enum").ProductStatus;
+  publishAt?: Date;
+  countryOfOrigin?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  price?: number;
+  priceSgd?: number;
+  priceUsd?: number;
+  compareAtPrice?: number;
+  categoryIds?: string[];
+  tags?: string[];
+};
 import { ProductId } from "../../domain/value-objects/product-id.vo";
 import { Slug } from "../../domain/value-objects/slug.vo";
 import {
@@ -23,7 +41,7 @@ export class ProductManagementService {
     private readonly productTagRepository?: IProductTagRepository,
   ) {}
 
-  async createProduct(data: CreateProductData): Promise<Product> {
+  async createProduct(data: CreateProductInput): Promise<Product> {
     // Validate categories - product must have at least one category
     if (!data.categoryIds || data.categoryIds.length === 0) {
       throw new DomainValidationError(
@@ -213,7 +231,7 @@ export class ProductManagementService {
 
   async updateProduct(
     id: string,
-    data: Partial<CreateProductData>,
+    data: Partial<CreateProductInput>,
   ): Promise<Product> {
     const product = await this.getProductById(id);
 

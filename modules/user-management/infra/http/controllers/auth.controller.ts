@@ -47,6 +47,7 @@ import {
 } from "../../../application/commands/delete-account.command";
 import { ITokenBlacklistService } from "../../../application/services/itoken-blacklist.service";
 import { UserRole } from "../../../domain/entities/user.entity";
+import { DomainValidationError } from "../../../domain/errors/user-management.errors";
 import crypto from "crypto";
 
 export class AuthController {
@@ -143,23 +144,6 @@ export class AuthController {
 
         // TODO: Send verification email with token
         // Token generated and stored — email service integration pending
-
-        return ResponseHelper.success(reply, 201, "Registration successful", {
-          accessToken: result.data.accessToken,
-          refreshToken: result.data.refreshToken,
-          user: {
-            id: result.data.user.id,
-            email,
-            role: result.data.user.role,
-            isGuest: result.data.user.isGuest,
-            emailVerified: result.data.user.emailVerified,
-            phoneVerified: result.data.user.phoneVerified,
-            status: "active",
-          },
-          expiresIn: result.data.expiresIn,
-          tokenType: "Bearer",
-          ...(process.env.NODE_ENV === "development" && { verificationToken }),
-        });
       }
 
       return ResponseHelper.fromCommand(
@@ -248,7 +232,7 @@ export class AuthController {
         { email, reason: result.error, deviceInfo },
         request,
       );
-      return ResponseHelper.unauthorized(reply, "Invalid email or password");
+      return ResponseHelper.fromCommand(reply, result, "Login failed");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -344,10 +328,7 @@ export class AuthController {
         { deviceInfo },
         request,
       );
-      return ResponseHelper.unauthorized(
-        reply,
-        result.error || "Token refresh failed",
-      );
+      return ResponseHelper.fromCommand(reply, result, "Token refresh failed");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -429,10 +410,7 @@ export class AuthController {
 
       const tokenData = this.tokenBlacklistService.getPasswordResetToken(token);
       if (!tokenData) {
-        return ResponseHelper.badRequest(
-          reply,
-          "Invalid or expired reset token",
-        );
+        throw new DomainValidationError("Invalid or expired reset token");
       }
 
       const command: ResetPasswordInput = {
@@ -478,10 +456,7 @@ export class AuthController {
 
       const tokenData = this.tokenBlacklistService.getVerificationToken(token);
       if (!tokenData) {
-        return ResponseHelper.badRequest(
-          reply,
-          "Invalid or expired verification token",
-        );
+        throw new DomainValidationError("Invalid or expired verification token");
       }
 
       const command: VerifyEmailInput = {
@@ -505,11 +480,7 @@ export class AuthController {
         );
       }
 
-      if (result.error === "Email is already verified") {
-        return ResponseHelper.badRequest(reply, "Email is already verified");
-      }
-
-      return ResponseHelper.fromCommand(reply, result, "");
+      return ResponseHelper.fromCommand(reply, result, "Email verification failed");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -529,23 +500,24 @@ export class AuthController {
 
       const email = (rawEmail || "").trim().toLowerCase();
       const query: GetUserByEmailInput = { email, timestamp: new Date() };
-      const userResult = await this.getUserByEmailHandler.handle(query);
 
-      if (!userResult.success || !userResult.data) {
+      let userInfo: { userId: string; emailVerified: boolean } | null = null;
+      try {
+        userInfo = await this.getUserByEmailHandler.handle(query);
+      } catch {
         // For security, don't reveal if email exists or not
+      }
+
+      if (!userInfo) {
         return ResponseHelper.ok(
           reply,
           "If an account with that email exists, verification email has been sent.",
-          {
-            action: "verification_sent",
-          },
+          { action: "verification_sent" },
         );
       }
 
-      const userInfo = userResult.data;
-
       if (userInfo.emailVerified) {
-        return ResponseHelper.badRequest(reply, "Email is already verified");
+        throw new DomainValidationError("Email is already verified");
       }
 
       const verificationToken = crypto.randomBytes(32).toString("hex");
@@ -566,9 +538,7 @@ export class AuthController {
       return ResponseHelper.ok(
         reply,
         "Verification email has been sent. Please check your inbox.",
-        {
-          action: "verification_sent",
-        },
+        { action: "verification_sent" },
       );
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -743,7 +713,7 @@ export class AuthController {
     reply: FastifyReply,
   ): Promise<void> {
     if (process.env.NODE_ENV === "production") {
-      return ResponseHelper.notFound(reply);
+      return reply.status(404).send({ success: false, statusCode: 404, message: "Not found" });
     }
 
     try {

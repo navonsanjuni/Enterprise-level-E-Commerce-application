@@ -1,124 +1,156 @@
-import { MediaAssetId } from "../value-objects/media-asset-id.vo";
-import { ProductId } from "../value-objects/product-id.vo";
-import { DomainValidationError } from "../errors";
-import { EditorialLookId } from "../value-objects/editorial-look-id.vo";
+import { AggregateRoot } from '../../../../packages/core/src/domain/aggregate-root';
+import { DomainEvent } from '../../../../packages/core/src/domain/events/domain-event';
+import { MediaAssetId } from '../value-objects/media-asset-id.vo';
+import { ProductId } from '../value-objects/product-id.vo';
+import { DomainValidationError } from '../errors';
+import { EditorialLookId } from '../value-objects/editorial-look-id.vo';
 
 export { EditorialLookId };
 
-export class EditorialLook {
-  private constructor(
-    private readonly id: EditorialLookId,
-    private title: string,
-    private storyHtml: string | null,
-    private heroAssetId: MediaAssetId | null,
-    private publishedAt: Date | null,
-    private productIds: Set<ProductId>,
-  ) {}
+// Domain Events
+export class EditorialLookCreatedEvent extends DomainEvent {
+  constructor(public readonly lookId: string, public readonly title: string) {
+    super(lookId, 'EditorialLook');
+  }
+  get eventType(): string { return 'editorial-look.created'; }
+  getPayload(): Record<string, unknown> { return { lookId: this.lookId, title: this.title }; }
+}
 
-  static create(data: CreateEditorialLookData): EditorialLook {
+export class EditorialLookUpdatedEvent extends DomainEvent {
+  constructor(public readonly lookId: string) {
+    super(lookId, 'EditorialLook');
+  }
+  get eventType(): string { return 'editorial-look.updated'; }
+  getPayload(): Record<string, unknown> { return { lookId: this.lookId }; }
+}
+
+export class EditorialLookPublishedEvent extends DomainEvent {
+  constructor(public readonly lookId: string) {
+    super(lookId, 'EditorialLook');
+  }
+  get eventType(): string { return 'editorial-look.published'; }
+  getPayload(): Record<string, unknown> { return { lookId: this.lookId }; }
+}
+
+export class EditorialLookDeletedEvent extends DomainEvent {
+  constructor(public readonly lookId: string) {
+    super(lookId, 'EditorialLook');
+  }
+  get eventType(): string { return 'editorial-look.deleted'; }
+  getPayload(): Record<string, unknown> { return { lookId: this.lookId }; }
+}
+
+export interface EditorialLookProps {
+  id: EditorialLookId;
+  title: string;
+  storyHtml: string | null;
+  heroAssetId: MediaAssetId | null;
+  publishedAt: Date | null;
+  productIds: Set<ProductId>;
+}
+
+export class EditorialLook extends AggregateRoot {
+  private props: EditorialLookProps;
+
+  private constructor(props: EditorialLookProps) {
+    super();
+    this.props = props;
+  }
+
+  static create(params: {
+    title: string;
+    storyHtml?: string;
+    heroAssetId?: string;
+    publishedAt?: Date;
+    productIds?: string[];
+  }): EditorialLook {
     const lookId = EditorialLookId.create();
 
-    return new EditorialLook(
-      lookId,
-      data.title,
-      data.storyHtml || null,
-      data.heroAssetId ? MediaAssetId.fromString(data.heroAssetId) : null,
-      data.publishedAt || null,
-      new Set(data.productIds?.map((id) => ProductId.fromString(id)) || []),
-    );
+    const look = new EditorialLook({
+      id: lookId,
+      title: params.title,
+      storyHtml: params.storyHtml || null,
+      heroAssetId: params.heroAssetId ? MediaAssetId.fromString(params.heroAssetId) : null,
+      publishedAt: params.publishedAt || null,
+      productIds: new Set(params.productIds?.map((id) => ProductId.fromString(id)) || []),
+    });
+
+    look.addDomainEvent(new EditorialLookCreatedEvent(lookId.getValue(), params.title));
+
+    return look;
   }
 
-  static reconstitute(data: EditorialLookData): EditorialLook {
-    return new EditorialLook(
-      EditorialLookId.fromString(data.id),
-      data.title,
-      data.storyHtml,
-      data.heroAssetId ? MediaAssetId.fromString(data.heroAssetId) : null,
-      data.publishedAt,
-      new Set(data.productIds.map((id) => ProductId.fromString(id))),
-    );
-  }
-
-  static fromDatabaseRow(
-    row: EditorialLookRow,
-    productIds: string[] = [],
-  ): EditorialLook {
-    return new EditorialLook(
-      EditorialLookId.fromString(row.look_id),
-      row.title,
-      row.story_html,
-      row.hero_asset_id ? MediaAssetId.fromString(row.hero_asset_id) : null,
-      row.published_at,
-      new Set(productIds.map((id) => ProductId.fromString(id))),
-    );
+  static reconstitute(props: EditorialLookProps): EditorialLook {
+    return new EditorialLook(props);
   }
 
   // Getters
   getId(): EditorialLookId {
-    return this.id;
+    return this.props.id;
   }
 
   getTitle(): string {
-    return this.title;
+    return this.props.title;
   }
 
   getStoryHtml(): string | null {
-    return this.storyHtml;
+    return this.props.storyHtml;
   }
 
   getHeroAssetId(): MediaAssetId | null {
-    return this.heroAssetId;
+    return this.props.heroAssetId;
   }
 
   getPublishedAt(): Date | null {
-    return this.publishedAt;
+    return this.props.publishedAt;
   }
 
   getProductIds(): ProductId[] {
-    return Array.from(this.productIds);
+    return Array.from(this.props.productIds);
   }
 
   getProductCount(): number {
-    return this.productIds.size;
+    return this.props.productIds.size;
   }
 
   // Business logic methods
   updateTitle(newTitle: string): void {
     if (!newTitle || newTitle.trim().length === 0) {
-      throw new DomainValidationError("Title cannot be empty");
+      throw new DomainValidationError('Title cannot be empty');
     }
 
     if (newTitle.trim().length > 200) {
-      throw new DomainValidationError("Title cannot be longer than 200 characters");
+      throw new DomainValidationError('Title cannot be longer than 200 characters');
     }
 
-    this.title = newTitle.trim();
+    this.props.title = newTitle.trim();
+    this.addDomainEvent(new EditorialLookUpdatedEvent(this.props.id.getValue()));
   }
 
   updateStoryHtml(newStoryHtml: string | null): void {
-    this.storyHtml = newStoryHtml?.trim() || null;
+    this.props.storyHtml = newStoryHtml?.trim() || null;
   }
 
   setHeroAsset(assetId: string | null): void {
-    this.heroAssetId = assetId ? MediaAssetId.fromString(assetId) : null;
+    this.props.heroAssetId = assetId ? MediaAssetId.fromString(assetId) : null;
   }
 
   addProduct(productId: string): void {
     const productIdVo = ProductId.fromString(productId);
-    this.productIds.add(productIdVo);
+    this.props.productIds.add(productIdVo);
   }
 
   removeProduct(productId: string): void {
     const productIdVo = ProductId.fromString(productId);
-    this.productIds.delete(productIdVo);
+    this.props.productIds.delete(productIdVo);
   }
 
   clearProducts(): void {
-    this.productIds.clear();
+    this.props.productIds.clear();
   }
 
   setProducts(productIds: string[]): void {
-    this.productIds.clear();
+    this.props.productIds.clear();
     productIds.forEach((id) => this.addProduct(id));
   }
 
@@ -127,101 +159,77 @@ export class EditorialLook {
       return;
     }
 
-    this.publishedAt = new Date();
+    this.props.publishedAt = new Date();
+    this.addDomainEvent(new EditorialLookPublishedEvent(this.props.id.getValue()));
   }
 
   unpublish(): void {
-    this.publishedAt = null;
+    this.props.publishedAt = null;
   }
 
   schedulePublication(publishDate: Date): void {
-    // Allow any scheduled publication date (past, present, future)
-    this.publishedAt = publishDate;
+    this.props.publishedAt = publishDate;
   }
 
   // Validation methods
   isPublished(): boolean {
-    return this.publishedAt !== null && this.publishedAt <= new Date();
+    return this.props.publishedAt !== null && this.props.publishedAt <= new Date();
   }
 
   isScheduled(): boolean {
-    return this.publishedAt !== null && this.publishedAt > new Date();
+    return this.props.publishedAt !== null && this.props.publishedAt > new Date();
   }
 
   isDraft(): boolean {
-    return this.publishedAt === null;
+    return this.props.publishedAt === null;
   }
 
   hasHeroImage(): boolean {
-    return this.heroAssetId !== null;
+    return this.props.heroAssetId !== null;
   }
 
   hasStory(): boolean {
-    return this.storyHtml !== null && this.storyHtml.trim().length > 0;
+    return this.props.storyHtml !== null && this.props.storyHtml.trim().length > 0;
   }
 
   hasProducts(): boolean {
-    return this.productIds.size > 0;
+    return this.props.productIds.size > 0;
   }
 
   includesProduct(productId: string): boolean {
     const productIdVo = ProductId.fromString(productId);
-    return Array.from(this.productIds).some((id) => id.equals(productIdVo));
+    return Array.from(this.props.productIds).some((id) => id.equals(productIdVo));
   }
 
   canBePublished(): boolean {
-    return this.title.trim().length > 0 && this.hasHeroImage();
+    return this.props.title.trim().length > 0 && this.hasHeroImage();
   }
 
-  // Convert to data for persistence
-  toData(): EditorialLookData {
-    return {
-      id: this.id.getValue(),
-      title: this.title,
-      storyHtml: this.storyHtml,
-      heroAssetId: this.heroAssetId?.getValue() || null,
-      publishedAt: this.publishedAt,
-      productIds: Array.from(this.productIds).map((id) => id.getValue()),
-    };
-  }
-
-  toDatabaseRow(): EditorialLookRow {
-    return {
-      look_id: this.id.getValue(),
-      title: this.title,
-      story_html: this.storyHtml,
-      hero_asset_id: this.heroAssetId?.getValue() || null,
-      published_at: this.publishedAt,
-    };
+  markAsDeleted(): void {
+    this.addDomainEvent(new EditorialLookDeletedEvent(this.props.id.getValue()));
   }
 
   equals(other: EditorialLook): boolean {
-    return this.id.equals(other.id);
+    return this.props.id.equals(other.props.id);
+  }
+
+  static toDTO(entity: EditorialLook): EditorialLookDTO {
+    return {
+      id: entity.props.id.getValue(),
+      title: entity.props.title,
+      storyHtml: entity.props.storyHtml,
+      heroAssetId: entity.props.heroAssetId?.getValue() || null,
+      publishedAt: entity.props.publishedAt?.toISOString() || null,
+      productIds: Array.from(entity.props.productIds).map((id) => id.getValue()),
+    };
   }
 }
 
-// Supporting types and interfaces
-export interface CreateEditorialLookData {
-  title: string;
-  storyHtml?: string;
-  heroAssetId?: string;
-  publishedAt?: Date;
-  productIds?: string[];
-}
-
-export interface EditorialLookData {
+export interface EditorialLookDTO {
   id: string;
   title: string;
   storyHtml: string | null;
   heroAssetId: string | null;
-  publishedAt: Date | null;
+  publishedAt: string | null;
   productIds: string[];
-}
-
-export interface EditorialLookRow {
-  look_id: string;
-  title: string;
-  story_html: string | null;
-  hero_asset_id: string | null;
-  published_at: Date | null;
 }
