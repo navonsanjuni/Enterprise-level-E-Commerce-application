@@ -3,7 +3,6 @@ import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-
 import { ProductTagManagementService } from "../../../application/services/product-tag-management.service";
 import { ProductTagQueryOptions } from "../../../domain/repositories/product-tag.repository";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
-import { ProductTag } from "../../../domain/entities/product-tag.entity";
 
 export interface CreateTagRequest {
   tag: string;
@@ -16,7 +15,7 @@ interface TagQueryParams {
   page?: number;
   limit?: number;
   kind?: string;
-  sortBy?: "tag" | "kind" | "usage_count";
+  sortBy?: "tag" | "kind";
   sortOrder?: "asc" | "desc";
 }
 
@@ -81,7 +80,6 @@ export class ProductTagController {
         },
       });
     } catch (error) {
-      request.log.error(error, "Failed to get tags");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -97,8 +95,6 @@ export class ProductTagController {
 
       return ResponseHelper.ok(reply, "Tag retrieved successfully", tag);
     } catch (error) {
-      request.log.error(error, "Failed to get tag");
-
       return ResponseHelper.error(reply, error);
     }
   }
@@ -116,8 +112,6 @@ export class ProductTagController {
 
       return ResponseHelper.ok(reply, "Tag retrieved successfully", tag);
     } catch (error) {
-      request.log.error(error, "Failed to get tag by name");
-
       return ResponseHelper.error(reply, error);
     }
   }
@@ -133,8 +127,6 @@ export class ProductTagController {
 
       return ResponseHelper.created(reply, "Tag created successfully", tag);
     } catch (error) {
-      request.log.error(error, "Failed to create tag");
-
       if (error instanceof Error && error.message.includes("already exists")) {
         return reply.status(409).send({
           success: false,
@@ -163,8 +155,6 @@ export class ProductTagController {
 
       return ResponseHelper.ok(reply, "Tag updated successfully", tag);
     } catch (error) {
-      request.log.error(error, "Failed to update tag");
-
       if (error instanceof Error && error.message.includes("already exists")) {
         return reply.status(409).send({
           success: false,
@@ -187,10 +177,8 @@ export class ProductTagController {
 
       await this.productTagManagementService.deleteTag(id);
 
-      return ResponseHelper.ok(reply, "Tag deleted successfully");
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to delete tag");
-
       if (
         error instanceof Error &&
         (error.message.includes("constraint") ||
@@ -223,17 +211,15 @@ export class ProductTagController {
 
       return ResponseHelper.ok(reply, "Tag suggestions retrieved successfully", suggestions);
     } catch (error) {
-      request.log.error(error, "Failed to get tag suggestions");
       return ResponseHelper.error(reply, error);
     }
   }
 
-  async getTagStats(request: AuthenticatedRequest, reply: FastifyReply) {
+  async getTagStats(_request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const stats = await this.productTagManagementService.getTagStats();
       return ResponseHelper.ok(reply, "Tag statistics retrieved successfully", stats);
     } catch (error) {
-      request.log.error(error, "Failed to get tag statistics");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -251,7 +237,6 @@ export class ProductTagController {
 
       return ResponseHelper.ok(reply, "Most used tags retrieved successfully", mostUsed);
     } catch (error) {
-      request.log.error(error, "Failed to get most used tags");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -269,10 +254,9 @@ export class ProductTagController {
       return ResponseHelper.created(
         reply,
         `${createdTags.length} tags created successfully`,
-        createdTags.map((tag) => ProductTag.toDTO(tag)),
+        createdTags,
       );
     } catch (error) {
-      request.log.error(error, "Failed to create bulk tags");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -284,16 +268,10 @@ export class ProductTagController {
     try {
       const { ids } = request.body;
 
-      const result =
-        await this.productTagManagementService.deleteMultipleTags(ids);
+      await this.productTagManagementService.deleteMultipleTags(ids);
 
-      return ResponseHelper.ok(
-        reply,
-        `${result.deleted.length} tags deleted successfully`,
-        result,
-      );
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to delete bulk tags");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -315,7 +293,6 @@ export class ProductTagController {
         available: isValid,
       });
     } catch (error) {
-      request.log.error(error, "Failed to validate tag");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -333,8 +310,6 @@ export class ProductTagController {
 
       return ResponseHelper.ok(reply, "Product tags retrieved successfully", tags);
     } catch (error) {
-      request.log.error(error, "Failed to get product tags");
-
       return ResponseHelper.error(reply, error);
     }
   }
@@ -355,10 +330,8 @@ export class ProductTagController {
         tagIds,
       );
 
-      return ResponseHelper.ok(reply, "Tags associated successfully");
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to associate product tags");
-
       return ResponseHelper.error(reply, error);
     }
   }
@@ -374,10 +347,8 @@ export class ProductTagController {
 
       await this.productTagManagementService.removeProductTag(productId, tagId);
 
-      return ResponseHelper.ok(reply, "Tag removed successfully");
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to remove product tag");
-
       return ResponseHelper.error(reply, error);
     }
   }
@@ -415,8 +386,6 @@ export class ProductTagController {
         },
       });
     } catch (error) {
-      request.log.error(error, "Failed to get tag products");
-
       return ResponseHelper.error(reply, error);
     }
   }

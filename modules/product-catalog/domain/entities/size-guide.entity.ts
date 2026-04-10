@@ -109,10 +109,12 @@ export class SizeGuide extends AggregateRoot {
 
   updateBodyHtml(newBodyHtml: string | null): void {
     this.props.bodyHtml = newBodyHtml?.trim() || null;
+    this.addDomainEvent(new SizeGuideUpdatedEvent(this.props.id.getValue()));
   }
 
   updateRegion(newRegion: Region): void {
     this.props.region = newRegion;
+    this.addDomainEvent(new SizeGuideUpdatedEvent(this.props.id.getValue()));
   }
 
   updateCategory(newCategory: string | null): void {
@@ -121,6 +123,7 @@ export class SizeGuide extends AggregateRoot {
     }
 
     this.props.category = newCategory?.trim() || null;
+    this.addDomainEvent(new SizeGuideUpdatedEvent(this.props.id.getValue()));
   }
 
   // Validation methods

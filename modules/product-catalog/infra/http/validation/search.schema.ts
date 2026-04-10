@@ -33,3 +33,45 @@ export const searchFiltersQuerySchema = z.object({
 export type SearchQuery = z.infer<typeof searchQuerySchema>;
 export type SearchSuggestionsQuery = z.infer<typeof searchSuggestionsQuerySchema>;
 export type SearchFiltersQuery = z.infer<typeof searchFiltersQuerySchema>;
+
+// ── JSON Schema for Swagger docs ──────────────────────────────────────────────
+
+export const searchResultsResponseSchema = {
+  type: "object",
+  properties: {
+    items: { type: "array", items: { type: "object", additionalProperties: true } },
+    totalCount: { type: "integer" },
+    page: { type: "integer" },
+    limit: { type: "integer" },
+    searchTerm: { type: "string" },
+    suggestions: { type: "array", items: { type: "string" } },
+  },
+} as const;
+
+export const searchSuggestionsResponseSchema = {
+  type: "object",
+  properties: {
+    suggestions: {
+      type: "array",
+      items: { type: "object", additionalProperties: true },
+    },
+    query: { type: "string" },
+    type: { type: "string" },
+    limit: { type: "integer" },
+  },
+} as const;
+
+export const popularSearchesResponseSchema = {
+  type: "array",
+  items: { type: "object", additionalProperties: true },
+} as const;
+
+export const searchFiltersResponseSchema = {
+  type: "object",
+  additionalProperties: true,
+} as const;
+
+export const searchStatsResponseSchema = {
+  type: "object",
+  additionalProperties: true,
+} as const;

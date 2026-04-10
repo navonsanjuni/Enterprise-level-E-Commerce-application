@@ -32,25 +32,23 @@ export class ProductVariantRepository implements IProductVariantRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async save(variant: ProductVariant): Promise<void> {
-    const dto = ProductVariant.toDTO(variant);
-
     await this.prisma.productVariant.create({
       data: {
-        id: dto.id,
-        productId: dto.productId,
-        sku: dto.sku,
+        id: variant.id.getValue(),
+        productId: variant.productId.getValue(),
+        sku: variant.sku.getValue(),
         price: 0,
-        size: dto.size,
-        color: dto.color,
-        barcode: dto.barcode,
-        weightG: dto.weightG,
-        dims: dto.dims as any,
-        taxClass: dto.taxClass,
-        allowBackorder: dto.allowBackorder,
-        allowPreorder: dto.allowPreorder,
-        restockEta: dto.restockEta,
-        createdAt: dto.createdAt,
-        updatedAt: dto.updatedAt,
+        size: variant.size,
+        color: variant.color,
+        barcode: variant.barcode,
+        weightG: variant.weightG,
+        dims: variant.dims as any,
+        taxClass: variant.taxClass,
+        allowBackorder: variant.allowBackorder,
+        allowPreorder: variant.allowPreorder,
+        restockEta: variant.restockEta,
+        createdAt: variant.createdAt,
+        updatedAt: variant.updatedAt,
       },
     });
   }
@@ -166,22 +164,20 @@ export class ProductVariantRepository implements IProductVariantRepository {
   }
 
   async update(variant: ProductVariant): Promise<void> {
-    const dto = ProductVariant.toDTO(variant);
-
     await this.prisma.productVariant.update({
-      where: { id: dto.id },
+      where: { id: variant.id.getValue() },
       data: {
-        sku: dto.sku,
-        size: dto.size,
-        color: dto.color,
-        barcode: dto.barcode,
-        weightG: dto.weightG,
-        dims: dto.dims as any,
-        taxClass: dto.taxClass,
-        allowBackorder: dto.allowBackorder,
-        allowPreorder: dto.allowPreorder,
-        restockEta: dto.restockEta,
-        updatedAt: dto.updatedAt,
+        sku: variant.sku.getValue(),
+        size: variant.size,
+        color: variant.color,
+        barcode: variant.barcode,
+        weightG: variant.weightG,
+        dims: variant.dims as any,
+        taxClass: variant.taxClass,
+        allowBackorder: variant.allowBackorder,
+        allowPreorder: variant.allowPreorder,
+        restockEta: variant.restockEta,
+        updatedAt: variant.updatedAt,
       },
     });
   }

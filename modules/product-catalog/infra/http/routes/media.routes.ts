@@ -146,7 +146,12 @@ export async function registerMediaRoutes(
         summary: "Delete Media Asset",
         security: [{ bearerAuth: [] }],
         params: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        response: {
+          204: {
+            description: 'Media asset deleted successfully',
+            type: 'null',
+          },
+        },
       },
     },
     (request, reply) => controller.deleteMediaAsset(request as AuthenticatedRequest, reply),

@@ -332,11 +332,6 @@ export class MediaAsset extends AggregateRoot {
     };
   }
 
-  /** @deprecated Use MediaAsset.toDTO(entity) instead */
-  toData(): MediaAssetDTO {
-    return MediaAsset.toDTO(this);
-  }
-
   equals(other: MediaAsset): boolean {
     return this.props.id.equals(other.props.id);
   }

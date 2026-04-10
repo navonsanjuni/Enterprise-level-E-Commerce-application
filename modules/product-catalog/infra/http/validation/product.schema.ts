@@ -97,8 +97,8 @@ export const paginatedProductsResponseSchema = {
     data: {
       type: "object",
       properties: {
-        items: { type: "array", items: productResponseSchema },
-        totalCount: { type: "integer" },
+        products: { type: "array", items: productResponseSchema },
+        total: { type: "integer" },
         page: { type: "integer" },
         limit: { type: "integer" },
       },

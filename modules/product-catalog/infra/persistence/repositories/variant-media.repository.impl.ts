@@ -17,9 +17,12 @@ export class VariantMediaRepository implements IVariantMediaRepository {
   }
 
   private hydrate(row: any): VariantMedia {
-    return VariantMedia.fromDatabaseRow({
-      variant_id: row.variantId,
-      asset_id: row.assetId,
+    return VariantMedia.fromPersistence({
+      id: row.id ?? `${row.variantId}_${row.assetId}`,
+      variantId: VariantId.fromString(row.variantId),
+      mediaAssetId: MediaAssetId.fromString(row.assetId),
+      displayOrder: row.displayOrder ?? 0,
+      createdAt: row.createdAt ?? new Date(),
     });
   }
 

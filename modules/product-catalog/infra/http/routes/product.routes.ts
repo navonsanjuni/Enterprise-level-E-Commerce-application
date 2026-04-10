@@ -227,12 +227,9 @@ export async function registerProductRoutes(
           properties: { productId: { type: "string", format: "uuid" } },
         },
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-            },
+          204: {
+            description: "Product deleted successfully",
+            type: "null",
           },
         },
       },

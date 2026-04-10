@@ -7,7 +7,7 @@ export interface ListCategoriesInput extends IQuery {
   limit?: number;
   parentId?: string;
   includeChildren?: boolean;
-  sortBy?: "name" | "position" | "createdAt";
+  sortBy?: "name" | "position";
   sortOrder?: "asc" | "desc";
 }
 

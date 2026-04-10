@@ -12,7 +12,6 @@ import {
   GetVariantInput,
   GetVariantHandler,
 } from "../../../application";
-import { VariantManagementService } from "../../../application/services/variant-management.service";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
 export interface CreateVariantRequest {
@@ -41,19 +40,14 @@ export interface VariantQueryParams {
 }
 
 export class VariantController {
-  private createVariantHandler: CreateProductVariantHandler;
-  private updateVariantHandler: UpdateProductVariantHandler;
-  private deleteVariantHandler: DeleteProductVariantHandler;
-  private listVariantsHandler: ListVariantsHandler;
-  private getVariantHandler: GetVariantHandler;
+  constructor(
+    private readonly createVariantHandler: CreateProductVariantHandler,
+    private readonly updateVariantHandler: UpdateProductVariantHandler,
+    private readonly deleteVariantHandler: DeleteProductVariantHandler,
+    private readonly listVariantsHandler: ListVariantsHandler,
+    private readonly getVariantHandler: GetVariantHandler,
+  ) {}
 
-  constructor(variantManagementService: VariantManagementService) {
-    this.createVariantHandler = new CreateProductVariantHandler(variantManagementService);
-    this.updateVariantHandler = new UpdateProductVariantHandler(variantManagementService);
-    this.deleteVariantHandler = new DeleteProductVariantHandler(variantManagementService);
-    this.listVariantsHandler = new ListVariantsHandler(variantManagementService);
-    this.getVariantHandler = new GetVariantHandler(variantManagementService);
-  }
 
   async getVariants(
     request: AuthenticatedRequest<{
@@ -69,7 +63,6 @@ export class VariantController {
         limit: request.query.limit,
         size: request.query.size,
         color: request.query.color,
-        inStock: request.query.inStock,
         sortBy: request.query.sortBy,
         sortOrder: request.query.sortOrder,
       };
@@ -77,7 +70,6 @@ export class VariantController {
       const result = await this.listVariantsHandler.handle(query);
       return ResponseHelper.ok(reply, "Variants retrieved successfully", result);
     } catch (error) {
-      request.log.error(error, "Failed to get variants");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -91,7 +83,6 @@ export class VariantController {
       const result = await this.getVariantHandler.handle(query);
       return ResponseHelper.ok(reply, "Variant retrieved successfully", result);
     } catch (error) {
-      request.log.error(error, "Failed to get variant");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -125,7 +116,6 @@ export class VariantController {
 
       return ResponseHelper.fromCommand(reply, result, "Variant created successfully", 201);
     } catch (error) {
-      request.log.error(error, "Failed to create variant");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -158,7 +148,6 @@ export class VariantController {
 
       return ResponseHelper.fromCommand(reply, result, "Variant updated successfully");
     } catch (error) {
-      request.log.error(error, "Failed to update variant");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -168,11 +157,10 @@ export class VariantController {
     reply: FastifyReply,
   ) {
     try {
-      const command: DeleteProductVariantCommand = { variantId: request.params.variantId };
+      const command: DeleteProductVariantInput = { variantId: request.params.variantId };
       const result = await this.deleteVariantHandler.handle(command);
-      return ResponseHelper.fromCommand(reply, result, "Variant deleted successfully");
+      return ResponseHelper.fromCommand(reply, result, "Variant deleted successfully", undefined, 204);
     } catch (error) {
-      request.log.error(error, "Failed to delete variant");
       return ResponseHelper.error(reply, error);
     }
   }

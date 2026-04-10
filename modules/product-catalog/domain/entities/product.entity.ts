@@ -377,11 +377,6 @@ export class Product extends AggregateRoot {
     };
   }
 
-  /** @deprecated Use Product.toDTO(entity) instead */
-  toData(): ProductDTO {
-    return Product.toDTO(this);
-  }
-
   equals(other: Product): boolean {
     return this.props.id.equals(other.props.id);
   }

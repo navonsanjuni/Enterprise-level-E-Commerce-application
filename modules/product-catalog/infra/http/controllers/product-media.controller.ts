@@ -57,7 +57,6 @@ export class ProductMediaController {
 
       return ResponseHelper.ok(reply, "Product media retrieved successfully", productMedia);
     } catch (error) {
-      request.log.error(error, "Failed to get product media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -84,7 +83,6 @@ export class ProductMediaController {
 
       return ResponseHelper.created(reply, "Media added to product successfully", { productMediaId });
     } catch (error) {
-      request.log.error(error, "Failed to add media to product");
 
       if (
         error instanceof Error &&
@@ -114,9 +112,8 @@ export class ProductMediaController {
         assetId,
       );
 
-      return ResponseHelper.ok(reply, "Media removed from product successfully");
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to remove media from product");
 
       return ResponseHelper.error(reply, error);
     }
@@ -131,9 +128,8 @@ export class ProductMediaController {
 
       await this.productMediaManagementService.removeAllProductMedia(productId);
 
-      return ResponseHelper.ok(reply, "All media removed from product successfully");
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to remove all product media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -155,9 +151,8 @@ export class ProductMediaController {
         assetId,
       );
 
-      return ResponseHelper.ok(reply, "Product cover image set successfully");
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to set product cover image");
 
       return ResponseHelper.error(reply, error);
     }
@@ -172,9 +167,8 @@ export class ProductMediaController {
 
       await this.productMediaManagementService.removeCoverImage(productId);
 
-      return ResponseHelper.ok(reply, "Product cover image removed successfully");
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to remove product cover image");
 
       return ResponseHelper.error(reply, error);
     }
@@ -196,9 +190,8 @@ export class ProductMediaController {
         reorderData,
       );
 
-      return ResponseHelper.ok(reply, "Product media reordered successfully");
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to reorder product media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -223,7 +216,6 @@ export class ProductMediaController {
 
       return ResponseHelper.ok(reply, "Media position updated successfully");
     } catch (error) {
-      request.log.error(error, "Failed to move media position");
 
       return ResponseHelper.error(reply, error);
     }
@@ -247,7 +239,6 @@ export class ProductMediaController {
 
       return ResponseHelper.ok(reply, "Product media set successfully");
     } catch (error) {
-      request.log.error(error, "Failed to set product media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -269,7 +260,6 @@ export class ProductMediaController {
 
       return ResponseHelper.ok(reply, "Product media duplicated successfully");
     } catch (error) {
-      request.log.error(error, "Failed to duplicate product media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -287,7 +277,6 @@ export class ProductMediaController {
 
       return ResponseHelper.ok(reply, "Products using asset retrieved successfully", productIds);
     } catch (error) {
-      request.log.error(error, "Failed to get products using asset");
 
       return ResponseHelper.error(reply, error);
     }
@@ -305,7 +294,6 @@ export class ProductMediaController {
 
       return ResponseHelper.ok(reply, "Asset usage count retrieved successfully", { assetId, usageCount });
     } catch (error) {
-      request.log.error(error, "Failed to get asset usage count");
 
       return ResponseHelper.error(reply, error);
     }
@@ -324,7 +312,6 @@ export class ProductMediaController {
 
       return ResponseHelper.ok(reply, "Product media positions compacted successfully");
     } catch (error) {
-      request.log.error(error, "Failed to compact product media positions");
 
       return ResponseHelper.error(reply, error);
     }
@@ -344,7 +331,6 @@ export class ProductMediaController {
 
       return ResponseHelper.ok(reply, "Product media validated successfully", validation);
     } catch (error) {
-      request.log.error(error, "Failed to validate product media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -364,7 +350,6 @@ export class ProductMediaController {
 
       return ResponseHelper.ok(reply, "Product media statistics retrieved successfully", statistics);
     } catch (error) {
-      request.log.error(error, "Failed to get product media statistics");
 
       return ResponseHelper.error(reply, error);
     }

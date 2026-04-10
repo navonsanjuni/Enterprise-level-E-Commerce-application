@@ -137,29 +137,41 @@ export class EditorialLook extends AggregateRoot {
 
   updateStoryHtml(newStoryHtml: string | null): void {
     this.props.storyHtml = newStoryHtml?.trim() || null;
+    this.addDomainEvent(new EditorialLookUpdatedEvent(this.props.id.getValue()));
   }
 
   setHeroAsset(assetId: string | null): void {
     this.props.heroAssetId = assetId ? MediaAssetId.fromString(assetId) : null;
+    this.addDomainEvent(new EditorialLookUpdatedEvent(this.props.id.getValue()));
   }
 
   addProduct(productId: string): void {
     const productIdVo = ProductId.fromString(productId);
     this.props.productIds.add(productIdVo);
+    this.addDomainEvent(new EditorialLookUpdatedEvent(this.props.id.getValue()));
   }
 
   removeProduct(productId: string): void {
-    const productIdVo = ProductId.fromString(productId);
-    this.props.productIds.delete(productIdVo);
+    for (const existing of this.props.productIds) {
+      if (existing.equals(ProductId.fromString(productId))) {
+        this.props.productIds.delete(existing);
+        break;
+      }
+    }
+    this.addDomainEvent(new EditorialLookUpdatedEvent(this.props.id.getValue()));
   }
 
   clearProducts(): void {
     this.props.productIds.clear();
+    this.addDomainEvent(new EditorialLookUpdatedEvent(this.props.id.getValue()));
   }
 
   setProducts(productIds: string[]): void {
     this.props.productIds.clear();
-    productIds.forEach((id) => this.addProduct(id));
+    productIds.forEach((id) => {
+      this.props.productIds.add(ProductId.fromString(id));
+    });
+    this.addDomainEvent(new EditorialLookUpdatedEvent(this.props.id.getValue()));
   }
 
   publish(): void {
@@ -173,10 +185,12 @@ export class EditorialLook extends AggregateRoot {
 
   unpublish(): void {
     this.props.publishedAt = null;
+    this.addDomainEvent(new EditorialLookUpdatedEvent(this.props.id.getValue()));
   }
 
   schedulePublication(publishDate: Date): void {
     this.props.publishedAt = publishDate;
+    this.addDomainEvent(new EditorialLookUpdatedEvent(this.props.id.getValue()));
   }
 
   // Validation methods

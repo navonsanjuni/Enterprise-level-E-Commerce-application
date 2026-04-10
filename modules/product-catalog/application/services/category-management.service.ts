@@ -5,8 +5,9 @@ import {
 import {
   Category,
   CategoryDTO,
-  CreateCategoryData,
 } from "../../domain/entities/category.entity";
+
+type CreateCategoryData = { name: string; parentId?: string; position?: number };
 import { CategoryId } from "../../domain/value-objects/category-id.vo";
 import { Slug } from "../../domain/value-objects/slug.vo";
 import {
@@ -21,7 +22,7 @@ export interface CategoryQueryServiceOptions {
   limit?: number;
   parentId?: string;
   includeChildren?: boolean;
-  sortBy?: "name" | "position" | "createdAt";
+  sortBy?: "name" | "position";
   sortOrder?: "asc" | "desc";
 }
 

@@ -23,7 +23,7 @@ export const listTagsSchema = z.object({
   page: z.string().regex(/^\d+$/).optional().default("1").transform(Number),
   limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
   kind: z.string().optional(),
-  sortBy: z.enum(["tag", "kind", "usage_count"]).optional().default("tag"),
+  sortBy: z.enum(["tag", "kind"]).optional().default("tag"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
 });
 
@@ -84,5 +84,50 @@ export const tagResponseSchema = {
     kind: { type: "string", nullable: true },
     createdAt: { type: "string", format: "date-time" },
     updatedAt: { type: "string", format: "date-time" },
+  },
+} as const;
+
+export const tagStatsResponseSchema = {
+  type: "object",
+  properties: {
+    totalTags: { type: "integer" },
+    tagsByKind: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          kind: { type: "string", nullable: true },
+          count: { type: "integer" },
+        },
+      },
+    },
+    averageTagLength: { type: "number" },
+  },
+} as const;
+
+export const mostUsedTagsResponseSchema = {
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      tag: tagResponseSchema,
+      usageCount: { type: "integer" },
+    },
+  },
+} as const;
+
+export const paginatedTagsResponseSchema = {
+  type: "object",
+  properties: {
+    tags: { type: "array", items: tagResponseSchema },
+    pagination: {
+      type: "object",
+      properties: {
+        page: { type: "integer" },
+        limit: { type: "integer" },
+        total: { type: "integer" },
+        total_pages: { type: "integer" },
+      },
+    },
   },
 } as const;

@@ -60,3 +60,133 @@ export type SetVariantMediaBody = z.infer<typeof setVariantMediaSchema>;
 export type AddMultipleMediaToVariantBody = z.infer<typeof addMultipleMediaToVariantSchema>;
 export type AddMediaToMultipleVariantsBody = z.infer<typeof addMediaToMultipleVariantsSchema>;
 export type CopyVariantMediaBody = z.infer<typeof copyVariantMediaSchema>;
+
+// ── JSON Schema for Swagger docs ──────────────────────────────────────────────
+
+const mediaAssetItemSchema = {
+  type: "object",
+  properties: {
+    assetId: { type: "string", format: "uuid" },
+    storageKey: { type: "string" },
+    mimeType: { type: "string" },
+    altText: { type: "string", nullable: true },
+  },
+} as const;
+
+export const variantMediaSummaryResponseSchema = {
+  type: "object",
+  properties: {
+    variantId: { type: "string", format: "uuid" },
+    sku: { type: "string" },
+    color: { type: "string", nullable: true },
+    size: { type: "string", nullable: true },
+    totalMedia: { type: "integer" },
+    mediaAssets: { type: "array", items: mediaAssetItemSchema },
+  },
+} as const;
+
+export const productVariantMediaResponseSchema = {
+  type: "object",
+  properties: {
+    productId: { type: "string", format: "uuid" },
+    variants: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          variantId: { type: "string", format: "uuid" },
+          sku: { type: "string" },
+          color: { type: "string", nullable: true },
+          size: { type: "string", nullable: true },
+          mediaCount: { type: "integer" },
+          mediaAssets: { type: "array", items: mediaAssetItemSchema },
+        },
+      },
+    },
+  },
+} as const;
+
+export const colorVariantMediaResponseSchema = {
+  type: "object",
+  properties: {
+    color: { type: "string" },
+    variants: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          variantId: { type: "string", format: "uuid" },
+          sku: { type: "string" },
+          size: { type: "string", nullable: true },
+          mediaAssets: { type: "array", items: mediaAssetItemSchema },
+        },
+      },
+    },
+  },
+} as const;
+
+export const sizeVariantMediaResponseSchema = {
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      size: { type: "string" },
+      variants: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            variantId: { type: "string", format: "uuid" },
+            sku: { type: "string" },
+            color: { type: "string", nullable: true },
+            mediaAssets: { type: "array", items: mediaAssetItemSchema },
+          },
+        },
+      },
+    },
+  },
+} as const;
+
+export const variantMediaStatisticsResponseSchema = {
+  type: "object",
+  properties: {
+    totalMedia: { type: "integer" },
+    imageCount: { type: "integer" },
+    videoCount: { type: "integer" },
+    otherCount: { type: "integer" },
+    totalSize: { type: "integer" },
+    averageFileSize: { type: "number" },
+  },
+} as const;
+
+export const validateVariantMediaResponseSchema = {
+  type: "object",
+  properties: {
+    isValid: { type: "boolean" },
+    issues: { type: "array", items: { type: "string" } },
+  },
+} as const;
+
+export const unusedAssetsResponseSchema = {
+  type: "object",
+  properties: {
+    assets: { type: "array", items: { type: "string", format: "uuid" } },
+    meta: {
+      type: "object",
+      properties: { productId: { type: "string" } },
+    },
+  },
+} as const;
+
+export const variantsUsingAssetResponseSchema = {
+  type: "array",
+  items: { type: "string", format: "uuid" },
+} as const;
+
+export const assetUsageCountResponseSchema = {
+  type: "object",
+  properties: {
+    assetId: { type: "string", format: "uuid" },
+    usageCount: { type: "integer" },
+  },
+} as const;

@@ -1,6 +1,6 @@
 import { IProductRepository } from "../../domain/repositories/product.repository";
 import { ICategoryRepository } from "../../domain/repositories/category.repository";
-import { Product } from "../../domain/entities/product.entity";
+import { Product, ProductDTO } from "../../domain/entities/product.entity";
 import {
   DomainValidationError,
   InvalidOperationError,
@@ -62,7 +62,7 @@ export class ProductSearchService {
   async searchProducts(
     query: string,
     options: ProductSearchOptions = {},
-  ): Promise<{ items: Product[]; totalCount: number; suggestions?: string[] }> {
+  ): Promise<{ items: ProductDTO[]; totalCount: number; suggestions?: string[] }> {
     if (!query || query.trim().length === 0) {
       throw new DomainValidationError("Search query cannot be empty");
     }
@@ -117,7 +117,7 @@ export class ProductSearchService {
       });
 
       return {
-        items: products,
+        items: products.map((p) => Product.toDTO(p)),
         totalCount: allResults.length,
         // Basic suggestions based on search results
         suggestions: this.generateSearchSuggestions(query, products),

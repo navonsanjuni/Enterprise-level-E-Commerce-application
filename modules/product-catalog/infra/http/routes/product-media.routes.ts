@@ -74,7 +74,12 @@ export async function registerProductMediaRoutes(
           required: ["assetId"],
           properties: { assetId: { type: "string", format: "uuid" } },
         },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        response: {
+          204: {
+            description: "Product cover image set successfully",
+            type: "null",
+          },
+        },
       },
     },
     (request, reply) => controller.setProductCoverImage(request as AuthenticatedRequest, reply),
@@ -107,7 +112,12 @@ export async function registerProductMediaRoutes(
             },
           },
         },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        response: {
+          204: {
+            description: "Product media reordered successfully",
+            type: "null",
+          },
+        },
       },
     },
     (request, reply) => controller.reorderProductMedia(request as AuthenticatedRequest, reply),
@@ -165,7 +175,12 @@ export async function registerProductMediaRoutes(
           required: ["productId", "assetId"],
           properties: { productId: { type: "string", format: "uuid" }, assetId: { type: "string", format: "uuid" } },
         },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        response: {
+          204: {
+            description: "Media removed from product successfully",
+            type: "null",
+          },
+        },
       },
     },
     (request, reply) => controller.removeMediaFromProduct(request as AuthenticatedRequest, reply),

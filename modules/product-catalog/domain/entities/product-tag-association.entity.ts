@@ -34,19 +34,19 @@ export class ProductTagAssociation {
   }
 
   // Getters
-  getId(): string {
+  get id(): string {
     return this.props.id;
   }
 
-  getProductId(): ProductId {
+  get productId(): ProductId {
     return this.props.productId;
   }
 
-  getTagId(): ProductTagId {
+  get tagId(): ProductTagId {
     return this.props.tagId;
   }
 
-  getCreatedAt(): Date {
+  get createdAt(): Date {
     return this.props.createdAt;
   }
 

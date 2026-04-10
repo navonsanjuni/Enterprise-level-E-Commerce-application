@@ -89,3 +89,96 @@ export const sizeGuideResponseSchema = {
     updatedAt: { type: "string", format: "date-time" },
   },
 } as const;
+
+export const sizeGuideStatsResponseSchema = {
+  type: "object",
+  properties: {
+    totalGuides: { type: "integer" },
+    guidesByRegion: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          region: { type: "string", enum: ["UK", "US", "EU"] },
+          count: { type: "integer" },
+        },
+      },
+    },
+    guidesByCategory: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          category: { type: "string", nullable: true },
+          count: { type: "integer" },
+        },
+      },
+    },
+    guidesWithContent: { type: "integer" },
+    guidesWithoutContent: { type: "integer" },
+  },
+} as const;
+
+export const availableRegionsResponseSchema = {
+  type: "array",
+  items: { type: "string", enum: ["UK", "US", "EU"] },
+} as const;
+
+export const availableCategoriesResponseSchema = {
+  type: "object",
+  properties: {
+    categories: { type: "array", items: { type: "string" } },
+    meta: {
+      type: "object",
+      properties: { region: { type: "string" } },
+    },
+  },
+} as const;
+
+export const generalSizeGuidesResponseSchema = {
+  type: "object",
+  properties: {
+    guides: { type: "array", items: sizeGuideResponseSchema },
+    meta: {
+      type: "object",
+      properties: {
+        region: { type: "string" },
+        count: { type: "integer" },
+      },
+    },
+  },
+} as const;
+
+export const validateSizeGuideUniquenessResponseSchema = {
+  type: "object",
+  properties: {
+    region: { type: "string" },
+    category: { type: "string", nullable: true },
+    isUnique: { type: "boolean" },
+    available: { type: "boolean" },
+  },
+} as const;
+
+export const regionalSizeGuidesResponseSchema = {
+  type: "object",
+  properties: {
+    sizeGuides: { type: "array", items: sizeGuideResponseSchema },
+    pagination: {
+      type: "object",
+      properties: {
+        page: { type: "integer" },
+        limit: { type: "integer" },
+        total: { type: "integer" },
+        total_pages: { type: "integer" },
+      },
+    },
+    meta: {
+      type: "object",
+      properties: {
+        region: { type: "string" },
+        page: { type: "integer" },
+        limit: { type: "integer" },
+      },
+    },
+  },
+} as const;

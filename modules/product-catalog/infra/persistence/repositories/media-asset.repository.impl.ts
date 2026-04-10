@@ -41,22 +41,20 @@ export class MediaAssetRepository implements IMediaAssetRepository {
   }
 
   async save(asset: MediaAsset): Promise<void> {
-    const dto = MediaAsset.toDTO(asset);
-
     await this.prisma.mediaAsset.create({
       data: {
-        id: dto.id,
-        storageKey: dto.storageKey,
-        mime: dto.mime,
-        width: dto.width,
-        height: dto.height,
-        bytes: dto.bytes,
-        altText: dto.altText,
-        focalX: dto.focalX,
-        focalY: dto.focalY,
-        renditions: dto.renditions as any,
-        version: dto.version,
-        createdAt: dto.createdAt,
+        id: asset.id.getValue(),
+        storageKey: asset.storageKey,
+        mime: asset.mime,
+        width: asset.width,
+        height: asset.height,
+        bytes: asset.bytes,
+        altText: asset.altText,
+        focalX: asset.focalX,
+        focalY: asset.focalY,
+        renditions: asset.renditions as any,
+        version: asset.version,
+        createdAt: asset.createdAt,
       },
     });
   }
@@ -266,21 +264,19 @@ export class MediaAssetRepository implements IMediaAssetRepository {
   }
 
   async update(asset: MediaAsset): Promise<void> {
-    const dto = MediaAsset.toDTO(asset);
-
     await this.prisma.mediaAsset.update({
-      where: { id: dto.id },
+      where: { id: asset.id.getValue() },
       data: {
-        storageKey: dto.storageKey,
-        mime: dto.mime,
-        width: dto.width,
-        height: dto.height,
-        bytes: dto.bytes,
-        altText: dto.altText,
-        focalX: dto.focalX,
-        focalY: dto.focalY,
-        renditions: dto.renditions as any,
-        version: dto.version,
+        storageKey: asset.storageKey,
+        mime: asset.mime,
+        width: asset.width,
+        height: asset.height,
+        bytes: asset.bytes,
+        altText: asset.altText,
+        focalX: asset.focalX,
+        focalY: asset.focalY,
+        renditions: asset.renditions as any,
+        version: asset.version,
       },
     });
   }

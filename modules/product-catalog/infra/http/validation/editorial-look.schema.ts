@@ -111,3 +111,42 @@ export const editorialLookResponseSchema = {
     productIds: { type: "array", items: { type: "string", format: "uuid" } },
   },
 } as const;
+
+export const editorialLookStatsResponseSchema = {
+  type: "object",
+  properties: {
+    totalLooks: { type: "integer" },
+    publishedLooks: { type: "integer" },
+    scheduledLooks: { type: "integer" },
+    draftLooks: { type: "integer" },
+    looksWithHeroImage: { type: "integer" },
+    looksWithProducts: { type: "integer" },
+    looksWithContent: { type: "integer" },
+  },
+} as const;
+
+export const readyToPublishLooksResponseSchema = {
+  type: "array",
+  items: editorialLookResponseSchema,
+} as const;
+
+export const popularProductsResponseSchema = {
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      productId: { type: "string", format: "uuid" },
+      appearanceCount: { type: "integer" },
+    },
+  },
+} as const;
+
+export const lookProductsResponseSchema = {
+  type: "array",
+  items: { type: "string", format: "uuid" },
+} as const;
+
+export const productLooksResponseSchema = {
+  type: "array",
+  items: { type: "string", format: "uuid" },
+} as const;

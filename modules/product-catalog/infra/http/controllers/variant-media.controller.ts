@@ -53,7 +53,6 @@ export class VariantMediaController {
         variantMedia,
       );
     } catch (error) {
-      request.log.error(error, "Failed to get variant media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -80,7 +79,6 @@ export class VariantMediaController {
         "Media added to variant successfully",
       );
     } catch (error) {
-      request.log.error(error, "Failed to add media to variant");
 
       if (
         error instanceof Error &&
@@ -110,12 +108,8 @@ export class VariantMediaController {
         assetId,
       );
 
-      return ResponseHelper.ok(
-        reply,
-        "Media removed from variant successfully",
-      );
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to remove media from variant");
 
       return ResponseHelper.error(reply, error);
     }
@@ -130,12 +124,8 @@ export class VariantMediaController {
 
       await this.variantMediaManagementService.removeAllVariantMedia(variantId);
 
-      return ResponseHelper.ok(
-        reply,
-        "All media removed from variant successfully",
-      );
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to remove all variant media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -157,9 +147,8 @@ export class VariantMediaController {
         assetIds,
       );
 
-      return ResponseHelper.ok(reply, "Variant media set successfully");
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to set variant media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -182,7 +171,6 @@ export class VariantMediaController {
         `Media added to ${variantIds.length} variants successfully`,
       );
     } catch (error) {
-      request.log.error(error, "Failed to add media to multiple variants");
 
       return ResponseHelper.error(reply, error);
     }
@@ -209,7 +197,6 @@ export class VariantMediaController {
         `${assetIds.length} media assets added to variant successfully`,
       );
     } catch (error) {
-      request.log.error(error, "Failed to add multiple media to variant");
 
       return ResponseHelper.error(reply, error);
     }
@@ -229,9 +216,8 @@ export class VariantMediaController {
         targetVariantId,
       );
 
-      return ResponseHelper.ok(reply, "Variant media duplicated successfully");
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to duplicate variant media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -260,7 +246,6 @@ export class VariantMediaController {
         productVariantMedia,
       );
     } catch (error) {
-      request.log.error(error, "Failed to get product variant media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -279,12 +264,8 @@ export class VariantMediaController {
         variantMapping,
       );
 
-      return ResponseHelper.ok(
-        reply,
-        "Product variant media copied successfully",
-      );
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to copy product variant media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -306,7 +287,6 @@ export class VariantMediaController {
         variantIds,
       );
     } catch (error) {
-      request.log.error(error, "Failed to get variants using asset");
 
       return ResponseHelper.error(reply, error);
     }
@@ -328,7 +308,6 @@ export class VariantMediaController {
         { assetId, usageCount },
       );
     } catch (error) {
-      request.log.error(error, "Failed to get asset usage count");
 
       return ResponseHelper.error(reply, error);
     }
@@ -353,7 +332,6 @@ export class VariantMediaController {
         colorVariantMedia,
       );
     } catch (error) {
-      request.log.error(error, "Failed to get color variant media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -378,7 +356,6 @@ export class VariantMediaController {
         sizeVariantMedia,
       );
     } catch (error) {
-      request.log.error(error, "Failed to get size variant media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -401,7 +378,6 @@ export class VariantMediaController {
         },
       });
     } catch (error) {
-      request.log.error(error, "Failed to get unused assets");
 
       return ResponseHelper.error(reply, error);
     }
@@ -425,7 +401,6 @@ export class VariantMediaController {
         validation,
       );
     } catch (error) {
-      request.log.error(error, "Failed to validate variant media");
 
       return ResponseHelper.error(reply, error);
     }
@@ -449,7 +424,6 @@ export class VariantMediaController {
         statistics,
       );
     } catch (error) {
-      request.log.error(error, "Failed to get variant media statistics");
 
       return ResponseHelper.error(reply, error);
     }

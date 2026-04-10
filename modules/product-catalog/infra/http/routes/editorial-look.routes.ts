@@ -24,6 +24,11 @@ import {
   bulkPublishEditorialLooksSchema,
   bulkDeleteEditorialLooksSchema,
   editorialLookResponseSchema,
+  editorialLookStatsResponseSchema,
+  readyToPublishLooksResponseSchema,
+  popularProductsResponseSchema,
+  lookProductsResponseSchema,
+  productLooksResponseSchema,
 } from "../validation/editorial-look.schema";
 
 export async function registerEditorialLookRoutes(
@@ -96,6 +101,15 @@ export async function registerEditorialLookRoutes(
         tags: ["Editorial Looks"],
         summary: "Get Editorial Look Statistics",
         security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: editorialLookStatsResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) =>
@@ -112,6 +126,15 @@ export async function registerEditorialLookRoutes(
         tags: ["Editorial Looks"],
         summary: "Get Ready to Publish Looks",
         security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: readyToPublishLooksResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) =>
@@ -131,6 +154,15 @@ export async function registerEditorialLookRoutes(
           type: "object",
           properties: {
             limit: { type: "integer", minimum: 1, maximum: 50, default: 10 },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: popularProductsResponseSchema,
+            },
           },
         },
       },
@@ -179,6 +211,15 @@ export async function registerEditorialLookRoutes(
           required: ["id"],
           properties: { id: { type: "string", format: "uuid" } },
         },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: lookProductsResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) =>
@@ -198,6 +239,15 @@ export async function registerEditorialLookRoutes(
           type: "object",
           required: ["productId"],
           properties: { productId: { type: "string", format: "uuid" } },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: productLooksResponseSchema,
+            },
+          },
         },
       },
     },
@@ -290,6 +340,13 @@ export async function registerEditorialLookRoutes(
             properties: {
               success: { type: "boolean" },
               message: { type: "string" },
+              data: {
+                type: "object",
+                properties: {
+                  published: { type: "array", items: lookSchema },
+                  failed: { type: "array", items: { type: "object" } },
+                },
+              },
             },
           },
         },
@@ -319,6 +376,13 @@ export async function registerEditorialLookRoutes(
             properties: {
               success: { type: "boolean" },
               message: { type: "string" },
+              data: {
+                type: "object",
+                properties: {
+                  published: { type: "array", items: lookSchema },
+                  errors: { type: "array", items: { type: "object" } },
+                },
+              },
             },
           },
         },
@@ -396,6 +460,7 @@ export async function registerEditorialLookRoutes(
             properties: {
               success: { type: "boolean" },
               message: { type: "string" },
+              data: lookSchema,
             },
           },
         },
@@ -427,6 +492,7 @@ export async function registerEditorialLookRoutes(
             properties: {
               success: { type: "boolean" },
               message: { type: "string" },
+              data: lookSchema,
             },
           },
         },
@@ -466,6 +532,7 @@ export async function registerEditorialLookRoutes(
             properties: {
               success: { type: "boolean" },
               message: { type: "string" },
+              data: lookSchema,
             },
           },
         },
@@ -540,6 +607,7 @@ export async function registerEditorialLookRoutes(
             properties: {
               success: { type: "boolean" },
               message: { type: "string" },
+              data: lookSchema,
             },
           },
         },
@@ -584,6 +652,7 @@ export async function registerEditorialLookRoutes(
             properties: {
               success: { type: "boolean" },
               message: { type: "string" },
+              data: lookSchema,
             },
           },
         },
@@ -613,12 +682,9 @@ export async function registerEditorialLookRoutes(
           },
         },
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-            },
+          204: {
+            description: "Product added to editorial look successfully",
+            type: "null",
           },
         },
       },
@@ -657,6 +723,7 @@ export async function registerEditorialLookRoutes(
             properties: {
               success: { type: "boolean" },
               message: { type: "string" },
+              data: lookSchema,
             },
           },
         },
@@ -736,13 +803,7 @@ export async function registerEditorialLookRoutes(
           },
         },
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-            },
-          },
+          204: { type: "null", description: "No Content" },
         },
       },
     },
@@ -770,12 +831,9 @@ export async function registerEditorialLookRoutes(
           properties: { id: { type: "string", format: "uuid" } },
         },
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-            },
+          204: {
+            description: "Hero image removed successfully",
+            type: "null",
           },
         },
       },
@@ -801,12 +859,9 @@ export async function registerEditorialLookRoutes(
           properties: { id: { type: "string", format: "uuid" } },
         },
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-            },
+          204: {
+            description: "Story content cleared successfully",
+            type: "null",
           },
         },
       },
@@ -835,12 +890,9 @@ export async function registerEditorialLookRoutes(
           },
         },
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-            },
+          204: {
+            description: "Product removed from editorial look successfully",
+            type: "null",
           },
         },
       },
@@ -866,12 +918,9 @@ export async function registerEditorialLookRoutes(
           properties: { id: { type: "string", format: "uuid" } },
         },
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-            },
+          204: {
+            description: "Editorial look deleted successfully",
+            type: "null",
           },
         },
       },

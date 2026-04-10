@@ -16,7 +16,6 @@ import {
   GetCategoryHierarchyInput,
   GetCategoryHierarchyHandler,
 } from "../../../application";
-import { CategoryManagementService } from "../../../application/services/category-management.service";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
 export interface CreateCategoryRequest {
@@ -32,40 +31,21 @@ export interface CategoryQueryParams {
   limit?: number;
   parentId?: string;
   includeChildren?: boolean;
-  sortBy?: "name" | "position" | "createdAt";
+  sortBy?: "name" | "position";
   sortOrder?: "asc" | "desc";
 }
 
 export class CategoryController {
-  private createCategoryHandler: CreateCategoryHandler;
-  private updateCategoryHandler: UpdateCategoryHandler;
-  private deleteCategoryHandler: DeleteCategoryHandler;
-  private reorderCategoriesHandler: ReorderCategoriesHandler;
-  private getCategoryHandler: GetCategoryHandler;
-  private listCategoriesHandler: ListCategoriesHandler;
-  private getCategoryHierarchyHandler: GetCategoryHierarchyHandler;
+  constructor(
+    private readonly createCategoryHandler: CreateCategoryHandler,
+    private readonly updateCategoryHandler: UpdateCategoryHandler,
+    private readonly deleteCategoryHandler: DeleteCategoryHandler,
+    private readonly reorderCategoriesHandler: ReorderCategoriesHandler,
+    private readonly getCategoryHandler: GetCategoryHandler,
+    private readonly listCategoriesHandler: ListCategoriesHandler,
+    private readonly getCategoryHierarchyHandler: GetCategoryHierarchyHandler,
+  ) {}
 
-  constructor(categoryManagementService: CategoryManagementService) {
-    this.createCategoryHandler = new CreateCategoryHandler(
-      categoryManagementService,
-    );
-    this.updateCategoryHandler = new UpdateCategoryHandler(
-      categoryManagementService,
-    );
-    this.deleteCategoryHandler = new DeleteCategoryHandler(
-      categoryManagementService,
-    );
-    this.reorderCategoriesHandler = new ReorderCategoriesHandler(
-      categoryManagementService,
-    );
-    this.getCategoryHandler = new GetCategoryHandler(categoryManagementService);
-    this.listCategoriesHandler = new ListCategoriesHandler(
-      categoryManagementService,
-    );
-    this.getCategoryHierarchyHandler = new GetCategoryHierarchyHandler(
-      categoryManagementService,
-    );
-  }
 
   async getCategories(
     request: AuthenticatedRequest<{ Querystring: CategoryQueryParams }>,
@@ -84,7 +64,6 @@ export class CategoryController {
       const result = await this.listCategoriesHandler.handle(query);
       return ResponseHelper.ok(reply, "Categories retrieved successfully", result);
     } catch (error) {
-      request.log.error(error, "Failed to get categories");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -98,7 +77,6 @@ export class CategoryController {
       const result = await this.getCategoryHandler.handle(query);
       return ResponseHelper.ok(reply, "Category retrieved successfully", result);
     } catch (error) {
-      request.log.error(error, "Failed to get category");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -112,7 +90,6 @@ export class CategoryController {
       const result = await this.getCategoryHandler.handle(query);
       return ResponseHelper.ok(reply, "Category retrieved successfully", result);
     } catch (error) {
-      request.log.error(error, "Failed to get category by slug");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -138,7 +115,6 @@ export class CategoryController {
         201,
       );
     } catch (error) {
-      request.log.error(error, "Failed to create category");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -168,7 +144,6 @@ export class CategoryController {
         "Category updated successfully",
       );
     } catch (error) {
-      request.log.error(error, "Failed to update category");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -184,20 +159,20 @@ export class CategoryController {
         reply,
         result,
         "Category deleted successfully",
+        undefined,
+        204,
       );
     } catch (error) {
-      request.log.error(error, "Failed to delete category");
       return ResponseHelper.error(reply, error);
     }
   }
 
-  async getCategoryHierarchy(request: AuthenticatedRequest, reply: FastifyReply) {
+  async getCategoryHierarchy(_request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const query: GetCategoryHierarchyInput = {};
       const result = await this.getCategoryHierarchyHandler.handle(query);
       return ResponseHelper.ok(reply, "Category hierarchy retrieved successfully", result);
     } catch (error) {
-      request.log.error(error, "Failed to get category hierarchy");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -217,9 +192,10 @@ export class CategoryController {
         reply,
         result,
         "Categories reordered successfully",
+        undefined,
+        204,
       );
     } catch (error) {
-      request.log.error(error, "Failed to reorder categories");
       return ResponseHelper.error(reply, error);
     }
   }

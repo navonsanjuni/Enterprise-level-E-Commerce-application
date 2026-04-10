@@ -15,7 +15,6 @@ import {
   SearchProductsHandler,
 } from "../../../application";
 import { ProductManagementService } from "../../../application/services/product-management.service";
-import { ProductSearchService } from "../../../application/services/product-search.service";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
 export interface CreateProductRequest {
@@ -51,34 +50,16 @@ export interface ProductQueryParams {
 }
 
 export class ProductController {
-  private createProductHandler: CreateProductHandler;
-  private updateProductHandler: UpdateProductHandler;
-  private deleteProductHandler: DeleteProductHandler;
-  private getProductHandler: GetProductHandler;
-  private listProductsHandler: ListProductsHandler;
-  private searchProductsHandler: SearchProductsHandler;
-
   constructor(
+    private readonly createProductHandler: CreateProductHandler,
+    private readonly updateProductHandler: UpdateProductHandler,
+    private readonly deleteProductHandler: DeleteProductHandler,
+    private readonly getProductHandler: GetProductHandler,
+    private readonly listProductsHandler: ListProductsHandler,
+    private readonly searchProductsHandler: SearchProductsHandler,
     private readonly productManagementService: ProductManagementService,
-    productSearchService: ProductSearchService,
-  ) {
-    this.createProductHandler = new CreateProductHandler(
-      productManagementService,
-    );
-    this.updateProductHandler = new UpdateProductHandler(
-      productManagementService,
-    );
-    this.deleteProductHandler = new DeleteProductHandler(
-      productManagementService,
-    );
-    this.getProductHandler = new GetProductHandler(productManagementService);
-    this.listProductsHandler = new ListProductsHandler(
-      productManagementService,
-    );
-    this.searchProductsHandler = new SearchProductsHandler(
-      productSearchService,
-    );
-  }
+  ) {}
+
 
   async listProducts(
     request: AuthenticatedRequest<{ Querystring: ProductQueryParams }>,
@@ -181,7 +162,6 @@ export class ProductController {
         limit: currentLimit,
       });
     } catch (error) {
-      request.log.error(error, "Failed to list/search products");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -193,7 +173,7 @@ export class ProductController {
     try {
       const { productId } = request.params;
 
-      const query: GetProductInput ={ productId };
+      const query: GetProductInput = { productId };
       const productData = await this.getProductHandler.handle(query);
 
       const mediaEnrichment =
@@ -214,7 +194,6 @@ export class ProductController {
         productWithDetails,
       );
     } catch (error) {
-      request.log.error(error, "Failed to get product");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -226,7 +205,7 @@ export class ProductController {
     try {
       const { slug } = request.params;
 
-      const query: GetProductInput ={ slug };
+      const query: GetProductInput = { slug };
       const productData = await this.getProductHandler.handle(query);
 
       const enrichment =
@@ -247,7 +226,6 @@ export class ProductController {
         productWithDetails,
       );
     } catch (error) {
-      request.log.error(error, "Failed to get product by slug");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -288,7 +266,6 @@ export class ProductController {
         201,
       );
     } catch (error) {
-      request.log.error(error, "Failed to create product");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -333,7 +310,6 @@ export class ProductController {
         "Product updated successfully",
       );
     } catch (error) {
-      request.log.error(error, "Failed to update product");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -352,9 +328,10 @@ export class ProductController {
         reply,
         result,
         "Product deleted successfully",
+        undefined,
+        204,
       );
     } catch (error) {
-      request.log.error(error, "Failed to delete product");
       return ResponseHelper.error(reply, error);
     }
   }

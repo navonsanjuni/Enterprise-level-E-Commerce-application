@@ -265,11 +265,6 @@ export class ProductVariant extends AggregateRoot {
     };
   }
 
-  /** @deprecated Use ProductVariant.toDTO(entity) instead */
-  toData(): ProductVariantDTO {
-    return ProductVariant.toDTO(this);
-  }
-
   equals(other: ProductVariant): boolean {
     return this.props.id.equals(other.props.id);
   }

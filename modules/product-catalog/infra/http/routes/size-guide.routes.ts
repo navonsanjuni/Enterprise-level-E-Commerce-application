@@ -19,6 +19,12 @@ import {
   bulkDeleteSizeGuidesSchema,
   regionalSizeGuideSchema,
   sizeGuideResponseSchema,
+  sizeGuideStatsResponseSchema,
+  availableRegionsResponseSchema,
+  availableCategoriesResponseSchema,
+  generalSizeGuidesResponseSchema,
+  validateSizeGuideUniquenessResponseSchema,
+  regionalSizeGuidesResponseSchema,
 } from "../validation/size-guide.schema";
 
 export async function registerSizeGuideRoutes(
@@ -86,6 +92,15 @@ export async function registerSizeGuideRoutes(
         tags: ["Size Guides"],
         summary: "Get Size Guide Statistics",
         security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: sizeGuideStatsResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) => controller.getSizeGuideStats(request as AuthenticatedRequest, reply),
@@ -99,6 +114,15 @@ export async function registerSizeGuideRoutes(
         description: "Get available size guide regions",
         tags: ["Size Guides"],
         summary: "Get Available Regions",
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: availableRegionsResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) => controller.getAvailableRegions(request as AuthenticatedRequest, reply),
@@ -112,20 +136,44 @@ export async function registerSizeGuideRoutes(
         description: "Get available size guide categories",
         tags: ["Size Guides"],
         summary: "Get Available Categories",
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: availableCategoriesResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) =>
       controller.getAvailableCategories(request as AuthenticatedRequest, reply),
   );
 
-  // GET /size-guides/general — Get general (non-regional) size guides (public, before /:id)
+  // GET /size-guides/general/:region — Get general size guides for a region (public, before /:id)
   fastify.get(
-    "/size-guides/general",
+    "/size-guides/general/:region",
     {
+      preValidation: [validateParams(regionParamsSchema)],
       schema: {
-        description: "Get general size guides not tied to a specific region",
+        description: "Get general size guides for a specific region",
         tags: ["Size Guides"],
         summary: "Get General Size Guides",
+        params: {
+          type: "object",
+          required: ["region"],
+          properties: { region: { type: "string", enum: ["UK", "US", "EU"] } },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: generalSizeGuidesResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) => controller.getGeneralSizeGuides(request as AuthenticatedRequest, reply),
@@ -149,6 +197,15 @@ export async function registerSizeGuideRoutes(
             category: { type: "string" },
           },
         },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: validateSizeGuideUniquenessResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) => controller.validateUniqueness(request as AuthenticatedRequest, reply),
@@ -167,6 +224,15 @@ export async function registerSizeGuideRoutes(
           type: "object",
           required: ["region"],
           properties: { region: { type: "string", enum: ["UK", "US", "EU"] } },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: regionalSizeGuidesResponseSchema,
+            },
+          },
         },
       },
     },
@@ -423,12 +489,9 @@ export async function registerSizeGuideRoutes(
           },
         },
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-            },
+          204: {
+            description: "Size guides bulk deleted successfully",
+            type: "null",
           },
         },
       },
@@ -453,12 +516,9 @@ export async function registerSizeGuideRoutes(
           properties: { id: { type: "string", format: "uuid" } },
         },
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-            },
+          204: {
+            description: "Size guide content cleared successfully",
+            type: "null",
           },
         },
       },
@@ -483,12 +543,9 @@ export async function registerSizeGuideRoutes(
           properties: { id: { type: "string", format: "uuid" } },
         },
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-            },
+          204: {
+            description: "Size guide deleted successfully",
+            type: "null",
           },
         },
       },

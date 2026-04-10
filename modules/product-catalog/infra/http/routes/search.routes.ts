@@ -7,6 +7,11 @@ import {
   searchQuerySchema,
   searchSuggestionsQuerySchema,
   searchFiltersQuerySchema,
+  searchResultsResponseSchema,
+  searchSuggestionsResponseSchema,
+  popularSearchesResponseSchema,
+  searchFiltersResponseSchema,
+  searchStatsResponseSchema,
 } from "../validation/search.schema";
 
 export async function registerSearchRoutes(
@@ -43,16 +48,7 @@ export async function registerSearchRoutes(
             type: "object",
             properties: {
               success: { type: "boolean" },
-              data: {
-                type: "object",
-                properties: {
-                  products: { type: "array", items: { type: "object" } },
-                  total: { type: "integer" },
-                  page: { type: "integer" },
-                  limit: { type: "integer" },
-                  query: { type: "string" },
-                },
-              },
+              data: searchResultsResponseSchema,
             },
           },
         },
@@ -84,7 +80,7 @@ export async function registerSearchRoutes(
             type: "object",
             properties: {
               success: { type: "boolean" },
-              data: { type: "array", items: { type: "object" } },
+              data: searchSuggestionsResponseSchema,
             },
           },
         },
@@ -101,6 +97,15 @@ export async function registerSearchRoutes(
         description: "Get popular/trending search queries",
         tags: ["Search"],
         summary: "Get Popular Searches",
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: popularSearchesResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) => controller.getPopularSearches(request as AuthenticatedRequest, reply),
@@ -121,6 +126,15 @@ export async function registerSearchRoutes(
             q: { type: "string" },
           },
         },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: searchFiltersResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) => controller.getSearchFilters(request as AuthenticatedRequest, reply),
@@ -136,6 +150,15 @@ export async function registerSearchRoutes(
         tags: ["Search"],
         summary: "Get Search Statistics",
         security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: searchStatsResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) => controller.getSearchStats(request as AuthenticatedRequest, reply),

@@ -15,7 +15,7 @@ export const listCategoriesSchema = z.object({
   limit: z.string().regex(/^\d+$/).optional().default("50").transform(Number),
   parentId: z.string().uuid().optional(),
   includeChildren: z.string().optional().transform((v) => v === "true"),
-  sortBy: z.enum(["name", "position", "createdAt"]).optional().default("position"),
+  sortBy: z.enum(["name", "position"]).optional().default("position"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
 });
 

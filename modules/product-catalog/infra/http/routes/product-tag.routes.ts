@@ -18,6 +18,9 @@ import {
   bulkDeleteTagsSchema,
   associateTagsSchema,
   tagResponseSchema,
+  tagStatsResponseSchema,
+  mostUsedTagsResponseSchema,
+  paginatedTagsResponseSchema,
 } from "../validation/product-tag.schema";
 
 export async function registerProductTagRoutes(
@@ -41,7 +44,7 @@ export async function registerProductTagRoutes(
             page: { type: "integer", minimum: 1, default: 1 },
             limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
             kind: { type: "string" },
-            sortBy: { type: "string", enum: ["tag", "kind", "usage_count"], default: "tag" },
+            sortBy: { type: "string", enum: ["tag", "kind"], default: "tag" },
             sortOrder: { type: "string", enum: ["asc", "desc"], default: "asc" },
           },
         },
@@ -76,6 +79,15 @@ export async function registerProductTagRoutes(
             limit: { type: "integer", minimum: 1, maximum: 50, default: 10 },
           },
         },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: { type: "array", items: tagSchema },
+            },
+          },
+        },
       },
     },
     (request, reply) => controller.getTagSuggestions(request as AuthenticatedRequest, reply),
@@ -91,6 +103,15 @@ export async function registerProductTagRoutes(
         tags: ["Product Tags"],
         summary: "Get Tag Statistics",
         security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: tagStatsResponseSchema,
+            },
+          },
+        },
       },
     },
     (request, reply) => controller.getTagStats(request as AuthenticatedRequest, reply),
@@ -108,6 +129,15 @@ export async function registerProductTagRoutes(
         querystring: {
           type: "object",
           properties: { limit: { type: "integer", minimum: 1, maximum: 50, default: 10 } },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: mostUsedTagsResponseSchema,
+            },
+          },
         },
       },
     },
@@ -146,6 +176,15 @@ export async function registerProductTagRoutes(
           properties: {
             page: { type: "integer", minimum: 1, default: 1 },
             limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: paginatedTagsResponseSchema,
+            },
           },
         },
       },
@@ -226,7 +265,12 @@ export async function registerProductTagRoutes(
             ids: { type: "array", minItems: 1, maxItems: 100, items: { type: "string", format: "uuid" } },
           },
         },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        response: {
+          204: {
+            description: "Tags bulk deleted successfully",
+            type: "null",
+          },
+        },
       },
     },
     (request, reply) => controller.deleteBulkTags(request as AuthenticatedRequest, reply),
@@ -266,7 +310,12 @@ export async function registerProductTagRoutes(
         summary: "Delete Product Tag",
         security: [{ bearerAuth: [] }],
         params: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        response: {
+          204: {
+            description: "Tag deleted successfully",
+            type: "null",
+          },
+        },
       },
     },
     (request, reply) => controller.deleteTag(request as AuthenticatedRequest, reply),
@@ -282,6 +331,15 @@ export async function registerProductTagRoutes(
         tags: ["Product Tags"],
         summary: "Get Product Tags",
         params: { type: "object", required: ["productId"], properties: { productId: { type: "string", format: "uuid" } } },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: { type: "array", items: tagSchema },
+            },
+          },
+        },
       },
     },
     (request, reply) => controller.getProductTags(request as AuthenticatedRequest, reply),
@@ -306,7 +364,12 @@ export async function registerProductTagRoutes(
             tagIds: { type: "array", minItems: 1, items: { type: "string", format: "uuid" } },
           },
         },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        response: {
+          204: {
+            description: "Tags associated with product successfully",
+            type: "null",
+          },
+        },
       },
     },
     (request, reply) => controller.associateProductTags(request as AuthenticatedRequest, reply),
@@ -328,7 +391,12 @@ export async function registerProductTagRoutes(
           required: ["productId", "tagId"],
           properties: { productId: { type: "string", format: "uuid" }, tagId: { type: "string", format: "uuid" } },
         },
-        response: { 200: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } } },
+        response: {
+          204: {
+            description: "Tag removed from product successfully",
+            type: "null",
+          },
+        },
       },
     },
     (request, reply) => controller.removeProductTag(request as AuthenticatedRequest, reply),

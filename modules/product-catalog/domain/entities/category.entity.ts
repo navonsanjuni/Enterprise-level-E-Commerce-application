@@ -121,6 +121,7 @@ export class Category extends AggregateRoot {
     } else {
       this.props.parentId = null;
     }
+    this.addDomainEvent(new CategoryUpdatedEvent(this.props.id.getValue()));
   }
 
   updatePosition(newPosition: number | null): void {
@@ -128,6 +129,7 @@ export class Category extends AggregateRoot {
       throw new DomainValidationError('Position cannot be negative');
     }
     this.props.position = newPosition;
+    this.addDomainEvent(new CategoryUpdatedEvent(this.props.id.getValue()));
   }
 
   // Validation methods

@@ -294,16 +294,15 @@ export class VariantManagementService {
     return ProductVariant.toDTO(variant);
   }
 
-  async deleteVariant(id: string): Promise<boolean> {
+  async deleteVariant(id: string): Promise<void> {
     const variantId = VariantId.fromString(id);
     const variant = await this.productVariantRepository.findById(variantId);
 
     if (!variant) {
-      return false;
+      throw new ProductVariantNotFoundError(id);
     }
 
     await this.productVariantRepository.delete(variantId);
-    return true;
   }
 
   async deleteVariantsByProduct(productId: string): Promise<void> {

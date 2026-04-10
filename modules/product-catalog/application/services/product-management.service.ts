@@ -16,7 +16,7 @@ type CreateProductInput = {
   brand?: string;
   shortDesc?: string;
   longDescHtml?: string;
-  status?: import("../../domain/enums/product-status.enum").ProductStatus;
+  status?: import("../../domain/enums/product-catalog.enums").ProductStatus;
   publishAt?: Date;
   countryOfOrigin?: string;
   seoTitle?: string;
@@ -155,7 +155,7 @@ export class ProductManagementService {
       throw new DomainValidationError("Status is required");
     }
 
-    const validStatuses = ["draft", "published", "scheduled"];
+    const validStatuses = ["draft", "published", "scheduled", "archived"];
     if (!validStatuses.includes(status)) {
       throw new DomainValidationError(
         `Status must be one of: ${validStatuses.join(", ")}`,

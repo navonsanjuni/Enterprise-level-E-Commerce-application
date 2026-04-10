@@ -4,10 +4,6 @@ import {
 } from "../../domain/repositories/product-media.repository";
 import { IMediaAssetRepository } from "../../domain/repositories/media-asset.repository";
 import { IProductRepository } from "../../domain/repositories/product.repository";
-import {
-  ProductMedia,
-  ProductMediaId,
-} from "../../domain/entities/product-media.entity";
 import { MediaAssetId as EntityMediaAssetId } from "../../domain/entities/media-asset.entity";
 import { ProductId } from "../../domain/value-objects/product-id.vo";
 import { MediaAssetId } from "../../domain/value-objects/media-asset-id.vo";

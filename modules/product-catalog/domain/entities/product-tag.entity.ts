@@ -95,6 +95,7 @@ export class ProductTag extends AggregateRoot {
     }
 
     this.props.kind = newKind?.trim() || null;
+    this.addDomainEvent(new TagUpdatedEvent(this.props.id.getValue()));
   }
 
   // Validation methods

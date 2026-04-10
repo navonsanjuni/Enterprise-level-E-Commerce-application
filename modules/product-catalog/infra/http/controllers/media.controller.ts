@@ -2,7 +2,6 @@ import { FastifyReply } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { MediaManagementService } from "../../../application/services/media-management.service";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
-import { MediaAssetNotFoundError } from "../../../domain/errors/product-catalog.errors";
 
 export interface CreateMediaAssetRequest {
   storageKey: string;
@@ -77,7 +76,6 @@ export class MediaController {
         hasRenditions,
       };
 
-      // Use search assets with filters for more complex filtering
       const filters = {
         mimeType,
         isImage,
@@ -118,7 +116,6 @@ export class MediaController {
         },
       });
     } catch (error) {
-      request.log.error(error, "Failed to get media assets");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -140,13 +137,8 @@ export class MediaController {
 
       const asset = await this.mediaManagementService.getAssetById(id);
 
-      if (!asset) {
-        throw new MediaAssetNotFoundError(id);
-      }
-
       return ResponseHelper.ok(reply, "Media asset retrieved successfully", asset);
     } catch (error) {
-      request.log.error(error, "Failed to get media asset");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -162,8 +154,6 @@ export class MediaController {
 
       return ResponseHelper.created(reply, "Media asset created successfully", asset);
     } catch (error) {
-      request.log.error(error, "Failed to create media asset");
-
       if (
         error instanceof Error &&
         (error.message.includes("duplicate") ||
@@ -192,18 +182,10 @@ export class MediaController {
       const { id } = request.params;
       const updateData = request.body;
 
-      const asset = await this.mediaManagementService.updateAsset(
-        id,
-        updateData,
-      );
-
-      if (!asset) {
-        throw new MediaAssetNotFoundError(id);
-      }
+      const asset = await this.mediaManagementService.updateAsset(id, updateData);
 
       return ResponseHelper.ok(reply, "Media asset updated successfully", asset);
     } catch (error) {
-      request.log.error(error, "Failed to update media asset");
       return ResponseHelper.error(reply, error);
     }
   }
@@ -215,16 +197,10 @@ export class MediaController {
     try {
       const { id } = request.params;
 
-      const deleted = await this.mediaManagementService.deleteAsset(id);
+      await this.mediaManagementService.deleteAsset(id);
 
-      if (!deleted) {
-        throw new MediaAssetNotFoundError(id);
-      }
-
-      return ResponseHelper.ok(reply, "Media asset deleted successfully");
+      return ResponseHelper.noContent(reply);
     } catch (error) {
-      request.log.error(error, "Failed to delete media asset");
-
       if (
         error instanceof Error &&
         (error.message.includes("constraint") ||

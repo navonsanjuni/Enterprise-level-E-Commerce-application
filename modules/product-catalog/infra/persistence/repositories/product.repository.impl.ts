@@ -39,23 +39,21 @@ export class ProductRepository implements IProductRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async save(product: Product): Promise<void> {
-    const dto = Product.toDTO(product);
-
     await this.prisma.product.create({
       data: {
-        id: dto.id,
-        title: dto.title,
-        slug: dto.slug,
-        brand: dto.brand,
-        shortDesc: dto.shortDesc,
-        longDescHtml: dto.longDescHtml,
-        status: dto.status as any,
-        publishAt: dto.publishAt,
-        countryOfOrigin: dto.countryOfOrigin,
-        seoTitle: dto.seoTitle,
-        seoDescription: dto.seoDescription,
-        createdAt: dto.createdAt,
-        updatedAt: dto.updatedAt,
+        id: product.id.getValue(),
+        title: product.title,
+        slug: product.slug.getValue(),
+        brand: product.brand,
+        shortDesc: product.shortDesc,
+        longDescHtml: product.longDescHtml,
+        status: product.status as any,
+        publishAt: product.publishAt,
+        countryOfOrigin: product.countryOfOrigin,
+        seoTitle: product.seoTitle,
+        seoDescription: product.seoDescription,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
       },
     });
   }
@@ -64,26 +62,26 @@ export class ProductRepository implements IProductRepository {
     product: Product,
     categoryIds: string[],
   ): Promise<void> {
-    const dto = Product.toDTO(product);
+    const productId = product.id.getValue();
 
     // Use transaction to ensure atomicity
     await this.prisma.$transaction(async (tx) => {
       // Create product
       await tx.product.create({
         data: {
-          id: dto.id,
-          title: dto.title,
-          slug: dto.slug,
-          brand: dto.brand,
-          shortDesc: dto.shortDesc,
-          longDescHtml: dto.longDescHtml,
-          status: dto.status as any,
-          publishAt: dto.publishAt,
-          countryOfOrigin: dto.countryOfOrigin,
-          seoTitle: dto.seoTitle,
-          seoDescription: dto.seoDescription,
-          createdAt: dto.createdAt,
-          updatedAt: dto.updatedAt,
+          id: productId,
+          title: product.title,
+          slug: product.slug.getValue(),
+          brand: product.brand,
+          shortDesc: product.shortDesc,
+          longDescHtml: product.longDescHtml,
+          status: product.status as any,
+          publishAt: product.publishAt,
+          countryOfOrigin: product.countryOfOrigin,
+          seoTitle: product.seoTitle,
+          seoDescription: product.seoDescription,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt,
         },
       });
 
@@ -91,7 +89,7 @@ export class ProductRepository implements IProductRepository {
       if (categoryIds.length > 0) {
         await tx.productCategory.createMany({
           data: categoryIds.map((categoryId) => ({
-            productId: dto.id,
+            productId,
             categoryId,
           })),
         });
@@ -336,22 +334,20 @@ export class ProductRepository implements IProductRepository {
   }
 
   async update(product: Product): Promise<void> {
-    const dto = Product.toDTO(product);
-
     await this.prisma.product.update({
-      where: { id: dto.id },
+      where: { id: product.id.getValue() },
       data: {
-        title: dto.title,
-        slug: dto.slug,
-        brand: dto.brand,
-        shortDesc: dto.shortDesc,
-        longDescHtml: dto.longDescHtml,
-        status: dto.status as any,
-        publishAt: dto.publishAt,
-        countryOfOrigin: dto.countryOfOrigin,
-        seoTitle: dto.seoTitle,
-        seoDescription: dto.seoDescription,
-        updatedAt: dto.updatedAt,
+        title: product.title,
+        slug: product.slug.getValue(),
+        brand: product.brand,
+        shortDesc: product.shortDesc,
+        longDescHtml: product.longDescHtml,
+        status: product.status as any,
+        publishAt: product.publishAt,
+        countryOfOrigin: product.countryOfOrigin,
+        seoTitle: product.seoTitle,
+        seoDescription: product.seoDescription,
+        updatedAt: product.updatedAt,
       },
     });
   }
