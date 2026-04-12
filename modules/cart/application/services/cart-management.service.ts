@@ -20,7 +20,7 @@ import {
   IExternalProductMediaRepository,
   IExternalMediaAssetRepository,
   IExternalSettingsService,
-} from "../../domain/external-services";
+} from "../../domain/ports/external-services";
 import {
   RESERVATION_DEFAULT_DURATION_MINUTES,
   DEFAULT_CURRENCY,

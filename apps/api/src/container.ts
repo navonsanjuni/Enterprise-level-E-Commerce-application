@@ -147,7 +147,7 @@ import { CartManagementService } from "../../../modules/cart/application/service
 import { ReservationService } from "../../../modules/cart/application/services/reservation.service";
 import { CheckoutService } from "../../../modules/cart/application/services/checkout.service";
 import { CheckoutOrderService } from "../../../modules/cart/application/services/checkout-order.service";
-import { CheckoutCompletionPortImpl } from "../../../modules/cart/infra/persistence/checkout-completion.port.impl";
+import { CheckoutCompletionPortImpl } from "../../../modules/cart/infra/persistence/repositories/checkout-completion.port.impl";
 import type {
   IProductSnapshotFactory,
   IExternalStockService,
@@ -155,7 +155,7 @@ import type {
   IExternalProductRepository,
   IExternalProductMediaRepository,
   IExternalMediaAssetRepository,
-} from "../../../modules/cart/domain/external-services";
+} from "../../../modules/cart/domain/ports/external-services";
 
 // Cart — Handlers
 import {

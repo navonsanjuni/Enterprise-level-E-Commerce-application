@@ -6,7 +6,7 @@ import {
 } from "../../domain/entities/checkout.entity";
 import { CheckoutId } from "../../domain/value-objects/checkout-id.vo";
 import { CartId } from "../../domain/value-objects/cart-id.vo";
-import { IExternalSettingsService } from "../../domain/external-services";
+import { IExternalSettingsService } from "../../domain/ports/external-services";
 import { CHECKOUT_DEFAULT_EXPIRY_MINUTES } from "../../domain/constants";
 import {
   CartNotFoundError,

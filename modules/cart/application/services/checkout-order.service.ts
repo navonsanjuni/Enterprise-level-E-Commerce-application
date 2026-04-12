@@ -9,7 +9,7 @@ import {
   IProductSnapshotFactory,
   ICheckoutCompletionPort,
   CheckoutOrderResult,
-} from "../../domain/external-services";
+} from "../../domain/ports/external-services";
 import {
   CartNotFoundError,
   CheckoutNotFoundError,

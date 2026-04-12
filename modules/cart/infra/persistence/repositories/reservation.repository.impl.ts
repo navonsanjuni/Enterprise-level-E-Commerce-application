@@ -7,7 +7,7 @@ import {
 import { CartId } from "../../../domain/value-objects/cart-id.vo";
 import { VariantId } from "../../../domain/value-objects/variant-id.vo";
 import { Quantity } from "../../../domain/value-objects/quantity.vo";
-import { IExternalStockService } from "../../../domain/external-services";
+import { IExternalStockService } from "../../../domain/ports/external-services";
 
 export class ReservationRepositoryImpl implements IReservationRepository {
   constructor(

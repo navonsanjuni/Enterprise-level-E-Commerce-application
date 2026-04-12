@@ -4,7 +4,7 @@ import {
   PaymentIntentInfo,
   CheckoutOrderResult,
   PersistCheckoutOrderData,
-} from "../../domain/external-services";
+} from "../../../domain/ports/external-services";
 
 export class CheckoutCompletionPortImpl implements ICheckoutCompletionPort {
   constructor(private readonly prisma: PrismaClient) {}
