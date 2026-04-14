@@ -186,7 +186,7 @@ export async function authRoutes(
   fastify.post(
     "/auth/change-password",
     {
-      preHandler: [validateBody(changePasswordSchema), RolePermissions.AUTHENTICATED],
+      preHandler: [RolePermissions.AUTHENTICATED, validateBody(changePasswordSchema)],
       schema: {
         tags: ["Authentication"],
         summary: "Change password",
@@ -319,7 +319,7 @@ export async function authRoutes(
   fastify.post(
     "/auth/change-email",
     {
-      preHandler: [validateBody(changeEmailSchema), RolePermissions.AUTHENTICATED],
+      preHandler: [RolePermissions.AUTHENTICATED, validateBody(changeEmailSchema)],
       schema: {
         tags: ["Authentication"],
         summary: "Change email address",
@@ -347,7 +347,7 @@ export async function authRoutes(
   fastify.post(
     "/auth/delete-account",
     {
-      preHandler: [validateBody(deleteAccountSchema), RolePermissions.AUTHENTICATED],
+      preHandler: [RolePermissions.AUTHENTICATED, validateBody(deleteAccountSchema)],
       schema: {
         tags: ["Authentication"],
         summary: "Delete account",

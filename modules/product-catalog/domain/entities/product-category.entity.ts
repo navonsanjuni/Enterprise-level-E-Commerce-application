@@ -8,6 +8,7 @@ export interface ProductCategoryProps {
   displayOrder: number;
   isPrimary: boolean;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ProductCategoryDTO {
@@ -17,6 +18,7 @@ export interface ProductCategoryDTO {
   displayOrder: number;
   isPrimary: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 export class ProductCategory {
@@ -38,6 +40,7 @@ export class ProductCategory {
       displayOrder: params.displayOrder,
       isPrimary: params.isPrimary,
       createdAt: now,
+      updatedAt: now,
     });
   }
 
@@ -70,17 +73,24 @@ export class ProductCategory {
     return this.props.createdAt;
   }
 
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+
   // Business methods
   updateDisplayOrder(order: number): void {
     this.props.displayOrder = order;
+    this.props.updatedAt = new Date();
   }
 
   markAsPrimary(): void {
     this.props.isPrimary = true;
+    this.props.updatedAt = new Date();
   }
 
   unmarkAsPrimary(): void {
     this.props.isPrimary = false;
+    this.props.updatedAt = new Date();
   }
 
   isForProduct(productId: ProductId): boolean {
@@ -103,6 +113,7 @@ export class ProductCategory {
       displayOrder: entity.props.displayOrder,
       isPrimary: entity.props.isPrimary,
       createdAt: entity.props.createdAt.toISOString(),
+      updatedAt: entity.props.updatedAt.toISOString(),
     };
   }
 }

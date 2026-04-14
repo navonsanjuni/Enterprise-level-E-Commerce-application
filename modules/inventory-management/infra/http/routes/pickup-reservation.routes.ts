@@ -105,7 +105,7 @@ export async function pickupReservationRoutes(
   fastify.post(
     "/pickup-reservations",
     {
-      preHandler: [validateBody(createPickupReservationSchema), RolePermissions.AUTHENTICATED],
+      preHandler: [RolePermissions.AUTHENTICATED, validateBody(createPickupReservationSchema)],
       schema: {
         description: "Create pickup reservation",
         tags: ["Pickup Reservations"],

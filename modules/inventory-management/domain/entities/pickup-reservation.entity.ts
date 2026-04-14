@@ -52,6 +52,19 @@ export class PickupReservationFulfilledEvent extends DomainEvent {
   }
 }
 
+export class PickupReservationExtendedEvent extends DomainEvent {
+  constructor(
+    public readonly reservationId: string,
+    public readonly newExpiresAt: Date,
+  ) {
+    super(reservationId, "PickupReservation");
+  }
+  get eventType(): string { return "pickup_reservation.extended"; }
+  getPayload(): Record<string, unknown> {
+    return { reservationId: this.reservationId, newExpiresAt: this.newExpiresAt.toISOString() };
+  }
+}
+
 // ── Props & DTO ────────────────────────────────────────────────────────
 
 export interface PickupReservationProps {
@@ -170,6 +183,9 @@ export class PickupReservation extends AggregateRoot {
       throw new InvalidOperationError("Cannot extend expiration of non-active reservation");
     }
     this.props.expiresAt = newExpiresAt;
+    this.addDomainEvent(
+      new PickupReservationExtendedEvent(this.props.reservationId.getValue(), newExpiresAt),
+    );
   }
 
   cancel(): void {

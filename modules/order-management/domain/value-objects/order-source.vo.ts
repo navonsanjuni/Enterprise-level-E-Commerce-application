@@ -8,6 +8,10 @@ export class OrderSource {
     this.value = value;
   }
 
+  static create(value: string): OrderSource {
+    return OrderSource.fromString(value);
+  }
+
   static fromString(value: string): OrderSource {
     const normalizedValue = value.toLowerCase();
 

@@ -7,6 +7,7 @@ export interface VariantMediaProps {
   mediaAssetId: MediaAssetId;
   displayOrder: number;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface VariantMediaDTO {
@@ -15,6 +16,7 @@ export interface VariantMediaDTO {
   mediaAssetId: string;
   displayOrder: number;
   createdAt: string;
+  updatedAt: string;
 }
 
 export class VariantMedia {
@@ -34,6 +36,7 @@ export class VariantMedia {
       mediaAssetId: MediaAssetId.fromString(params.mediaAssetId),
       displayOrder: params.displayOrder,
       createdAt: now,
+      updatedAt: now,
     });
   }
 
@@ -62,9 +65,14 @@ export class VariantMedia {
     return this.props.createdAt;
   }
 
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+
   // Business methods
   updateDisplayOrder(order: number): void {
     this.props.displayOrder = order;
+    this.props.updatedAt = new Date();
   }
 
   isForVariant(variantId: VariantId): boolean {
@@ -86,6 +94,7 @@ export class VariantMedia {
       mediaAssetId: entity.props.mediaAssetId.getValue(),
       displayOrder: entity.props.displayOrder,
       createdAt: entity.props.createdAt.toISOString(),
+      updatedAt: entity.props.updatedAt.toISOString(),
     };
   }
 }

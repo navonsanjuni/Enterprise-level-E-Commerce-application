@@ -170,7 +170,7 @@ export async function purchaseOrderRoutes(
   fastify.post(
     "/purchase-orders/full",
     {
-      preHandler: [validateBody(createPurchaseOrderWithItemsSchema), RolePermissions.STAFF_LEVEL],
+      preHandler: [RolePermissions.STAFF_LEVEL, validateBody(createPurchaseOrderWithItemsSchema)],
       schema: {
         description: "Create a new purchase order with items (Staff/Admin only)",
         tags: ["Purchase Orders"],
@@ -218,7 +218,7 @@ export async function purchaseOrderRoutes(
     "/purchase-orders/:poId/status",
     {
       preValidation: [validateParams(poParamsSchema)],
-      preHandler: [validateBody(updatePOStatusSchema), RolePermissions.STAFF_LEVEL],
+      preHandler: [RolePermissions.STAFF_LEVEL, validateBody(updatePOStatusSchema)],
       schema: {
         description: "Update purchase order status (Staff/Admin only)",
         tags: ["Purchase Orders"],
@@ -268,7 +268,7 @@ export async function purchaseOrderRoutes(
     "/purchase-orders/:poId/eta",
     {
       preValidation: [validateParams(poParamsSchema)],
-      preHandler: [validateBody(updatePOEtaSchema), RolePermissions.STAFF_LEVEL],
+      preHandler: [RolePermissions.STAFF_LEVEL, validateBody(updatePOEtaSchema)],
       schema: {
         description: "Update purchase order estimated arrival (Staff/Admin only)",
         tags: ["Purchase Orders"],
@@ -316,7 +316,7 @@ export async function purchaseOrderRoutes(
     "/purchase-orders/:poId/receive",
     {
       preValidation: [validateParams(poParamsSchema)],
-      preHandler: [validateBody(receivePOItemsSchema), RolePermissions.STAFF_LEVEL],
+      preHandler: [RolePermissions.STAFF_LEVEL, validateBody(receivePOItemsSchema)],
       schema: {
         description: "Receive items from purchase order (Staff/Admin only)",
         tags: ["Purchase Orders"],

@@ -1,8 +1,7 @@
 import { OrderStatus } from "../value-objects";
 
-
 export interface OrderStatusHistoryProps {
-  historyId: number;
+  historyId: number | null;
   orderId: string;
   fromStatus?: OrderStatus;
   toStatus: OrderStatus;
@@ -12,7 +11,7 @@ export interface OrderStatusHistoryProps {
 }
 
 export interface OrderStatusHistoryDTO {
-  historyId: number;
+  historyId: number | null;
   orderId: string;
   fromStatus?: string;
   toStatus: string;
@@ -32,7 +31,7 @@ export class OrderStatusHistory {
   ): OrderStatusHistory {
     return new OrderStatusHistory({
       ...params,
-      historyId: 0, // Assigned by database typically
+      historyId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -42,7 +41,7 @@ export class OrderStatusHistory {
     return new OrderStatusHistory(props);
   }
 
-  get historyId(): number {
+  get historyId(): number | null {
     return this.props.historyId;
   }
 
@@ -75,6 +74,9 @@ export class OrderStatusHistory {
   }
 
   equals(other: OrderStatusHistory): boolean {
+    if (this.props.historyId === null || other.props.historyId === null) {
+      return false;
+    }
     return this.props.historyId === other.props.historyId;
   }
 

@@ -980,6 +980,6 @@ export class ReservationRepositoryImpl implements IReservationRepository {
       expiresAt: reservationData.expiresAt,
     };
 
-    return Reservation.reconstitute(entityData);
+    return Reservation.fromPersistence(entityData);
   }
 }

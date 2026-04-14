@@ -55,9 +55,10 @@ export interface MediaAssetProps {
   altText: string | null;
   focalX: number | null;
   focalY: number | null;
-  renditions: Record<string, any>;
+  renditions: Record<string, unknown>;
   version: number;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface MediaAssetDTO {
@@ -70,9 +71,10 @@ export interface MediaAssetDTO {
   altText: string | null;
   focalX: number | null;
   focalY: number | null;
-  renditions: Record<string, any>;
+  renditions: Record<string, unknown>;
   version: number;
   createdAt: string;
+  updatedAt: string;
 }
 
 // ── Entity ─────────────────────────────────────────────────────────────
@@ -91,7 +93,7 @@ export class MediaAsset extends AggregateRoot {
     altText?: string;
     focalX?: number;
     focalY?: number;
-    renditions?: Record<string, any>;
+    renditions?: Record<string, unknown>;
   }): MediaAsset {
     const assetId = MediaAssetId.create();
     const now = new Date();
@@ -109,6 +111,7 @@ export class MediaAsset extends AggregateRoot {
       renditions: params.renditions || {},
       version: 1,
       createdAt: now,
+      updatedAt: now,
     });
 
     asset.addDomainEvent(
@@ -133,9 +136,10 @@ export class MediaAsset extends AggregateRoot {
   get altText(): string | null { return this.props.altText; }
   get focalX(): number | null { return this.props.focalX; }
   get focalY(): number | null { return this.props.focalY; }
-  get renditions(): Record<string, any> { return this.props.renditions; }
+  get renditions(): Record<string, unknown> { return this.props.renditions; }
   get version(): number { return this.props.version; }
   get createdAt(): Date { return this.props.createdAt; }
+  get updatedAt(): Date { return this.props.updatedAt; }
 
   // ── Business Logic ─────────────────────────────────────────────────
 
@@ -156,6 +160,7 @@ export class MediaAsset extends AggregateRoot {
     }
     this.props.width = width;
     this.props.height = height;
+    this.incrementVersion();
   }
 
   updateSize(bytes: number | null): void {
@@ -163,10 +168,12 @@ export class MediaAsset extends AggregateRoot {
       throw new DomainValidationError("Size cannot be negative");
     }
     this.props.bytes = bytes;
+    this.incrementVersion();
   }
 
   updateAltText(newAltText: string | null): void {
     this.props.altText = newAltText?.trim() || null;
+    this.incrementVersion();
   }
 
   updateFocalPoint(focalX: number | null, focalY: number | null): void {
@@ -178,9 +185,10 @@ export class MediaAsset extends AggregateRoot {
     }
     this.props.focalX = focalX;
     this.props.focalY = focalY;
+    this.incrementVersion();
   }
 
-  addRendition(name: string, renditionData: any): void {
+  addRendition(name: string, renditionData: unknown): void {
     if (!name || name.trim().length === 0) {
       throw new DomainValidationError("Rendition name cannot be empty");
     }
@@ -195,7 +203,7 @@ export class MediaAsset extends AggregateRoot {
     }
   }
 
-  updateRenditions(renditions: Record<string, any>): void {
+  updateRenditions(renditions: Record<string, unknown>): void {
     this.props.renditions = renditions || {};
     this.incrementVersion();
   }
@@ -209,7 +217,7 @@ export class MediaAsset extends AggregateRoot {
     altText?: string;
     focalX?: number;
     focalY?: number;
-    renditions?: Record<string, any>;
+    renditions?: Record<string, unknown>;
   }>): void {
     let changed = false;
 
@@ -307,6 +315,7 @@ export class MediaAsset extends AggregateRoot {
 
   private incrementVersion(): void {
     this.props.version += 1;
+    this.props.updatedAt = new Date();
     this.addDomainEvent(new MediaAssetUpdatedEvent(this.props.id.getValue()));
   }
 
@@ -330,6 +339,7 @@ export class MediaAsset extends AggregateRoot {
       renditions: entity.props.renditions,
       version: entity.props.version,
       createdAt: entity.props.createdAt.toISOString(),
+      updatedAt: entity.props.updatedAt.toISOString(),
     };
   }
 }

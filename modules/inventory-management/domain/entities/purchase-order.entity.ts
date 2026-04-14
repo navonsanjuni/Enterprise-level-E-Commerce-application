@@ -33,6 +33,19 @@ export class PurchaseOrderStatusChangedEvent extends DomainEvent {
   }
 }
 
+export class PurchaseOrderEtaUpdatedEvent extends DomainEvent {
+  constructor(
+    public readonly poId: string,
+    public readonly eta: Date,
+  ) {
+    super(poId, "PurchaseOrder");
+  }
+  get eventType(): string { return "purchase_order.eta_updated"; }
+  getPayload(): Record<string, unknown> {
+    return { poId: this.poId, eta: this.eta.toISOString() };
+  }
+}
+
 export class PurchaseOrderDeletedEvent extends DomainEvent {
   constructor(public readonly poId: string) {
     super(poId, "PurchaseOrder");
@@ -57,7 +70,7 @@ export interface PurchaseOrderProps {
 export interface PurchaseOrderDTO {
   poId: string;
   supplierId: string;
-  eta?: Date;
+  eta?: string;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -113,6 +126,7 @@ export class PurchaseOrder extends AggregateRoot {
   updateEta(eta: Date): void {
     this.props.eta = eta;
     this.props.updatedAt = new Date();
+    this.addDomainEvent(new PurchaseOrderEtaUpdatedEvent(this.props.poId.getValue(), eta));
   }
 
   updateStatus(newStatus: PurchaseOrderStatusVO): void {
@@ -152,7 +166,7 @@ export class PurchaseOrder extends AggregateRoot {
     return {
       poId: entity.props.poId.getValue(),
       supplierId: entity.props.supplierId.getValue(),
-      eta: entity.props.eta,
+      eta: entity.props.eta?.toISOString(),
       status: entity.props.status.getValue(),
       createdAt: entity.props.createdAt.toISOString(),
       updatedAt: entity.props.updatedAt.toISOString(),

@@ -1,4 +1,5 @@
 import { AggregateRoot } from '../../../../packages/core/src/domain/aggregate-root';
+import { DomainEvent } from '../../../../packages/core/src/domain/events/domain-event';
 import { UserId } from '../value-objects/user-id.vo';
 import { PaymentMethodId } from '../value-objects/payment-method-id';
 import {
@@ -8,6 +9,35 @@ import {
 import { PaymentMethodType } from '../enums/payment-method-type.enum';
 
 export { PaymentMethodType, PaymentMethodId };
+
+// ── Domain Events ──────────────────────────────────────────────────────
+
+export class PaymentMethodAddedEvent extends DomainEvent {
+  constructor(
+    public readonly paymentMethodId: string,
+    public readonly userId: string,
+    public readonly type: string,
+  ) {
+    super(paymentMethodId, 'PaymentMethod');
+  }
+  get eventType(): string { return 'payment-method.added'; }
+  getPayload(): Record<string, unknown> {
+    return { paymentMethodId: this.paymentMethodId, userId: this.userId, type: this.type };
+  }
+}
+
+export class PaymentMethodSetAsDefaultEvent extends DomainEvent {
+  constructor(
+    public readonly paymentMethodId: string,
+    public readonly userId: string,
+  ) {
+    super(paymentMethodId, 'PaymentMethod');
+  }
+  get eventType(): string { return 'payment-method.set_as_default'; }
+  getPayload(): Record<string, unknown> {
+    return { paymentMethodId: this.paymentMethodId, userId: this.userId };
+  }
+}
 
 // ============================================================================
 // Props Interface
@@ -88,6 +118,13 @@ export class PaymentMethod extends AggregateRoot {
       updatedAt: now,
     });
     paymentMethod.validate();
+    paymentMethod.addDomainEvent(
+      new PaymentMethodAddedEvent(
+        paymentMethod.props.id.getValue(),
+        params.userId,
+        params.type.toString(),
+      ),
+    );
     return paymentMethod;
   }
 
@@ -137,6 +174,12 @@ export class PaymentMethod extends AggregateRoot {
     if (this.props.isDefault) return;
     this.props.isDefault = true;
     this.props.updatedAt = new Date();
+    this.addDomainEvent(
+      new PaymentMethodSetAsDefaultEvent(
+        this.props.id.getValue(),
+        this.props.userId.getValue(),
+      ),
+    );
   }
 
   removeAsDefault(): void {

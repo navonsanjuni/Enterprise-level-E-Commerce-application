@@ -1,19 +1,19 @@
 import { DomainValidationError } from "../errors/order-management.errors";
 
 export interface OrderEventProps {
-  eventId: number; // Database generated usually, or 0 if unpersisted
+  eventId: number | null;
   orderId: string;
   eventType: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface OrderEventDTO {
-  eventId: number;
+  eventId: number | null;
   orderId: string;
   eventType: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -32,7 +32,7 @@ export class OrderEvent {
 
     return new OrderEvent({
       ...params,
-      eventId: 0,
+      eventId: null,
       payload: params.payload || {},
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -49,7 +49,7 @@ export class OrderEvent {
     }
   }
 
-  get eventId(): number {
+  get eventId(): number | null {
     return this.props.eventId;
   }
 
@@ -61,7 +61,7 @@ export class OrderEvent {
     return this.props.eventType;
   }
 
-  get payload(): Record<string, any> {
+  get payload(): Record<string, unknown> {
     return this.props.payload;
   }
 
@@ -74,7 +74,9 @@ export class OrderEvent {
   }
 
   equals(other: OrderEvent): boolean {
-    // Identity comparison
+    if (this.props.eventId === null || other.props.eventId === null) {
+      return false;
+    }
     return this.props.eventId === other.props.eventId;
   }
 

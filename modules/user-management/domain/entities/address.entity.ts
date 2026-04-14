@@ -1,14 +1,47 @@
-import { AggregateRoot } from '../../../../packages/core/src/domain/aggregate-root';
-import { UserId } from '../value-objects/user-id.vo';
-import { AddressId } from '../value-objects/address-id';
+import { AggregateRoot } from "../../../../packages/core/src/domain/aggregate-root";
+import { DomainEvent } from "../../../../packages/core/src/domain/events/domain-event";
+import { UserId } from "../value-objects/user-id.vo";
+import { AddressId } from "../value-objects/address-id";
 import {
   Address as AddressVO,
   AddressData,
   AddressType,
-} from '../value-objects/address.vo';
-import { ShippingZone } from '../enums/shipping-zone.enum';
+} from "../value-objects/address.vo";
+import { ShippingZone } from "../enums/shipping-zone.enum";
 
 export { ShippingZone, AddressId };
+
+// ── Domain Events ──────────────────────────────────────────────────────
+
+export class AddressCreatedEvent extends DomainEvent {
+  constructor(
+    public readonly addressId: string,
+    public readonly userId: string,
+  ) {
+    super(addressId, "Address");
+  }
+  get eventType(): string {
+    return "address.created";
+  }
+  getPayload(): Record<string, unknown> {
+    return { addressId: this.addressId, userId: this.userId };
+  }
+}
+
+export class AddressSetAsDefaultEvent extends DomainEvent {
+  constructor(
+    public readonly addressId: string,
+    public readonly userId: string,
+  ) {
+    super(addressId, "Address");
+  }
+  get eventType(): string {
+    return "address.set_as_default";
+  }
+  getPayload(): Record<string, unknown> {
+    return { addressId: this.addressId, userId: this.userId };
+  }
+}
 
 // ============================================================================
 // Props Interface
@@ -65,7 +98,7 @@ export class Address extends AggregateRoot {
     isDefault?: boolean;
   }): Address {
     const now = new Date();
-    return new Address({
+    const address = new Address({
       id: AddressId.create(),
       userId: UserId.fromString(params.userId),
       addressValue: AddressVO.fromData(params.addressData),
@@ -74,6 +107,10 @@ export class Address extends AggregateRoot {
       createdAt: now,
       updatedAt: now,
     });
+    address.addDomainEvent(
+      new AddressCreatedEvent(address.props.id.getValue(), params.userId),
+    );
+    return address;
   }
 
   static fromPersistence(props: AddressProps): Address {
@@ -82,13 +119,27 @@ export class Address extends AggregateRoot {
 
   // --- Native getters ---
 
-  get id(): AddressId { return this.props.id; }
-  get userId(): UserId { return this.props.userId; }
-  get addressValue(): AddressVO { return this.props.addressValue; }
-  get type(): AddressType { return this.props.type; }
-  get isDefault(): boolean { return this.props.isDefault; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get id(): AddressId {
+    return this.props.id;
+  }
+  get userId(): UserId {
+    return this.props.userId;
+  }
+  get addressValue(): AddressVO {
+    return this.props.addressValue;
+  }
+  get type(): AddressType {
+    return this.props.type;
+  }
+  get isDefault(): boolean {
+    return this.props.isDefault;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // --- Business methods ---
 
@@ -103,6 +154,12 @@ export class Address extends AggregateRoot {
     if (this.props.isDefault) return;
     this.props.isDefault = true;
     this.props.updatedAt = new Date();
+    this.addDomainEvent(
+      new AddressSetAsDefaultEvent(
+        this.props.id.getValue(),
+        this.props.userId.getValue(),
+      ),
+    );
   }
 
   removeAsDefault(): void {
@@ -140,29 +197,38 @@ export class Address extends AggregateRoot {
   calculateShippingZone(): ShippingZone {
     const country = this.props.addressValue.getCountry();
     switch (country) {
-      case 'US': return ShippingZone.DOMESTIC;
-      case 'CA':
-      case 'MX': return ShippingZone.NORTH_AMERICA;
-      case 'UK':
-      case 'FR':
-      case 'DE':
-      case 'IT':
-      case 'ES': return ShippingZone.EUROPE;
-      default: return ShippingZone.INTERNATIONAL;
+      case "US":
+        return ShippingZone.DOMESTIC;
+      case "CA":
+      case "MX":
+        return ShippingZone.NORTH_AMERICA;
+      case "UK":
+      case "FR":
+      case "DE":
+      case "IT":
+      case "ES":
+        return ShippingZone.EUROPE;
+      default:
+        return ShippingZone.INTERNATIONAL;
     }
   }
 
   estimateDeliveryDays(): number {
     switch (this.calculateShippingZone()) {
-      case ShippingZone.DOMESTIC: return 3;
-      case ShippingZone.NORTH_AMERICA: return 7;
-      case ShippingZone.EUROPE: return 10;
-      case ShippingZone.INTERNATIONAL: return 14;
-      default: return 14;
+      case ShippingZone.DOMESTIC:
+        return 3;
+      case ShippingZone.NORTH_AMERICA:
+        return 7;
+      case ShippingZone.EUROPE:
+        return 10;
+      case ShippingZone.INTERNATIONAL:
+        return 14;
+      default:
+        return 14;
     }
   }
 
-  isInternationalShipping(fromCountry: string = 'US'): boolean {
+  isInternationalShipping(fromCountry: string = "US"): boolean {
     return this.props.addressValue.isInternational(fromCountry);
   }
 
@@ -173,7 +239,7 @@ export class Address extends AggregateRoot {
   getTaxJurisdiction(): string {
     const country = this.props.addressValue.getCountry();
     const state = this.props.addressValue.getState();
-    if (country === 'US' && state) return `${country}-${state}`;
+    if (country === "US" && state) return `${country}-${state}`;
     return country;
   }
 
@@ -184,7 +250,7 @@ export class Address extends AggregateRoot {
       addressLines: formatted.street,
       cityStateZip: formatted.cityStateZip,
       country: formatted.country,
-      type: 'SHIPPING',
+      type: "SHIPPING",
     };
   }
 
@@ -195,7 +261,7 @@ export class Address extends AggregateRoot {
       addressLines: formatted.street,
       cityStateZip: formatted.cityStateZip,
       country: formatted.country,
-      type: 'BILLING',
+      type: "BILLING",
     };
   }
 
@@ -237,6 +303,5 @@ export interface AddressLabel {
   addressLines: string[];
   cityStateZip: string;
   country: string;
-  type: 'SHIPPING' | 'BILLING';
+  type: "SHIPPING" | "BILLING";
 }
-

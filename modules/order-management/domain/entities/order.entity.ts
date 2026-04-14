@@ -66,6 +66,45 @@ export class OrderStatusUpdatedEvent extends DomainEvent {
   }
 }
 
+export class OrderItemAddedEvent extends DomainEvent {
+  constructor(
+    public readonly orderId: string,
+    public readonly variantId: string,
+  ) {
+    super(orderId, "Order");
+  }
+  get eventType(): string { return "order.item.added"; }
+  getPayload(): Record<string, unknown> {
+    return { orderId: this.orderId, variantId: this.variantId };
+  }
+}
+
+export class OrderItemRemovedEvent extends DomainEvent {
+  constructor(
+    public readonly orderId: string,
+    public readonly itemId: string,
+  ) {
+    super(orderId, "Order");
+  }
+  get eventType(): string { return "order.item.removed"; }
+  getPayload(): Record<string, unknown> {
+    return { orderId: this.orderId, itemId: this.itemId };
+  }
+}
+
+export class OrderShipmentCreatedEvent extends DomainEvent {
+  constructor(
+    public readonly orderId: string,
+    public readonly shipmentId: string,
+  ) {
+    super(orderId, "Order");
+  }
+  get eventType(): string { return "order.shipment.created"; }
+  getPayload(): Record<string, unknown> {
+    return { orderId: this.orderId, shipmentId: this.shipmentId };
+  }
+}
+
 export interface OrderProps {
   id: OrderId;
   orderNumber: OrderNumber;
@@ -123,72 +162,6 @@ export class Order extends AggregateRoot {
       id: orderId,
       orderNumber,
       status: OrderStatus.created(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-
-    order.addDomainEvent(
-      new OrderCreatedEvent(
-        order.props.id.getValue(),
-        order.props.orderNumber.getValue(),
-        order.props.totals.getTotal(),
-      ),
-    );
-
-    return order;
-  }
-
-  static buildOrderWithItems(data: CreateOrderData): Order {
-    // Ported from previous massive creation block
-    Order.validateIdentity(data.userId, data.guestToken);
-
-    if (!data.items || data.items.length === 0) {
-      throw new DomainValidationError("Order must have at least one item");
-    }
-
-    const orderId = OrderId.create();
-    const orderNumber = OrderNumber.generate();
-
-    const items = data.items.map((item) =>
-      OrderItem.create({
-        orderId: orderId.getValue(),
-        variantId: item.variantId,
-        quantity: item.quantity,
-        productSnapshot: item.productSnapshot,
-        isGift: item.isGift || false,
-        giftMessage: item.giftMessage,
-      }),
-    );
-
-    const subtotal = items.reduce(
-      (sum, item) => sum + item.calculateSubtotal(),
-      0,
-    );
-
-    const totals = OrderTotals.create({
-      subtotal,
-      tax: data.tax || 0,
-      shipping: data.shipping || 0,
-      discount: data.discount || 0,
-      total:
-        subtotal +
-        (data.tax || 0) +
-        (data.shipping || 0) -
-        (data.discount || 0),
-    });
-
-    const order = new Order({
-      id: orderId,
-      orderNumber,
-      userId: data.userId,
-      guestToken: data.guestToken,
-      items,
-      address: undefined, // Will be set later
-      shipments: [],
-      totals,
-      status: OrderStatus.created(),
-      source: data.source || OrderSource.fromString("web"),
-      currency: data.currency,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -266,17 +239,20 @@ export class Order extends AggregateRoot {
   // Aggregate Root Logic
 
   addItem(item: OrderItem): void {
-    if (this.props.status.getValue() !== "created") {
+    if (!this.props.status.isCreated()) {
       throw new OrderNotEditableError(this.props.status.getValue());
     }
 
     this.props.items.push(item);
     this.recalculateTotals();
     this.props.updatedAt = new Date();
+    this.addDomainEvent(
+      new OrderItemAddedEvent(this.props.id.getValue(), item.variantId),
+    );
   }
 
   removeItem(itemId: string): void {
-    if (this.props.status.getValue() !== "created") {
+    if (!this.props.status.isCreated()) {
       throw new OrderNotEditableError(this.props.status.getValue());
     }
 
@@ -295,10 +271,13 @@ export class Order extends AggregateRoot {
 
     this.recalculateTotals();
     this.props.updatedAt = new Date();
+    this.addDomainEvent(
+      new OrderItemRemovedEvent(this.props.id.getValue(), itemId),
+    );
   }
 
   updateItemQuantity(itemId: string, quantity: number): void {
-    if (this.props.status.getValue() !== "created") {
+    if (!this.props.status.isCreated()) {
       throw new OrderNotEditableError(this.props.status.getValue());
     }
 
@@ -313,7 +292,7 @@ export class Order extends AggregateRoot {
   }
 
   setAddress(address: OrderAddress): void {
-    if (this.props.status.getValue() !== "created") {
+    if (!this.props.status.isCreated()) {
       throw new OrderNotEditableError(this.props.status.getValue());
     }
 
@@ -333,6 +312,9 @@ export class Order extends AggregateRoot {
 
     this.props.shipments.push(shipment);
     this.props.updatedAt = new Date();
+    this.addDomainEvent(
+      new OrderShipmentCreatedEvent(this.props.id.getValue(), shipment.shipmentId),
+    );
   }
 
   markAsPaid(): void {
@@ -495,21 +477,3 @@ export class Order extends AggregateRoot {
   }
 }
 
-export interface CreateOrderItemData {
-  variantId: string;
-  quantity: number;
-  productSnapshot: any;
-  isGift?: boolean;
-  giftMessage?: string;
-}
-
-export interface CreateOrderData {
-  userId?: string;
-  guestToken?: string;
-  items: CreateOrderItemData[];
-  source?: OrderSource;
-  currency: Currency;
-  tax?: number;
-  shipping?: number;
-  discount?: number;
-}

@@ -43,7 +43,7 @@ export async function checkoutRoutes(
   fastify.post(
     "/checkout/initialize",
     {
-      preHandler: [validateBody(initializeCheckoutSchema), optionalAuth, extractGuestToken, requireCartAuth],
+      preHandler: [optionalAuth, extractGuestToken, requireCartAuth, validateBody(initializeCheckoutSchema)],
       schema: {
         description: "Initialize checkout from cart.",
         tags: ["Checkout"],
@@ -114,7 +114,7 @@ export async function checkoutRoutes(
     "/checkout/:checkoutId/complete",
     {
       preValidation: [validateParams(checkoutIdParamsSchema)],
-      preHandler: [validateBody(completeCheckoutSchema), optionalAuth, extractGuestToken, requireCartAuth],
+      preHandler: [optionalAuth, extractGuestToken, requireCartAuth, validateBody(completeCheckoutSchema)],
       schema: {
         description: "Complete checkout with payment intent.",
         tags: ["Checkout"],
@@ -191,7 +191,7 @@ export async function checkoutRoutes(
     "/checkout/:checkoutId/complete-with-order",
     {
       preValidation: [validateParams(checkoutIdParamsSchema)],
-      preHandler: [validateBody(completeCheckoutWithOrderSchema), optionalAuth, extractGuestToken, requireCartAuth],
+      preHandler: [optionalAuth, extractGuestToken, requireCartAuth, validateBody(completeCheckoutWithOrderSchema)],
       schema: {
         description: "Complete checkout and create order in a single transaction.",
         tags: ["Checkout"],

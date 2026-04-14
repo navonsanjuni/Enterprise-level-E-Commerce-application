@@ -1,10 +1,27 @@
 import { AggregateRoot } from '../../../../packages/core/src/domain/aggregate-root';
+import { DomainEvent } from '../../../../packages/core/src/domain/events/domain-event';
 import { UserId } from '../value-objects/user-id.vo';
 import { SocialLoginId } from '../value-objects/social-login-id';
 import { DomainValidationError, InvalidOperationError } from '../errors/user-management.errors';
 import { SocialProvider } from '../enums/social-provider.enum';
 
 export { SocialProvider, SocialLoginId };
+
+// ── Domain Events ──────────────────────────────────────────────────────
+
+export class SocialLoginConnectedEvent extends DomainEvent {
+  constructor(
+    public readonly socialLoginId: string,
+    public readonly userId: string,
+    public readonly provider: string,
+  ) {
+    super(socialLoginId, 'SocialLogin');
+  }
+  get eventType(): string { return 'social-login.connected'; }
+  getPayload(): Record<string, unknown> {
+    return { socialLoginId: this.socialLoginId, userId: this.userId, provider: this.provider };
+  }
+}
 
 // ============================================================================
 // Props Interface
@@ -55,6 +72,13 @@ export class SocialLogin extends AggregateRoot {
       createdAt: new Date(),
     });
     socialLogin.validate();
+    socialLogin.addDomainEvent(
+      new SocialLoginConnectedEvent(
+        socialLogin.props.id.getValue(),
+        params.userId,
+        params.provider.toString(),
+      ),
+    );
     return socialLogin;
   }
 

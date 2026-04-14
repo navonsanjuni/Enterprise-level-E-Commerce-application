@@ -187,6 +187,6 @@ export class CheckoutRepositoryImpl implements ICheckoutRepository {
       updatedAt: prismaData.updatedAt,
     };
 
-    return Checkout.reconstitute(entityData);
+    return Checkout.fromPersistence(entityData);
   }
 }

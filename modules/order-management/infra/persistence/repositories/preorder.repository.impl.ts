@@ -5,36 +5,43 @@ import {
 } from "../../../domain/repositories/preorder.repository";
 import { Preorder } from "../../../domain/entities/preorder.entity";
 
+interface PreorderDatabaseRow {
+  orderItemId: string;
+  releaseDate: Date | null;
+  notifiedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class PreorderRepositoryImpl implements IPreorderRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  // Hydration: Database row � Entity
-  private toEntity(row: any): Preorder {
-    return Preorder.fromDatabaseRow({
-      order_item_id: row.orderItemId,
-      release_date: row.releaseDate,
-      notified_at: row.notifiedAt,
+  private toEntity(row: PreorderDatabaseRow): Preorder {
+    return Preorder.fromPersistence({
+      orderItemId: row.orderItemId,
+      releaseDate: row.releaseDate || undefined,
+      notifiedAt: row.notifiedAt || undefined,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     });
   }
 
   async save(preorder: Preorder): Promise<void> {
-    const data = preorder.toDatabaseRow();
     await this.prisma.preorder.create({
       data: {
-        orderItemId: data.order_item_id,
-        releaseDate: data.release_date,
-        notifiedAt: data.notified_at,
+        orderItemId: preorder.orderItemId,
+        releaseDate: preorder.releaseDate || null,
+        notifiedAt: preorder.notifiedAt || null,
       },
     });
   }
 
   async update(preorder: Preorder): Promise<void> {
-    const data = preorder.toDatabaseRow();
     await this.prisma.preorder.update({
-      where: { orderItemId: data.order_item_id },
+      where: { orderItemId: preorder.orderItemId },
       data: {
-        releaseDate: data.release_date,
-        notifiedAt: data.notified_at,
+        releaseDate: preorder.releaseDate || null,
+        notifiedAt: preorder.notifiedAt || null,
       },
     });
   }
@@ -54,7 +61,7 @@ export class PreorderRepositoryImpl implements IPreorderRepository {
       return null;
     }
 
-    return this.toEntity(preorder);
+    return this.toEntity(preorder as any);
   }
 
   async findAll(options?: PreorderQueryOptions): Promise<Preorder[]> {
@@ -71,7 +78,7 @@ export class PreorderRepositoryImpl implements IPreorderRepository {
       orderBy: { [sortBy]: sortOrder },
     });
 
-    return preorders.map((preorder) => this.toEntity(preorder));
+    return preorders.map((preorder) => this.toEntity(preorder as any));
   }
 
   async findNotified(options?: PreorderQueryOptions): Promise<Preorder[]> {
@@ -91,7 +98,7 @@ export class PreorderRepositoryImpl implements IPreorderRepository {
       orderBy: { [sortBy]: sortOrder },
     });
 
-    return preorders.map((preorder) => this.toEntity(preorder));
+    return preorders.map((preorder) => this.toEntity(preorder as any));
   }
 
   async findUnnotified(options?: PreorderQueryOptions): Promise<Preorder[]> {
@@ -111,7 +118,7 @@ export class PreorderRepositoryImpl implements IPreorderRepository {
       orderBy: { [sortBy]: sortOrder },
     });
 
-    return preorders.map((preorder) => this.toEntity(preorder));
+    return preorders.map((preorder) => this.toEntity(preorder as any));
   }
 
   async findReleased(options?: PreorderQueryOptions): Promise<Preorder[]> {
@@ -136,7 +143,7 @@ export class PreorderRepositoryImpl implements IPreorderRepository {
       orderBy: { [sortBy]: sortOrder },
     });
 
-    return preorders.map((preorder) => this.toEntity(preorder));
+    return preorders.map((preorder) => this.toEntity(preorder as any));
   }
 
   async findByReleaseDateBefore(
@@ -162,7 +169,7 @@ export class PreorderRepositoryImpl implements IPreorderRepository {
       orderBy: { [sortBy]: sortOrder },
     });
 
-    return preorders.map((preorder) => this.toEntity(preorder));
+    return preorders.map((preorder) => this.toEntity(preorder as any));
   }
 
   async count(): Promise<number> {

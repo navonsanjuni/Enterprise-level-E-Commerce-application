@@ -1,5 +1,25 @@
+import { AggregateRoot } from "../../../../packages/core/src/domain/aggregate-root";
+import { DomainEvent } from "../../../../packages/core/src/domain/events/domain-event";
 import { AddressSnapshot, AddressSnapshotData } from "../value-objects";
 
+// ── Domain Events ──────────────────────────────────────────────────────
+
+export class OrderAddressUpdatedEvent extends DomainEvent {
+  constructor(
+    public readonly orderId: string,
+    public readonly field: "billing" | "shipping",
+  ) {
+    super(orderId, "OrderAddress");
+  }
+  get eventType(): string {
+    return "order-address.updated";
+  }
+  getPayload(): Record<string, unknown> {
+    return { orderId: this.orderId, field: this.field };
+  }
+}
+
+// ── Props & DTO ────────────────────────────────────────────────────────
 
 export interface OrderAddressProps {
   orderId: string;
@@ -17,8 +37,12 @@ export interface OrderAddressDTO {
   updatedAt: string;
 }
 
-export class OrderAddress {
-  private constructor(private props: OrderAddressProps) {}
+// ── Entity ─────────────────────────────────────────────────────────────
+
+export class OrderAddress extends AggregateRoot {
+  private constructor(private props: OrderAddressProps) {
+    super();
+  }
 
   static create(
     params: Omit<OrderAddressProps, "createdAt" | "updatedAt">,
@@ -57,11 +81,13 @@ export class OrderAddress {
   updateBillingAddress(billingAddress: AddressSnapshot): void {
     this.props.billingAddress = billingAddress;
     this.props.updatedAt = new Date();
+    this.addDomainEvent(new OrderAddressUpdatedEvent(this.props.orderId, "billing"));
   }
 
   updateShippingAddress(shippingAddress: AddressSnapshot): void {
     this.props.shippingAddress = shippingAddress;
     this.props.updatedAt = new Date();
+    this.addDomainEvent(new OrderAddressUpdatedEvent(this.props.orderId, "shipping"));
   }
 
   isSameAddress(): boolean {

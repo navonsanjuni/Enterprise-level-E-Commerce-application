@@ -933,6 +933,6 @@ export class CartRepositoryImpl implements ICartRepository {
         ) || [],
     };
 
-    return ShoppingCart.reconstitute(entityData);
+    return ShoppingCart.fromPersistence(entityData);
   }
 }

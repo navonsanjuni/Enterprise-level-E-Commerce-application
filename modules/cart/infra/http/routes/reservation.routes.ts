@@ -52,7 +52,7 @@ export async function reservationRoutes(
   fastify.post(
     "/reservations",
     {
-      preHandler: [validateBody(createReservationSchema), requireRole(["ADMIN", "CUSTOMER"])],
+      preHandler: [requireRole(["ADMIN", "CUSTOMER"]), validateBody(createReservationSchema)],
       schema: {
         description: "Create a new reservation",
         tags: ["Reservations"],
@@ -199,7 +199,7 @@ export async function reservationRoutes(
     "/reservations/:reservationId/extend",
     {
       preValidation: [validateParams(reservationIdParamsSchema)],
-      preHandler: [validateBody(extendReservationSchema), requireRole(["ADMIN", "CUSTOMER"])],
+      preHandler: [requireRole(["ADMIN", "CUSTOMER"]), validateBody(extendReservationSchema)],
       schema: {
         description: "Extend reservation duration",
         tags: ["Reservations"],
@@ -368,7 +368,7 @@ export async function reservationRoutes(
     "/reservations/:reservationId/renew",
     {
       preValidation: [validateParams(reservationIdParamsSchema)],
-      preHandler: [validateBody(renewReservationSchema), requireRole(["ADMIN", "CUSTOMER"])],
+      preHandler: [requireRole(["ADMIN", "CUSTOMER"]), validateBody(renewReservationSchema)],
       schema: {
         description: "Renew an expired or expiring reservation",
         tags: ["Reservations"],
@@ -409,7 +409,7 @@ export async function reservationRoutes(
     "/carts/:cartId/reservations/:variantId",
     {
       preValidation: [validateParams(cartReservationParamsSchema)],
-      preHandler: [validateBody(adjustReservationSchema), requireRole(["ADMIN", "CUSTOMER"])],
+      preHandler: [requireRole(["ADMIN", "CUSTOMER"]), validateBody(adjustReservationSchema)],
       schema: {
         description: "Adjust reservation quantity for a variant in a cart",
         tags: ["Reservations"],
@@ -529,7 +529,7 @@ export async function reservationRoutes(
   fastify.post(
     "/reservations/bulk",
     {
-      preHandler: [validateBody(createBulkReservationsSchema), requireRole(["ADMIN", "CUSTOMER"])],
+      preHandler: [requireRole(["ADMIN", "CUSTOMER"]), validateBody(createBulkReservationsSchema)],
       schema: {
         description: "Create reservations for multiple items at once",
         tags: ["Reservations"],

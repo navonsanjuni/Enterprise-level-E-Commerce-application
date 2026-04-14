@@ -1,4 +1,5 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 import {
   CreateOrderCommand,
@@ -7,24 +8,38 @@ import {
   UpdateOrderStatusCommandHandler,
   UpdateOrderTotalsCommand,
   UpdateOrderTotalsCommandHandler,
-  MarkOrderAsPaidCommand,
-  MarkOrderAsPaidCommandHandler,
-  MarkOrderAsFulfilledCommand,
-  MarkOrderAsFulfilledCommandHandler,
+  MarkOrderPaidCommand,
+  MarkOrderPaidCommandHandler,
+  MarkOrderFulfilledCommand,
+  MarkOrderFulfilledCommandHandler,
   CancelOrderCommand,
   CancelOrderCommandHandler,
   DeleteOrderCommand,
   DeleteOrderCommandHandler,
   GetOrderQuery,
   GetOrderHandler,
-  ListOrdersQueryHandler,
-  GetOrderAddressesQuery,
-  GetOrderAddressesHandler,
-  GetOrderShipmentsQuery,
-  GetOrderShipmentsHandler,
+  ListOrdersQuery,
+  ListOrdersHandler,
+  GetOrderAddressQuery,
+  GetOrderAddressHandler,
+  ListOrderShipmentsQuery,
+  ListOrderShipmentsHandler,
   OrderManagementService,
   ShipmentManagementService,
 } from "../../../application";
+
+export interface AddressInput {
+  firstName: string;
+  lastName: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone?: string;
+  email?: string;
+}
 
 export interface CreateOrderBody {
   guestToken?: string;
@@ -34,13 +49,15 @@ export interface CreateOrderBody {
     isGift?: boolean;
     giftMessage?: string;
   }>;
+  shippingAddress: AddressInput;
+  billingAddress?: AddressInput;
   source?: string;
   currency?: string;
 }
 
 export interface TrackOrderQuerystring {
-  orderNumber: string;
-  contact: string;
+  orderNumber?: string;
+  contact?: string;
   trackingNumber?: string;
 }
 
@@ -50,8 +67,8 @@ export interface ListOrdersQuerystring {
   status?: string;
   startDate?: string;
   endDate?: string;
-  sortBy?: string;
-  sortOrder?: string;
+  sortBy?: "createdAt" | "updatedAt" | "orderNumber";
+  sortOrder?: "asc" | "desc";
 }
 
 export interface UpdateOrderStatusBody {
@@ -66,18 +83,20 @@ export interface UpdateOrderTotalsBody {
   };
 }
 
+const STAFF_ROLES = ["ADMIN", "INVENTORY_STAFF", "CUSTOMER_SERVICE", "ANALYST"];
+
 export class OrderController {
   private createOrderHandler: CreateOrderHandler;
   private getOrderHandler: GetOrderHandler;
-  private listOrdersHandler: ListOrdersQueryHandler;
+  private listOrdersHandler: ListOrdersHandler;
   private updateOrderStatusHandler: UpdateOrderStatusCommandHandler;
   private updateOrderTotalsHandler: UpdateOrderTotalsCommandHandler;
-  private markOrderAsPaidHandler: MarkOrderAsPaidCommandHandler;
-  private markOrderAsFulfilledHandler: MarkOrderAsFulfilledCommandHandler;
+  private markOrderPaidHandler: MarkOrderPaidCommandHandler;
+  private markOrderFulfilledHandler: MarkOrderFulfilledCommandHandler;
   private cancelOrderHandler: CancelOrderCommandHandler;
   private deleteOrderHandler: DeleteOrderCommandHandler;
-  private getOrderAddressesHandler: GetOrderAddressesHandler;
-  private getOrderShipmentsHandler: GetOrderShipmentsHandler;
+  private getOrderAddressHandler: GetOrderAddressHandler;
+  private listOrderShipmentsHandler: ListOrderShipmentsHandler;
   private shipmentService: ShipmentManagementService;
 
   constructor(
@@ -87,678 +106,291 @@ export class OrderController {
     this.shipmentService = shipmentService;
     this.createOrderHandler = new CreateOrderHandler(orderManagementService);
     this.getOrderHandler = new GetOrderHandler(orderManagementService);
-    this.listOrdersHandler = new ListOrdersQueryHandler(orderManagementService);
-    this.updateOrderStatusHandler = new UpdateOrderStatusCommandHandler(
-      orderManagementService,
-    );
-    this.updateOrderTotalsHandler = new UpdateOrderTotalsCommandHandler(
-      orderManagementService,
-    );
-    this.markOrderAsPaidHandler = new MarkOrderAsPaidCommandHandler(
-      orderManagementService,
-    );
-    this.markOrderAsFulfilledHandler = new MarkOrderAsFulfilledCommandHandler(
-      orderManagementService,
-    );
-    this.cancelOrderHandler = new CancelOrderCommandHandler(
-      orderManagementService,
-    );
-    this.deleteOrderHandler = new DeleteOrderCommandHandler(
-      orderManagementService,
-    );
-    this.getOrderAddressesHandler = new GetOrderAddressesHandler(
-      orderManagementService,
-    );
-    this.getOrderShipmentsHandler = new GetOrderShipmentsHandler(
-      shipmentService,
-    );
+    this.listOrdersHandler = new ListOrdersHandler(orderManagementService);
+    this.updateOrderStatusHandler = new UpdateOrderStatusCommandHandler(orderManagementService);
+    this.updateOrderTotalsHandler = new UpdateOrderTotalsCommandHandler(orderManagementService);
+    this.markOrderPaidHandler = new MarkOrderPaidCommandHandler(orderManagementService);
+    this.markOrderFulfilledHandler = new MarkOrderFulfilledCommandHandler(orderManagementService);
+    this.cancelOrderHandler = new CancelOrderCommandHandler(orderManagementService);
+    this.deleteOrderHandler = new DeleteOrderCommandHandler(orderManagementService);
+    this.getOrderAddressHandler = new GetOrderAddressHandler(orderManagementService);
+    this.listOrderShipmentsHandler = new ListOrderShipmentsHandler(shipmentService);
   }
 
   async getOrder(
-    request: FastifyRequest<{ Params: { orderId: string } }>,
+    request: AuthenticatedRequest<{ Params: { orderId: string } }>,
     reply: FastifyReply,
   ) {
     try {
-      const { orderId } = request.params;
-
-      if (!orderId || typeof orderId !== "string") {
-        return ResponseHelper.badRequest(
-          reply,
-          "Order ID is required and must be a valid string",
-        );
-      }
-
-      // Create query
-      const query: GetOrderQuery = {
-        orderId,
-      };
-
-      // Execute query using handler
+      const query: GetOrderQuery = { orderId: request.params.orderId };
       const result = await this.getOrderHandler.handle(query);
 
-      if (result.success && result.data) {
-        const user = (request as any).user;
-        const requesterId = user?.userId;
-        const userRole = user?.role;
-        const isAdminOrStaff = [
-          "ADMIN",
-          "INVENTORY_STAFF",
-          "CUSTOMER_SERVICE",
-          "ANALYST",
-        ].includes(userRole);
-
-        if (
-          !isAdminOrStaff &&
-          result.data.userId &&
-          requesterId &&
-          result.data.userId !== requesterId
-        ) {
-          return ResponseHelper.forbidden(
-            reply,
-            "You are not allowed to view this order",
-          );
-        }
-
-        return ResponseHelper.ok(reply, "Order retrieved", result.data);
-      } else {
-        return ResponseHelper.notFound(
-          reply,
-          result.error || "Order not found",
-        );
+      if (!result.success || !result.data) {
+        return ResponseHelper.notFound(reply, "Order not found");
       }
-    } catch (error) {
-      request.log.error(error, "Failed to get order");
+
+      const { userId: requesterId, role: userRole } = request.user;
+      const isAdminOrStaff = STAFF_ROLES.includes(userRole ?? "");
+
+      if (!isAdminOrStaff && result.data.userId && requesterId && result.data.userId !== requesterId) {
+        return ResponseHelper.forbidden(reply, "You are not allowed to view this order");
+      }
+
+      return ResponseHelper.ok(reply, "Order retrieved successfully", result.data);
+    } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }
 
   async getOrderByOrderNumber(
-    request: FastifyRequest<{ Params: { orderNumber: string } }>,
+    request: AuthenticatedRequest<{ Params: { orderNumber: string } }>,
     reply: FastifyReply,
   ) {
     try {
-      const { orderNumber } = request.params;
-
-      if (!orderNumber || typeof orderNumber !== "string") {
-        return ResponseHelper.badRequest(
-          reply,
-          "Order number is required and must be a valid string",
-        );
-      }
-
-      // Create query
-      const query: GetOrderQuery = {
-        orderNumber,
-      };
-
-      // Execute query using handler
+      const query: GetOrderQuery = { orderNumber: request.params.orderNumber };
       const result = await this.getOrderHandler.handle(query);
 
-      if (result.success && result.data) {
-        const user = (request as any).user;
-        const requesterId = user?.userId;
-        const userRole = user?.role;
-        const isAdminOrStaff = [
-          "ADMIN",
-          "INVENTORY_STAFF",
-          "CUSTOMER_SERVICE",
-          "ANALYST",
-        ].includes(userRole);
-
-        if (
-          !isAdminOrStaff &&
-          result.data.userId &&
-          requesterId &&
-          result.data.userId !== requesterId
-        ) {
-          return ResponseHelper.forbidden(
-            reply,
-            "You are not allowed to view this order",
-          );
-        }
-
-        return ResponseHelper.ok(reply, "Order retrieved", result.data);
-      } else {
-        return ResponseHelper.notFound(
-          reply,
-          result.error || "Order not found",
-        );
+      if (!result.success || !result.data) {
+        return ResponseHelper.notFound(reply, "Order not found");
       }
-    } catch (error) {
-      request.log.error(error, "Failed to get order by order number");
+
+      const { userId: requesterId, role: userRole } = request.user;
+      const isAdminOrStaff = STAFF_ROLES.includes(userRole ?? "");
+
+      if (!isAdminOrStaff && result.data.userId && requesterId && result.data.userId !== requesterId) {
+        return ResponseHelper.forbidden(reply, "You are not allowed to view this order");
+      }
+
+      return ResponseHelper.ok(reply, "Order retrieved successfully", result.data);
+    } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }
 
   async createOrder(
-    request: FastifyRequest<{ Body: CreateOrderBody }>,
+    request: AuthenticatedRequest<{ Body: CreateOrderBody }>,
     reply: FastifyReply,
   ) {
     try {
-      const orderData = request.body;
-
-      // Extract userId from authentication context (JWT token)
-      // @ts-ignore - request.user is added by authentication middleware
       const authenticatedUserId = request.user?.userId;
+      const { guestToken, items, shippingAddress, billingAddress, source, currency } = request.body;
 
-      // Validation: Either authenticated user OR guest token required
-      if (!authenticatedUserId && !orderData.guestToken) {
-        return ResponseHelper.badRequest(
-          reply,
-          "Order requires either authentication or guest token",
-        );
+      if (!authenticatedUserId && !guestToken) {
+        return ResponseHelper.badRequest(reply, "Order requires either authentication or guest token");
       }
 
-      // Security: Don't allow both authentication AND guest token
-      if (authenticatedUserId && orderData.guestToken) {
-        return ResponseHelper.badRequest(
-          reply,
-          "Authenticated users cannot use guest checkout",
-        );
+      if (authenticatedUserId && guestToken) {
+        return ResponseHelper.badRequest(reply, "Authenticated users cannot use guest checkout");
       }
 
-      if (!orderData.items || orderData.items.length === 0) {
-        return ResponseHelper.badRequest(reply, "Order items are required");
-      }
-
-      // Validate items
-      for (const item of orderData.items) {
-        if (!item.variantId || item.quantity <= 0) {
-          return ResponseHelper.badRequest(
-            reply,
-            "Each item must have a valid variantId and quantity > 0",
-          );
-        }
-      }
-
-      // Create command with userId from auth context
       const command: CreateOrderCommand = {
-        userId: authenticatedUserId, // From JWT token, not request body
-        guestToken: orderData.guestToken,
-        items: orderData.items, // Simplified items - only variantId, quantity, isGift, giftMessage
-        source: orderData.source || "web",
-        currency: orderData.currency || "USD",
+        userId: authenticatedUserId,
+        guestToken,
+        items,
+        shippingAddress,
+        billingAddress,
+        source: source || "web",
+        currency: currency || "USD",
       };
 
-      // Execute command using handler
       const result = await this.createOrderHandler.handle(command);
-
-      if (result.success && result.data) {
-        const order = result.data;
-
-        return ResponseHelper.created(reply, "Order created successfully", {
-          orderId: order.getOrderId().toString(),
-          orderNumber: order.getOrderNumber().toString(),
-          status: order.getStatus().toString(),
-          createdAt: order.getCreatedAt().toISOString(),
-        });
-      } else {
-        return ResponseHelper.badRequest(
-          reply,
-          result.error || "Order creation failed",
-          result.errors,
-        );
-      }
-    } catch (error) {
-      request.log.error(error, "Failed to create order");
+      return ResponseHelper.fromCommand(reply, result, "Order created successfully", 201);
+    } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }
 
   async listOrders(
-    request: FastifyRequest<{ Querystring: ListOrdersQuerystring }>,
+    request: AuthenticatedRequest<{ Querystring: ListOrdersQuerystring }>,
     reply: FastifyReply,
   ) {
     try {
-      const {
-        page: pageQuery = 1,
-        limit: limitQuery = 20,
-        status,
-        startDate,
-        endDate,
-        sortBy = "createdAt",
-        sortOrder = "desc",
-      } = request.query;
+      const { page = 1, limit = 20, status, startDate, endDate, sortBy = "createdAt", sortOrder = "desc" } = request.query;
 
-      const page = parseInt(String(pageQuery), 10);
-      const limit = parseInt(String(limitQuery), 10);
+      const { userId: authenticatedUserId, role: userRole } = request.user;
+      const isAdminOrStaff = STAFF_ROLES.includes(userRole ?? "");
+      const filterUserId = isAdminOrStaff ? undefined : authenticatedUserId;
 
-      // Get userId and role from authenticated user
-      const user = (request as any).user;
-      const authenticatedUserId = user?.userId;
-      const userRole = user?.role;
-
-      const isAdminOrStaff = [
-        "ADMIN",
-        "INVENTORY_STAFF",
-        "CUSTOMER_SERVICE",
-        "ANALYST",
-      ].includes(userRole);
-
-      // Security: Regular users MUST only see their own orders
-      // Admins see all orders by default
-      let filterUserId: string | undefined = authenticatedUserId;
-
-      if (isAdminOrStaff) {
-        filterUserId = undefined;
-      } else {
-        if (!authenticatedUserId) {
-          return ResponseHelper.unauthorized(
-            reply,
-            "Authentication required to list orders",
-          );
-        }
-        filterUserId = authenticatedUserId;
-      }
-
-      const queryResult = await this.listOrdersHandler.handle({
+      const query: ListOrdersQuery = {
         page,
         limit,
         userId: filterUserId,
         status,
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
-        sortBy: sortBy as any,
-        sortOrder: sortOrder as any,
-      });
+        sortBy,
+        sortOrder,
+      };
 
-      // Handle empty or undefined results
-      if (
-        !queryResult.success ||
-        !queryResult.data ||
-        !queryResult.data.items
-      ) {
-        return ResponseHelper.ok(reply, "Orders retrieved", {
-          orders: [],
-          pagination: {
-            total: 0,
-            page,
-            limit,
-            totalPages: 0,
-          },
-        });
-      }
-
-      const result = queryResult.data;
-
-      // Fetch addresses for all orders in parallel via handlers
-      const addressResults = await Promise.all(
-        result.items.map((order) =>
-          this.getOrderAddressesHandler.handle({
-            orderId: order.getOrderId().toString(),
-          }),
-        ),
-      );
-
-      const orders = result.items.map((order, index) => {
-        const addressResult = addressResults[index];
-        const orderAddress = addressResult.success ? addressResult.data : null;
-        const billing = orderAddress?.billingAddress;
-
-        let customerName = "Guest Customer";
-        let customerEmail = billing?.email || "";
-
-        if (billing) {
-          customerName = `${billing.firstName} ${billing.lastName}`;
-        } else if (order.getUserId()) {
-          customerName = "Authenticated User";
-        }
-
-        return {
-          orderId: order.getOrderId()?.toString() || "",
-          orderNumber: order.getOrderNumber()?.toString() || "",
-          userId: order.getUserId() || null,
-          guestToken: order.getGuestToken() || null,
-          customerName,
-          customerEmail,
-          billingAddress: billing,
-          shippingAddress: orderAddress?.shippingAddress,
-
-          items: order.getItems().map((item) => ({
-            orderItemId: item.getOrderItemId(),
-            variantId: item.getVariantId(),
-            quantity: item.getQuantity(),
-            productSnapshot: item.getProductSnapshot().toJSON(),
-            isGift: item.isGiftItem(),
-            giftMessage: item.getGiftMessage(),
-          })),
-          totals: order.getTotals()?.toJSON() || {},
-          status: order.getStatus()?.toString() || "",
-          source: order.getSource()?.toString() || "",
-          currency: order.getCurrency()?.toString() || "",
-          createdAt: order.getCreatedAt() || null,
-          updatedAt: order.getUpdatedAt() || null,
-        };
-      });
-
-      return ResponseHelper.ok(reply, "Orders retrieved", {
-        orders,
-        pagination: {
-          total: result.totalCount,
-          page: result.page,
-          limit: result.limit,
-          totalPages: result.totalPages,
-        },
-      });
-    } catch (error) {
-      request.log.error(error, "Failed to list orders");
+      const result = await this.listOrdersHandler.handle(query);
+      return ResponseHelper.ok(reply, "Orders retrieved successfully", result.data);
+    } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }
 
   async updateOrderStatus(
-    request: FastifyRequest<{
-      Params: { orderId: string };
-      Body: UpdateOrderStatusBody;
-    }>,
+    request: AuthenticatedRequest<{ Params: { orderId: string }; Body: UpdateOrderStatusBody }>,
     reply: FastifyReply,
   ) {
     try {
-      const { orderId } = request.params;
-      const { status } = request.body;
-
-      if (!orderId) {
-        return ResponseHelper.badRequest(reply, "Order ID is required");
-      }
-
-      if (!status) {
-        return ResponseHelper.badRequest(reply, "Status is required");
-      }
-
-      const command: UpdateOrderStatusCommand = { orderId, status };
+      const command: UpdateOrderStatusCommand = {
+        orderId: request.params.orderId,
+        status: request.body.status,
+      };
       const result = await this.updateOrderStatusHandler.handle(command);
-
-      if (result.success && result.data) {
-        const order = result.data;
-        return ResponseHelper.ok(reply, "Order status updated successfully", {
-          orderId: order.getOrderId().toString(),
-          status: order.getStatus().toString(),
-          updatedAt: order.getUpdatedAt(),
-        });
-      }
-
-      return ResponseHelper.fromCommand(
-        reply,
-        result,
-        "Order status updated successfully",
-      );
-    } catch (error) {
-      request.log.error(error, "Failed to update order status");
+      return ResponseHelper.fromCommand(reply, result, "Order status updated successfully");
+    } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }
 
   async updateOrderTotals(
-    request: FastifyRequest<{
-      Params: { orderId: string };
-      Body: UpdateOrderTotalsBody;
-    }>,
+    request: AuthenticatedRequest<{ Params: { orderId: string }; Body: UpdateOrderTotalsBody }>,
     reply: FastifyReply,
   ) {
     try {
-      const { orderId } = request.params;
-      const { totals } = request.body;
-
-      const command: UpdateOrderTotalsCommand = { orderId, totals };
+      const command: UpdateOrderTotalsCommand = {
+        orderId: request.params.orderId,
+        totals: request.body.totals,
+      };
       const result = await this.updateOrderTotalsHandler.handle(command);
-
-      if (result.success && result.data) {
-        const order = result.data;
-        return ResponseHelper.ok(reply, "Order totals updated successfully", {
-          orderId: order.getOrderId().toString(),
-          totals: order.getTotals().toJSON(),
-          updatedAt: order.getUpdatedAt(),
-        });
-      }
-
-      return ResponseHelper.fromCommand(
-        reply,
-        result,
-        "Order totals updated successfully",
-      );
-    } catch (error) {
-      request.log.error(error, "Failed to update order totals");
+      return ResponseHelper.fromCommand(reply, result, "Order totals updated successfully");
+    } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }
 
   async markOrderAsPaid(
-    request: FastifyRequest<{ Params: { orderId: string } }>,
+    request: AuthenticatedRequest<{ Params: { orderId: string } }>,
     reply: FastifyReply,
   ) {
     try {
-      const { orderId } = request.params;
-
-      const command: MarkOrderAsPaidCommand = { orderId };
-      const result = await this.markOrderAsPaidHandler.handle(command);
-
-      if (result.success && result.data) {
-        const order = result.data;
-        return ResponseHelper.ok(reply, "Order marked as paid successfully", {
-          orderId: order.getOrderId().toString(),
-          status: order.getStatus().toString(),
-          updatedAt: order.getUpdatedAt(),
-        });
-      }
-
-      return ResponseHelper.fromCommand(
-        reply,
-        result,
-        "Order marked as paid successfully",
-      );
-    } catch (error) {
-      request.log.error(error, "Failed to mark order as paid");
+      const command: MarkOrderPaidCommand = { orderId: request.params.orderId };
+      const result = await this.markOrderPaidHandler.handle(command);
+      return ResponseHelper.fromCommand(reply, result, "Order marked as paid successfully");
+    } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }
 
   async markOrderAsFulfilled(
-    request: FastifyRequest<{ Params: { orderId: string } }>,
+    request: AuthenticatedRequest<{ Params: { orderId: string } }>,
     reply: FastifyReply,
   ) {
     try {
-      const { orderId } = request.params;
-
-      const command: MarkOrderAsFulfilledCommand = { orderId };
-      const result = await this.markOrderAsFulfilledHandler.handle(command);
-
-      if (result.success && result.data) {
-        const order = result.data;
-        return ResponseHelper.ok(
-          reply,
-          "Order marked as fulfilled successfully",
-          {
-            orderId: order.getOrderId().toString(),
-            status: order.getStatus().toString(),
-            updatedAt: order.getUpdatedAt(),
-          },
-        );
-      }
-
-      return ResponseHelper.fromCommand(
-        reply,
-        result,
-        "Order marked as fulfilled successfully",
-      );
-    } catch (error) {
-      request.log.error(error, "Failed to mark order as fulfilled");
+      const command: MarkOrderFulfilledCommand = { orderId: request.params.orderId };
+      const result = await this.markOrderFulfilledHandler.handle(command);
+      return ResponseHelper.fromCommand(reply, result, "Order marked as fulfilled successfully");
+    } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }
 
   async cancelOrder(
-    request: FastifyRequest<{ Params: { orderId: string } }>,
+    request: AuthenticatedRequest<{ Params: { orderId: string } }>,
     reply: FastifyReply,
   ) {
     try {
-      const { orderId } = request.params;
-
-      const command: CancelOrderCommand = { orderId };
+      const command: CancelOrderCommand = { orderId: request.params.orderId };
       const result = await this.cancelOrderHandler.handle(command);
-
-      if (result.success && result.data) {
-        const order = result.data;
-        return ResponseHelper.ok(reply, "Order cancelled successfully", {
-          orderId: order.getOrderId().toString(),
-          status: order.getStatus().toString(),
-          updatedAt: order.getUpdatedAt(),
-        });
-      }
-
-      return ResponseHelper.fromCommand(
-        reply,
-        result,
-        "Order cancelled successfully",
-      );
-    } catch (error) {
-      request.log.error(error, "Failed to cancel order");
+      return ResponseHelper.fromCommand(reply, result, "Order cancelled successfully");
+    } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }
 
   async deleteOrder(
-    request: FastifyRequest<{ Params: { orderId: string } }>,
+    request: AuthenticatedRequest<{ Params: { orderId: string } }>,
     reply: FastifyReply,
   ) {
     try {
-      const { orderId } = request.params;
-
-      const command: DeleteOrderCommand = { orderId };
+      const command: DeleteOrderCommand = { orderId: request.params.orderId };
       const result = await this.deleteOrderHandler.handle(command);
-      return ResponseHelper.fromCommand(
-        reply,
-        result,
-        "Order deleted successfully",
-      );
-    } catch (error) {
-      request.log.error(error, "Failed to delete order");
+      return ResponseHelper.fromCommand(reply, result, "Order deleted successfully", undefined, 204);
+    } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }
 
-  // Public order tracking (no authentication required)
   async trackOrder(
-    request: FastifyRequest<{ Querystring: TrackOrderQuerystring }>,
+    request: AuthenticatedRequest<{ Querystring: TrackOrderQuerystring }>,
     reply: FastifyReply,
   ) {
     try {
       const { orderNumber, contact, trackingNumber } = request.query;
 
-      // Validate inputs
       if (!orderNumber && !trackingNumber) {
-        return ResponseHelper.badRequest(
-          reply,
-          "Either order number or tracking number is required",
-        );
+        return ResponseHelper.badRequest(reply, "Either order number or tracking number is required");
       }
 
       if (orderNumber && !contact) {
-        return ResponseHelper.badRequest(
-          reply,
-          "Email or phone number is required when tracking by order number",
-        );
+        return ResponseHelper.badRequest(reply, "Email or phone number is required when tracking by order number");
       }
 
-      // Track by order number + contact verification
       if (orderNumber && contact) {
-        const query: GetOrderQuery = {
-          orderNumber,
-        };
-
-        const result = await this.getOrderHandler.handle(query);
+        const result = await this.getOrderHandler.handle({ orderNumber });
 
         if (!result.success || !result.data) {
-          return ResponseHelper.notFound(
-            reply,
-            `No order found with the provided order number: ${orderNumber}. Please check and try again.`,
-          );
+          return ResponseHelper.notFound(reply, `No order found with order number: ${orderNumber}`);
         }
 
         const order = result.data;
-
-        // Get the order addresses to verify contact info
-        const addressQuery: GetOrderAddressesQuery = {
-          orderId: order.orderId as string,
-        };
-        const addressResult =
-          await this.getOrderAddressesHandler.handle(addressQuery);
+        const addressQuery: GetOrderAddressQuery = { orderId: order.id };
+        const addressResult = await this.getOrderAddressHandler.handle(addressQuery);
         const orderAddress = addressResult.success ? addressResult.data : null;
 
-        // Verify contact matches billing or shipping address
         const contactLower = contact.toLowerCase().trim();
-        const billingAddress = orderAddress?.billingAddress;
-        const shippingAddress = orderAddress?.shippingAddress;
-
-        const billingEmail = billingAddress?.email?.toLowerCase().trim();
-        const billingPhone = billingAddress?.phone?.trim();
-        const shippingEmail = shippingAddress?.email?.toLowerCase().trim();
-        const shippingPhone = shippingAddress?.phone?.trim();
+        const billing = orderAddress?.billingAddress;
+        const shipping = orderAddress?.shippingAddress;
 
         const contactMatches =
-          contactLower === billingEmail ||
-          contactLower === shippingEmail ||
-          contact === billingPhone ||
-          contact === shippingPhone;
+          contactLower === (billing?.email as string | undefined)?.toLowerCase().trim() ||
+          contactLower === (shipping?.email as string | undefined)?.toLowerCase().trim() ||
+          contact === (billing?.phone as string | undefined)?.trim() ||
+          contact === (shipping?.phone as string | undefined)?.trim();
 
         if (!contactMatches) {
-          return ResponseHelper.forbidden(
-            reply,
-            "The email or phone number does not match our records for this order.",
-          );
+          return ResponseHelper.forbidden(reply, "The email or phone number does not match our records for this order.");
         }
 
-        // Get shipment information
-        const shipmentsQuery: GetOrderShipmentsQuery = {
-          orderId: order.orderId as string,
-        };
-        const shipmentsResult =
-          await this.getOrderShipmentsHandler.handle(shipmentsQuery);
-        const shipments = shipmentsResult.success ? shipmentsResult.data : [];
+        const shipmentsQuery: ListOrderShipmentsQuery = { orderId: order.id };
+        const shipmentsResult = await this.listOrderShipmentsHandler.handle(shipmentsQuery);
 
-        return ResponseHelper.ok(reply, "Order tracking retrieved", {
-          orderId: order.orderId,
+        return ResponseHelper.ok(reply, "Order tracking retrieved successfully", {
+          orderId: order.id,
           orderNumber: order.orderNumber,
           status: order.status,
           items: order.items,
           totals: order.totals,
-          shipments: shipments || [],
-          billingAddress: billingAddress || {},
-          shippingAddress: shippingAddress || {},
+          shipments: shipmentsResult.success ? shipmentsResult.data : [],
+          billingAddress: billing || {},
+          shippingAddress: shipping || {},
           createdAt: order.createdAt,
           updatedAt: order.updatedAt,
         });
       }
 
-      // Track by tracking number only
       if (trackingNumber) {
-        const shipment =
-          await this.shipmentService.getShipmentByTrackingNumber(
-            trackingNumber,
-          );
+        const shipment = await this.shipmentService.getShipmentByTrackingNumber(trackingNumber);
 
         if (!shipment) {
-          return ResponseHelper.notFound(
-            reply,
-            "No shipment found for the given tracking number",
-          );
+          return ResponseHelper.notFound(reply, "No shipment found for the given tracking number");
         }
 
-        return ResponseHelper.ok(reply, "Shipment tracking retrieved", {
-          shipmentId: shipment.getShipmentId(),
-          orderId: shipment.getOrderId(),
-          carrier: shipment.getCarrier(),
-          service: shipment.getService(),
-          trackingNumber: shipment.getTrackingNumber(),
-          shipped: shipment.isShipped(),
-          delivered: shipment.isDelivered(),
-          shippedAt: shipment.getShippedAt(),
-          deliveredAt: shipment.getDeliveredAt(),
+        return ResponseHelper.ok(reply, "Shipment tracking retrieved successfully", {
+          shipmentId: shipment.shipmentId,
+          orderId: shipment.orderId,
+          carrier: shipment.carrier,
+          service: shipment.service,
+          trackingNumber: shipment.trackingNumber,
+          shippedAt: shipment.shippedAt,
+          deliveredAt: shipment.deliveredAt,
         });
       }
 
       return ResponseHelper.badRequest(reply, "Invalid tracking request");
-    } catch (error) {
-      request.log.error(error, "Failed to track order");
+    } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }

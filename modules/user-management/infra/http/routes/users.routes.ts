@@ -128,8 +128,8 @@ export async function userRoutes(
     {
       preValidation: [validateParams(userIdParamsSchema)],
       preHandler: [
-        validateBody(updateUserStatusSchema),
         RolePermissions.ADMIN_ONLY,
+        validateBody(updateUserStatusSchema),
       ],
       schema: {
         tags: ["Users"],
@@ -166,8 +166,8 @@ export async function userRoutes(
     {
       preValidation: [validateParams(userIdParamsSchema)],
       preHandler: [
-        validateBody(updateUserRoleSchema),
         RolePermissions.ADMIN_ONLY,
+        validateBody(updateUserRoleSchema),
       ],
       schema: {
         tags: ["Users"],
@@ -203,8 +203,8 @@ export async function userRoutes(
     {
       preValidation: [validateParams(userIdParamsSchema)],
       preHandler: [
-        validateBody(toggleEmailVerifiedSchema),
         RolePermissions.ADMIN_ONLY,
+        validateBody(toggleEmailVerifiedSchema),
       ],
       schema: {
         tags: ["Users"],

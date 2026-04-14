@@ -15,7 +15,7 @@ export interface ProductSnapshotData {
     width: number;
     height: number;
   };
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 export class ProductSnapshot {
@@ -33,7 +33,7 @@ export class ProductSnapshot {
     width: number;
     height: number;
   };
-  private readonly attributes?: Record<string, any>;
+  private readonly attributes?: Record<string, unknown>;
 
   private constructor(data: ProductSnapshotData) {
     this.productId = data.productId;
@@ -123,7 +123,7 @@ export class ProductSnapshot {
     return this.dimensions;
   }
 
-  getAttributes(): Record<string, any> | undefined {
+  getAttributes(): Record<string, unknown> | undefined {
     return this.attributes;
   }
 
