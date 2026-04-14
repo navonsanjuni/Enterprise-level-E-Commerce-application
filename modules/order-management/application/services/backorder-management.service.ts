@@ -2,7 +2,10 @@ import {
   IBackorderRepository,
   BackorderQueryOptions,
 } from "../../domain/repositories/backorder.repository";
-import { Backorder, BackorderDTO } from "../../domain/entities/backorder.entity";
+import {
+  Backorder,
+  BackorderDTO,
+} from "../../domain/entities/backorder.entity";
 import {
   BackorderNotFoundError,
   BackorderAlreadyExistsError,
@@ -45,12 +48,15 @@ export class BackorderManagementService {
     return Backorder.toDTO(backorder);
   }
 
-  async getBackorderByOrderItemId(orderItemId: string): Promise<BackorderDTO | null> {
+  async getBackorderByOrderItemId(
+    orderItemId: string,
+  ): Promise<BackorderDTO | null> {
     if (!orderItemId || orderItemId.trim().length === 0) {
       throw new DomainValidationError("Order item ID is required");
     }
 
-    const backorder = await this.backorderRepository.findByOrderItemId(orderItemId);
+    const backorder =
+      await this.backorderRepository.findByOrderItemId(orderItemId);
     return backorder ? Backorder.toDTO(backorder) : null;
   }
 
@@ -79,7 +85,10 @@ export class BackorderManagementService {
     options?: BackorderQueryOptions,
   ): Promise<BackorderDTO[]> {
     const now = new Date();
-    const backorders = await this.backorderRepository.findByPromisedEtaBefore(now, options);
+    const backorders = await this.backorderRepository.findByPromisedEtaBefore(
+      now,
+      options,
+    );
     return backorders.map((b) => Backorder.toDTO(b));
   }
 
@@ -98,12 +107,16 @@ export class BackorderManagementService {
     return backorders.map((b) => Backorder.toDTO(b));
   }
 
-  async updatePromisedEta(orderItemId: string, eta: Date): Promise<BackorderDTO> {
+  async updatePromisedEta(
+    orderItemId: string,
+    eta: Date,
+  ): Promise<BackorderDTO> {
     if (!eta) {
       throw new DomainValidationError("Promised ETA is required");
     }
 
-    const backorder = await this.backorderRepository.findByOrderItemId(orderItemId);
+    const backorder =
+      await this.backorderRepository.findByOrderItemId(orderItemId);
     if (!backorder) throw new BackorderNotFoundError(orderItemId);
 
     backorder.updatePromisedEta(eta);
@@ -113,7 +126,8 @@ export class BackorderManagementService {
   }
 
   async markAsNotified(orderItemId: string): Promise<BackorderDTO> {
-    const backorder = await this.backorderRepository.findByOrderItemId(orderItemId);
+    const backorder =
+      await this.backorderRepository.findByOrderItemId(orderItemId);
     if (!backorder) throw new BackorderNotFoundError(orderItemId);
 
     backorder.markAsNotified();
@@ -122,7 +136,9 @@ export class BackorderManagementService {
     return Backorder.toDTO(backorder);
   }
 
-  async notifyMultipleBackorders(orderItemIds: string[]): Promise<BackorderDTO[]> {
+  async notifyMultipleBackorders(
+    orderItemIds: string[],
+  ): Promise<BackorderDTO[]> {
     if (!orderItemIds || orderItemIds.length === 0) {
       throw new DomainValidationError("At least one order item ID is required");
     }
@@ -130,7 +146,8 @@ export class BackorderManagementService {
     const notifiedBackorders: Backorder[] = [];
 
     for (const orderItemId of orderItemIds) {
-      const backorder = await this.backorderRepository.findByOrderItemId(orderItemId);
+      const backorder =
+        await this.backorderRepository.findByOrderItemId(orderItemId);
 
       if (backorder && !backorder.isCustomerNotified()) {
         backorder.markAsNotified();
@@ -170,7 +187,8 @@ export class BackorderManagementService {
   }
 
   async isBackorderOverdue(orderItemId: string): Promise<boolean> {
-    const backorder = await this.backorderRepository.findByOrderItemId(orderItemId);
+    const backorder =
+      await this.backorderRepository.findByOrderItemId(orderItemId);
     if (!backorder) {
       return false;
     }
