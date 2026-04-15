@@ -7,6 +7,7 @@ export { GetOrderEventQuery, GetOrderEventHandler } from "./get-order-event.quer
 export { ListOrderEventsQuery, ListOrderEventsHandler } from "./list-order-events.query";
 export { GetOrderStatusHistoryQuery, GetOrderStatusHistoryHandler } from "./get-order-status-history.query";
 export { GetShipmentQuery, GetShipmentHandler } from "./get-shipment.query";
+export { GetShipmentByTrackingNumberQuery, GetShipmentByTrackingNumberHandler } from "./get-shipment-by-tracking-number.query";
 export { ListOrderShipmentsQuery, ListOrderShipmentsHandler } from "./list-order-shipments.query";
 export { GetBackorderQuery, GetBackorderHandler } from "./get-backorder.query";
 export { ListBackordersQuery, ListBackordersHandler } from "./list-backorders.query";

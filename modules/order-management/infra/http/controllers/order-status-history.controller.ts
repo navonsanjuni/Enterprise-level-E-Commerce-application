@@ -6,7 +6,6 @@ import {
   LogOrderStatusChangeCommandHandler,
   GetOrderStatusHistoryQuery,
   GetOrderStatusHistoryHandler,
-  OrderManagementService,
 } from "../../../application";
 
 export interface LogStatusChangeRequest {
@@ -27,13 +26,10 @@ export interface GetStatusHistoryRequest {
 }
 
 export class OrderStatusHistoryController {
-  private logStatusChangeHandler: LogOrderStatusChangeCommandHandler;
-  private getStatusHistoryHandler: GetOrderStatusHistoryHandler;
-
-  constructor(orderService: OrderManagementService) {
-    this.logStatusChangeHandler = new LogOrderStatusChangeCommandHandler(orderService);
-    this.getStatusHistoryHandler = new GetOrderStatusHistoryHandler(orderService);
-  }
+  constructor(
+    private readonly logStatusChangeHandler: LogOrderStatusChangeCommandHandler,
+    private readonly getStatusHistoryHandler: GetOrderStatusHistoryHandler,
+  ) {}
 
   async logStatusChange(
     request: AuthenticatedRequest<LogStatusChangeRequest>,

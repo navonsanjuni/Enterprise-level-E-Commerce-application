@@ -14,8 +14,6 @@ import {
   ListOrderShipmentsHandler,
   GetShipmentQuery,
   GetShipmentHandler,
-  OrderManagementService,
-  ShipmentManagementService,
 } from "../../../application";
 
 export interface CreateShipmentRequest {
@@ -63,24 +61,14 @@ export interface GetShipmentRequest {
 }
 
 export class OrderShipmentController {
-  private createShipmentHandler: CreateShipmentCommandHandler;
-  private updateTrackingHandler: UpdateShipmentTrackingCommandHandler;
-  private markShippedHandler: MarkShipmentShippedCommandHandler;
-  private markDeliveredHandler: MarkShipmentDeliveredCommandHandler;
-  private listOrderShipmentsHandler: ListOrderShipmentsHandler;
-  private getShipmentHandler: GetShipmentHandler;
-
   constructor(
-    orderService: OrderManagementService,
-    shipmentService: ShipmentManagementService,
-  ) {
-    this.createShipmentHandler = new CreateShipmentCommandHandler(orderService);
-    this.updateTrackingHandler = new UpdateShipmentTrackingCommandHandler(orderService);
-    this.markShippedHandler = new MarkShipmentShippedCommandHandler(orderService);
-    this.markDeliveredHandler = new MarkShipmentDeliveredCommandHandler(orderService);
-    this.listOrderShipmentsHandler = new ListOrderShipmentsHandler(shipmentService);
-    this.getShipmentHandler = new GetShipmentHandler(shipmentService);
-  }
+    private readonly createShipmentHandler: CreateShipmentCommandHandler,
+    private readonly updateTrackingHandler: UpdateShipmentTrackingCommandHandler,
+    private readonly markShippedHandler: MarkShipmentShippedCommandHandler,
+    private readonly markDeliveredHandler: MarkShipmentDeliveredCommandHandler,
+    private readonly listOrderShipmentsHandler: ListOrderShipmentsHandler,
+    private readonly getShipmentHandler: GetShipmentHandler,
+  ) {}
 
   async createShipment(
     request: AuthenticatedRequest<CreateShipmentRequest>,

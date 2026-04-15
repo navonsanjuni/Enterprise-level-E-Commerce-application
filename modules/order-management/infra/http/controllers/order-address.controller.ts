@@ -10,7 +10,6 @@ import {
   UpdateShippingAddressCommandHandler,
   GetOrderAddressQuery,
   GetOrderAddressHandler,
-  OrderManagementService,
 } from "../../../application";
 
 export interface AddressData {
@@ -49,17 +48,12 @@ export interface GetAddressesRequest {
 }
 
 export class OrderAddressController {
-  private setAddressesHandler: SetOrderAddressesCommandHandler;
-  private updateBillingAddressHandler: UpdateBillingAddressCommandHandler;
-  private updateShippingAddressHandler: UpdateShippingAddressCommandHandler;
-  private getAddressesHandler: GetOrderAddressHandler;
-
-  constructor(orderManagementService: OrderManagementService) {
-    this.setAddressesHandler = new SetOrderAddressesCommandHandler(orderManagementService);
-    this.updateBillingAddressHandler = new UpdateBillingAddressCommandHandler(orderManagementService);
-    this.updateShippingAddressHandler = new UpdateShippingAddressCommandHandler(orderManagementService);
-    this.getAddressesHandler = new GetOrderAddressHandler(orderManagementService);
-  }
+  constructor(
+    private readonly setAddressesHandler: SetOrderAddressesCommandHandler,
+    private readonly updateBillingAddressHandler: UpdateBillingAddressCommandHandler,
+    private readonly updateShippingAddressHandler: UpdateShippingAddressCommandHandler,
+    private readonly getAddressesHandler: GetOrderAddressHandler,
+  ) {}
 
   async setAddresses(
     request: AuthenticatedRequest<SetAddressesRequest>,

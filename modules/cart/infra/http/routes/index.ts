@@ -2,9 +2,9 @@ import { FastifyInstance } from "fastify";
 import { CartController } from "../controllers/cart.controller";
 import { ReservationController } from "../controllers/reservation.controller";
 import { CheckoutController } from "../controllers/checkout.controller";
-import { registerCartRoutes } from "./cart.routes";
-import { registerCheckoutRoutes } from "./checkout.routes";
-import { registerReservationRoutes } from "./reservation.routes";
+import { cartRoutes } from "./cart.routes";
+import { checkoutRoutes } from "./checkout.routes";
+import { reservationRoutes } from "./reservation.routes";
 
 export async function registerCartModuleRoutes(
   fastify: FastifyInstance,
@@ -16,9 +16,9 @@ export async function registerCartModuleRoutes(
 ): Promise<void> {
   await fastify.register(
     async (instance) => {
-      await registerCartRoutes(instance, controllers.cartController);
-      await registerCheckoutRoutes(instance, controllers.checkoutController);
-      await registerReservationRoutes(instance, controllers.reservationController);
+      await cartRoutes(instance, controllers.cartController);
+      await checkoutRoutes(instance, controllers.checkoutController);
+      await reservationRoutes(instance, controllers.reservationController);
     },
     { prefix: "/api/v1" },
   );

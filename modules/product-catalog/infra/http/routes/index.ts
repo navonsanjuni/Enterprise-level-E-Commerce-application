@@ -1,14 +1,4 @@
 import { FastifyInstance } from "fastify";
-import { productRoutes } from "./product.routes";
-import { categoryRoutes } from "./category.routes";
-import { variantRoutes } from "./variant.routes";
-import { mediaRoutes } from "./media.routes";
-import { productMediaRoutes } from "./product-media.routes";
-import { productTagRoutes } from "./product-tag.routes";
-import { searchRoutes } from "./search.routes";
-import { sizeGuideRoutes } from "./size-guide.routes";
-import { editorialLookRoutes } from "./editorial-look.routes";
-import { variantMediaRoutes } from "./variant-media.routes";
 import { ProductController } from "../controllers/product.controller";
 import { CategoryController } from "../controllers/category.controller";
 import { VariantController } from "../controllers/variant.controller";
@@ -19,6 +9,16 @@ import { SearchController } from "../controllers/search.controller";
 import { SizeGuideController } from "../controllers/size-guide.controller";
 import { EditorialLookController } from "../controllers/editorial-look.controller";
 import { VariantMediaController } from "../controllers/variant-media.controller";
+import { productRoutes } from "./product.routes";
+import { categoryRoutes } from "./category.routes";
+import { variantRoutes } from "./variant.routes";
+import { mediaRoutes } from "./media.routes";
+import { productMediaRoutes } from "./product-media.routes";
+import { productTagRoutes } from "./product-tag.routes";
+import { searchRoutes } from "./search.routes";
+import { sizeGuideRoutes } from "./size-guide.routes";
+import { editorialLookRoutes } from "./editorial-look.routes";
+import { variantMediaRoutes } from "./variant-media.routes";
 import {
   ProductManagementService,
   CategoryManagementService,
@@ -30,8 +30,6 @@ import {
   EditorialLookManagementService,
   ProductMediaManagementService,
   VariantMediaManagementService,
-} from "../../../application/services";
-import {
   // Product commands
   CreateProductHandler,
   UpdateProductHandler,

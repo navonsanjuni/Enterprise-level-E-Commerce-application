@@ -7,13 +7,13 @@ import { PurchaseOrderItemController } from "../controllers/purchase-order-item.
 import { StockAlertController } from "../controllers/stock-alert.controller";
 import { PickupReservationController } from "../controllers/pickup-reservation.controller";
 import { InventoryTransactionController } from "../controllers/inventory-transaction.controller";
-import { StockManagementService } from "../../../application/services/stock-management.service";
-import { LocationManagementService } from "../../../application/services/location-management.service";
-import { SupplierManagementService } from "../../../application/services/supplier-management.service";
-import { PurchaseOrderManagementService } from "../../../application/services/purchase-order-management.service";
-import { StockAlertService } from "../../../application/services/stock-alert.service";
-import { PickupReservationService } from "../../../application/services/pickup-reservation.service";
 import {
+  StockManagementService,
+  LocationManagementService,
+  SupplierManagementService,
+  PurchaseOrderManagementService,
+  StockAlertService,
+  PickupReservationService,
   AddStockHandler,
   AdjustStockHandler,
   TransferStockHandler,

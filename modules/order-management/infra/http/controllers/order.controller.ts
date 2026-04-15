@@ -24,8 +24,7 @@ import {
   GetOrderAddressHandler,
   ListOrderShipmentsQuery,
   ListOrderShipmentsHandler,
-  OrderManagementService,
-  ShipmentManagementService,
+  GetShipmentByTrackingNumberHandler,
 } from "../../../application";
 
 export interface AddressInput {
@@ -86,36 +85,20 @@ export interface UpdateOrderTotalsBody {
 const STAFF_ROLES = ["ADMIN", "INVENTORY_STAFF", "CUSTOMER_SERVICE", "ANALYST"];
 
 export class OrderController {
-  private createOrderHandler: CreateOrderHandler;
-  private getOrderHandler: GetOrderHandler;
-  private listOrdersHandler: ListOrdersHandler;
-  private updateOrderStatusHandler: UpdateOrderStatusCommandHandler;
-  private updateOrderTotalsHandler: UpdateOrderTotalsCommandHandler;
-  private markOrderPaidHandler: MarkOrderPaidCommandHandler;
-  private markOrderFulfilledHandler: MarkOrderFulfilledCommandHandler;
-  private cancelOrderHandler: CancelOrderCommandHandler;
-  private deleteOrderHandler: DeleteOrderCommandHandler;
-  private getOrderAddressHandler: GetOrderAddressHandler;
-  private listOrderShipmentsHandler: ListOrderShipmentsHandler;
-  private shipmentService: ShipmentManagementService;
-
   constructor(
-    orderManagementService: OrderManagementService,
-    shipmentService: ShipmentManagementService,
-  ) {
-    this.shipmentService = shipmentService;
-    this.createOrderHandler = new CreateOrderHandler(orderManagementService);
-    this.getOrderHandler = new GetOrderHandler(orderManagementService);
-    this.listOrdersHandler = new ListOrdersHandler(orderManagementService);
-    this.updateOrderStatusHandler = new UpdateOrderStatusCommandHandler(orderManagementService);
-    this.updateOrderTotalsHandler = new UpdateOrderTotalsCommandHandler(orderManagementService);
-    this.markOrderPaidHandler = new MarkOrderPaidCommandHandler(orderManagementService);
-    this.markOrderFulfilledHandler = new MarkOrderFulfilledCommandHandler(orderManagementService);
-    this.cancelOrderHandler = new CancelOrderCommandHandler(orderManagementService);
-    this.deleteOrderHandler = new DeleteOrderCommandHandler(orderManagementService);
-    this.getOrderAddressHandler = new GetOrderAddressHandler(orderManagementService);
-    this.listOrderShipmentsHandler = new ListOrderShipmentsHandler(shipmentService);
-  }
+    private readonly createOrderHandler: CreateOrderHandler,
+    private readonly getOrderHandler: GetOrderHandler,
+    private readonly listOrdersHandler: ListOrdersHandler,
+    private readonly updateOrderStatusHandler: UpdateOrderStatusCommandHandler,
+    private readonly updateOrderTotalsHandler: UpdateOrderTotalsCommandHandler,
+    private readonly markOrderPaidHandler: MarkOrderPaidCommandHandler,
+    private readonly markOrderFulfilledHandler: MarkOrderFulfilledCommandHandler,
+    private readonly cancelOrderHandler: CancelOrderCommandHandler,
+    private readonly deleteOrderHandler: DeleteOrderCommandHandler,
+    private readonly getOrderAddressHandler: GetOrderAddressHandler,
+    private readonly listOrderShipmentsHandler: ListOrderShipmentsHandler,
+    private readonly getShipmentByTrackingNumberHandler: GetShipmentByTrackingNumberHandler,
+  ) {}
 
   async getOrder(
     request: AuthenticatedRequest<{ Params: { orderId: string } }>,
@@ -372,7 +355,7 @@ export class OrderController {
       }
 
       if (trackingNumber) {
-        const shipment = await this.shipmentService.getShipmentByTrackingNumber(trackingNumber);
+        const shipment = await this.getShipmentByTrackingNumberHandler.handle({ trackingNumber });
 
         if (!shipment) {
           return ResponseHelper.notFound(reply, "No shipment found for the given tracking number");

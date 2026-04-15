@@ -19,7 +19,7 @@ export async function registerUserManagementRoutes(
     paymentMethodsController: PaymentMethodsController;
     usersController: UsersController;
   },
-) {
+): Promise<void> {
   await fastify.register(
     async (instance) => {
       // Public auth routes

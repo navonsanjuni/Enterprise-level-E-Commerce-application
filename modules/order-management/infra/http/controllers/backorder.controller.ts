@@ -14,7 +14,6 @@ import {
   GetBackorderHandler,
   ListBackordersQuery,
   ListBackordersHandler,
-  BackorderManagementService,
 } from "../../../application";
 
 export interface CreateBackorderRequest {
@@ -54,21 +53,14 @@ export interface ListBackordersRequest {
 }
 
 export class BackorderController {
-  private createHandler: CreateBackorderCommandHandler;
-  private updateEtaHandler: UpdateBackorderEtaCommandHandler;
-  private markNotifiedHandler: MarkBackorderNotifiedCommandHandler;
-  private deleteHandler: DeleteBackorderCommandHandler;
-  private getBackorderHandler: GetBackorderHandler;
-  private listBackordersHandler: ListBackordersHandler;
-
-  constructor(backorderService: BackorderManagementService) {
-    this.createHandler = new CreateBackorderCommandHandler(backorderService);
-    this.updateEtaHandler = new UpdateBackorderEtaCommandHandler(backorderService);
-    this.markNotifiedHandler = new MarkBackorderNotifiedCommandHandler(backorderService);
-    this.deleteHandler = new DeleteBackorderCommandHandler(backorderService);
-    this.getBackorderHandler = new GetBackorderHandler(backorderService);
-    this.listBackordersHandler = new ListBackordersHandler(backorderService);
-  }
+  constructor(
+    private readonly createHandler: CreateBackorderCommandHandler,
+    private readonly updateEtaHandler: UpdateBackorderEtaCommandHandler,
+    private readonly markNotifiedHandler: MarkBackorderNotifiedCommandHandler,
+    private readonly deleteHandler: DeleteBackorderCommandHandler,
+    private readonly getBackorderHandler: GetBackorderHandler,
+    private readonly listBackordersHandler: ListBackordersHandler,
+  ) {}
 
   async createBackorder(
     request: AuthenticatedRequest<CreateBackorderRequest>,

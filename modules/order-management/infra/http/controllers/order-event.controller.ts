@@ -8,7 +8,6 @@ import {
   ListOrderEventsHandler,
   GetOrderEventQuery,
   GetOrderEventHandler,
-  OrderEventService,
 } from "../../../application";
 
 export interface LogEventRequest {
@@ -38,15 +37,11 @@ export interface GetEventRequest {
 }
 
 export class OrderEventController {
-  private logEventHandler: LogOrderEventCommandHandler;
-  private listOrderEventsHandler: ListOrderEventsHandler;
-  private getOrderEventHandler: GetOrderEventHandler;
-
-  constructor(orderEventService: OrderEventService) {
-    this.logEventHandler = new LogOrderEventCommandHandler(orderEventService);
-    this.listOrderEventsHandler = new ListOrderEventsHandler(orderEventService);
-    this.getOrderEventHandler = new GetOrderEventHandler(orderEventService);
-  }
+  constructor(
+    private readonly logEventHandler: LogOrderEventCommandHandler,
+    private readonly listOrderEventsHandler: ListOrderEventsHandler,
+    private readonly getOrderEventHandler: GetOrderEventHandler,
+  ) {}
 
   async logEvent(
     request: AuthenticatedRequest<LogEventRequest>,

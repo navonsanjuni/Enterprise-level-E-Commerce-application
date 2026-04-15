@@ -14,7 +14,6 @@ import {
   GetPreorderHandler,
   ListPreordersQuery,
   ListPreordersHandler,
-  PreorderManagementService,
 } from "../../../application";
 
 export interface CreatePreorderRequest {
@@ -54,21 +53,14 @@ export interface ListPreordersRequest {
 }
 
 export class PreorderController {
-  private createHandler: CreatePreorderCommandHandler;
-  private updateReleaseDateHandler: UpdatePreorderReleaseDateCommandHandler;
-  private markNotifiedHandler: MarkPreorderNotifiedCommandHandler;
-  private deleteHandler: DeletePreorderCommandHandler;
-  private getPreorderHandler: GetPreorderHandler;
-  private listPreordersHandler: ListPreordersHandler;
-
-  constructor(preorderService: PreorderManagementService) {
-    this.createHandler = new CreatePreorderCommandHandler(preorderService);
-    this.updateReleaseDateHandler = new UpdatePreorderReleaseDateCommandHandler(preorderService);
-    this.markNotifiedHandler = new MarkPreorderNotifiedCommandHandler(preorderService);
-    this.deleteHandler = new DeletePreorderCommandHandler(preorderService);
-    this.getPreorderHandler = new GetPreorderHandler(preorderService);
-    this.listPreordersHandler = new ListPreordersHandler(preorderService);
-  }
+  constructor(
+    private readonly createHandler: CreatePreorderCommandHandler,
+    private readonly updateReleaseDateHandler: UpdatePreorderReleaseDateCommandHandler,
+    private readonly markNotifiedHandler: MarkPreorderNotifiedCommandHandler,
+    private readonly deleteHandler: DeletePreorderCommandHandler,
+    private readonly getPreorderHandler: GetPreorderHandler,
+    private readonly listPreordersHandler: ListPreordersHandler,
+  ) {}
 
   async createPreorder(
     request: AuthenticatedRequest<CreatePreorderRequest>,

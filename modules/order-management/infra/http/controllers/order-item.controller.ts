@@ -12,8 +12,6 @@ import {
   ListOrderItemsHandler,
   GetOrderItemQuery,
   GetOrderItemHandler,
-  OrderManagementService,
-  OrderItemManagementService,
 } from "../../../application";
 
 export interface AddItemRequest {
@@ -48,22 +46,13 @@ export interface GetItemRequest {
 }
 
 export class OrderItemController {
-  private addOrderItemHandler: AddOrderItemCommandHandler;
-  private updateOrderItemHandler: UpdateOrderItemCommandHandler;
-  private removeOrderItemHandler: RemoveOrderItemCommandHandler;
-  private listOrderItemsHandler: ListOrderItemsHandler;
-  private getOrderItemHandler: GetOrderItemHandler;
-
   constructor(
-    orderService: OrderManagementService,
-    orderItemService: OrderItemManagementService,
-  ) {
-    this.addOrderItemHandler = new AddOrderItemCommandHandler(orderService);
-    this.updateOrderItemHandler = new UpdateOrderItemCommandHandler(orderService);
-    this.removeOrderItemHandler = new RemoveOrderItemCommandHandler(orderService);
-    this.listOrderItemsHandler = new ListOrderItemsHandler(orderItemService);
-    this.getOrderItemHandler = new GetOrderItemHandler(orderItemService);
-  }
+    private readonly addOrderItemHandler: AddOrderItemCommandHandler,
+    private readonly updateOrderItemHandler: UpdateOrderItemCommandHandler,
+    private readonly removeOrderItemHandler: RemoveOrderItemCommandHandler,
+    private readonly listOrderItemsHandler: ListOrderItemsHandler,
+    private readonly getOrderItemHandler: GetOrderItemHandler,
+  ) {}
 
   async addItem(
     request: AuthenticatedRequest<AddItemRequest>,
