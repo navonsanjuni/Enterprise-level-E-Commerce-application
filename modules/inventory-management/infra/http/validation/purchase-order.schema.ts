@@ -3,29 +3,29 @@ import { z } from "zod";
 // ── Request Schemas (Zod) ─────────────────────────────────────────────────────
 
 export const poParamsSchema = z.object({
-  poId: z.string().uuid(),
+  poId: z.uuid(),
 });
 
 export const poItemParamsSchema = z.object({
-  poId: z.string().uuid(),
-  variantId: z.string().uuid(),
+  poId: z.uuid(),
+  variantId: z.uuid(),
 });
 
 export const listPurchaseOrdersSchema = z.object({
   limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
   offset: z.string().regex(/^\d+$/).optional().default("0").transform(Number),
   status: z.enum(["draft", "sent", "part_received", "received", "cancelled"]).optional(),
-  supplierId: z.string().uuid().optional(),
+  supplierId: z.uuid().optional(),
   sortBy: z.enum(["createdAt", "updatedAt", "eta"]).optional().default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
 export const createPurchaseOrderWithItemsSchema = z.object({
-  supplierId: z.string().uuid(),
-  eta: z.string().datetime().optional().transform((v) => v ? new Date(v) : undefined),
+  supplierId: z.uuid(),
+  eta: z.iso.datetime().optional().transform((v) => v ? new Date(v) : undefined),
   items: z.array(
     z.object({
-      variantId: z.string().uuid(),
+      variantId: z.uuid(),
       orderedQty: z.number().int().min(1).max(10000),
     }),
   ).min(1).max(100),
@@ -36,21 +36,21 @@ export const updatePOStatusSchema = z.object({
 });
 
 export const updatePOEtaSchema = z.object({
-  eta: z.string().datetime().transform((v) => new Date(v)),
+  eta: z.iso.datetime().transform((v) => new Date(v)),
 });
 
 export const receivePOItemsSchema = z.object({
-  locationId: z.string().uuid(),
+  locationId: z.uuid(),
   items: z.array(
     z.object({
-      variantId: z.string().uuid(),
+      variantId: z.uuid(),
       receivedQty: z.number().int().min(1),
     }),
   ).min(1),
 });
 
 export const addPOItemSchema = z.object({
-  variantId: z.string().uuid(),
+  variantId: z.uuid(),
   orderedQty: z.number().int().min(1).max(10000),
 });
 
