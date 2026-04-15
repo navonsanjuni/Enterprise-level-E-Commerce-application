@@ -3,18 +3,18 @@ import { z } from "zod";
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
 export const orderItemsParamsSchema = z.object({
-  orderId: z.string().uuid(),
+  orderId: z.uuid(),
 });
 
 export const orderItemParamsSchema = z.object({
-  orderId: z.string().uuid(),
-  itemId: z.string().uuid(),
+  orderId: z.uuid(),
+  itemId: z.uuid(),
 });
 
 // ── Body Schemas ──────────────────────────────────────────────────────────────
 
 export const addOrderItemSchema = z.object({
-  variantId: z.string().uuid(),
+  variantId: z.uuid(),
   quantity: z.number().int().min(1),
   isGift: z.boolean().optional().default(false),
   giftMessage: z.string().max(500).optional(),

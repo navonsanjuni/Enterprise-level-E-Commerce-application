@@ -3,7 +3,7 @@ import { z } from "zod";
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
 export const backorderParamsSchema = z.object({
-  orderItemId: z.string().uuid(),
+  orderItemId: z.uuid(),
 });
 
 // ── Query Schemas ─────────────────────────────────────────────────────────────
@@ -19,12 +19,12 @@ export const listBackordersQuerySchema = z.object({
 // ── Body Schemas ──────────────────────────────────────────────────────────────
 
 export const createBackorderSchema = z.object({
-  orderItemId: z.string().uuid(),
-  promisedEta: z.string().datetime().optional(),
+  orderItemId: z.uuid(),
+  promisedEta: z.iso.datetime().optional(),
 });
 
 export const updateBackorderEtaSchema = z.object({
-  promisedEta: z.string().datetime(),
+  promisedEta: z.iso.datetime(),
 });
 
 // ── Inferred Types ────────────────────────────────────────────────────────────

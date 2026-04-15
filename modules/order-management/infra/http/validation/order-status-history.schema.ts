@@ -3,7 +3,7 @@ import { z } from "zod";
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
 export const orderStatusHistoryParamsSchema = z.object({
-  orderId: z.string().uuid(),
+  orderId: z.uuid(),
 });
 
 // ── Query Schemas ─────────────────────────────────────────────────────────────

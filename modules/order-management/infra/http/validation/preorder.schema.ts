@@ -3,7 +3,7 @@ import { z } from "zod";
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
 export const preorderParamsSchema = z.object({
-  orderItemId: z.string().uuid(),
+  orderItemId: z.uuid(),
 });
 
 // ── Query Schemas ─────────────────────────────────────────────────────────────
@@ -19,12 +19,12 @@ export const listPreordersQuerySchema = z.object({
 // ── Body Schemas ──────────────────────────────────────────────────────────────
 
 export const createPreorderSchema = z.object({
-  orderItemId: z.string().uuid(),
-  releaseDate: z.string().datetime().optional(),
+  orderItemId: z.uuid(),
+  releaseDate: z.iso.datetime().optional(),
 });
 
 export const updatePreorderReleaseDateSchema = z.object({
-  releaseDate: z.string().datetime(),
+  releaseDate: z.iso.datetime(),
 });
 
 // ── Inferred Types ────────────────────────────────────────────────────────────

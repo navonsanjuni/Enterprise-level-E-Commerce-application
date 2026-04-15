@@ -3,11 +3,11 @@ import { z } from "zod";
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
 export const orderEventsParamsSchema = z.object({
-  orderId: z.string().uuid(),
+  orderId: z.uuid(),
 });
 
 export const orderEventParamsSchema = z.object({
-  orderId: z.string().uuid(),
+  orderId: z.uuid(),
   eventId: z.string().min(1),
 });
 
@@ -25,7 +25,7 @@ export const listOrderEventsQuerySchema = z.object({
 
 export const logOrderEventSchema = z.object({
   eventType: z.string().min(1),
-  payload: z.record(z.unknown()).optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
 });
 
 // ── Inferred Types ────────────────────────────────────────────────────────────

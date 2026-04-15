@@ -3,7 +3,7 @@ import { z } from "zod";
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
 export const orderAddressParamsSchema = z.object({
-  orderId: z.string().uuid(),
+  orderId: z.uuid(),
 });
 
 // ── Body Schemas ──────────────────────────────────────────────────────────────
@@ -18,7 +18,7 @@ const addressFieldsSchema = z.object({
   postalCode: z.string().min(1),
   country: z.string().min(1),
   phone: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.email().optional(),
 });
 
 export const setOrderAddressesSchema = z.object({

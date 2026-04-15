@@ -3,12 +3,12 @@ import { z } from "zod";
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
 export const orderShipmentsParamsSchema = z.object({
-  orderId: z.string().uuid(),
+  orderId: z.uuid(),
 });
 
 export const orderShipmentParamsSchema = z.object({
-  orderId: z.string().uuid(),
-  shipmentId: z.string().uuid(),
+  orderId: z.uuid(),
+  shipmentId: z.uuid(),
 });
 
 // ── Body Schemas ──────────────────────────────────────────────────────────────
@@ -18,7 +18,7 @@ export const createShipmentSchema = z.object({
   service: z.string().optional(),
   trackingNumber: z.string().optional(),
   giftReceipt: z.boolean().optional().default(false),
-  pickupLocationId: z.string().uuid().optional(),
+  pickupLocationId: z.uuid().optional(),
 });
 
 export const markShippedSchema = z.object({
@@ -34,7 +34,7 @@ export const updateShipmentTrackingSchema = z.object({
 });
 
 export const markDeliveredSchema = z.object({
-  deliveredAt: z.string().datetime().optional(),
+  deliveredAt: z.iso.datetime().optional(),
 });
 
 // ── Inferred Types ────────────────────────────────────────────────────────────

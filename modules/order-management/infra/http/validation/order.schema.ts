@@ -3,7 +3,7 @@ import { z } from "zod";
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
 export const orderIdParamsSchema = z.object({
-  orderId: z.string().uuid(),
+  orderId: z.uuid(),
 });
 
 export const orderNumberParamsSchema = z.object({
@@ -22,8 +22,8 @@ export const listOrdersQuerySchema = z.object({
   limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
   offset: z.string().regex(/^\d+$/).optional().default("0").transform(Number),
   status: z.string().optional(),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
+  startDate: z.iso.datetime().optional(),
+  endDate: z.iso.datetime().optional(),
   sortBy: z.enum(["createdAt", "updatedAt", "orderNumber"]).optional().default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
@@ -40,7 +40,7 @@ const addressSchema = z.object({
   postalCode: z.string().optional(),
   country: z.string().optional(),
   phone: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.email().optional(),
 });
 
 export const createOrderSchema = z.object({
@@ -48,7 +48,7 @@ export const createOrderSchema = z.object({
   items: z
     .array(
       z.object({
-        variantId: z.string().uuid(),
+        variantId: z.uuid(),
         quantity: z.number().int().min(1),
         isGift: z.boolean().optional().default(false),
         giftMessage: z.string().max(500).optional(),
