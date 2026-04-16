@@ -64,7 +64,7 @@ export class NotificationService {
     );
     if (!notification) throw new NotificationNotFoundError(notificationId);
     notification.updatePayload(payload);
-    await this.notificationRepository.update(notification);
+    await this.notificationRepository.save(notification);
   }
 
   async scheduleNotification(notificationId: string, scheduledAt: Date): Promise<void> {
@@ -73,7 +73,7 @@ export class NotificationService {
     );
     if (!notification) throw new NotificationNotFoundError(notificationId);
     notification.schedule(scheduledAt);
-    await this.notificationRepository.update(notification);
+    await this.notificationRepository.save(notification);
   }
 
   async markNotificationAsSending(notificationId: string): Promise<void> {
@@ -82,7 +82,7 @@ export class NotificationService {
     );
     if (!notification) throw new NotificationNotFoundError(notificationId);
     notification.markAsSending();
-    await this.notificationRepository.update(notification);
+    await this.notificationRepository.save(notification);
   }
 
   async markNotificationAsSent(notificationId: string): Promise<void> {
@@ -91,7 +91,7 @@ export class NotificationService {
     );
     if (!notification) throw new NotificationNotFoundError(notificationId);
     notification.markAsSent();
-    await this.notificationRepository.update(notification);
+    await this.notificationRepository.save(notification);
   }
 
   async markNotificationAsFailed(notificationId: string, error: string): Promise<void> {
@@ -100,7 +100,7 @@ export class NotificationService {
     );
     if (!notification) throw new NotificationNotFoundError(notificationId);
     notification.markAsFailed(error);
-    await this.notificationRepository.update(notification);
+    await this.notificationRepository.save(notification);
   }
 
   async retryNotification(notificationId: string): Promise<void> {
@@ -109,7 +109,7 @@ export class NotificationService {
     );
     if (!notification) throw new NotificationNotFoundError(notificationId);
     notification.retry();
-    await this.notificationRepository.update(notification);
+    await this.notificationRepository.save(notification);
   }
 
   async deleteNotification(notificationId: string): Promise<void> {

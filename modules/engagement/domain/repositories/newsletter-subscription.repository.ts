@@ -21,7 +21,6 @@ export interface NewsletterSubscriptionFilters {
 export interface INewsletterSubscriptionRepository {
   // Basic CRUD
   save(subscription: NewsletterSubscription): Promise<void>;
-  update(subscription: NewsletterSubscription): Promise<void>;
   delete(subscriptionId: SubscriptionId): Promise<void>;
 
   // Finders

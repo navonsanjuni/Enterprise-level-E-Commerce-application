@@ -145,7 +145,8 @@ export async function productReviewRoutes(
   fastify.post(
     "/engagement/reviews",
     {
-      preHandler: [validateBody(createProductReviewSchema), RolePermissions.AUTHENTICATED],
+      preValidation: [validateBody(createProductReviewSchema)],
+      preHandler: [RolePermissions.AUTHENTICATED],
       schema: {
         description: "Create a new product review",
         summary: "Create Product Review",
@@ -181,8 +182,8 @@ export async function productReviewRoutes(
   fastify.patch(
     "/engagement/reviews/:reviewId/status",
     {
-      preValidation: [validateParams(reviewIdParamsSchema)],
-      preHandler: [validateBody(updateReviewStatusSchema), RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(reviewIdParamsSchema), validateBody(updateReviewStatusSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update product review status (admin only)",
         summary: "Update Review Status",

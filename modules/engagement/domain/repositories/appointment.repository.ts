@@ -22,7 +22,6 @@ export interface AppointmentFilters {
 export interface IAppointmentRepository {
   // Basic CRUD
   save(appointment: Appointment): Promise<void>;
-  update(appointment: Appointment): Promise<void>;
   delete(appointmentId: AppointmentId): Promise<void>;
 
   // Finders

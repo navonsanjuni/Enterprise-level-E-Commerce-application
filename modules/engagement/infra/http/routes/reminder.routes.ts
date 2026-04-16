@@ -162,10 +162,8 @@ export async function reminderRoutes(
   fastify.post(
     "/engagement/reminders",
     {
-      preHandler: [
-        validateBody(createReminderSchema),
-        RolePermissions.AUTHENTICATED,
-      ],
+      preValidation: [validateBody(createReminderSchema)],
+      preHandler: [RolePermissions.AUTHENTICATED],
       schema: {
         description: "Create a new product reminder",
         summary: "Create Reminder",
@@ -241,11 +239,8 @@ export async function reminderRoutes(
   fastify.patch(
     "/engagement/reminders/:reminderId/status",
     {
-      preValidation: [validateParams(reminderIdParamsSchema)],
-      preHandler: [
-        validateBody(updateReminderStatusSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(reminderIdParamsSchema), validateBody(updateReminderStatusSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update reminder status",
         summary: "Update Reminder Status",

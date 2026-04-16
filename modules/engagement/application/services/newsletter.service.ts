@@ -36,7 +36,7 @@ export class NewsletterService {
     if (existing) {
       if (existing.isUnsubscribed()) {
         existing.activate();
-        await this.subscriptionRepository.update(existing);
+        await this.subscriptionRepository.save(existing);
         return NewsletterSubscription.toDTO(existing);
       }
 
@@ -76,14 +76,14 @@ export class NewsletterService {
     );
     if (!subscription) throw new NewsletterSubscriptionNotFoundError(subscriptionId);
     subscription.unsubscribe();
-    await this.subscriptionRepository.update(subscription);
+    await this.subscriptionRepository.save(subscription);
   }
 
   async unsubscribeByEmail(email: string): Promise<void> {
     const subscription = await this.subscriptionRepository.findByEmail(email);
     if (!subscription) throw new NewsletterSubscriptionNotFoundError(email);
     subscription.unsubscribe();
-    await this.subscriptionRepository.update(subscription);
+    await this.subscriptionRepository.save(subscription);
   }
 
   async markAsBounced(subscriptionId: string): Promise<void> {
@@ -92,7 +92,7 @@ export class NewsletterService {
     );
     if (!subscription) throw new NewsletterSubscriptionNotFoundError(subscriptionId);
     subscription.bounce();
-    await this.subscriptionRepository.update(subscription);
+    await this.subscriptionRepository.save(subscription);
   }
 
   async markAsSpam(subscriptionId: string): Promise<void> {
@@ -101,7 +101,7 @@ export class NewsletterService {
     );
     if (!subscription) throw new NewsletterSubscriptionNotFoundError(subscriptionId);
     subscription.markAsSpam();
-    await this.subscriptionRepository.update(subscription);
+    await this.subscriptionRepository.save(subscription);
   }
 
   async reactivate(subscriptionId: string): Promise<void> {
@@ -110,7 +110,7 @@ export class NewsletterService {
     );
     if (!subscription) throw new NewsletterSubscriptionNotFoundError(subscriptionId);
     subscription.activate();
-    await this.subscriptionRepository.update(subscription);
+    await this.subscriptionRepository.save(subscription);
   }
 
   async deleteSubscription(subscriptionId: string): Promise<void> {

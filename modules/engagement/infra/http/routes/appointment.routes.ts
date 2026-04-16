@@ -149,7 +149,8 @@ export async function appointmentRoutes(
   fastify.post(
     "/engagement/appointments",
     {
-      preHandler: [validateBody(createAppointmentSchema), RolePermissions.AUTHENTICATED],
+      preValidation: [validateBody(createAppointmentSchema)],
+      preHandler: [RolePermissions.AUTHENTICATED],
       schema: {
         description: "Create a new appointment",
         summary: "Create Appointment",
@@ -221,8 +222,8 @@ export async function appointmentRoutes(
   fastify.patch(
     "/engagement/appointments/:appointmentId",
     {
-      preValidation: [validateParams(appointmentIdParamsSchema)],
-      preHandler: [validateBody(updateAppointmentSchema), RolePermissions.AUTHENTICATED],
+      preValidation: [validateParams(appointmentIdParamsSchema), validateBody(updateAppointmentSchema)],
+      preHandler: [RolePermissions.AUTHENTICATED],
       schema: {
         description: "Update appointment details",
         summary: "Update Appointment",

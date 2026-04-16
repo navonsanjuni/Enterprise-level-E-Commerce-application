@@ -60,8 +60,9 @@ export class NotificationRepositoryImpl
   }
 
   async save(notification: Notification): Promise<void> {
-    await this.prisma.notification.create({
-      data: {
+    await this.prisma.notification.upsert({
+      where: { id: notification.id.getValue() },
+      create: {
         id: notification.id.getValue(),
         type: notification.type.getValue() as any,
         channel: notification.channel?.getValue() as any,
@@ -74,14 +75,7 @@ export class NotificationRepositoryImpl
         createdAt: notification.createdAt,
         updatedAt: notification.updatedAt,
       },
-    });
-    await this.dispatchEvents(notification);
-  }
-
-  async update(notification: Notification): Promise<void> {
-    await this.prisma.notification.update({
-      where: { id: notification.id.getValue() },
-      data: {
+      update: {
         status: notification.status.getValue(),
         sentAt: notification.sentAt,
         error: notification.error,

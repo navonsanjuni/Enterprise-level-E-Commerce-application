@@ -55,8 +55,9 @@ export class ProductReviewRepositoryImpl
   }
 
   async save(review: ProductReview): Promise<void> {
-    await this.prisma.productReview.create({
-      data: {
+    await this.prisma.productReview.upsert({
+      where: { id: review.id.getValue() },
+      create: {
         id: review.id.getValue(),
         productId: review.productId,
         userId: review.userId,
@@ -67,14 +68,7 @@ export class ProductReviewRepositoryImpl
         createdAt: review.createdAt,
         updatedAt: review.updatedAt,
       },
-    });
-    await this.dispatchEvents(review);
-  }
-
-  async update(review: ProductReview): Promise<void> {
-    await this.prisma.productReview.update({
-      where: { id: review.id.getValue() },
-      data: {
+      update: {
         rating: review.rating.getValue(),
         title: review.title,
         body: review.body,

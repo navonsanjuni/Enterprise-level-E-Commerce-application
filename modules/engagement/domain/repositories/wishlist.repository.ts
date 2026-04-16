@@ -21,7 +21,6 @@ export interface WishlistFilters {
 export interface IWishlistRepository {
   // Basic CRUD
   save(wishlist: Wishlist): Promise<void>;
-  update(wishlist: Wishlist): Promise<void>;
   delete(wishlistId: WishlistId): Promise<void>;
 
   // Finders

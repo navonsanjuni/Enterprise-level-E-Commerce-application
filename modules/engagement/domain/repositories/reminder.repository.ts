@@ -25,7 +25,6 @@ export interface ReminderFilters {
 export interface IReminderRepository {
   // Basic CRUD
   save(reminder: Reminder): Promise<void>;
-  update(reminder: Reminder): Promise<void>;
   delete(reminderId: ReminderId): Promise<void>;
 
   // Finders

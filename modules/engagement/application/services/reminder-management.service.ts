@@ -58,21 +58,21 @@ export class ReminderManagementService {
     const reminder = await this.reminderRepository.findById(ReminderId.fromString(reminderId));
     if (!reminder) throw new ReminderNotFoundError(reminderId);
     reminder.optIn();
-    await this.reminderRepository.update(reminder);
+    await this.reminderRepository.save(reminder);
   }
 
   async markReminderAsSent(reminderId: string): Promise<void> {
     const reminder = await this.reminderRepository.findById(ReminderId.fromString(reminderId));
     if (!reminder) throw new ReminderNotFoundError(reminderId);
     reminder.markAsSent();
-    await this.reminderRepository.update(reminder);
+    await this.reminderRepository.save(reminder);
   }
 
   async unsubscribeReminder(reminderId: string): Promise<void> {
     const reminder = await this.reminderRepository.findById(ReminderId.fromString(reminderId));
     if (!reminder) throw new ReminderNotFoundError(reminderId);
     reminder.unsubscribe();
-    await this.reminderRepository.update(reminder);
+    await this.reminderRepository.save(reminder);
   }
 
   async deleteReminder(reminderId: string): Promise<void> {

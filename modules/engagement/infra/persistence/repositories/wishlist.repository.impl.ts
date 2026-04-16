@@ -51,8 +51,9 @@ export class WishlistRepositoryImpl
   }
 
   async save(wishlist: Wishlist): Promise<void> {
-    await this.prisma.wishlist.create({
-      data: {
+    await this.prisma.wishlist.upsert({
+      where: { id: wishlist.id.getValue() },
+      create: {
         id: wishlist.id.getValue(),
         userId: wishlist.userId,
         guestToken: wishlist.guestToken,
@@ -63,14 +64,7 @@ export class WishlistRepositoryImpl
         createdAt: wishlist.createdAt,
         updatedAt: wishlist.updatedAt,
       },
-    });
-    await this.dispatchEvents(wishlist);
-  }
-
-  async update(wishlist: Wishlist): Promise<void> {
-    await this.prisma.wishlist.update({
-      where: { id: wishlist.id.getValue() },
-      data: {
+      update: {
         name: wishlist.name,
         isDefault: wishlist.isDefault,
         isPublic: wishlist.isPublic,

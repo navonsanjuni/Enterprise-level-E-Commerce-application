@@ -104,7 +104,8 @@ export async function notificationRoutes(
   fastify.post(
     "/engagement/notifications/schedule",
     {
-      preHandler: [validateBody(scheduleNotificationSchema), RolePermissions.ADMIN_ONLY],
+      preValidation: [validateBody(scheduleNotificationSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Schedule a notification",
         summary: "Schedule Notification",

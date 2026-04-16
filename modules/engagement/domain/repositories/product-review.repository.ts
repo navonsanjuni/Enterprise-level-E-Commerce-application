@@ -24,7 +24,6 @@ export interface ProductReviewFilters {
 export interface IProductReviewRepository {
   // Basic CRUD
   save(review: ProductReview): Promise<void>;
-  update(review: ProductReview): Promise<void>;
   delete(reviewId: ReviewId): Promise<void>;
 
   // Finders

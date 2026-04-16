@@ -92,7 +92,7 @@ export class WishlistManagementService {
     const wishlist = await this.wishlistRepository.findById(WishlistId.fromString(wishlistId));
     if (!wishlist) throw new WishlistNotFoundError(wishlistId);
     wishlist.updateName(newName);
-    await this.wishlistRepository.update(wishlist);
+    await this.wishlistRepository.save(wishlist);
     return Wishlist.toDTO(wishlist);
   }
 
@@ -100,7 +100,7 @@ export class WishlistManagementService {
     const wishlist = await this.wishlistRepository.findById(WishlistId.fromString(wishlistId));
     if (!wishlist) throw new WishlistNotFoundError(wishlistId);
     wishlist.updateDescription(description);
-    await this.wishlistRepository.update(wishlist);
+    await this.wishlistRepository.save(wishlist);
     return Wishlist.toDTO(wishlist);
   }
 
@@ -108,7 +108,7 @@ export class WishlistManagementService {
     const wishlist = await this.wishlistRepository.findById(WishlistId.fromString(wishlistId));
     if (!wishlist) throw new WishlistNotFoundError(wishlistId);
     wishlist.makeDefault();
-    await this.wishlistRepository.update(wishlist);
+    await this.wishlistRepository.save(wishlist);
     return Wishlist.toDTO(wishlist);
   }
 
@@ -116,7 +116,7 @@ export class WishlistManagementService {
     const wishlist = await this.wishlistRepository.findById(WishlistId.fromString(wishlistId));
     if (!wishlist) throw new WishlistNotFoundError(wishlistId);
     wishlist.removeDefault();
-    await this.wishlistRepository.update(wishlist);
+    await this.wishlistRepository.save(wishlist);
     return Wishlist.toDTO(wishlist);
   }
 
@@ -124,7 +124,7 @@ export class WishlistManagementService {
     const wishlist = await this.wishlistRepository.findById(WishlistId.fromString(wishlistId));
     if (!wishlist) throw new WishlistNotFoundError(wishlistId);
     wishlist.makePublic();
-    await this.wishlistRepository.update(wishlist);
+    await this.wishlistRepository.save(wishlist);
     return Wishlist.toDTO(wishlist);
   }
 
@@ -132,7 +132,7 @@ export class WishlistManagementService {
     const wishlist = await this.wishlistRepository.findById(WishlistId.fromString(wishlistId));
     if (!wishlist) throw new WishlistNotFoundError(wishlistId);
     wishlist.makePrivate();
-    await this.wishlistRepository.update(wishlist);
+    await this.wishlistRepository.save(wishlist);
     return Wishlist.toDTO(wishlist);
   }
 
@@ -140,7 +140,7 @@ export class WishlistManagementService {
     const wishlist = await this.wishlistRepository.findById(WishlistId.fromString(wishlistId));
     if (!wishlist) throw new WishlistNotFoundError(wishlistId);
     wishlist.transferToUser(userId);
-    await this.wishlistRepository.update(wishlist);
+    await this.wishlistRepository.save(wishlist);
     return Wishlist.toDTO(wishlist);
   }
 

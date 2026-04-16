@@ -48,8 +48,9 @@ export class NewsletterSubscriptionRepositoryImpl
   }
 
   async save(subscription: NewsletterSubscription): Promise<void> {
-    await this.prisma.newsletterSubscription.create({
-      data: {
+    await this.prisma.newsletterSubscription.upsert({
+      where: { id: subscription.id.getValue() },
+      create: {
         id: subscription.id.getValue(),
         email: subscription.email.toLowerCase(),
         status: subscription.status.getValue() as any,
@@ -57,14 +58,7 @@ export class NewsletterSubscriptionRepositoryImpl
         createdAt: subscription.createdAt,
         updatedAt: subscription.updatedAt,
       },
-    });
-    await this.dispatchEvents(subscription);
-  }
-
-  async update(subscription: NewsletterSubscription): Promise<void> {
-    await this.prisma.newsletterSubscription.update({
-      where: { id: subscription.id.getValue() },
-      data: {
+      update: {
         status: subscription.status.getValue() as any,
         source: subscription.source,
         updatedAt: subscription.updatedAt,

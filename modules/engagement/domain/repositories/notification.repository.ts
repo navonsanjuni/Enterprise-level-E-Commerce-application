@@ -27,7 +27,6 @@ export interface NotificationFilters {
 export interface INotificationRepository {
   // Basic CRUD
   save(notification: Notification): Promise<void>;
-  update(notification: Notification): Promise<void>;
   delete(notificationId: NotificationId): Promise<void>;
 
   // Finders

@@ -269,21 +269,6 @@ export class ReservationRepositoryImpl implements IReservationRepository {
     });
   }
 
-  async updateBulk(reservations: Reservation[]): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
-      for (const reservation of reservations) {
-        const data = reservation.toSnapshot();
-        await tx.reservation.update({
-          where: { id: data.reservationId },
-          data: {
-            qty: data.quantity,
-            expiresAt: data.expiresAt,
-          },
-        });
-      }
-    });
-  }
-
   async findByIds(reservationIds: string[]): Promise<Reservation[]> {
     const reservations = await this.prisma.reservation.findMany({
       where: { id: { in: reservationIds } },

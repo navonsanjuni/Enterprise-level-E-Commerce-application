@@ -73,7 +73,7 @@ export const bulkCreateEditorialLooksSchema = z.object({
       title: z.string().min(1),
       storyHtml: z.string().optional(),
       heroAssetId: z.uuid().optional(),
-      publishedAt: z.iso.datetime().optional(),
+      publishedAt: z.iso.datetime().transform((v) => new Date(v)).optional(),
       productIds: z.array(z.uuid()).optional(),
     }),
   ).min(1),

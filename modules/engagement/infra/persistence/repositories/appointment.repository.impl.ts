@@ -54,8 +54,9 @@ export class AppointmentRepositoryImpl
   }
 
   async save(appointment: Appointment): Promise<void> {
-    await this.prisma.appointment.create({
-      data: {
+    await this.prisma.appointment.upsert({
+      where: { id: appointment.id.getValue() },
+      create: {
         id: appointment.id.getValue(),
         userId: appointment.userId,
         type: appointment.type.getValue() as any,
@@ -66,14 +67,7 @@ export class AppointmentRepositoryImpl
         createdAt: appointment.createdAt,
         updatedAt: appointment.updatedAt,
       },
-    });
-    await this.dispatchEvents(appointment);
-  }
-
-  async update(appointment: Appointment): Promise<void> {
-    await this.prisma.appointment.update({
-      where: { id: appointment.id.getValue() },
-      data: {
+      update: {
         type: appointment.type.getValue() as any,
         locationId: appointment.locationId,
         startAt: appointment.startAt,

@@ -88,7 +88,7 @@ export class AppointmentService {
     }
 
     appointment.reschedule(startAt, endAt);
-    await this.appointmentRepository.update(appointment);
+    await this.appointmentRepository.save(appointment);
   }
 
   async updateAppointmentNotes(appointmentId: string, notes?: string): Promise<void> {
@@ -97,7 +97,7 @@ export class AppointmentService {
     );
     if (!appointment) throw new AppointmentNotFoundError(appointmentId);
     appointment.updateNotes(notes);
-    await this.appointmentRepository.update(appointment);
+    await this.appointmentRepository.save(appointment);
   }
 
   async updateAppointmentLocation(appointmentId: string, locationId?: string): Promise<void> {
@@ -106,7 +106,7 @@ export class AppointmentService {
     );
     if (!appointment) throw new AppointmentNotFoundError(appointmentId);
     appointment.updateLocation(locationId);
-    await this.appointmentRepository.update(appointment);
+    await this.appointmentRepository.save(appointment);
   }
 
   async cancelAppointment(appointmentId: string): Promise<void> {

@@ -63,42 +63,42 @@ export class ProductReviewService {
     const review = await this.reviewRepository.findById(ReviewId.fromString(reviewId));
     if (!review) throw new ProductReviewNotFoundError(reviewId);
     review.updateRating(rating);
-    await this.reviewRepository.update(review);
+    await this.reviewRepository.save(review);
   }
 
   async updateReviewTitle(reviewId: string, title?: string): Promise<void> {
     const review = await this.reviewRepository.findById(ReviewId.fromString(reviewId));
     if (!review) throw new ProductReviewNotFoundError(reviewId);
     review.updateTitle(title);
-    await this.reviewRepository.update(review);
+    await this.reviewRepository.save(review);
   }
 
   async updateReviewBody(reviewId: string, body?: string): Promise<void> {
     const review = await this.reviewRepository.findById(ReviewId.fromString(reviewId));
     if (!review) throw new ProductReviewNotFoundError(reviewId);
     review.updateBody(body);
-    await this.reviewRepository.update(review);
+    await this.reviewRepository.save(review);
   }
 
   async approveReview(reviewId: string): Promise<void> {
     const review = await this.reviewRepository.findById(ReviewId.fromString(reviewId));
     if (!review) throw new ProductReviewNotFoundError(reviewId);
     review.approve();
-    await this.reviewRepository.update(review);
+    await this.reviewRepository.save(review);
   }
 
   async rejectReview(reviewId: string): Promise<void> {
     const review = await this.reviewRepository.findById(ReviewId.fromString(reviewId));
     if (!review) throw new ProductReviewNotFoundError(reviewId);
     review.reject();
-    await this.reviewRepository.update(review);
+    await this.reviewRepository.save(review);
   }
 
   async flagReview(reviewId: string): Promise<void> {
     const review = await this.reviewRepository.findById(ReviewId.fromString(reviewId));
     if (!review) throw new ProductReviewNotFoundError(reviewId);
     review.flag();
-    await this.reviewRepository.update(review);
+    await this.reviewRepository.save(review);
   }
 
   async deleteReview(reviewId: string): Promise<void> {

@@ -91,7 +91,7 @@ export async function newsletterRoutes(
   fastify.post(
     "/engagement/newsletter/subscribe",
     {
-      preHandler: [validateBody(subscribeNewsletterSchema)],
+      preValidation: [validateBody(subscribeNewsletterSchema)],
       schema: {
         description: "Subscribe to newsletter",
         summary: "Subscribe To Newsletter",
@@ -123,7 +123,7 @@ export async function newsletterRoutes(
   fastify.post(
     "/engagement/newsletter/unsubscribe",
     {
-      preHandler: [validateBody(unsubscribeNewsletterSchema)],
+      preValidation: [validateBody(unsubscribeNewsletterSchema)],
       schema: {
         description: "Unsubscribe from newsletter",
         summary: "Unsubscribe From Newsletter",

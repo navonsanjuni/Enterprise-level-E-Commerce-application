@@ -59,8 +59,9 @@ export class ReminderRepositoryImpl
   }
 
   async save(reminder: Reminder): Promise<void> {
-    await this.prisma.reminder.create({
-      data: {
+    await this.prisma.reminder.upsert({
+      where: { id: reminder.id.getValue() },
+      create: {
         id: reminder.id.getValue(),
         type: reminder.type.getValue() as any,
         variantId: reminder.variantId,
@@ -72,14 +73,7 @@ export class ReminderRepositoryImpl
         createdAt: reminder.createdAt,
         updatedAt: reminder.updatedAt,
       },
-    });
-    await this.dispatchEvents(reminder);
-  }
-
-  async update(reminder: Reminder): Promise<void> {
-    await this.prisma.reminder.update({
-      where: { id: reminder.id.getValue() },
-      data: {
+      update: {
         status: reminder.status.getValue() as any,
         optInAt: reminder.optInAt,
         updatedAt: reminder.updatedAt,

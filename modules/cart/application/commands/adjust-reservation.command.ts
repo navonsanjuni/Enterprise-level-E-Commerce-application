@@ -28,6 +28,6 @@ export class AdjustReservationHandler implements ICommandHandler<
       variantId: command.variantId,
       newQuantity: command.newQuantity,
     });
-    return CommandResult.success<ReservationDto | null>(reservation);
+    return CommandResult.success<ReservationDto>(reservation ?? undefined);
   }
 }
