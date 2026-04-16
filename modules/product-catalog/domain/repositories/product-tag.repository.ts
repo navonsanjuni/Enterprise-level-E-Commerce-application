@@ -26,8 +26,9 @@ export interface IProductTagRepository {
     averageTagLength: number;
   }>;
 
-  // Association read-only queries (write via ProductTagAssociation entity + save)
-  findByProductId(productId: string): Promise<ProductTag[]>;
+  associateProductTags(productId: string, tagIds: string[]): Promise<void>;
+
+  // Association read-only queries
   findProductIdsByTagId(
     tagId: string,
     options?: { limit?: number; offset?: number },
