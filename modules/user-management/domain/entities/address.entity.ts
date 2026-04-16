@@ -200,7 +200,7 @@ export class Address extends AggregateRoot {
   // --- Static DTO mapper ---
 
   static toDTO(address: Address): AddressDTO {
-    const data = address.addressValue.toData();
+    const data = address.addressValue.getValue();
     return {
       id: address.id.getValue(),
       userId: address.userId.getValue(),

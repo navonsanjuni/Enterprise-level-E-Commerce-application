@@ -78,7 +78,7 @@ export class UserProfileService {
         AddressId.fromString(profileDTO.defaultAddressId),
       );
       if (address) {
-        const data = address.addressValue.toData();
+        const data = address.addressValue.getValue();
         result.defaultAddress = {
           id: address.id.getValue(),
           type: address.type.toString(),

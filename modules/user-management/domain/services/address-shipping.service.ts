@@ -17,7 +17,7 @@ export interface AddressLabel {
  */
 export class AddressShippingService {
   static calculateShippingZone(address: Address): ShippingZone {
-    const country = address.addressValue.getCountry();
+    const country = address.addressValue.country;
     switch (country) {
       case 'US':
         return ShippingZone.DOMESTIC;
@@ -60,8 +60,8 @@ export class AddressShippingService {
   }
 
   static getTaxJurisdiction(address: Address): string {
-    const country = address.addressValue.getCountry();
-    const state = address.addressValue.getState();
+    const country = address.addressValue.country;
+    const state = address.addressValue.state;
     if (country === 'US' && state) return `${country}-${state}`;
     return country;
   }

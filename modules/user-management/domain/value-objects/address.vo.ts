@@ -1,16 +1,16 @@
 import { DomainValidationError } from "../errors/user-management.errors";
 
 export class Address {
-  private readonly firstName?: string;
-  private readonly lastName?: string;
-  private readonly company?: string;
-  private readonly addressLine1: string;
-  private readonly addressLine2?: string;
-  private readonly city: string;
-  private readonly state?: string;
-  private readonly postalCode?: string;
-  private readonly country: string;
-  private readonly phone?: string;
+  private readonly _firstName?: string;
+  private readonly _lastName?: string;
+  private readonly _company?: string;
+  private readonly _addressLine1: string;
+  private readonly _addressLine2?: string;
+  private readonly _city: string;
+  private readonly _state?: string;
+  private readonly _postalCode?: string;
+  private readonly _country: string;
+  private readonly _phone?: string;
 
   private constructor(data: AddressData) {
     // Validate required fields
@@ -47,16 +47,16 @@ export class Address {
     }
 
     // Assign values (trimmed and properly formatted)
-    this.firstName = data.firstName?.trim();
-    this.lastName = data.lastName?.trim();
-    this.company = data.company?.trim();
-    this.addressLine1 = data.addressLine1.trim();
-    this.addressLine2 = data.addressLine2?.trim();
-    this.city = data.city.trim();
-    this.state = data.state?.trim();
-    this.postalCode = data.postalCode?.trim().toUpperCase();
-    this.country = data.country.trim().toUpperCase();
-    this.phone = data.phone?.trim();
+    this._firstName = data.firstName?.trim();
+    this._lastName = data.lastName?.trim();
+    this._company = data.company?.trim();
+    this._addressLine1 = data.addressLine1.trim();
+    this._addressLine2 = data.addressLine2?.trim();
+    this._city = data.city.trim();
+    this._state = data.state?.trim();
+    this._postalCode = data.postalCode?.trim().toUpperCase();
+    this._country = data.country.trim().toUpperCase();
+    this._phone = data.phone?.trim();
   }
 
   private isValidPostalCode(postalCode: string, country: string): boolean {
@@ -72,55 +72,35 @@ export class Address {
     };
 
     const pattern = patterns[country.toUpperCase()];
-    return pattern ? pattern.test(postalCode) : true; // Allow any format for unlisted countries
+    return pattern ? pattern.test(postalCode) : true;
   }
 
-  // Getters
-  getFirstName(): string | undefined {
-    return this.firstName;
-  }
-  getLastName(): string | undefined {
-    return this.lastName;
-  }
-  getCompany(): string | undefined {
-    return this.company;
-  }
-  getAddressLine1(): string {
-    return this.addressLine1;
-  }
-  getAddressLine2(): string | undefined {
-    return this.addressLine2;
-  }
-  getCity(): string {
-    return this.city;
-  }
-  getState(): string | undefined {
-    return this.state;
-  }
-  getPostalCode(): string | undefined {
-    return this.postalCode;
-  }
-  getCountry(): string {
-    return this.country;
-  }
-  getPhone(): string | undefined {
-    return this.phone;
-  }
+  // Property accessors
+  get firstName(): string | undefined { return this._firstName; }
+  get lastName(): string | undefined { return this._lastName; }
+  get company(): string | undefined { return this._company; }
+  get addressLine1(): string { return this._addressLine1; }
+  get addressLine2(): string | undefined { return this._addressLine2; }
+  get city(): string { return this._city; }
+  get state(): string | undefined { return this._state; }
+  get postalCode(): string | undefined { return this._postalCode; }
+  get country(): string { return this._country; }
+  get phone(): string | undefined { return this._phone; }
 
   // Business methods
   getFullName(): string {
-    const parts = [this.firstName, this.lastName].filter(Boolean);
+    const parts = [this._firstName, this._lastName].filter(Boolean);
     return parts.join(" ");
   }
 
   getFullAddress(): string {
     const parts = [
-      this.addressLine1,
-      this.addressLine2,
-      this.city,
-      this.state,
-      this.postalCode,
-      this.country,
+      this._addressLine1,
+      this._addressLine2,
+      this._city,
+      this._state,
+      this._postalCode,
+      this._country,
     ].filter(Boolean);
 
     return parts.join(", ");
@@ -128,52 +108,50 @@ export class Address {
 
   getFormattedAddress(): FormattedAddress {
     return {
-      recipient: this.company || this.getFullName(),
-      street: [this.addressLine1, this.addressLine2].filter(
+      recipient: this._company || this.getFullName(),
+      street: [this._addressLine1, this._addressLine2].filter(
         (line): line is string => Boolean(line)
       ),
-      cityStateZip: [this.city, this.state, this.postalCode]
+      cityStateZip: [this._city, this._state, this._postalCode]
         .filter(Boolean)
         .join(", "),
-      country: this.country,
+      country: this._country,
     };
   }
 
   isSameCountry(other: Address): boolean {
-    return this.country === other.country;
+    return this._country === other._country;
   }
 
   isInternational(fromCountry: string): boolean {
-    return this.country !== fromCountry.toUpperCase();
+    return this._country !== fromCountry.toUpperCase();
   }
 
   isDomestic(fromCountry: string): boolean {
-    return this.country === fromCountry.toUpperCase();
+    return this._country === fromCountry.toUpperCase();
   }
 
-  // Validation methods
   isComplete(): boolean {
-    const requiredFields = [this.addressLine1, this.city, this.country];
+    const requiredFields = [this._addressLine1, this._city, this._country];
     return requiredFields.every((field) => field && field.trim().length > 0);
   }
 
   isShippable(): boolean {
-    // For shipping, we typically need more complete address
-    return this.isComplete() && !!this.postalCode;
+    return this.isComplete() && !!this._postalCode;
   }
 
   equals(other: Address): boolean {
     return (
-      this.firstName === other.firstName &&
-      this.lastName === other.lastName &&
-      this.company === other.company &&
-      this.addressLine1 === other.addressLine1 &&
-      this.addressLine2 === other.addressLine2 &&
-      this.city === other.city &&
-      this.state === other.state &&
-      this.postalCode === other.postalCode &&
-      this.country === other.country &&
-      this.phone === other.phone
+      this._firstName === other._firstName &&
+      this._lastName === other._lastName &&
+      this._company === other._company &&
+      this._addressLine1 === other._addressLine1 &&
+      this._addressLine2 === other._addressLine2 &&
+      this._city === other._city &&
+      this._state === other._state &&
+      this._postalCode === other._postalCode &&
+      this._country === other._country &&
+      this._phone === other._phone
     );
   }
 
@@ -185,26 +163,22 @@ export class Address {
     return new Address(data);
   }
 
-  /** Raw factory for reconstituting from persistence — skips no validation
-   *  (validation was already applied on create). Alias kept for backwards-
-   *  compat with any persistence mappers that call fromData. */
   static fromData(data: AddressData): Address {
     return new Address(data);
   }
 
-  // Convert to data object for persistence
-  toData(): AddressData {
+  getValue(): AddressData {
     return {
-      firstName: this.firstName,
-      lastName: this.lastName,
-      company: this.company,
-      addressLine1: this.addressLine1,
-      addressLine2: this.addressLine2,
-      city: this.city,
-      state: this.state,
-      postalCode: this.postalCode,
-      country: this.country,
-      phone: this.phone,
+      firstName: this._firstName,
+      lastName: this._lastName,
+      company: this._company,
+      addressLine1: this._addressLine1,
+      addressLine2: this._addressLine2,
+      city: this._city,
+      state: this._state,
+      postalCode: this._postalCode,
+      country: this._country,
+      phone: this._phone,
     };
   }
 }
