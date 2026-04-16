@@ -256,7 +256,7 @@ import {
   LoyaltyAccountRepository,
   LoyaltyProgramRepository,
   LoyaltyTransactionRepository,
-} from "../../../modules/payment-loyalty/infra/persistence/repositories";
+} from "../../../modules/payment/infra/persistence/repositories";
 
 // Payment & Loyalty — Services
 import {
@@ -267,8 +267,8 @@ import {
   PaymentWebhookService,
   LoyaltyService,
   LoyaltyTransactionService,
-} from "../../../modules/payment-loyalty/application/services";
-import type { IExternalOrderQueryPort } from "../../../modules/payment-loyalty/domain/external-services";
+} from "../../../modules/payment/application/services";
+import type { IExternalOrderQueryPort } from "../../../modules/payment/domain/external-services";
 
 /**
  * Dependency Injection Container
