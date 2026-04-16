@@ -78,8 +78,8 @@ export async function productMediaRoutes(
   fastify.post(
     "/products/:productId/media/cover",
     {
-      preValidation: [validateParams(productMediaParamsSchema)],
-      preHandler: [validateBody(setProductCoverImageSchema), RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(productMediaParamsSchema), validateBody(setProductCoverImageSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Set a media asset as the product cover/primary image",
         tags: ["Product Media"],
@@ -106,8 +106,8 @@ export async function productMediaRoutes(
   fastify.post(
     "/products/:productId/media/reorder",
     {
-      preValidation: [validateParams(productMediaParamsSchema)],
-      preHandler: [validateBody(reorderProductMediaSchema), RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(productMediaParamsSchema), validateBody(reorderProductMediaSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Reorder media assets for a product",
         tags: ["Product Media"],
@@ -144,8 +144,8 @@ export async function productMediaRoutes(
   fastify.post(
     "/products/:productId/media",
     {
-      preValidation: [validateParams(productMediaParamsSchema)],
-      preHandler: [validateBody(addMediaToProductSchema), RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(productMediaParamsSchema), validateBody(addMediaToProductSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Add/attach a media asset to a product",
         tags: ["Product Media"],

@@ -265,10 +265,8 @@ export async function productTagRoutes(
   fastify.post(
     "/tags/bulk",
     {
-      preHandler: [
-        validateBody(bulkCreateTagsSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateBody(bulkCreateTagsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Bulk create product tags",
         tags: ["Product Tags"],
@@ -314,7 +312,8 @@ export async function productTagRoutes(
   fastify.post(
     "/tags",
     {
-      preHandler: [validateBody(createTagSchema), RolePermissions.ADMIN_ONLY],
+      preValidation: [validateBody(createTagSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new product tag",
         tags: ["Product Tags"],
@@ -349,10 +348,8 @@ export async function productTagRoutes(
   fastify.delete(
     "/tags/bulk",
     {
-      preHandler: [
-        validateBody(bulkDeleteTagsSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateBody(bulkDeleteTagsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Bulk delete product tags",
         tags: ["Product Tags"],
@@ -386,8 +383,8 @@ export async function productTagRoutes(
   fastify.patch(
     "/tags/:id",
     {
-      preValidation: [validateParams(tagParamsSchema)],
-      preHandler: [validateBody(updateTagSchema), RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(tagParamsSchema), validateBody(updateTagSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update an existing product tag",
         tags: ["Product Tags"],
@@ -482,11 +479,8 @@ export async function productTagRoutes(
   fastify.post(
     "/products/:productId/tags",
     {
-      preValidation: [validateParams(productTagParamsSchema)],
-      preHandler: [
-        validateBody(associateTagsSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(productTagParamsSchema), validateBody(associateTagsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Associate one or more tags with a product",
         tags: ["Product Tags"],

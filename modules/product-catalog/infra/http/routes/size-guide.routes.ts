@@ -303,10 +303,8 @@ export async function sizeGuideRoutes(
   fastify.post(
     "/size-guides/bulk",
     {
-      preHandler: [
-        validateBody(bulkCreateSizeGuidesSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateBody(bulkCreateSizeGuidesSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Bulk create size guides",
         tags: ["Size Guides"],
@@ -352,11 +350,8 @@ export async function sizeGuideRoutes(
   fastify.post(
     "/size-guides/region/:region",
     {
-      preValidation: [validateParams(regionParamsSchema)],
-      preHandler: [
-        validateBody(regionalSizeGuideSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(regionParamsSchema), validateBody(regionalSizeGuideSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a size guide for a specific region",
         tags: ["Size Guides"],
@@ -397,10 +392,8 @@ export async function sizeGuideRoutes(
   fastify.post(
     "/size-guides",
     {
-      preHandler: [
-        validateBody(createSizeGuideSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateBody(createSizeGuideSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new size guide",
         tags: ["Size Guides"],
@@ -436,11 +429,8 @@ export async function sizeGuideRoutes(
   fastify.patch(
     "/size-guides/:id/content",
     {
-      preValidation: [validateParams(sizeGuideParamsSchema)],
-      preHandler: [
-        validateBody(updateSizeGuideContentSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(sizeGuideParamsSchema), validateBody(updateSizeGuideContentSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update only the HTML content of a size guide",
         tags: ["Size Guides"],
@@ -476,11 +466,8 @@ export async function sizeGuideRoutes(
   fastify.patch(
     "/size-guides/:id",
     {
-      preValidation: [validateParams(sizeGuideParamsSchema)],
-      preHandler: [
-        validateBody(updateSizeGuideSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(sizeGuideParamsSchema), validateBody(updateSizeGuideSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update an existing size guide",
         tags: ["Size Guides"],
@@ -520,10 +507,8 @@ export async function sizeGuideRoutes(
   fastify.delete(
     "/size-guides/bulk",
     {
-      preHandler: [
-        validateBody(bulkDeleteSizeGuidesSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateBody(bulkDeleteSizeGuidesSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Bulk delete size guides",
         tags: ["Size Guides"],

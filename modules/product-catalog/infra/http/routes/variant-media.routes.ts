@@ -316,10 +316,8 @@ export async function variantMediaRoutes(
   fastify.post(
     "/variants/media/copy",
     {
-      preHandler: [
-        validateBody(copyVariantMediaSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateBody(copyVariantMediaSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Copy variant media from one product to another",
         tags: ["Variant Media"],
@@ -356,10 +354,8 @@ export async function variantMediaRoutes(
   fastify.post(
     "/variants/media/bulk-assign",
     {
-      preHandler: [
-        validateBody(addMediaToMultipleVariantsSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateBody(addMediaToMultipleVariantsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Add a single media asset to multiple variants",
         tags: ["Variant Media"],
@@ -400,11 +396,8 @@ export async function variantMediaRoutes(
   fastify.post(
     "/variants/:variantId/media/set",
     {
-      preValidation: [validateParams(variantMediaParamsSchema)],
-      preHandler: [
-        validateBody(setVariantMediaSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(variantMediaParamsSchema), validateBody(setVariantMediaSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Set (replace) all media assets for a variant",
         tags: ["Variant Media"],
@@ -441,11 +434,8 @@ export async function variantMediaRoutes(
   fastify.post(
     "/variants/:variantId/media/bulk",
     {
-      preValidation: [validateParams(variantMediaParamsSchema)],
-      preHandler: [
-        validateBody(addMultipleMediaToVariantSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(variantMediaParamsSchema), validateBody(addMultipleMediaToVariantSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Add multiple media assets to a variant at once",
         tags: ["Variant Media"],
@@ -521,11 +511,8 @@ export async function variantMediaRoutes(
   fastify.post(
     "/variants/:variantId/media",
     {
-      preValidation: [validateParams(variantMediaParamsSchema)],
-      preHandler: [
-        validateBody(addMediaToVariantSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(variantMediaParamsSchema), validateBody(addMediaToVariantSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Add a media asset to a product variant",
         tags: ["Variant Media"],

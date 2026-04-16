@@ -122,11 +122,8 @@ export async function variantRoutes(
   fastify.post(
     "/products/:productId/variants",
     {
-      preValidation: [validateParams(variantByProductParamsSchema)],
-      preHandler: [
-        validateBody(createVariantSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(variantByProductParamsSchema), validateBody(createVariantSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new variant for a product",
         tags: ["Variants"],
@@ -174,11 +171,8 @@ export async function variantRoutes(
   fastify.patch(
     "/variants/:variantId",
     {
-      preValidation: [validateParams(variantParamsSchema)],
-      preHandler: [
-        validateBody(updateVariantSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(variantParamsSchema), validateBody(updateVariantSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update an existing variant",
         tags: ["Variants"],

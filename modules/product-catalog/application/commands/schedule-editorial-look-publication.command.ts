@@ -4,14 +4,14 @@ import { EditorialLookManagementService } from "../services/editorial-look-manag
 
 export interface ScheduleEditorialLookPublicationCommand extends ICommand {
   readonly id: string;
-  readonly publishDate: string;
+  readonly publishDate: Date;
 }
 
 export class ScheduleEditorialLookPublicationHandler implements ICommandHandler<ScheduleEditorialLookPublicationCommand, CommandResult<EditorialLookDTO>> {
   constructor(private readonly editorialLookManagementService: EditorialLookManagementService) {}
 
   async handle(command: ScheduleEditorialLookPublicationCommand): Promise<CommandResult<EditorialLookDTO>> {
-    const dto = await this.editorialLookManagementService.scheduleLookPublication(command.id, new Date(command.publishDate));
+    const dto = await this.editorialLookManagementService.scheduleLookPublication(command.id, command.publishDate);
     return CommandResult.success(dto);
   }
 }

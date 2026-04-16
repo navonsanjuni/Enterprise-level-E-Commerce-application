@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
 import { VariantMediaManagementService } from "../services/variant-media-management.service";
 
 export interface ValidateVariantMediaQuery extends IQuery {
@@ -10,10 +10,14 @@ export interface VariantMediaValidationResult {
   readonly issues: string[];
 }
 
-export class ValidateVariantMediaHandler implements IQueryHandler<ValidateVariantMediaQuery, VariantMediaValidationResult> {
+export class ValidateVariantMediaHandler implements IQueryHandler<ValidateVariantMediaQuery, QueryResult<VariantMediaValidationResult>> {
   constructor(private readonly variantMediaManagementService: VariantMediaManagementService) {}
 
-  async handle(query: ValidateVariantMediaQuery): Promise<VariantMediaValidationResult> {
-    return await this.variantMediaManagementService.validateVariantMedia(query.variantId);
+  async handle(query: ValidateVariantMediaQuery): Promise<QueryResult<VariantMediaValidationResult>> {
+    try {
+    return QueryResult.success(await this.variantMediaManagementService.validateVariantMedia(query.variantId));
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

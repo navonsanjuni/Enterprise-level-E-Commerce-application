@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
 import { ProductVariantDTO } from "../../domain/entities/product-variant.entity";
 import { VariantManagementService } from "../services/variant-management.service";
 
@@ -20,22 +20,26 @@ export interface ListVariantsResult {
   readonly totalPages: number;
 }
 
-export class ListVariantsHandler implements IQueryHandler<ListVariantsQuery, ListVariantsResult> {
+export class ListVariantsHandler implements IQueryHandler<ListVariantsQuery, QueryResult<ListVariantsResult>> {
   constructor(private readonly variantManagementService: VariantManagementService) {}
 
-  async handle(input: ListVariantsQuery): Promise<ListVariantsResult> {
+  async handle(input: ListVariantsQuery): Promise<QueryResult<ListVariantsResult>> {
+    try {
     const page = Math.max(1, input.page ?? 1);
     const limit = Math.min(100, Math.max(1, input.limit ?? 20));
     const result = await this.variantManagementService.getVariantsByProduct(input.productId, {
       page, limit, size: input.size, color: input.color,
       sortBy: input.sortBy ?? "createdAt", sortOrder: input.sortOrder ?? "asc",
     });
-    return {
+    return QueryResult.success({
       variants: result.variants,
       total: result.total,
       page,
       limit,
       totalPages: Math.ceil(result.total / limit),
-    };
+    });
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

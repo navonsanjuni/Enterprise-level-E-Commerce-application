@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
 import { EditorialLookDTO } from "../../domain/entities/editorial-look.entity";
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 import { EditorialLookQueryOptions } from "../../domain/repositories/editorial-look.repository";
@@ -24,10 +24,11 @@ export interface ListEditorialLooksResult {
   };
 }
 
-export class ListEditorialLooksHandler implements IQueryHandler<ListEditorialLooksQuery, ListEditorialLooksResult> {
+export class ListEditorialLooksHandler implements IQueryHandler<ListEditorialLooksQuery, QueryResult<ListEditorialLooksResult>> {
   constructor(private readonly editorialLookManagementService: EditorialLookManagementService) {}
 
-  async handle(query: ListEditorialLooksQuery): Promise<ListEditorialLooksResult> {
+  async handle(query: ListEditorialLooksQuery): Promise<QueryResult<ListEditorialLooksResult>> {
+    try {
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
     const sortBy = query.sortBy ?? "id";
@@ -55,6 +56,9 @@ export class ListEditorialLooksHandler implements IQueryHandler<ListEditorialLoo
       looks = await this.editorialLookManagementService.getAllEditorialLooks(serviceOptions);
     }
 
-    return { looks, meta: { page, limit, sortBy, sortOrder } };
+    return QueryResult.success({ looks, meta: { page, limit, sortBy, sortOrder } });
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

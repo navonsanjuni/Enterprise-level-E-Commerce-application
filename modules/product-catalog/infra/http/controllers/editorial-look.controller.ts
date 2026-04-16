@@ -94,8 +94,8 @@ export class EditorialLookController {
     try {
       const result = await this.listEditorialLooksHandler.handle(request.query);
       return ResponseHelper.ok(reply, "Editorial looks retrieved successfully", {
-        looks: result.looks.map(toLookResponse),
-        meta: result.meta,
+        looks: result.data?.looks.map(toLookResponse),
+        meta: result.data?.meta,
       });
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -108,7 +108,7 @@ export class EditorialLookController {
   ) {
     try {
       const look = await this.getEditorialLookHandler.handle({ id: request.params.id });
-      return ResponseHelper.ok(reply, "Editorial look retrieved successfully", toLookResponse(look));
+      return ResponseHelper.ok(reply, "Editorial look retrieved successfully", toLookResponse(look.data!));
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -116,7 +116,7 @@ export class EditorialLookController {
 
   async createEditorialLook(
     request: AuthenticatedRequest<{
-      Body: { title: string; storyHtml?: string; heroAssetId?: string; publishedAt?: string; productIds?: string[] };
+      Body: { title: string; storyHtml?: string; heroAssetId?: string; publishedAt?: Date; productIds?: string[] };
     }>,
     reply: FastifyReply,
   ) {
@@ -139,7 +139,7 @@ export class EditorialLookController {
   async updateEditorialLook(
     request: AuthenticatedRequest<{
       Params: { id: string };
-      Body: { title?: string; storyHtml?: string; heroAssetId?: string | null; publishedAt?: string | null };
+      Body: { title?: string; storyHtml?: string; heroAssetId?: string | null; publishedAt?: Date | null };
     }>,
     reply: FastifyReply,
   ) {
@@ -209,7 +209,7 @@ export class EditorialLookController {
   }
 
   async schedulePublication(
-    request: AuthenticatedRequest<{ Params: { id: string }; Body: { publishDate: string } }>,
+    request: AuthenticatedRequest<{ Params: { id: string }; Body: { publishDate: Date } }>,
     reply: FastifyReply,
   ) {
     try {
@@ -233,7 +233,7 @@ export class EditorialLookController {
   async getReadyToPublishLooks(_request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const looks = await this.getReadyToPublishEditorialLooksHandler.handle({});
-      return ResponseHelper.ok(reply, "Ready to publish looks retrieved successfully", looks.map(toLookResponse));
+      return ResponseHelper.ok(reply, "Ready to publish looks retrieved successfully", looks.data?.map(toLookResponse));
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -297,7 +297,7 @@ export class EditorialLookController {
   ) {
     try {
       const looks = await this.getEditorialLooksByHeroAssetHandler.handle({ assetId: request.params.assetId });
-      return ResponseHelper.ok(reply, "Looks by hero asset retrieved successfully", looks.map(toLookResponse));
+      return ResponseHelper.ok(reply, "Looks by hero asset retrieved successfully", looks.data?.map(toLookResponse));
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -355,7 +355,7 @@ export class EditorialLookController {
   ) {
     try {
       const productIds = await this.getEditorialLookProductsHandler.handle({ id: request.params.id });
-      return ResponseHelper.ok(reply, "Editorial look products retrieved successfully", productIds);
+      return ResponseHelper.ok(reply, "Editorial look products retrieved successfully", productIds.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -367,7 +367,7 @@ export class EditorialLookController {
   ) {
     try {
       const lookIds = await this.getProductEditorialLooksHandler.handle({ productId: request.params.productId });
-      return ResponseHelper.ok(reply, "Product looks retrieved successfully", lookIds);
+      return ResponseHelper.ok(reply, "Product looks retrieved successfully", lookIds.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -392,8 +392,8 @@ export class EditorialLookController {
         ...request.query,
       });
       return ResponseHelper.ok(reply, "Looks by product retrieved successfully", {
-        looks: result.looks.map(toLookResponse),
-        meta: result.meta,
+        looks: result.data?.looks.map(toLookResponse),
+        meta: result.data?.meta,
       });
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -437,7 +437,7 @@ export class EditorialLookController {
   async getEditorialLookStats(_request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const stats = await this.getEditorialLookStatsHandler.handle({});
-      return ResponseHelper.ok(reply, "Editorial look statistics retrieved successfully", stats);
+      return ResponseHelper.ok(reply, "Editorial look statistics retrieved successfully", stats.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -449,7 +449,7 @@ export class EditorialLookController {
   ) {
     try {
       const popularProducts = await this.getPopularEditorialLookProductsHandler.handle(request.query);
-      return ResponseHelper.ok(reply, "Popular products retrieved successfully", popularProducts);
+      return ResponseHelper.ok(reply, "Popular products retrieved successfully", popularProducts.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -458,7 +458,7 @@ export class EditorialLookController {
   async createBulkEditorialLooks(
     request: AuthenticatedRequest<{
       Body: {
-        looks: Array<{ title: string; storyHtml?: string; heroAssetId?: string; publishedAt?: string; productIds?: string[] }>;
+        looks: Array<{ title: string; storyHtml?: string; heroAssetId?: string; publishedAt?: Date; productIds?: string[] }>;
       };
     }>,
     reply: FastifyReply,
@@ -509,7 +509,7 @@ export class EditorialLookController {
   ) {
     try {
       const validation = await this.validateEditorialLookForPublicationHandler.handle({ id: request.params.id });
-      return ResponseHelper.ok(reply, "Editorial look validated for publication", validation);
+      return ResponseHelper.ok(reply, "Editorial look validated for publication", validation.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

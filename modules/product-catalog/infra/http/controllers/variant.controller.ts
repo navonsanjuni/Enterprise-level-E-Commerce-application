@@ -38,13 +38,7 @@ export class VariantController {
         productId: request.params.productId,
         ...request.query,
       });
-      return ResponseHelper.ok(reply, "Variants retrieved successfully", {
-        variants: result.variants,
-        total: result.total,
-        page: result.page,
-        limit: result.limit,
-        totalPages: result.totalPages,
-      });
+      return ResponseHelper.ok(reply, "Variants retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -56,7 +50,7 @@ export class VariantController {
   ) {
     try {
       const result = await this.getVariantHandler.handle({ variantId: request.params.variantId });
-      return ResponseHelper.ok(reply, "Variant retrieved successfully", result);
+      return ResponseHelper.ok(reply, "Variant retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -75,18 +69,16 @@ export class VariantController {
         taxClass?: string;
         allowBackorder?: boolean;
         allowPreorder?: boolean;
-        restockEta?: string;
+        restockEta?: Date;
       };
     }>,
     reply: FastifyReply,
   ) {
     try {
       const { productId } = request.params;
-      const { restockEta, ...rest } = request.body;
       const result = await this.createVariantHandler.handle({
         productId,
-        ...rest,
-        restockEta: restockEta ? new Date(restockEta) : undefined,
+        ...request.body,
       });
       return ResponseHelper.fromCommand(reply, result, "Variant created successfully", 201);
     } catch (error: unknown) {
@@ -107,17 +99,15 @@ export class VariantController {
         taxClass?: string;
         allowBackorder?: boolean;
         allowPreorder?: boolean;
-        restockEta?: string;
+        restockEta?: Date;
       };
     }>,
     reply: FastifyReply,
   ) {
     try {
-      const { restockEta, ...rest } = request.body;
       const result = await this.updateVariantHandler.handle({
         variantId: request.params.variantId,
-        ...rest,
-        restockEta: restockEta ? new Date(restockEta) : undefined,
+        ...request.body,
       });
       return ResponseHelper.fromCommand(reply, result, "Variant updated successfully");
     } catch (error: unknown) {

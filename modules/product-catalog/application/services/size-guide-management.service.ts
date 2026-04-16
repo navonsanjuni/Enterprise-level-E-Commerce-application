@@ -161,7 +161,7 @@ export class SizeGuideManagementService {
       sizeGuide.updateCategory(updates.category);
     }
 
-    await this.sizeGuideRepository.update(sizeGuide);
+    await this.sizeGuideRepository.save(sizeGuide);
     return SizeGuide.toDTO(sizeGuide);
   }
 

@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
 import { ProductDTO } from "../../domain/entities/product.entity";
 import { ProductManagementService } from "../services/product-management.service";
 
@@ -21,19 +21,23 @@ export interface ListProductsResult {
   readonly totalPages: number;
 }
 
-export class ListProductsHandler implements IQueryHandler<ListProductsQuery, ListProductsResult> {
+export class ListProductsHandler implements IQueryHandler<ListProductsQuery, QueryResult<ListProductsResult>> {
   constructor(private readonly productManagementService: ProductManagementService) {}
 
-  async handle(input: ListProductsQuery): Promise<ListProductsResult> {
+  async handle(input: ListProductsQuery): Promise<QueryResult<ListProductsResult>> {
+    try {
     const page = input.page ?? 1;
     const limit = input.limit ?? 20;
     const result = await this.productManagementService.getAllProducts({ page, limit, ...input });
-    return {
+    return QueryResult.success({
       products: result.items,
       total: result.total,
       page,
       limit,
       totalPages: Math.ceil(result.total / limit),
-    };
+    });
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

@@ -105,7 +105,8 @@ export async function mediaRoutes(
   fastify.post(
     "/media",
     {
-      preHandler: [validateBody(createMediaSchema), RolePermissions.ADMIN_ONLY],
+      preValidation: [validateBody(createMediaSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new media asset",
         tags: ["Media"],
@@ -146,8 +147,8 @@ export async function mediaRoutes(
   fastify.patch(
     "/media/:id",
     {
-      preValidation: [validateParams(mediaParamsSchema)],
-      preHandler: [validateBody(updateMediaSchema), RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(mediaParamsSchema), validateBody(updateMediaSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update an existing media asset",
         tags: ["Media"],

@@ -174,10 +174,8 @@ export async function categoryRoutes(
   fastify.post(
     "/categories/reorder",
     {
-      preHandler: [
-        validateBody(reorderCategoriesSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateBody(reorderCategoriesSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Reorder categories by updating positions",
         tags: ["Categories"],
@@ -216,10 +214,8 @@ export async function categoryRoutes(
   fastify.post(
     "/categories",
     {
-      preHandler: [
-        validateBody(createCategorySchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateBody(createCategorySchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new category",
         tags: ["Categories"],
@@ -258,11 +254,8 @@ export async function categoryRoutes(
   fastify.patch(
     "/categories/:id",
     {
-      preValidation: [validateParams(categoryParamsSchema)],
-      preHandler: [
-        validateBody(updateCategorySchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(categoryParamsSchema), validateBody(updateCategorySchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update an existing category",
         tags: ["Categories"],

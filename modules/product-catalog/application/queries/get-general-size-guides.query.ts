@@ -1,5 +1,6 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
-import { SizeGuideDTO, Region } from "../../domain/entities/size-guide.entity";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
+import { SizeGuideDTO } from "../../domain/entities/size-guide.entity";
+import { Region } from "../../domain/enums/product-catalog.enums";
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
 export interface GetGeneralSizeGuidesQuery extends IQuery {
@@ -11,11 +12,15 @@ export interface GeneralSizeGuidesResult {
   readonly meta: { region: Region; count: number };
 }
 
-export class GetGeneralSizeGuidesHandler implements IQueryHandler<GetGeneralSizeGuidesQuery, GeneralSizeGuidesResult> {
+export class GetGeneralSizeGuidesHandler implements IQueryHandler<GetGeneralSizeGuidesQuery, QueryResult<GeneralSizeGuidesResult>> {
   constructor(private readonly sizeGuideManagementService: SizeGuideManagementService) {}
 
-  async handle(query: GetGeneralSizeGuidesQuery): Promise<GeneralSizeGuidesResult> {
+  async handle(query: GetGeneralSizeGuidesQuery): Promise<QueryResult<GeneralSizeGuidesResult>> {
+    try {
     const guides = await this.sizeGuideManagementService.getGeneralSizeGuides(query.region);
-    return { guides, meta: { region: query.region, count: guides.length } };
+    return QueryResult.success({ guides, meta: { region: query.region, count: guides.length } });
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

@@ -10,7 +10,7 @@ export interface UpdateProductCommand extends ICommand {
   readonly shortDesc?: string;
   readonly longDescHtml?: string;
   readonly status?: ProductStatus;
-  readonly publishAt?: string;
+  readonly publishAt?: Date;
   readonly countryOfOrigin?: string;
   readonly seoTitle?: string;
   readonly seoDescription?: string;
@@ -26,11 +26,8 @@ export class UpdateProductHandler implements ICommandHandler<UpdateProductComman
   constructor(private readonly productManagementService: ProductManagementService) {}
 
   async handle(command: UpdateProductCommand): Promise<CommandResult<ProductDTO>> {
-    const { productId, publishAt, ...rest } = command;
-    const dto = await this.productManagementService.updateProduct(productId, {
-      ...rest,
-      publishAt: publishAt ? new Date(publishAt) : undefined,
-    });
+    const { productId, ...rest } = command;
+    const dto = await this.productManagementService.updateProduct(productId, rest);
     return CommandResult.success(dto);
   }
 }

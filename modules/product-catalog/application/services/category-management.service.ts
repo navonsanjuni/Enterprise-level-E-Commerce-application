@@ -254,7 +254,7 @@ export class CategoryManagementService {
       category.updatePosition(updateData.position);
     }
 
-    await this.categoryRepository.update(category);
+    await this.categoryRepository.save(category);
     return Category.toDTO(category);
   }
 
@@ -286,7 +286,7 @@ export class CategoryManagementService {
       const category = await this.categoryRepository.findById(categoryId);
       if (category) {
         category.updatePosition(orderItem.position);
-        await this.categoryRepository.update(category);
+        await this.categoryRepository.save(category);
       }
     }
   }

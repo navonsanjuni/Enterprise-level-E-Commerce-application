@@ -23,7 +23,6 @@ export interface IMediaAssetRepository {
     options?: MediaAssetQueryOptions,
   ): Promise<MediaAsset[]>;
   findOrphaned(): Promise<MediaAsset[]>; // Assets not associated with any product
-  update(asset: MediaAsset): Promise<void>;
   delete(id: MediaAssetId): Promise<void>;
   exists(id: MediaAssetId): Promise<boolean>;
   existsByStorageKey(storageKey: string): Promise<boolean>;

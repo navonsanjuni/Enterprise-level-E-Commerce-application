@@ -23,12 +23,11 @@ export class ProductTagRepositoryImpl implements IProductTagRepository {
   }
 
   async save(tag: ProductTag): Promise<void> {
-    await this.productTagModel.create({
-      data: {
-        id: tag.id.getValue(),
-        tag: tag.tag,
-        kind: tag.kind,
-      },
+    const data = { tag: tag.tag, kind: tag.kind };
+    await this.productTagModel.upsert({
+      where: { id: tag.id.getValue() },
+      create: { id: tag.id.getValue(), ...data },
+      update: data,
     });
   }
 
@@ -195,15 +194,6 @@ export class ProductTagRepositoryImpl implements IProductTagRepository {
     }));
   }
 
-  async update(tag: ProductTag): Promise<void> {
-    await this.productTagModel.update({
-      where: { id: tag.id.getValue() },
-      data: {
-        tag: tag.tag,
-        kind: tag.kind,
-      },
-    });
-  }
 
   async delete(id: ProductTagId): Promise<void> {
     await this.productTagModel.delete({

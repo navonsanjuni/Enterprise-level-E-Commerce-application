@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
 import { VariantMediaManagementService, VariantMediaServiceQueryOptions, ProductVariantMediaSummary } from "../services/variant-media-management.service";
 
 export interface GetProductVariantMediaQuery extends IQuery {
@@ -6,10 +6,14 @@ export interface GetProductVariantMediaQuery extends IQuery {
   readonly options?: VariantMediaServiceQueryOptions;
 }
 
-export class GetProductVariantMediaHandler implements IQueryHandler<GetProductVariantMediaQuery, ProductVariantMediaSummary> {
+export class GetProductVariantMediaHandler implements IQueryHandler<GetProductVariantMediaQuery, QueryResult<ProductVariantMediaSummary>> {
   constructor(private readonly variantMediaManagementService: VariantMediaManagementService) {}
 
-  async handle(query: GetProductVariantMediaQuery): Promise<ProductVariantMediaSummary> {
-    return await this.variantMediaManagementService.getProductVariantMedia(query.productId, query.options);
+  async handle(query: GetProductVariantMediaQuery): Promise<QueryResult<ProductVariantMediaSummary>> {
+    try {
+    return QueryResult.success(await this.variantMediaManagementService.getProductVariantMedia(query.productId, query.options));
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

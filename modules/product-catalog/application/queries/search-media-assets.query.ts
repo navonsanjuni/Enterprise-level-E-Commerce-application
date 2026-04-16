@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
 import { MediaAssetDTO } from "../../domain/entities/media-asset.entity";
 import { MediaManagementService } from "../services/media-management.service";
 import { MediaAssetFilters } from "../../domain/repositories/media-asset.repository";
@@ -31,10 +31,11 @@ export interface SearchMediaAssetsResult {
   };
 }
 
-export class SearchMediaAssetsHandler implements IQueryHandler<SearchMediaAssetsQuery, SearchMediaAssetsResult> {
+export class SearchMediaAssetsHandler implements IQueryHandler<SearchMediaAssetsQuery, QueryResult<SearchMediaAssetsResult>> {
   constructor(private readonly mediaManagementService: MediaManagementService) {}
 
-  async handle(query: SearchMediaAssetsQuery): Promise<SearchMediaAssetsResult> {
+  async handle(query: SearchMediaAssetsQuery): Promise<QueryResult<SearchMediaAssetsResult>> {
+    try {
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
     const sortBy = query.sortBy ?? "createdAt";
@@ -53,6 +54,9 @@ export class SearchMediaAssetsHandler implements IQueryHandler<SearchMediaAssets
 
     const assets = await this.mediaManagementService.searchAssets(filters, options);
 
-    return { assets, meta: { page, limit, sortBy, sortOrder, filters } };
+    return QueryResult.success({ assets, meta: { page, limit, sortBy, sortOrder, filters } });
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

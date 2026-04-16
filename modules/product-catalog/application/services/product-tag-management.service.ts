@@ -125,7 +125,7 @@ export class ProductTagManagementService {
       tag.updateKind(updates.kind);
     }
 
-    await this.productTagRepository.update(tag);
+    await this.productTagRepository.save(tag);
     return ProductTag.toDTO(tag);
   }
 

@@ -1,5 +1,6 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
-import { SizeGuideDTO, Region } from "../../domain/entities/size-guide.entity";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
+import { SizeGuideDTO } from "../../domain/entities/size-guide.entity";
+import { Region } from "../../domain/enums/product-catalog.enums";
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 import { SizeGuideQueryOptions } from "../../domain/repositories/size-guide.repository";
 
@@ -24,10 +25,11 @@ export interface RegionalSizeGuidesResult {
   readonly meta: { region: Region; page: number; limit: number };
 }
 
-export class GetRegionalSizeGuidesHandler implements IQueryHandler<GetRegionalSizeGuidesQuery, RegionalSizeGuidesResult> {
+export class GetRegionalSizeGuidesHandler implements IQueryHandler<GetRegionalSizeGuidesQuery, QueryResult<RegionalSizeGuidesResult>> {
   constructor(private readonly sizeGuideManagementService: SizeGuideManagementService) {}
 
-  async handle(query: GetRegionalSizeGuidesQuery): Promise<RegionalSizeGuidesResult> {
+  async handle(query: GetRegionalSizeGuidesQuery): Promise<QueryResult<RegionalSizeGuidesResult>> {
+    try {
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
 
@@ -49,10 +51,13 @@ export class GetRegionalSizeGuidesHandler implements IQueryHandler<GetRegionalSi
 
     const sizeGuides = guides.filter(Boolean);
 
-    return {
+    return QueryResult.success({
       sizeGuides,
       pagination: { page, limit, total: sizeGuides.length, total_pages: Math.ceil(sizeGuides.length / limit) },
       meta: { region: query.region, page, limit },
-    };
+    });
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

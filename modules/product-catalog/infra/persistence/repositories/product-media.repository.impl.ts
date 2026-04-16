@@ -40,14 +40,19 @@ export class ProductMediaRepositoryImpl implements IProductMediaRepository {
   }
 
   async save(productMedia: ProductMedia): Promise<void> {
-    await this.productMediaModel.create({
-      data: {
+    const updateData = {
+      position: productMedia.displayOrder,
+      isCover: productMedia.isPrimary,
+    };
+    await this.productMediaModel.upsert({
+      where: { id: productMedia.id },
+      create: {
         id: productMedia.id,
         productId: productMedia.productId.getValue(),
         assetId: productMedia.mediaAssetId.getValue(),
-        position: productMedia.displayOrder,
-        isCover: productMedia.isPrimary,
+        ...updateData,
       },
+      update: updateData,
     });
   }
 
@@ -63,15 +68,6 @@ export class ProductMediaRepositoryImpl implements IProductMediaRepository {
     return this.hydrate(mediaData);
   }
 
-  async update(productMedia: ProductMedia): Promise<void> {
-    await this.productMediaModel.update({
-      where: { id: productMedia.id },
-      data: {
-        position: productMedia.displayOrder,
-        isCover: productMedia.isPrimary,
-      },
-    });
-  }
 
   async delete(id: string): Promise<void> {
     await this.productMediaModel.delete({

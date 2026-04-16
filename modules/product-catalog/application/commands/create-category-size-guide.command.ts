@@ -1,5 +1,6 @@
 import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/core/src/application/cqrs";
-import { SizeGuideDTO, Region } from "../../domain/entities/size-guide.entity";
+import { SizeGuideDTO } from "../../domain/entities/size-guide.entity";
+import { Region } from "../../domain/enums/product-catalog.enums";
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
 export interface CreateCategorySizeGuideCommand extends ICommand {

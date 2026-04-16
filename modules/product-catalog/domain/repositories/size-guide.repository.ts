@@ -19,7 +19,6 @@ export interface ISizeGuideRepository {
     category: string,
   ): Promise<SizeGuide | null>;
   findGeneral(region: Region): Promise<SizeGuide[]>;
-  update(sizeGuide: SizeGuide): Promise<void>;
   delete(id: SizeGuideId): Promise<void>;
   exists(id: SizeGuideId): Promise<boolean>;
   count(options?: SizeGuideCountOptions): Promise<number>;

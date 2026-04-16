@@ -257,7 +257,7 @@ export class MediaManagementService {
   ): Promise<MediaAssetDTO> {
     const asset = await this._getAsset(id);
     asset.updateFields(updateData);
-    await this.mediaAssetRepository.update(asset);
+    await this.mediaAssetRepository.save(asset);
     return MediaAsset.toDTO(asset);
   }
 
@@ -278,7 +278,7 @@ export class MediaManagementService {
     }
 
     asset.addRendition(name, renditionData);
-    await this.mediaAssetRepository.update(asset);
+    await this.mediaAssetRepository.save(asset);
     return MediaAsset.toDTO(asset);
   }
 
@@ -288,7 +288,7 @@ export class MediaManagementService {
   ): Promise<MediaAssetDTO> {
     const asset = await this._getAsset(id);
     asset.removeRendition(renditionName);
-    await this.mediaAssetRepository.update(asset);
+    await this.mediaAssetRepository.save(asset);
     return MediaAsset.toDTO(asset);
   }
 
@@ -443,7 +443,7 @@ export class MediaManagementService {
     }
 
     asset.updateStorageKey(newStorageKey);
-    await this.mediaAssetRepository.update(asset);
+    await this.mediaAssetRepository.save(asset);
     return MediaAsset.toDTO(asset);
   }
 

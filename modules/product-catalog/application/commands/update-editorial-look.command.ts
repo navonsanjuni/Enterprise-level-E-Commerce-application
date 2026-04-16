@@ -7,23 +7,15 @@ export interface UpdateEditorialLookCommand extends ICommand {
   readonly title?: string;
   readonly storyHtml?: string;
   readonly heroAssetId?: string | null;
-  readonly publishedAt?: string | null;
+  readonly publishedAt?: Date | null;
 }
 
 export class UpdateEditorialLookHandler implements ICommandHandler<UpdateEditorialLookCommand, CommandResult<EditorialLookDTO>> {
   constructor(private readonly editorialLookManagementService: EditorialLookManagementService) {}
 
   async handle(command: UpdateEditorialLookCommand): Promise<CommandResult<EditorialLookDTO>> {
-    let resolvedPublishedAt: Date | null | undefined;
-    if (command.publishedAt !== undefined) {
-      resolvedPublishedAt = command.publishedAt === null ? null : new Date(command.publishedAt);
-    }
-    const dto = await this.editorialLookManagementService.updateEditorialLook(command.id, {
-      title: command.title,
-      storyHtml: command.storyHtml,
-      heroAssetId: command.heroAssetId,
-      publishedAt: resolvedPublishedAt,
-    });
+    const { id, ...rest } = command;
+    const dto = await this.editorialLookManagementService.updateEditorialLook(id, rest);
     return CommandResult.success(dto);
   }
 }

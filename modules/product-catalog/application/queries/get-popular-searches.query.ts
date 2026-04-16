@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
 import { ProductSearchService } from "../services/product-search.service";
 
 export interface GetPopularSearchesQuery extends IQuery {}
@@ -8,10 +8,14 @@ export interface PopularSearchResult {
   readonly count: number;
 }
 
-export class GetPopularSearchesHandler implements IQueryHandler<GetPopularSearchesQuery, PopularSearchResult[]> {
+export class GetPopularSearchesHandler implements IQueryHandler<GetPopularSearchesQuery, QueryResult<PopularSearchResult[]>> {
   constructor(private readonly productSearchService: ProductSearchService) {}
 
-  async handle(_input: GetPopularSearchesQuery): Promise<PopularSearchResult[]> {
-    return await this.productSearchService.getPopularSearches();
+  async handle(_input: GetPopularSearchesQuery): Promise<QueryResult<PopularSearchResult[]>> {
+    try {
+    return QueryResult.success(await this.productSearchService.getPopularSearches());
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

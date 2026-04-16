@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface GetProductMediaAssetUsageCountQuery extends IQuery {
@@ -10,11 +10,15 @@ export interface ProductMediaAssetUsageCountResult {
   readonly usageCount: number;
 }
 
-export class GetProductMediaAssetUsageCountHandler implements IQueryHandler<GetProductMediaAssetUsageCountQuery, ProductMediaAssetUsageCountResult> {
+export class GetProductMediaAssetUsageCountHandler implements IQueryHandler<GetProductMediaAssetUsageCountQuery, QueryResult<ProductMediaAssetUsageCountResult>> {
   constructor(private readonly productMediaManagementService: ProductMediaManagementService) {}
 
-  async handle(query: GetProductMediaAssetUsageCountQuery): Promise<ProductMediaAssetUsageCountResult> {
+  async handle(query: GetProductMediaAssetUsageCountQuery): Promise<QueryResult<ProductMediaAssetUsageCountResult>> {
+    try {
     const usageCount = await this.productMediaManagementService.getAssetUsageCount(query.assetId);
-    return { assetId: query.assetId, usageCount };
+    return QueryResult.success({ assetId: query.assetId, usageCount });
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

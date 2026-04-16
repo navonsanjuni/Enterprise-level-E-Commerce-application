@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
 import { ProductDTO } from "../../domain/entities/product.entity";
 import { ProductSearchService } from "../services/product-search.service";
 
@@ -25,10 +25,11 @@ export interface SearchProductsResult {
   readonly suggestions?: string[];
 }
 
-export class SearchProductsHandler implements IQueryHandler<SearchProductsQuery, SearchProductsResult> {
+export class SearchProductsHandler implements IQueryHandler<SearchProductsQuery, QueryResult<SearchProductsResult>> {
   constructor(private readonly productSearchService: ProductSearchService) {}
 
-  async handle(input: SearchProductsQuery): Promise<SearchProductsResult> {
+  async handle(input: SearchProductsQuery): Promise<QueryResult<SearchProductsResult>> {
+    try {
     const page = input.page ?? 1;
     const limit = input.limit ?? 20;
     const result = await this.productSearchService.searchProducts(input.searchTerm.trim(), {
@@ -43,6 +44,9 @@ export class SearchProductsHandler implements IQueryHandler<SearchProductsQuery,
       sortBy: input.sortBy ?? "relevance",
       sortOrder: input.sortOrder ?? "desc",
     });
-    return { ...result, searchTerm: input.searchTerm, page, limit };
+    return QueryResult.success({ ...result, searchTerm: input.searchTerm, page, limit });
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

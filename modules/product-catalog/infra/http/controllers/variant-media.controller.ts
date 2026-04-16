@@ -49,7 +49,7 @@ export class VariantMediaController {
   ) {
     try {
       const variantMedia = await this.getVariantMediaHandler.handle({ variantId: request.params.variantId });
-      return ResponseHelper.ok(reply, "Variant media retrieved successfully", variantMedia);
+      return ResponseHelper.ok(reply, "Variant media retrieved successfully", variantMedia.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -171,7 +171,7 @@ export class VariantMediaController {
         productId: request.params.productId,
         options: request.query,
       });
-      return ResponseHelper.ok(reply, "Product variant media retrieved successfully", productVariantMedia);
+      return ResponseHelper.ok(reply, "Product variant media retrieved successfully", productVariantMedia.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -197,7 +197,7 @@ export class VariantMediaController {
   ) {
     try {
       const variantIds = await this.getVariantsUsingAssetHandler.handle({ assetId: request.params.assetId });
-      return ResponseHelper.ok(reply, "Variants using asset retrieved successfully", variantIds);
+      return ResponseHelper.ok(reply, "Variants using asset retrieved successfully", variantIds.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -209,7 +209,7 @@ export class VariantMediaController {
   ) {
     try {
       const result = await this.getVariantMediaAssetUsageCountHandler.handle({ assetId: request.params.assetId });
-      return ResponseHelper.ok(reply, "Asset usage count retrieved successfully", result);
+      return ResponseHelper.ok(reply, "Asset usage count retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -221,7 +221,7 @@ export class VariantMediaController {
   ) {
     try {
       const colorVariantMedia = await this.getColorVariantMediaHandler.handle(request.params);
-      return ResponseHelper.ok(reply, "Color variant media retrieved successfully", colorVariantMedia);
+      return ResponseHelper.ok(reply, "Color variant media retrieved successfully", colorVariantMedia.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -233,7 +233,7 @@ export class VariantMediaController {
   ) {
     try {
       const sizeVariantMedia = await this.getSizeVariantMediaHandler.handle(request.params);
-      return ResponseHelper.ok(reply, "Size variant media retrieved successfully", sizeVariantMedia);
+      return ResponseHelper.ok(reply, "Size variant media retrieved successfully", sizeVariantMedia.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -245,7 +245,7 @@ export class VariantMediaController {
   ) {
     try {
       const result = await this.getUnusedVariantMediaAssetsHandler.handle(request.query);
-      return ResponseHelper.ok(reply, "Unused assets retrieved successfully", result);
+      return ResponseHelper.ok(reply, "Unused assets retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -257,7 +257,7 @@ export class VariantMediaController {
   ) {
     try {
       const validation = await this.validateVariantMediaHandler.handle({ variantId: request.params.variantId });
-      return ResponseHelper.ok(reply, "Variant media validated successfully", validation);
+      return ResponseHelper.ok(reply, "Variant media validated successfully", validation.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -269,7 +269,7 @@ export class VariantMediaController {
   ) {
     try {
       const statistics = await this.getVariantMediaStatisticsHandler.handle({ variantId: request.params.variantId });
-      return ResponseHelper.ok(reply, "Variant media statistics retrieved successfully", statistics);
+      return ResponseHelper.ok(reply, "Variant media statistics retrieved successfully", statistics.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

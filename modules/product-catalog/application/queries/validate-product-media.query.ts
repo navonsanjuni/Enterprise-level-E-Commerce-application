@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface ValidateProductMediaQuery extends IQuery {
@@ -10,10 +10,14 @@ export interface ProductMediaValidationResult {
   readonly issues: string[];
 }
 
-export class ValidateProductMediaHandler implements IQueryHandler<ValidateProductMediaQuery, ProductMediaValidationResult> {
+export class ValidateProductMediaHandler implements IQueryHandler<ValidateProductMediaQuery, QueryResult<ProductMediaValidationResult>> {
   constructor(private readonly productMediaManagementService: ProductMediaManagementService) {}
 
-  async handle(query: ValidateProductMediaQuery): Promise<ProductMediaValidationResult> {
-    return await this.productMediaManagementService.validateProductMedia(query.productId);
+  async handle(query: ValidateProductMediaQuery): Promise<QueryResult<ProductMediaValidationResult>> {
+    try {
+    return QueryResult.success(await this.productMediaManagementService.validateProductMedia(query.productId));
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

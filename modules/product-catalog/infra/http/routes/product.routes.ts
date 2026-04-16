@@ -151,10 +151,8 @@ export async function productRoutes(
   fastify.post(
     "/products",
     {
-      preHandler: [
-        validateBody(createProductSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateBody(createProductSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new product",
         tags: ["Products"],
@@ -208,11 +206,8 @@ export async function productRoutes(
   fastify.patch(
     "/products/:productId",
     {
-      preValidation: [validateParams(productParamsSchema)],
-      preHandler: [
-        validateBody(updateProductSchema),
-        RolePermissions.ADMIN_ONLY,
-      ],
+      preValidation: [validateParams(productParamsSchema), validateBody(updateProductSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Update an existing product",
         tags: ["Products"],

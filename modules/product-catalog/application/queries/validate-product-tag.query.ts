@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
 import { ProductTagManagementService } from "../services/product-tag-management.service";
 
 export interface ValidateProductTagQuery extends IQuery {
@@ -11,11 +11,15 @@ export interface ProductTagValidationResult {
   readonly available: boolean;
 }
 
-export class ValidateProductTagHandler implements IQueryHandler<ValidateProductTagQuery, ProductTagValidationResult> {
+export class ValidateProductTagHandler implements IQueryHandler<ValidateProductTagQuery, QueryResult<ProductTagValidationResult>> {
   constructor(private readonly productTagManagementService: ProductTagManagementService) {}
 
-  async handle(query: ValidateProductTagQuery): Promise<ProductTagValidationResult> {
+  async handle(query: ValidateProductTagQuery): Promise<QueryResult<ProductTagValidationResult>> {
+    try {
     const isValid = await this.productTagManagementService.validateTag(decodeURIComponent(query.name));
-    return { tagName: query.name, isValid, available: isValid };
+    return QueryResult.success({ tagName: query.name, isValid, available: isValid });
+      } catch (error: unknown) {
+      return QueryResult.fromError(error);
+    }
   }
 }

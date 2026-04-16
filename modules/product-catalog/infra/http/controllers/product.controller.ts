@@ -38,45 +38,18 @@ export class ProductController {
     reply: FastifyReply,
   ) {
     try {
-      const {
-        page = 1,
-        limit = 20,
-        status,
-        brand,
-        categoryId,
-        search,
-        includeDrafts = false,
-        sortBy = "createdAt",
-        sortOrder = "desc",
-      } = request.query;
+      const { search, ...queryRest } = request.query;
 
       if (search) {
         const result = await this.searchProductsHandler.handle({
           searchTerm: search,
-          page,
-          limit,
-          categoryId,
-          brand,
-          status,
-          sortBy: sortBy === "createdAt" || sortBy === "title" || sortBy === "publishAt"
-            ? sortBy
-            : "relevance",
-          sortOrder,
+          ...queryRest,
         });
-        return ResponseHelper.ok(reply, "Products retrieved successfully", result);
+        return ResponseHelper.ok(reply, "Products retrieved successfully", result.data);
       }
 
-      const result = await this.listProductsHandler.handle({
-        page,
-        limit,
-        status,
-        brand,
-        categoryId,
-        includeDrafts,
-        sortBy,
-        sortOrder,
-      });
-      return ResponseHelper.ok(reply, "Products retrieved successfully", result);
+      const result = await this.listProductsHandler.handle(queryRest);
+      return ResponseHelper.ok(reply, "Products retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -89,7 +62,7 @@ export class ProductController {
     try {
       const { productId } = request.params;
       const result = await this.getProductHandler.handle({ productId });
-      return ResponseHelper.ok(reply, "Product retrieved successfully", result);
+      return ResponseHelper.ok(reply, "Product retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -102,7 +75,7 @@ export class ProductController {
     try {
       const { slug } = request.params;
       const result = await this.getProductHandler.handle({ slug });
-      return ResponseHelper.ok(reply, "Product retrieved successfully", result);
+      return ResponseHelper.ok(reply, "Product retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -116,7 +89,7 @@ export class ProductController {
         shortDesc?: string;
         longDescHtml?: string;
         status?: ProductStatus;
-        publishAt?: string;
+        publishAt?: Date;
         countryOfOrigin?: string;
         seoTitle?: string;
         seoDescription?: string;

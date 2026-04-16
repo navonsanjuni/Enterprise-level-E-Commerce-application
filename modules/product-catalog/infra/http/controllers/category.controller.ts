@@ -37,13 +37,7 @@ export class CategoryController {
   ) {
     try {
       const result = await this.listCategoriesHandler.handle(request.query);
-      return ResponseHelper.ok(reply, "Categories retrieved successfully", {
-        categories: result.categories,
-        total: result.total,
-        page: result.page,
-        limit: result.limit,
-        totalPages: result.totalPages,
-      });
+      return ResponseHelper.ok(reply, "Categories retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -60,7 +54,7 @@ export class CategoryController {
       return ResponseHelper.ok(
         reply,
         "Category retrieved successfully",
-        result,
+        result.data,
       );
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -78,7 +72,7 @@ export class CategoryController {
       return ResponseHelper.ok(
         reply,
         "Category retrieved successfully",
-        result,
+        result.data,
       );
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -156,7 +150,7 @@ export class CategoryController {
       return ResponseHelper.ok(
         reply,
         "Category hierarchy retrieved successfully",
-        result,
+        result.data,
       );
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);

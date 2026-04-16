@@ -19,7 +19,7 @@ import {
   GetAvailableSizeGuideCategoriesHandler,
   ValidateSizeGuideUniquenessHandler,
 } from "../../../application";
-import { Region } from "../../../domain/entities/size-guide.entity";
+import { Region } from "../../../domain/enums/product-catalog.enums";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 
 export class SizeGuideController {
@@ -59,7 +59,7 @@ export class SizeGuideController {
   ) {
     try {
       const result = await this.listSizeGuidesHandler.handle(request.query);
-      return ResponseHelper.ok(reply, "Size guides retrieved successfully", result);
+      return ResponseHelper.ok(reply, "Size guides retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -71,7 +71,7 @@ export class SizeGuideController {
   ) {
     try {
       const guide = await this.getSizeGuideHandler.handle({ id: request.params.id });
-      return ResponseHelper.ok(reply, "Size guide retrieved successfully", guide);
+      return ResponseHelper.ok(reply, "Size guide retrieved successfully", guide.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -137,7 +137,7 @@ export class SizeGuideController {
         region: request.params.region as Region,
         ...request.query,
       });
-      return ResponseHelper.ok(reply, "Regional size guides retrieved successfully", result);
+      return ResponseHelper.ok(reply, "Regional size guides retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -167,7 +167,7 @@ export class SizeGuideController {
   ) {
     try {
       const result = await this.getGeneralSizeGuidesHandler.handle({ region: request.params.region as Region });
-      return ResponseHelper.ok(reply, "General size guides retrieved successfully", result);
+      return ResponseHelper.ok(reply, "General size guides retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -225,7 +225,7 @@ export class SizeGuideController {
   async getSizeGuideStats(_request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const stats = await this.getSizeGuideStatsHandler.handle({});
-      return ResponseHelper.ok(reply, "Size guide statistics retrieved successfully", stats);
+      return ResponseHelper.ok(reply, "Size guide statistics retrieved successfully", stats.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -234,7 +234,7 @@ export class SizeGuideController {
   async getAvailableRegions(_request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const regions = await this.getAvailableSizeGuideRegionsHandler.handle({});
-      return ResponseHelper.ok(reply, "Available regions retrieved successfully", regions);
+      return ResponseHelper.ok(reply, "Available regions retrieved successfully", regions.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -248,7 +248,7 @@ export class SizeGuideController {
       const result = await this.getAvailableSizeGuideCategoriesHandler.handle({
         region: request.query.region as Region | undefined,
       });
-      return ResponseHelper.ok(reply, "Available categories retrieved successfully", result);
+      return ResponseHelper.ok(reply, "Available categories retrieved successfully", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -291,7 +291,7 @@ export class SizeGuideController {
         region: request.query.region as Region,
         category: request.query.category,
       });
-      return ResponseHelper.ok(reply, "Size guide uniqueness validated", result);
+      return ResponseHelper.ok(reply, "Size guide uniqueness validated", result.data);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

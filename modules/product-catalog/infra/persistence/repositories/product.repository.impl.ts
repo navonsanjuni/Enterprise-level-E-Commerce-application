@@ -39,26 +39,31 @@ export class ProductRepositoryImpl implements IProductRepository {
   }
 
   async save(product: Product): Promise<void> {
-    await this.prisma.product.create({
-      data: {
+    const updateData = {
+      title: product.title,
+      slug: product.slug.getValue(),
+      brand: product.brand,
+      shortDesc: product.shortDesc,
+      longDescHtml: product.longDescHtml,
+      status: product.status as any,
+      publishAt: product.publishAt,
+      countryOfOrigin: product.countryOfOrigin,
+      seoTitle: product.seoTitle,
+      seoDescription: product.seoDescription,
+      updatedAt: product.updatedAt,
+    };
+    await this.prisma.product.upsert({
+      where: { id: product.id.getValue() },
+      create: {
         id: product.id.getValue(),
-        title: product.title,
-        slug: product.slug.getValue(),
-        brand: product.brand,
-        shortDesc: product.shortDesc,
-        longDescHtml: product.longDescHtml,
-        status: product.status as any,
-        publishAt: product.publishAt,
-        countryOfOrigin: product.countryOfOrigin,
-        seoTitle: product.seoTitle,
-        seoDescription: product.seoDescription,
         price: product.price.getValue(),
         priceSgd: product.priceSgd?.getValue() ?? null,
         priceUsd: product.priceUsd?.getValue() ?? null,
         compareAtPrice: product.compareAtPrice?.getValue() ?? null,
         createdAt: product.createdAt,
-        updatedAt: product.updatedAt,
+        ...updateData,
       },
+      update: updateData,
     });
   }
 
@@ -341,24 +346,6 @@ export class ProductRepositoryImpl implements IProductRepository {
     return products.map((p) => this.mapRow(p));
   }
 
-  async update(product: Product): Promise<void> {
-    await this.prisma.product.update({
-      where: { id: product.id.getValue() },
-      data: {
-        title: product.title,
-        slug: product.slug.getValue(),
-        brand: product.brand,
-        shortDesc: product.shortDesc,
-        longDescHtml: product.longDescHtml,
-        status: product.status as any,
-        publishAt: product.publishAt,
-        countryOfOrigin: product.countryOfOrigin,
-        seoTitle: product.seoTitle,
-        seoDescription: product.seoDescription,
-        updatedAt: product.updatedAt,
-      },
-    });
-  }
 
   async delete(id: ProductId): Promise<void> {
     await this.prisma.product.update({
