@@ -7,9 +7,8 @@ import {
   AddressData,
   AddressType,
 } from "../value-objects/address.vo";
-import { ShippingZone } from "../enums/shipping-zone.enum";
 
-export { ShippingZone, AddressId };
+export { AddressId };
 
 // ── Domain Events ──────────────────────────────────────────────────────
 
@@ -101,7 +100,7 @@ export class Address extends AggregateRoot {
     const address = new Address({
       id: AddressId.create(),
       userId: UserId.fromString(params.userId),
-      addressValue: AddressVO.fromData(params.addressData),
+      addressValue: AddressVO.create(params.addressData),
       type: params.type,
       isDefault: params.isDefault || false,
       createdAt: now,
@@ -194,77 +193,6 @@ export class Address extends AggregateRoot {
     return true;
   }
 
-  calculateShippingZone(): ShippingZone {
-    const country = this.props.addressValue.getCountry();
-    switch (country) {
-      case "US":
-        return ShippingZone.DOMESTIC;
-      case "CA":
-      case "MX":
-        return ShippingZone.NORTH_AMERICA;
-      case "UK":
-      case "FR":
-      case "DE":
-      case "IT":
-      case "ES":
-        return ShippingZone.EUROPE;
-      default:
-        return ShippingZone.INTERNATIONAL;
-    }
-  }
-
-  estimateDeliveryDays(): number {
-    switch (this.calculateShippingZone()) {
-      case ShippingZone.DOMESTIC:
-        return 3;
-      case ShippingZone.NORTH_AMERICA:
-        return 7;
-      case ShippingZone.EUROPE:
-        return 10;
-      case ShippingZone.INTERNATIONAL:
-        return 14;
-      default:
-        return 14;
-    }
-  }
-
-  isInternationalShipping(fromCountry: string = "US"): boolean {
-    return this.props.addressValue.isInternational(fromCountry);
-  }
-
-  requiresCustomsDeclaration(): boolean {
-    return this.isInternationalShipping();
-  }
-
-  getTaxJurisdiction(): string {
-    const country = this.props.addressValue.getCountry();
-    const state = this.props.addressValue.getState();
-    if (country === "US" && state) return `${country}-${state}`;
-    return country;
-  }
-
-  getShippingLabel(): AddressLabel {
-    const formatted = this.props.addressValue.getFormattedAddress();
-    return {
-      recipient: formatted.recipient,
-      addressLines: formatted.street,
-      cityStateZip: formatted.cityStateZip,
-      country: formatted.country,
-      type: "SHIPPING",
-    };
-  }
-
-  getBillingLabel(): AddressLabel {
-    const formatted = this.props.addressValue.getFormattedAddress();
-    return {
-      recipient: formatted.recipient,
-      addressLines: formatted.street,
-      cityStateZip: formatted.cityStateZip,
-      country: formatted.country,
-      type: "BILLING",
-    };
-  }
-
   equals(other: Address): boolean {
     return this.props.id.equals(other.props.id);
   }
@@ -294,14 +222,3 @@ export class Address extends AggregateRoot {
   }
 }
 
-// ============================================================================
-// Supporting Types
-// ============================================================================
-
-export interface AddressLabel {
-  recipient: string;
-  addressLines: string[];
-  cityStateZip: string;
-  country: string;
-  type: "SHIPPING" | "BILLING";
-}

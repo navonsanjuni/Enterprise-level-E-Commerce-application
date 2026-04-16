@@ -2,8 +2,8 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface AddProductToEditorialLookCommand extends ICommand {
-  id: string;
-  productId: string;
+  readonly id: string;
+  readonly productId: string;
 }
 
 export class AddProductToEditorialLookHandler implements ICommandHandler<AddProductToEditorialLookCommand, CommandResult<void>> {

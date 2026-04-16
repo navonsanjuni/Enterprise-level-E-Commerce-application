@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { ProductManagementService } from "../services/product-management.service";
 
 export interface DeleteProductCommand extends ICommand {
-  productId: string;
+  readonly productId: string;
 }
 
 export class DeleteProductHandler implements ICommandHandler<DeleteProductCommand, CommandResult<void>> {

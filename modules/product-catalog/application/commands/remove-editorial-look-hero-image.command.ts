@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface RemoveEditorialLookHeroImageCommand extends ICommand {
-  id: string;
+  readonly id: string;
 }
 
 export class RemoveEditorialLookHeroImageHandler implements ICommandHandler<RemoveEditorialLookHeroImageCommand, CommandResult<void>> {

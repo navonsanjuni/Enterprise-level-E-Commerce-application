@@ -4,9 +4,9 @@ import { SupplierContactProps } from "../../domain/value-objects/supplier-contac
 import { SupplierManagementService } from "../services/supplier-management.service";
 
 export interface CreateSupplierCommand extends ICommand {
-  name: string;
-  leadTimeDays?: number;
-  contacts?: SupplierContactProps[];
+  readonly name: string;
+  readonly leadTimeDays?: number;
+  readonly contacts?: SupplierContactProps[];
 }
 
 export class CreateSupplierHandler implements ICommandHandler<

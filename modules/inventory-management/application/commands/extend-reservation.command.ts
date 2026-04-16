@@ -3,8 +3,8 @@ import { PickupReservationDTO } from "../../domain/entities/pickup-reservation.e
 import { PickupReservationService } from "../services/pickup-reservation.service";
 
 export interface ExtendReservationCommand extends ICommand {
-  reservationId: string;
-  additionalMinutes: number;
+  readonly reservationId: string;
+  readonly additionalMinutes: number;
 }
 
 export class ExtendReservationHandler implements ICommandHandler<

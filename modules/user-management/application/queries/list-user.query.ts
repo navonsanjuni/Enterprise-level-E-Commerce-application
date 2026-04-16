@@ -7,14 +7,14 @@ import {
 } from '../../../../packages/core/src/application/cqrs';
 
 export interface ListUsersQuery extends IQuery {
-  search?: string;
-  role?: UserRole;
-  status?: UserStatus;
-  emailVerified?: boolean;
-  page?: number;
-  limit?: number;
-  sortBy?: 'createdAt' | 'email';
-  sortOrder?: 'asc' | 'desc';
+  readonly search?: string;
+  readonly role?: UserRole;
+  readonly status?: UserStatus;
+  readonly emailVerified?: boolean;
+  readonly page?: number;
+  readonly limit?: number;
+  readonly sortBy?: 'createdAt' | 'email';
+  readonly sortOrder?: 'asc' | 'desc';
 }
 
 export class ListUsersHandler implements IQueryHandler<ListUsersQuery, ListUsersResult> {

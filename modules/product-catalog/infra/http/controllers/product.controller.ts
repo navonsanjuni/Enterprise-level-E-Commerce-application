@@ -50,35 +50,25 @@ export class ProductController {
         sortOrder = "desc",
       } = request.query;
 
-      const currentPage = Math.max(1, page);
-      const currentLimit = Math.min(100, Math.max(1, limit));
-
       if (search) {
         const result = await this.searchProductsHandler.handle({
           searchTerm: search,
-          page: currentPage,
-          limit: currentLimit,
+          page,
+          limit,
           categoryId,
           brand,
           status,
-          sortBy:
-            sortBy === "createdAt" || sortBy === "title" || sortBy === "publishAt"
-              ? sortBy
-              : "relevance",
+          sortBy: sortBy === "createdAt" || sortBy === "title" || sortBy === "publishAt"
+            ? sortBy
+            : "relevance",
           sortOrder,
         });
-        return ResponseHelper.ok(reply, "Products retrieved successfully", {
-          products: result.items,
-          total: result.totalCount,
-          page: currentPage,
-          limit: currentLimit,
-          totalPages: Math.ceil(result.totalCount / currentLimit),
-        });
+        return ResponseHelper.ok(reply, "Products retrieved successfully", result);
       }
 
       const result = await this.listProductsHandler.handle({
-        page: currentPage,
-        limit: currentLimit,
+        page,
+        limit,
         status,
         brand,
         categoryId,
@@ -86,13 +76,7 @@ export class ProductController {
         sortBy,
         sortOrder,
       });
-      return ResponseHelper.ok(reply, "Products retrieved successfully", {
-        products: result.products,
-        total: result.total,
-        page: result.page,
-        limit: result.limit,
-        totalPages: result.totalPages,
-      });
+      return ResponseHelper.ok(reply, "Products retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -147,11 +131,7 @@ export class ProductController {
     reply: FastifyReply,
   ) {
     try {
-      const { publishAt, ...rest } = request.body;
-      const result = await this.createProductHandler.handle({
-        ...rest,
-        publishAt: publishAt ? new Date(publishAt) : undefined,
-      });
+      const result = await this.createProductHandler.handle(request.body);
       return ResponseHelper.fromCommand(reply, result, "Product created successfully", 201);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -183,11 +163,9 @@ export class ProductController {
   ) {
     try {
       const { productId } = request.params;
-      const { publishAt, ...rest } = request.body;
       const result = await this.updateProductHandler.handle({
         productId,
-        ...rest,
-        publishAt: publishAt ? new Date(publishAt) : undefined,
+        ...request.body,
       });
       return ResponseHelper.fromCommand(reply, result, "Product updated successfully");
     } catch (error: unknown) {

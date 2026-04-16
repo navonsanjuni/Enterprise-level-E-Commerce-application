@@ -3,8 +3,8 @@ import { SizeGuideDTO } from "../../domain/entities/size-guide.entity";
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
 export interface UpdateSizeGuideContentCommand extends ICommand {
-  id: string;
-  htmlContent: string;
+  readonly id: string;
+  readonly htmlContent: string;
 }
 
 export class UpdateSizeGuideContentHandler implements ICommandHandler<UpdateSizeGuideContentCommand, CommandResult<SizeGuideDTO>> {

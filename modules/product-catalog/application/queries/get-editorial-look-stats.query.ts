@@ -4,13 +4,13 @@ import { EditorialLookManagementService } from "../services/editorial-look-manag
 export interface GetEditorialLookStatsQuery extends IQuery {}
 
 export interface EditorialLookStatsResult {
-  totalLooks: number;
-  publishedLooks: number;
-  scheduledLooks: number;
-  draftLooks: number;
-  looksWithHeroImage: number;
-  looksWithProducts: number;
-  looksWithContent: number;
+  readonly totalLooks: number;
+  readonly publishedLooks: number;
+  readonly scheduledLooks: number;
+  readonly draftLooks: number;
+  readonly looksWithHeroImage: number;
+  readonly looksWithProducts: number;
+  readonly looksWithContent: number;
 }
 
 export class GetEditorialLookStatsHandler implements IQueryHandler<GetEditorialLookStatsQuery, EditorialLookStatsResult> {

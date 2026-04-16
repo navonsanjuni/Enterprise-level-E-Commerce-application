@@ -3,7 +3,7 @@ import { PickupReservationDTO } from "../../domain/entities/pickup-reservation.e
 import { PickupReservationService } from "../services/pickup-reservation.service";
 
 export interface CancelPickupReservationCommand extends ICommand {
-  reservationId: string;
+  readonly reservationId: string;
 }
 
 export class CancelPickupReservationHandler implements ICommandHandler<

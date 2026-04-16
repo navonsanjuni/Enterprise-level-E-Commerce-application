@@ -1,6 +1,11 @@
-import { User, UserRole, UserStatus } from "../entities/user.entity";
-import { UserId } from "../value-objects/user-id.vo";
-import { Email } from "../value-objects/email.vo";
+import { User } from '../entities/user.entity';
+import { UserRole } from '../enums/user-role.enum';
+import { UserStatus } from '../enums/user-status.enum';
+import { UserId } from '../value-objects/user-id.vo';
+import { Email } from '../value-objects/email.vo';
+import {
+  PaginatedResult,
+} from '../../../../packages/core/src/domain/interfaces/paginated-result.interface';
 
 export interface FindAllWithFiltersOptions {
   search?: string;
@@ -9,8 +14,8 @@ export interface FindAllWithFiltersOptions {
   emailVerified?: boolean;
   page: number;
   limit: number;
-  sortBy: "createdAt" | "email";
-  sortOrder: "asc" | "desc";
+  sortBy: 'createdAt' | 'email';
+  sortOrder: 'asc' | 'desc';
 }
 
 /** Projection returned by the read-side list query — avoids full entity hydration. */
@@ -40,9 +45,9 @@ export interface IUserRepository {
   findByPhone(phone: string): Promise<User | null>;
 
   /** Read-side list projection — no full entity hydration. */
-  findAllWithFilters(options: FindAllWithFiltersOptions): Promise<{ users: UserListItem[]; total: number }>;
+  findAllWithFilters(options: FindAllWithFiltersOptions): Promise<PaginatedResult<UserListItem>>;
 
-  // Business operations
+  // Existence checks
   existsByEmail(email: Email): Promise<boolean>;
   existsByPhone(phone: string): Promise<boolean>;
 

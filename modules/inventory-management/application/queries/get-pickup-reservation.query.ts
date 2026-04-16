@@ -3,7 +3,7 @@ import { PickupReservationDTO } from "../../domain/entities/pickup-reservation.e
 import { PickupReservationService } from "../services/pickup-reservation.service";
 
 export interface GetPickupReservationQuery extends IQuery {
-  reservationId: string;
+  readonly reservationId: string;
 }
 
 export type PickupReservationResult = PickupReservationDTO;

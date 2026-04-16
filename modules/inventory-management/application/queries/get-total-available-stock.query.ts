@@ -2,12 +2,12 @@ import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/sr
 import { StockManagementService } from "../services/stock-management.service";
 
 export interface GetTotalAvailableStockQuery extends IQuery {
-  variantId: string;
+  readonly variantId: string;
 }
 
 export interface TotalAvailableStockResult {
-  variantId: string;
-  totalAvailable: number;
+  readonly variantId: string;
+  readonly totalAvailable: number;
 }
 
 export class GetTotalAvailableStockHandler implements IQueryHandler<

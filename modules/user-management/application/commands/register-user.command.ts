@@ -10,12 +10,12 @@ import {
 import { UserRole } from "../../domain/enums/user-role.enum";
 
 export interface RegisterUserCommand extends ICommand {
-  email: string;
-  password: string;
-  phone?: string;
-  firstName?: string;
-  lastName?: string;
-  role?: UserRole;
+  readonly email: string;
+  readonly password: string;
+  readonly phone?: string;
+  readonly firstName?: string;
+  readonly lastName?: string;
+  readonly role?: UserRole;
 }
 
 export class RegisterUserHandler implements ICommandHandler<

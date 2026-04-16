@@ -3,21 +3,21 @@ import { ProductVariantDTO } from "../../domain/entities/product-variant.entity"
 import { VariantManagementService } from "../services/variant-management.service";
 
 export interface ListVariantsQuery extends IQuery {
-  productId: string;
-  page?: number;
-  limit?: number;
-  size?: string;
-  color?: string;
-  sortBy?: "sku" | "createdAt" | "size" | "color";
-  sortOrder?: "asc" | "desc";
+  readonly productId: string;
+  readonly page?: number;
+  readonly limit?: number;
+  readonly size?: string;
+  readonly color?: string;
+  readonly sortBy?: "sku" | "createdAt" | "size" | "color";
+  readonly sortOrder?: "asc" | "desc";
 }
 
 export interface ListVariantsResult {
-  variants: ProductVariantDTO[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  readonly variants: ProductVariantDTO[];
+  readonly total: number;
+  readonly page: number;
+  readonly limit: number;
+  readonly totalPages: number;
 }
 
 export class ListVariantsHandler implements IQueryHandler<ListVariantsQuery, ListVariantsResult> {

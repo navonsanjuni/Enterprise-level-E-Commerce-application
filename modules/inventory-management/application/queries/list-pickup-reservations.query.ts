@@ -3,9 +3,9 @@ import { PickupReservationResult } from "./get-pickup-reservation.query";
 import { PickupReservationService } from "../services/pickup-reservation.service";
 
 export interface ListPickupReservationsQuery extends IQuery {
-  orderId?: string;
-  locationId?: string;
-  activeOnly?: boolean;
+  readonly orderId?: string;
+  readonly locationId?: string;
+  readonly activeOnly?: boolean;
 }
 
 export class ListPickupReservationsHandler implements IQueryHandler<

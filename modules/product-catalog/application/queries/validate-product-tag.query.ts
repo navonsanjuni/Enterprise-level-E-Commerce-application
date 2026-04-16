@@ -2,13 +2,13 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { ProductTagManagementService } from "../services/product-tag-management.service";
 
 export interface ValidateProductTagQuery extends IQuery {
-  name: string;
+  readonly name: string;
 }
 
 export interface ProductTagValidationResult {
-  tagName: string;
-  isValid: boolean;
-  available: boolean;
+  readonly tagName: string;
+  readonly isValid: boolean;
+  readonly available: boolean;
 }
 
 export class ValidateProductTagHandler implements IQueryHandler<ValidateProductTagQuery, ProductTagValidationResult> {

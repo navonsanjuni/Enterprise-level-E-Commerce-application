@@ -4,14 +4,14 @@ import { PurchaseOrderItemDTO } from "../../domain/entities/purchase-order-item.
 import { PurchaseOrderManagementService } from "../services/purchase-order-management.service";
 
 export interface CreatePurchaseOrderWithItemsCommand extends ICommand {
-  supplierId: string;
-  eta?: Date;
-  items: Array<{ variantId: string; orderedQty: number }>;
+  readonly supplierId: string;
+  readonly eta?: Date;
+  readonly items: Array<{ variantId: string; orderedQty: number }>;
 }
 
 export interface CreatePurchaseOrderWithItemsResult {
-  purchaseOrder: PurchaseOrderDTO;
-  items: PurchaseOrderItemDTO[];
+  readonly purchaseOrder: PurchaseOrderDTO;
+  readonly items: PurchaseOrderItemDTO[];
 }
 
 export class CreatePurchaseOrderWithItemsHandler implements ICommandHandler<

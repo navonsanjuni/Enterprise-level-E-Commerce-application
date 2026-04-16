@@ -3,12 +3,12 @@ import { SizeGuideDTO, Region } from "../../domain/entities/size-guide.entity";
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
 export interface GetGeneralSizeGuidesQuery extends IQuery {
-  region: Region;
+  readonly region: Region;
 }
 
 export interface GeneralSizeGuidesResult {
-  guides: SizeGuideDTO[];
-  meta: { region: Region; count: number };
+  readonly guides: SizeGuideDTO[];
+  readonly meta: { region: Region; count: number };
 }
 
 export class GetGeneralSizeGuidesHandler implements IQueryHandler<GetGeneralSizeGuidesQuery, GeneralSizeGuidesResult> {

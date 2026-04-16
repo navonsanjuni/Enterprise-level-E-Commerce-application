@@ -2,12 +2,12 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { VariantMediaManagementService } from "../services/variant-media-management.service";
 
 export interface GetVariantMediaAssetUsageCountQuery extends IQuery {
-  assetId: string;
+  readonly assetId: string;
 }
 
 export interface VariantMediaAssetUsageCountResult {
-  assetId: string;
-  usageCount: number;
+  readonly assetId: string;
+  readonly usageCount: number;
 }
 
 export class GetVariantMediaAssetUsageCountHandler implements IQueryHandler<GetVariantMediaAssetUsageCountQuery, VariantMediaAssetUsageCountResult> {

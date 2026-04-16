@@ -5,11 +5,11 @@ import { SizeGuideManagementService } from "../services/size-guide-management.se
 export interface GetSizeGuideStatsQuery extends IQuery {}
 
 export interface SizeGuideStatsResult {
-  totalGuides: number;
-  guidesByRegion: Array<{ region: Region; count: number }>;
-  guidesByCategory: Array<{ category: string | null; count: number }>;
-  guidesWithContent: number;
-  guidesWithoutContent: number;
+  readonly totalGuides: number;
+  readonly guidesByRegion: Array<{ region: Region; count: number }>;
+  readonly guidesByCategory: Array<{ category: string | null; count: number }>;
+  readonly guidesWithContent: number;
+  readonly guidesWithoutContent: number;
 }
 
 export class GetSizeGuideStatsHandler implements IQueryHandler<GetSizeGuideStatsQuery, SizeGuideStatsResult> {

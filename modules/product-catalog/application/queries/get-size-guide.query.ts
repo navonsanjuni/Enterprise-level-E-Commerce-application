@@ -3,7 +3,7 @@ import { SizeGuideDTO } from "../../domain/entities/size-guide.entity";
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
 export interface GetSizeGuideQuery extends IQuery {
-  id: string;
+  readonly id: string;
 }
 
 export class GetSizeGuideHandler implements IQueryHandler<GetSizeGuideQuery, SizeGuideDTO> {

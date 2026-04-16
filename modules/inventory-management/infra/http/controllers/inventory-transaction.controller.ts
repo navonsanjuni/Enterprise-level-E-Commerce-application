@@ -36,12 +36,9 @@ export class InventoryTransactionController {
   ) {
     try {
       const { variantId } = request.params;
-      const { locationId, limit, offset } = request.query;
       const result = await this.getTransactionsByVariantHandler.handle({
         variantId,
-        locationId,
-        limit: limit ? Number(limit) : undefined,
-        offset: offset ? Number(offset) : undefined,
+        ...request.query,
       });
       return ResponseHelper.fromQuery(reply, result, "Transactions retrieved");
     } catch (error: unknown) {
@@ -56,13 +53,7 @@ export class InventoryTransactionController {
     reply: FastifyReply,
   ) {
     try {
-      const { variantId, locationId, limit, offset } = request.query;
-      const result = await this.listTransactionsHandler.handle({
-        variantId,
-        locationId,
-        limit: limit ? Number(limit) : undefined,
-        offset: offset ? Number(offset) : undefined,
-      });
+      const result = await this.listTransactionsHandler.handle(request.query);
       return ResponseHelper.fromQuery(reply, result, "Transactions retrieved");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);

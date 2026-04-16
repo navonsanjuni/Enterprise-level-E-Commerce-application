@@ -2,12 +2,12 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface ValidateProductMediaQuery extends IQuery {
-  productId: string;
+  readonly productId: string;
 }
 
 export interface ProductMediaValidationResult {
-  isValid: boolean;
-  issues: string[];
+  readonly isValid: boolean;
+  readonly issues: string[];
 }
 
 export class ValidateProductMediaHandler implements IQueryHandler<ValidateProductMediaQuery, ProductMediaValidationResult> {

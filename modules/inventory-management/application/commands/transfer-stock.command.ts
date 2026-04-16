@@ -3,15 +3,15 @@ import { StockDTO } from "../../domain/entities/stock.entity";
 import { StockManagementService } from "../services/stock-management.service";
 
 export interface TransferStockCommand extends ICommand {
-  variantId: string;
-  fromLocationId: string;
-  toLocationId: string;
-  quantity: number;
+  readonly variantId: string;
+  readonly fromLocationId: string;
+  readonly toLocationId: string;
+  readonly quantity: number;
 }
 
 export interface TransferStockResult {
-  fromStock: StockDTO;
-  toStock: StockDTO;
+  readonly fromStock: StockDTO;
+  readonly toStock: StockDTO;
 }
 
 export class TransferStockHandler implements ICommandHandler<

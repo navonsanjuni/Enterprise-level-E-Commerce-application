@@ -4,8 +4,8 @@ import { ProductManagementService } from "../services/product-management.service
 import { DomainValidationError } from "../../domain/errors/product-catalog.errors";
 
 export interface GetProductQuery extends IQuery {
-  productId?: string;
-  slug?: string;
+  readonly productId?: string;
+  readonly slug?: string;
 }
 
 export class GetProductHandler implements IQueryHandler<GetProductQuery, ProductDTO> {

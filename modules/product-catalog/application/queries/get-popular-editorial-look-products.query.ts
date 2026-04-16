@@ -2,7 +2,7 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface GetPopularEditorialLookProductsQuery extends IQuery {
-  limit?: number;
+  readonly limit?: number;
 }
 
 export class GetPopularEditorialLookProductsHandler implements IQueryHandler<GetPopularEditorialLookProductsQuery, Array<{ productId: string; appearanceCount: number }>> {

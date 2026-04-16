@@ -2,8 +2,8 @@ import { AuthenticationService } from '../services/authentication.service';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface ResetPasswordCommand extends ICommand {
-  email: string;
-  newPassword: string;
+  readonly email: string;
+  readonly newPassword: string;
 }
 
 export class ResetPasswordHandler

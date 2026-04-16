@@ -4,25 +4,25 @@ import { MediaManagementService } from "../services/media-management.service";
 import { MediaAssetFilters } from "../../domain/repositories/media-asset.repository";
 
 export interface SearchMediaAssetsQuery extends IQuery {
-  page?: number;
-  limit?: number;
-  mimeType?: string;
-  isImage?: boolean;
-  isVideo?: boolean;
-  hasRenditions?: boolean;
-  sortBy?: "createdAt" | "bytes" | "width" | "height" | "version";
-  sortOrder?: "asc" | "desc";
-  minBytes?: number;
-  maxBytes?: number;
-  minWidth?: number;
-  maxWidth?: number;
-  minHeight?: number;
-  maxHeight?: number;
+  readonly page?: number;
+  readonly limit?: number;
+  readonly mimeType?: string;
+  readonly isImage?: boolean;
+  readonly isVideo?: boolean;
+  readonly hasRenditions?: boolean;
+  readonly sortBy?: "createdAt" | "bytes" | "width" | "height" | "version";
+  readonly sortOrder?: "asc" | "desc";
+  readonly minBytes?: number;
+  readonly maxBytes?: number;
+  readonly minWidth?: number;
+  readonly maxWidth?: number;
+  readonly minHeight?: number;
+  readonly maxHeight?: number;
 }
 
 export interface SearchMediaAssetsResult {
-  assets: MediaAssetDTO[];
-  meta: {
+  readonly assets: MediaAssetDTO[];
+  readonly meta: {
     page: number;
     limit: number;
     sortBy: string;

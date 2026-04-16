@@ -67,7 +67,6 @@ export interface IProductRepository {
     options?: ProductQueryOptions,
   ): Promise<Product[]>;
   search(query: string, options?: ProductSearchOptions): Promise<Product[]>;
-  update(product: Product): Promise<void>;
   delete(id: ProductId): Promise<void>;
   exists(id: ProductId): Promise<boolean>;
   existsBySlug(slug: Slug): Promise<boolean>;

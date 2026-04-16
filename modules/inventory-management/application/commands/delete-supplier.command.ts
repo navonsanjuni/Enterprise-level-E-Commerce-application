@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { SupplierManagementService } from "../services/supplier-management.service";
 
 export interface DeleteSupplierCommand extends ICommand {
-  supplierId: string;
+  readonly supplierId: string;
 }
 
 export class DeleteSupplierHandler implements ICommandHandler<

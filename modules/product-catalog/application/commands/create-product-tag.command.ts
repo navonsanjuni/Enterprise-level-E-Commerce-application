@@ -3,8 +3,8 @@ import { ProductTagDTO } from "../../domain/entities/product-tag.entity";
 import { ProductTagManagementService } from "../services/product-tag-management.service";
 
 export interface CreateProductTagCommand extends ICommand {
-  tag: string;
-  kind?: string;
+  readonly tag: string;
+  readonly kind?: string;
 }
 
 export class CreateProductTagHandler implements ICommandHandler<CreateProductTagCommand, CommandResult<ProductTagDTO>> {

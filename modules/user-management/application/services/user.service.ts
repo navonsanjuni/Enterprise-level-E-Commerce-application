@@ -7,6 +7,17 @@ import {
   UserNotFoundError,
 } from '../../domain/errors/user-management.errors';
 
+interface ListUsersParams {
+  search?: string;
+  role?: UserRole;
+  status?: UserStatus;
+  emailVerified?: boolean;
+  page?: number;
+  limit?: number;
+  sortBy?: 'createdAt' | 'email';
+  sortOrder?: 'asc' | 'desc';
+}
+
 export interface ListUsersResult {
   users: UserListItem[];
   pagination: {
@@ -25,22 +36,13 @@ export class UserService {
     return User.toDTO(user);
   }
 
-  async listUsers(params: {
-    search?: string;
-    role?: UserRole;
-    status?: UserStatus;
-    emailVerified?: boolean;
-    page?: number;
-    limit?: number;
-    sortBy?: 'createdAt' | 'email';
-    sortOrder?: 'asc' | 'desc';
-  }): Promise<ListUsersResult> {
+  async listUsers(params: ListUsersParams): Promise<ListUsersResult> {
     const page = params.page || 1;
     const limit = params.limit || 20;
     const sortBy = params.sortBy || 'createdAt';
     const sortOrder = params.sortOrder || 'desc';
 
-    const { users, total } = await this.userRepository.findAllWithFilters({
+    const result = await this.userRepository.findAllWithFilters({
       search: params.search,
       role: params.role,
       status: params.status,
@@ -52,8 +54,13 @@ export class UserService {
     });
 
     return {
-      users,
-      pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
+      users: result.items,
+      pagination: {
+        total: result.total,
+        page,
+        limit,
+        totalPages: Math.ceil(result.total / limit),
+      },
     };
   }
 

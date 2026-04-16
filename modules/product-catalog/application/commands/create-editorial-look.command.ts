@@ -3,11 +3,11 @@ import { EditorialLookDTO, CreateEditorialLookData } from "../../domain/entities
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface CreateEditorialLookCommand extends ICommand {
-  title: string;
-  storyHtml?: string;
-  heroAssetId?: string;
-  publishedAt?: string;
-  productIds?: string[];
+  readonly title: string;
+  readonly storyHtml?: string;
+  readonly heroAssetId?: string;
+  readonly publishedAt?: string;
+  readonly productIds?: string[];
 }
 
 export class CreateEditorialLookHandler implements ICommandHandler<CreateEditorialLookCommand, CommandResult<EditorialLookDTO>> {

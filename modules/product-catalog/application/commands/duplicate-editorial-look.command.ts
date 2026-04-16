@@ -3,8 +3,8 @@ import { EditorialLookDTO } from "../../domain/entities/editorial-look.entity";
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface DuplicateEditorialLookCommand extends ICommand {
-  id: string;
-  newTitle: string;
+  readonly id: string;
+  readonly newTitle: string;
 }
 
 export class DuplicateEditorialLookHandler implements ICommandHandler<DuplicateEditorialLookCommand, CommandResult<EditorialLookDTO>> {

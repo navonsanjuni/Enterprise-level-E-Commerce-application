@@ -3,21 +3,21 @@ import { UserProfileDTO } from '../../domain/entities/user-profile.entity';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface UpdateProfileCommand extends ICommand {
-  userId: string;
-  defaultAddressId?: string;
-  defaultPaymentMethodId?: string;
-  prefs?: Record<string, any>;
-  locale?: string;
-  currency?: string;
-  stylePreferences?: Record<string, any>;
-  preferredSizes?: Record<string, any>;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-  title?: string;
-  dateOfBirth?: string;
-  residentOf?: string;
-  nationality?: string;
+  readonly userId: string;
+  readonly defaultAddressId?: string;
+  readonly defaultPaymentMethodId?: string;
+  readonly prefs?: Record<string, any>;
+  readonly locale?: string;
+  readonly currency?: string;
+  readonly stylePreferences?: Record<string, any>;
+  readonly preferredSizes?: Record<string, any>;
+  readonly firstName?: string;
+  readonly lastName?: string;
+  readonly phone?: string;
+  readonly title?: string;
+  readonly dateOfBirth?: string;
+  readonly residentOf?: string;
+  readonly nationality?: string;
 }
 
 export class UpdateProfileHandler

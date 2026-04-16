@@ -2,12 +2,12 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface GetProductMediaAssetUsageCountQuery extends IQuery {
-  assetId: string;
+  readonly assetId: string;
 }
 
 export interface ProductMediaAssetUsageCountResult {
-  assetId: string;
-  usageCount: number;
+  readonly assetId: string;
+  readonly usageCount: number;
 }
 
 export class GetProductMediaAssetUsageCountHandler implements IQueryHandler<GetProductMediaAssetUsageCountQuery, ProductMediaAssetUsageCountResult> {

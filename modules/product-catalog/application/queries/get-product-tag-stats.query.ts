@@ -4,9 +4,9 @@ import { ProductTagManagementService } from "../services/product-tag-management.
 export interface GetProductTagStatsQuery extends IQuery {}
 
 export interface ProductTagStatsResult {
-  totalTags: number;
-  tagsByKind: Array<{ kind: string | null; count: number }>;
-  averageTagLength: number;
+  readonly totalTags: number;
+  readonly tagsByKind: Array<{ kind: string | null; count: number }>;
+  readonly averageTagLength: number;
 }
 
 export class GetProductTagStatsHandler implements IQueryHandler<GetProductTagStatsQuery, ProductTagStatsResult> {

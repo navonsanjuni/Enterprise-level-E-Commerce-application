@@ -3,7 +3,7 @@ import { ProductVariantDTO } from "../../domain/entities/product-variant.entity"
 import { VariantManagementService } from "../services/variant-management.service";
 
 export interface GetVariantQuery extends IQuery {
-  variantId: string;
+  readonly variantId: string;
 }
 
 export class GetVariantHandler implements IQueryHandler<GetVariantQuery, ProductVariantDTO> {

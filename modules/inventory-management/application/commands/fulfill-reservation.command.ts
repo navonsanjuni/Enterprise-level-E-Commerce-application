@@ -3,9 +3,9 @@ import { StockDTO } from "../../domain/entities/stock.entity";
 import { StockManagementService } from "../services/stock-management.service";
 
 export interface FulfillReservationCommand extends ICommand {
-  variantId: string;
-  locationId: string;
-  quantity: number;
+  readonly variantId: string;
+  readonly locationId: string;
+  readonly quantity: number;
 }
 
 export class FulfillReservationHandler implements ICommandHandler<

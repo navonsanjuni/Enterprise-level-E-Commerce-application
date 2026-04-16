@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
 export interface ClearSizeGuideContentCommand extends ICommand {
-  id: string;
+  readonly id: string;
 }
 
 export class ClearSizeGuideContentHandler implements ICommandHandler<ClearSizeGuideContentCommand, CommandResult<void>> {

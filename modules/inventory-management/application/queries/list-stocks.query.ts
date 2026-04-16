@@ -3,18 +3,18 @@ import { StockResult } from "./get-stock.query";
 import { StockManagementService } from "../services/stock-management.service";
 
 export interface ListStocksQuery extends IQuery {
-  limit?: number;
-  offset?: number;
-  search?: string;
-  status?: "low_stock" | "out_of_stock" | "in_stock";
-  locationId?: string;
-  sortBy?: "available" | "onHand" | "location" | "product";
-  sortOrder?: "asc" | "desc";
+  readonly limit?: number;
+  readonly offset?: number;
+  readonly search?: string;
+  readonly status?: "low_stock" | "out_of_stock" | "in_stock";
+  readonly locationId?: string;
+  readonly sortBy?: "available" | "onHand" | "location" | "product";
+  readonly sortOrder?: "asc" | "desc";
 }
 
 export interface ListStocksResult {
-  stocks: StockResult[];
-  total: number;
+  readonly stocks: StockResult[];
+  readonly total: number;
 }
 
 export class ListStocksHandler implements IQueryHandler<

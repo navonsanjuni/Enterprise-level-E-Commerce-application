@@ -4,9 +4,9 @@ import { UserDTO } from '../../domain/entities/user.entity';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface UpdateUserRoleCommand extends ICommand {
-  userId: string;
-  role: UserRole;
-  reason?: string;
+  readonly userId: string;
+  readonly role: UserRole;
+  readonly reason?: string;
 }
 
 export class UpdateUserRoleHandler implements ICommandHandler<UpdateUserRoleCommand, CommandResult<UserDTO>> {

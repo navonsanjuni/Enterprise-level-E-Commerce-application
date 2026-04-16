@@ -2,8 +2,8 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { VariantMediaManagementService, VariantMediaServiceQueryOptions, ProductVariantMediaSummary } from "../services/variant-media-management.service";
 
 export interface GetProductVariantMediaQuery extends IQuery {
-  productId: string;
-  options?: VariantMediaServiceQueryOptions;
+  readonly productId: string;
+  readonly options?: VariantMediaServiceQueryOptions;
 }
 
 export class GetProductVariantMediaHandler implements IQueryHandler<GetProductVariantMediaQuery, ProductVariantMediaSummary> {

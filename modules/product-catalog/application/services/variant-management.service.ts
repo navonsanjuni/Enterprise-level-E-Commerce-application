@@ -292,7 +292,7 @@ export class VariantManagementService {
       variant.setRestockEta(updateData.restockEta);
     }
 
-    await this.productVariantRepository.update(variant);
+    await this.productVariantRepository.save(variant);
     return ProductVariant.toDTO(variant);
   }
 

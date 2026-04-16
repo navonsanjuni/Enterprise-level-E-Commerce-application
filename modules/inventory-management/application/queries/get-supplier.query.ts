@@ -3,7 +3,7 @@ import { SupplierDTO } from "../../domain/entities/supplier.entity";
 import { SupplierManagementService } from "../services/supplier-management.service";
 
 export interface GetSupplierQuery extends IQuery {
-  supplierId: string;
+  readonly supplierId: string;
 }
 
 export type SupplierResult = SupplierDTO;

@@ -3,8 +3,8 @@ import { StockAlertDTO } from "../../domain/entities/stock-alert.entity";
 import { StockAlertService } from "../services/stock-alert.service";
 
 export interface CreateStockAlertCommand extends ICommand {
-  variantId: string;
-  type: string;
+  readonly variantId: string;
+  readonly type: string;
 }
 
 export class CreateStockAlertHandler implements ICommandHandler<

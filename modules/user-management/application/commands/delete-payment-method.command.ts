@@ -2,8 +2,8 @@ import { PaymentMethodService } from '../services/payment-method.service';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface DeletePaymentMethodCommand extends ICommand {
-  paymentMethodId: string;
-  userId: string;
+  readonly paymentMethodId: string;
+  readonly userId: string;
 }
 
 export class DeletePaymentMethodHandler implements ICommandHandler<

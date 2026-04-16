@@ -3,7 +3,7 @@ import { StockAlertDTO } from "../../domain/entities/stock-alert.entity";
 import { StockAlertService } from "../services/stock-alert.service";
 
 export interface GetStockAlertQuery extends IQuery {
-  alertId: string;
+  readonly alertId: string;
 }
 
 export type StockAlertResult = StockAlertDTO;

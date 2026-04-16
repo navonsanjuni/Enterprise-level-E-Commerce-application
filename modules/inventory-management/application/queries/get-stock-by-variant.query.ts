@@ -3,7 +3,7 @@ import { StockResult } from "./get-stock.query";
 import { StockManagementService } from "../services/stock-management.service";
 
 export interface GetStockByVariantQuery extends IQuery {
-  variantId: string;
+  readonly variantId: string;
 }
 
 export class GetStockByVariantHandler implements IQueryHandler<

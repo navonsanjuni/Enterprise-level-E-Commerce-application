@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { PurchaseOrderManagementService } from "../services/purchase-order-management.service";
 
 export interface DeletePurchaseOrderCommand extends ICommand {
-  poId: string;
+  readonly poId: string;
 }
 
 export class DeletePurchaseOrderHandler implements ICommandHandler<

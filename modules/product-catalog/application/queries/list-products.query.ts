@@ -3,22 +3,22 @@ import { ProductDTO } from "../../domain/entities/product.entity";
 import { ProductManagementService } from "../services/product-management.service";
 
 export interface ListProductsQuery extends IQuery {
-  page?: number;
-  limit?: number;
-  categoryId?: string;
-  brand?: string;
-  status?: "draft" | "published" | "scheduled" | "archived";
-  includeDrafts?: boolean;
-  sortBy?: "title" | "createdAt" | "updatedAt" | "publishAt";
-  sortOrder?: "asc" | "desc";
+  readonly page?: number;
+  readonly limit?: number;
+  readonly categoryId?: string;
+  readonly brand?: string;
+  readonly status?: "draft" | "published" | "scheduled" | "archived";
+  readonly includeDrafts?: boolean;
+  readonly sortBy?: "title" | "createdAt" | "updatedAt" | "publishAt";
+  readonly sortOrder?: "asc" | "desc";
 }
 
 export interface ListProductsResult {
-  products: ProductDTO[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  readonly products: ProductDTO[];
+  readonly total: number;
+  readonly page: number;
+  readonly limit: number;
+  readonly totalPages: number;
 }
 
 export class ListProductsHandler implements IQueryHandler<ListProductsQuery, ListProductsResult> {
@@ -30,10 +30,10 @@ export class ListProductsHandler implements IQueryHandler<ListProductsQuery, Lis
     const result = await this.productManagementService.getAllProducts({ page, limit, ...input });
     return {
       products: result.items,
-      total: result.totalCount,
+      total: result.total,
       page,
       limit,
-      totalPages: Math.ceil(result.totalCount / limit),
+      totalPages: Math.ceil(result.total / limit),
     };
   }
 }

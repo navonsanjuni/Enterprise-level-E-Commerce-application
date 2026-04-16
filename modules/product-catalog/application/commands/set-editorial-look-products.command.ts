@@ -3,8 +3,8 @@ import { EditorialLookDTO } from "../../domain/entities/editorial-look.entity";
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface SetEditorialLookProductsCommand extends ICommand {
-  id: string;
-  productIds: string[];
+  readonly id: string;
+  readonly productIds: string[];
 }
 
 export class SetEditorialLookProductsHandler implements ICommandHandler<SetEditorialLookProductsCommand, CommandResult<EditorialLookDTO>> {

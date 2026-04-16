@@ -3,8 +3,8 @@ import { PurchaseOrderDTO } from "../../domain/entities/purchase-order.entity";
 import { PurchaseOrderManagementService } from "../services/purchase-order-management.service";
 
 export interface UpdatePOStatusCommand extends ICommand {
-  poId: string;
-  status: string;
+  readonly poId: string;
+  readonly status: string;
 }
 
 export class UpdatePOStatusHandler implements ICommandHandler<

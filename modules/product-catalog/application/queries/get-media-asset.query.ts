@@ -3,7 +3,7 @@ import { MediaAssetDTO } from "../../domain/entities/media-asset.entity";
 import { MediaManagementService } from "../services/media-management.service";
 
 export interface GetMediaAssetQuery extends IQuery {
-  id: string;
+  readonly id: string;
 }
 
 export class GetMediaAssetHandler implements IQueryHandler<GetMediaAssetQuery, MediaAssetDTO> {

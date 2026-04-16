@@ -3,7 +3,7 @@ import { LocationDTO } from "../../domain/entities/location.entity";
 import { LocationManagementService } from "../services/location-management.service";
 
 export interface GetLocationQuery extends IQuery {
-  locationId: string;
+  readonly locationId: string;
 }
 
 export type LocationResult = LocationDTO;

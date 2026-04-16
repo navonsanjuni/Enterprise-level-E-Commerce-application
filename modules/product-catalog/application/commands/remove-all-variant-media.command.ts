@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { VariantMediaManagementService } from "../services/variant-media-management.service";
 
 export interface RemoveAllVariantMediaCommand extends ICommand {
-  variantId: string;
+  readonly variantId: string;
 }
 
 export class RemoveAllVariantMediaHandler implements ICommandHandler<RemoveAllVariantMediaCommand, CommandResult<void>> {

@@ -6,7 +6,7 @@ import {
 } from '../../../../packages/core/src/application/cqrs';
 
 export interface ListAddressesQuery extends IQuery {
-  userId: string;
+  readonly userId: string;
 }
 
 export class ListAddressesHandler implements IQueryHandler<ListAddressesQuery, AddressDTO[]> {

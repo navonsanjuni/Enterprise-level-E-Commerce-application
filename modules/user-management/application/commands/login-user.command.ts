@@ -5,9 +5,9 @@ import {
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface LoginUserCommand extends ICommand {
-  email: string;
-  password: string;
-  rememberMe?: boolean;
+  readonly email: string;
+  readonly password: string;
+  readonly rememberMe?: boolean;
 }
 
 export class LoginUserHandler

@@ -2,8 +2,8 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { PurchaseOrderManagementService } from "../services/purchase-order-management.service";
 
 export interface RemovePOItemCommand extends ICommand {
-  poId: string;
-  variantId: string;
+  readonly poId: string;
+  readonly variantId: string;
 }
 
 export class RemovePOItemHandler implements ICommandHandler<

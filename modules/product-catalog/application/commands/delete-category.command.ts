@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { CategoryManagementService } from "../services/category-management.service";
 
 export interface DeleteCategoryCommand extends ICommand {
-  categoryId: string;
+  readonly categoryId: string;
 }
 
 export class DeleteCategoryHandler implements ICommandHandler<DeleteCategoryCommand, CommandResult<void>> {

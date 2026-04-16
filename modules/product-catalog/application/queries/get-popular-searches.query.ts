@@ -4,8 +4,8 @@ import { ProductSearchService } from "../services/product-search.service";
 export interface GetPopularSearchesQuery extends IQuery {}
 
 export interface PopularSearchResult {
-  term: string;
-  count: number;
+  readonly term: string;
+  readonly count: number;
 }
 
 export class GetPopularSearchesHandler implements IQueryHandler<GetPopularSearchesQuery, PopularSearchResult[]> {

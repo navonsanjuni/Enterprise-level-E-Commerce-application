@@ -4,15 +4,15 @@ import { PaymentMethodType } from '../../domain/enums/payment-method-type.enum';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface AddPaymentMethodCommand extends ICommand {
-  userId: string;
-  type: 'card' | 'wallet' | 'bank' | 'cod' | 'gift_card';
-  brand?: string;
-  last4?: string;
-  expMonth?: number;
-  expYear?: number;
-  billingAddressId?: string;
-  providerRef?: string;
-  isDefault?: boolean;
+  readonly userId: string;
+  readonly type: 'card' | 'wallet' | 'bank' | 'cod' | 'gift_card';
+  readonly brand?: string;
+  readonly last4?: string;
+  readonly expMonth?: number;
+  readonly expYear?: number;
+  readonly billingAddressId?: string;
+  readonly providerRef?: string;
+  readonly isDefault?: boolean;
 }
 
 export class AddPaymentMethodHandler implements ICommandHandler<

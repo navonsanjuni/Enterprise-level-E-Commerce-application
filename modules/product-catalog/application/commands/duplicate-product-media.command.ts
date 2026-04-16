@@ -2,8 +2,8 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface DuplicateProductMediaCommand extends ICommand {
-  sourceProductId: string;
-  targetProductId: string;
+  readonly sourceProductId: string;
+  readonly targetProductId: string;
 }
 
 export class DuplicateProductMediaHandler implements ICommandHandler<DuplicateProductMediaCommand, CommandResult<void>> {

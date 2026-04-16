@@ -2,14 +2,14 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { ProductTagManagementService } from "../services/product-tag-management.service";
 
 export interface GetTagProductsQuery extends IQuery {
-  tagId: string;
-  page?: number;
-  limit?: number;
+  readonly tagId: string;
+  readonly page?: number;
+  readonly limit?: number;
 }
 
 export interface GetTagProductsResult {
-  products: unknown[];
-  pagination: {
+  readonly products: unknown[];
+  readonly pagination: {
     page: number;
     limit: number;
     total: number;

@@ -4,10 +4,10 @@ import { StockManagementService } from "../services/stock-management.service";
 export interface GetStockStatsQuery extends IQuery {}
 
 export interface StockStatsResult {
-  totalItems: number;
-  lowStockCount: number;
-  outOfStockCount: number;
-  totalValue: number;
+  readonly totalItems: number;
+  readonly lowStockCount: number;
+  readonly outOfStockCount: number;
+  readonly totalValue: number;
 }
 
 export class GetStockStatsHandler implements IQueryHandler<

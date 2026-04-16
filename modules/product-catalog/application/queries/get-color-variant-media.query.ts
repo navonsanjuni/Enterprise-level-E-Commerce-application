@@ -2,8 +2,8 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { VariantMediaManagementService, ColorVariantMedia } from "../services/variant-media-management.service";
 
 export interface GetColorVariantMediaQuery extends IQuery {
-  productId: string;
-  color: string;
+  readonly productId: string;
+  readonly color: string;
 }
 
 export class GetColorVariantMediaHandler implements IQueryHandler<GetColorVariantMediaQuery, ColorVariantMedia> {

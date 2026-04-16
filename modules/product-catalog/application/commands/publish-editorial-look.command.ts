@@ -3,7 +3,7 @@ import { EditorialLookDTO } from "../../domain/entities/editorial-look.entity";
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface PublishEditorialLookCommand extends ICommand {
-  id: string;
+  readonly id: string;
 }
 
 export class PublishEditorialLookHandler implements ICommandHandler<PublishEditorialLookCommand, CommandResult<EditorialLookDTO>> {

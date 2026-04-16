@@ -3,8 +3,8 @@ import { StockDTO } from "../../domain/entities/stock.entity";
 import { StockManagementService } from "../services/stock-management.service";
 
 export interface GetStockQuery extends IQuery {
-  variantId: string;
-  locationId: string;
+  readonly variantId: string;
+  readonly locationId: string;
 }
 
 export type StockResult = StockDTO;

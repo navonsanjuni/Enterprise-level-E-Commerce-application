@@ -3,10 +3,10 @@ import { StockDTO } from "../../domain/entities/stock.entity";
 import { StockManagementService } from "../services/stock-management.service";
 
 export interface SetStockThresholdsCommand extends ICommand {
-  variantId: string;
-  locationId: string;
-  lowStockThreshold?: number;
-  safetyStock?: number;
+  readonly variantId: string;
+  readonly locationId: string;
+  readonly lowStockThreshold?: number;
+  readonly safetyStock?: number;
 }
 
 export class SetStockThresholdsHandler implements ICommandHandler<

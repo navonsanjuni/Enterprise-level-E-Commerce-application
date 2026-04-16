@@ -3,14 +3,14 @@ import { LocationResult } from "./get-location.query";
 import { LocationManagementService } from "../services/location-management.service";
 
 export interface ListLocationsQuery extends IQuery {
-  limit?: number;
-  offset?: number;
-  type?: string;
+  readonly limit?: number;
+  readonly offset?: number;
+  readonly type?: string;
 }
 
 export interface ListLocationsResult {
-  locations: LocationResult[];
-  total: number;
+  readonly locations: LocationResult[];
+  readonly total: number;
 }
 
 export class ListLocationsHandler implements IQueryHandler<

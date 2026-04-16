@@ -3,9 +3,9 @@ import { PurchaseOrderItemDTO } from "../../domain/entities/purchase-order-item.
 import { PurchaseOrderManagementService } from "../services/purchase-order-management.service";
 
 export interface UpdatePOItemCommand extends ICommand {
-  poId: string;
-  variantId: string;
-  orderedQty: number;
+  readonly poId: string;
+  readonly variantId: string;
+  readonly orderedQty: number;
 }
 
 export class UpdatePOItemHandler implements ICommandHandler<

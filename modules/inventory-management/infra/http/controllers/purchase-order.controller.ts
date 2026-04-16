@@ -56,11 +56,7 @@ export class PurchaseOrderController {
     reply: FastifyReply,
   ) {
     try {
-      const { supplierId, eta } = request.body;
-      const result = await this.createPurchaseOrderHandler.handle({
-        supplierId,
-        eta: eta ? new Date(eta) : undefined,
-      });
+      const result = await this.createPurchaseOrderHandler.handle(request.body);
       return ResponseHelper.fromCommand(reply, result, "Purchase order created successfully", 201);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -78,12 +74,7 @@ export class PurchaseOrderController {
     reply: FastifyReply,
   ) {
     try {
-      const { supplierId, eta, items } = request.body;
-      const result = await this.createPurchaseOrderWithItemsHandler.handle({
-        supplierId,
-        eta: eta ? new Date(eta) : undefined,
-        items,
-      });
+      const result = await this.createPurchaseOrderWithItemsHandler.handle(request.body);
       return ResponseHelper.fromCommand(reply, result, "Purchase order with items created successfully", 201);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -104,15 +95,7 @@ export class PurchaseOrderController {
     reply: FastifyReply,
   ) {
     try {
-      const { limit, offset, status, supplierId, sortBy, sortOrder } = request.query;
-      const result = await this.listPurchaseOrdersHandler.handle({
-        limit: limit ? Number(limit) : undefined,
-        offset: offset ? Number(offset) : undefined,
-        status,
-        supplierId,
-        sortBy,
-        sortOrder,
-      });
+      const result = await this.listPurchaseOrdersHandler.handle(request.query);
       return ResponseHelper.fromQuery(reply, result, "Purchase orders retrieved");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -243,7 +226,7 @@ export class PurchaseOrderController {
     try {
       const { poId } = request.params;
       const { eta } = request.body;
-      const result = await this.updatePOEtaHandler.handle({ poId, eta: new Date(eta) });
+      const result = await this.updatePOEtaHandler.handle({ poId, eta });
       return ResponseHelper.fromCommand(reply, result, "ETA updated successfully");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);

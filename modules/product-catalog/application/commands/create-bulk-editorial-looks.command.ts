@@ -3,7 +3,7 @@ import { EditorialLookDTO, CreateEditorialLookData } from "../../domain/entities
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface CreateBulkEditorialLooksCommand extends ICommand {
-  looks: Array<{
+  readonly looks: Array<{
     title: string;
     storyHtml?: string;
     heroAssetId?: string;

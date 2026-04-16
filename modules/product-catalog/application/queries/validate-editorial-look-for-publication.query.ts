@@ -2,12 +2,12 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface ValidateEditorialLookForPublicationQuery extends IQuery {
-  id: string;
+  readonly id: string;
 }
 
 export interface EditorialLookPublicationValidationResult {
-  isValid: boolean;
-  errors: string[];
+  readonly isValid: boolean;
+  readonly errors: string[];
 }
 
 export class ValidateEditorialLookForPublicationHandler implements IQueryHandler<ValidateEditorialLookForPublicationQuery, EditorialLookPublicationValidationResult> {

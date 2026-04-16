@@ -4,19 +4,19 @@ import { EditorialLookManagementService } from "../services/editorial-look-manag
 import { EditorialLookQueryOptions } from "../../domain/repositories/editorial-look.repository";
 
 export interface ListEditorialLooksQuery extends IQuery {
-  page?: number;
-  limit?: number;
-  published?: boolean;
-  scheduled?: boolean;
-  draft?: boolean;
-  hasContent?: boolean;
-  sortBy?: "title" | "publishedAt" | "id";
-  sortOrder?: "asc" | "desc";
+  readonly page?: number;
+  readonly limit?: number;
+  readonly published?: boolean;
+  readonly scheduled?: boolean;
+  readonly draft?: boolean;
+  readonly hasContent?: boolean;
+  readonly sortBy?: "title" | "publishedAt" | "id";
+  readonly sortOrder?: "asc" | "desc";
 }
 
 export interface ListEditorialLooksResult {
-  looks: EditorialLookDTO[];
-  meta: {
+  readonly looks: EditorialLookDTO[];
+  readonly meta: {
     page: number;
     limit: number;
     sortBy: string;

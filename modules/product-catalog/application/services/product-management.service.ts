@@ -7,6 +7,7 @@ import {
 import { IProductTagRepository } from "../../domain/repositories/product-tag.repository";
 import { Product, ProductDTO } from "../../domain/entities/product.entity";
 import { ProductStatus } from "../../domain/enums/product-catalog.enums";
+import { PaginatedResult } from '../../../../packages/core/src/domain/interfaces/paginated-result.interface';
 import { ProductId } from "../../domain/value-objects/product-id.vo";
 import { Slug } from "../../domain/value-objects/slug.vo";
 import {
@@ -94,7 +95,7 @@ export class ProductManagementService {
       brand?: string;
       status?: string;
     },
-  ): Promise<{ items: ProductDTO[]; totalCount: number }> {
+  ): Promise<PaginatedResult<ProductDTO>> {
     const {
       page = 1,
       limit = 20,
@@ -124,24 +125,22 @@ export class ProductManagementService {
         categoryId,
         { sortBy, sortOrder, includeDrafts: effectiveIncludeDrafts },
       );
-
-      if (brand) {
-        products = categoryProducts.filter((p) => p.brand === brand);
-      } else {
-        products = categoryProducts;
-      }
+      products = brand ? categoryProducts.filter((p) => p.brand === brand) : categoryProducts;
     }
 
     if (status) {
       products = products.filter((p) => p.status.toString() === status);
     }
 
-    const totalCount = products.length;
+    const total = products.length;
     const paginatedProducts = products.slice(offset, offset + limit);
 
     return {
       items: paginatedProducts.map((p) => Product.toDTO(p)),
-      totalCount,
+      total,
+      limit,
+      offset,
+      hasMore: offset + limit < total,
     };
   }
 
@@ -256,7 +255,7 @@ export class ProductManagementService {
       await this.productTagRepository.associateProductTags(id, data.tags);
     }
 
-    await this.productRepository.update(product);
+    await this.productRepository.save(product);
 
     return Product.toDTO(product);
   }

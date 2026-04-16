@@ -2,8 +2,8 @@ import { AddressManagementService } from '../services/address-management.service
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface DeleteAddressCommand extends ICommand {
-  addressId: string;
-  userId: string;
+  readonly addressId: string;
+  readonly userId: string;
 }
 
 export class DeleteAddressHandler implements ICommandHandler<

@@ -4,16 +4,16 @@ import { ProductTagManagementService } from "../services/product-tag-management.
 import { ProductTagQueryOptions } from "../../domain/repositories/product-tag.repository";
 
 export interface ListProductTagsQuery extends IQuery {
-  page?: number;
-  limit?: number;
-  kind?: string;
-  sortBy?: "tag" | "kind";
-  sortOrder?: "asc" | "desc";
+  readonly page?: number;
+  readonly limit?: number;
+  readonly kind?: string;
+  readonly sortBy?: "tag" | "kind";
+  readonly sortOrder?: "asc" | "desc";
 }
 
 export interface ListProductTagsResult {
-  tags: ProductTagDTO[];
-  pagination: {
+  readonly tags: ProductTagDTO[];
+  readonly pagination: {
     page: number;
     limit: number;
     total: number;

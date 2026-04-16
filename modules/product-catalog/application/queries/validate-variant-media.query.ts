@@ -2,12 +2,12 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { VariantMediaManagementService } from "../services/variant-media-management.service";
 
 export interface ValidateVariantMediaQuery extends IQuery {
-  variantId: string;
+  readonly variantId: string;
 }
 
 export interface VariantMediaValidationResult {
-  isValid: boolean;
-  issues: string[];
+  readonly isValid: boolean;
+  readonly issues: string[];
 }
 
 export class ValidateVariantMediaHandler implements IQueryHandler<ValidateVariantMediaQuery, VariantMediaValidationResult> {

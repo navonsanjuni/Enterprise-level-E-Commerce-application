@@ -2,13 +2,13 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { VariantMediaManagementService } from "../services/variant-media-management.service";
 
 export interface GetSizeVariantMediaQuery extends IQuery {
-  productId: string;
-  size: string;
+  readonly productId: string;
+  readonly size: string;
 }
 
 export type SizeVariantMediaResult = Array<{
-  size: string;
-  variants: Array<{
+  readonly size: string;
+  readonly variants: Array<{
     variantId: string;
     sku: string;
     color?: string;

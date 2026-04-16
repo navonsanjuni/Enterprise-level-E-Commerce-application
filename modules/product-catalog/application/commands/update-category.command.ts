@@ -3,11 +3,11 @@ import { CategoryDTO } from "../../domain/entities/category.entity";
 import { CategoryManagementService } from "../services/category-management.service";
 
 export interface UpdateCategoryCommand extends ICommand {
-  categoryId: string;
-  name?: string;
-  slug?: string;
-  parentId?: string;
-  position?: number;
+  readonly categoryId: string;
+  readonly name?: string;
+  readonly slug?: string;
+  readonly parentId?: string;
+  readonly position?: number;
 }
 
 export class UpdateCategoryHandler implements ICommandHandler<UpdateCategoryCommand, CommandResult<CategoryDTO>> {

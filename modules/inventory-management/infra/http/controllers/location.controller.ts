@@ -38,12 +38,7 @@ export class LocationController {
     reply: FastifyReply,
   ) {
     try {
-      const { limit, offset, type } = request.query;
-      const result = await this.listLocationsHandler.handle({
-        limit: limit ? Number(limit) : undefined,
-        offset: offset ? Number(offset) : undefined,
-        type,
-      });
+      const result = await this.listLocationsHandler.handle(request.query);
       return ResponseHelper.fromQuery(reply, result, "Locations retrieved");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);

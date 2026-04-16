@@ -103,16 +103,7 @@ export class StockController {
     reply: FastifyReply,
   ) {
     try {
-      const { limit, offset, search, status, locationId, sortBy, sortOrder } = request.query;
-      const result = await this.listStocksHandler.handle({
-        limit: limit ? Number(limit) : undefined,
-        offset: offset ? Number(offset) : undefined,
-        search,
-        status,
-        locationId,
-        sortBy,
-        sortOrder,
-      });
+      const result = await this.listStocksHandler.handle(request.query);
       return ResponseHelper.fromQuery(reply, result, "Stocks retrieved");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);

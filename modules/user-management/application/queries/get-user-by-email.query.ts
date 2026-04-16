@@ -5,7 +5,7 @@ import {
 } from '../../../../packages/core/src/application/cqrs';
 
 export interface GetUserByEmailQuery extends IQuery {
-  email: string;
+  readonly email: string;
 }
 
 export class GetUserByEmailHandler implements IQueryHandler<

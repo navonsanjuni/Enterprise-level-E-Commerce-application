@@ -6,7 +6,7 @@ import {
 } from '../../../../packages/core/src/application/cqrs';
 
 export interface ListPaymentMethodsQuery extends IQuery {
-  userId: string;
+  readonly userId: string;
 }
 
 export class ListPaymentMethodsHandler implements IQueryHandler<ListPaymentMethodsQuery, PaymentMethodDTO[]> {

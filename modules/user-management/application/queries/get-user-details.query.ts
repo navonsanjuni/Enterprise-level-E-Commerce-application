@@ -6,7 +6,7 @@ import {
 } from '../../../../packages/core/src/application/cqrs';
 
 export interface GetUserDetailsQuery extends IQuery {
-  userId: string;
+  readonly userId: string;
 }
 
 export class GetUserDetailsHandler implements IQueryHandler<GetUserDetailsQuery, UserDTO> {

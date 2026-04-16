@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface RemoveAllProductMediaCommand extends ICommand {
-  productId: string;
+  readonly productId: string;
 }
 
 export class RemoveAllProductMediaHandler implements ICommandHandler<RemoveAllProductMediaCommand, CommandResult<void>> {

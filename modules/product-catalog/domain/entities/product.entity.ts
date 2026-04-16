@@ -6,9 +6,6 @@ import { Price } from "../value-objects/price.vo";
 import { DomainValidationError, InvalidOperationError } from "../errors";
 import { ProductStatus } from "../enums/product-catalog.enums";
 
-// Re-export so consumers importing from this file still work
-export { ProductStatus };
-
 // ── Domain Events ──────────────────────────────────────────────────────
 
 export class ProductCreatedEvent extends DomainEvent {

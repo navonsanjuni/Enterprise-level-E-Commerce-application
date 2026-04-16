@@ -3,13 +3,13 @@ import { PaymentMethodDTO } from '../../domain/entities/payment-method.entity';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface UpdatePaymentMethodCommand extends ICommand {
-  paymentMethodId: string;
-  userId: string;
-  billingAddressId?: string;
-  isDefault?: boolean;
-  expMonth?: number;
-  expYear?: number;
-  providerRef?: string;
+  readonly paymentMethodId: string;
+  readonly userId: string;
+  readonly billingAddressId?: string;
+  readonly isDefault?: boolean;
+  readonly expMonth?: number;
+  readonly expYear?: number;
+  readonly providerRef?: string;
 }
 
 export class UpdatePaymentMethodHandler implements ICommandHandler<

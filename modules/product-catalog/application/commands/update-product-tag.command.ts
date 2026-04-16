@@ -3,9 +3,9 @@ import { ProductTagDTO } from "../../domain/entities/product-tag.entity";
 import { ProductTagManagementService } from "../services/product-tag-management.service";
 
 export interface UpdateProductTagCommand extends ICommand {
-  id: string;
-  tag?: string;
-  kind?: string;
+  readonly id: string;
+  readonly tag?: string;
+  readonly kind?: string;
 }
 
 export class UpdateProductTagHandler implements ICommandHandler<UpdateProductTagCommand, CommandResult<ProductTagDTO>> {

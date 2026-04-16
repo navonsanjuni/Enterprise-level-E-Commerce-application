@@ -3,8 +3,8 @@ import { ProductTagDTO } from "../../domain/entities/product-tag.entity";
 import { ProductTagManagementService } from "../services/product-tag-management.service";
 
 export interface GetProductTagQuery extends IQuery {
-  id?: string;
-  name?: string;
+  readonly id?: string;
+  readonly name?: string;
 }
 
 export class GetProductTagHandler implements IQueryHandler<GetProductTagQuery, ProductTagDTO> {

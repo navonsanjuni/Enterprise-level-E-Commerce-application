@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface DeleteBulkEditorialLooksCommand extends ICommand {
-  ids: string[];
+  readonly ids: string[];
 }
 
 export class DeleteBulkEditorialLooksHandler implements ICommandHandler<DeleteBulkEditorialLooksCommand, CommandResult<void>> {

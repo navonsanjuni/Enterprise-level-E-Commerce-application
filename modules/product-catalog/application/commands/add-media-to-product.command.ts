@@ -2,10 +2,10 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface AddMediaToProductCommand extends ICommand {
-  productId: string;
-  assetId: string;
-  position?: number;
-  isCover?: boolean;
+  readonly productId: string;
+  readonly assetId: string;
+  readonly position?: number;
+  readonly isCover?: boolean;
 }
 
 export class AddMediaToProductHandler implements ICommandHandler<AddMediaToProductCommand, CommandResult<{ productMediaId: string }>> {

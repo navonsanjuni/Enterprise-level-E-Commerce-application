@@ -3,9 +3,9 @@ import { UserDTO } from '../../domain/entities/user.entity';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface ToggleUserEmailVerifiedCommand extends ICommand {
-  userId: string;
-  isVerified: boolean;
-  reason?: string;
+  readonly userId: string;
+  readonly isVerified: boolean;
+  readonly reason?: string;
 }
 
 export class ToggleUserEmailVerifiedHandler implements ICommandHandler<

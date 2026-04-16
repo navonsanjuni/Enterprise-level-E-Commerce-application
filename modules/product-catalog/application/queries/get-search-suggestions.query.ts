@@ -2,16 +2,16 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { ProductSearchService, SearchSuggestion } from "../services/product-search.service";
 
 export interface GetSearchSuggestionsQuery extends IQuery {
-  searchTerm: string;
-  limit?: number;
-  type?: "products" | "categories" | "brands" | "all";
+  readonly searchTerm: string;
+  readonly limit?: number;
+  readonly type?: "products" | "categories" | "brands" | "all";
 }
 
 export interface GetSearchSuggestionsResult {
-  suggestions: SearchSuggestion[];
-  query: string;
-  type: string;
-  limit: number;
+  readonly suggestions: SearchSuggestion[];
+  readonly query: string;
+  readonly type: string;
+  readonly limit: number;
 }
 
 export class GetSearchSuggestionsHandler implements IQueryHandler<GetSearchSuggestionsQuery, GetSearchSuggestionsResult> {

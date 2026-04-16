@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { MediaManagementService } from "../services/media-management.service";
 
 export interface DeleteMediaAssetCommand extends ICommand {
-  id: string;
+  readonly id: string;
 }
 
 export class DeleteMediaAssetHandler implements ICommandHandler<DeleteMediaAssetCommand, CommandResult<void>> {

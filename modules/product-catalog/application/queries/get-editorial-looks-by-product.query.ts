@@ -4,17 +4,17 @@ import { EditorialLookManagementService } from "../services/editorial-look-manag
 import { EditorialLookQueryOptions } from "../../domain/repositories/editorial-look.repository";
 
 export interface GetEditorialLooksByProductQuery extends IQuery {
-  productId: string;
-  page?: number;
-  limit?: number;
-  includeUnpublished?: boolean;
-  sortBy?: "title" | "publishedAt" | "id";
-  sortOrder?: "asc" | "desc";
+  readonly productId: string;
+  readonly page?: number;
+  readonly limit?: number;
+  readonly includeUnpublished?: boolean;
+  readonly sortBy?: "title" | "publishedAt" | "id";
+  readonly sortOrder?: "asc" | "desc";
 }
 
 export interface EditorialLooksByProductResult {
-  looks: EditorialLookDTO[];
-  meta: {
+  readonly looks: EditorialLookDTO[];
+  readonly meta: {
     productId: string;
     page: number;
     limit: number;

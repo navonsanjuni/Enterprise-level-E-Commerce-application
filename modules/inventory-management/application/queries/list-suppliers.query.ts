@@ -3,13 +3,13 @@ import { SupplierResult } from "./get-supplier.query";
 import { SupplierManagementService } from "../services/supplier-management.service";
 
 export interface ListSuppliersQuery extends IQuery {
-  limit?: number;
-  offset?: number;
+  readonly limit?: number;
+  readonly offset?: number;
 }
 
 export interface ListSuppliersResult {
-  suppliers: SupplierResult[];
-  total: number;
+  readonly suppliers: SupplierResult[];
+  readonly total: number;
 }
 
 export class ListSuppliersHandler implements IQueryHandler<

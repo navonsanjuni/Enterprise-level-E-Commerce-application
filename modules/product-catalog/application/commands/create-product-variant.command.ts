@@ -3,17 +3,17 @@ import { ProductVariantDTO } from "../../domain/entities/product-variant.entity"
 import { VariantManagementService } from "../services/variant-management.service";
 
 export interface CreateProductVariantCommand extends ICommand {
-  productId: string;
-  sku: string;
-  size?: string;
-  color?: string;
-  barcode?: string;
-  weightG?: number;
-  dims?: { length?: number; width?: number; height?: number };
-  taxClass?: string;
-  allowBackorder?: boolean;
-  allowPreorder?: boolean;
-  restockEta?: Date;
+  readonly productId: string;
+  readonly sku: string;
+  readonly size?: string;
+  readonly color?: string;
+  readonly barcode?: string;
+  readonly weightG?: number;
+  readonly dims?: { length?: number; width?: number; height?: number };
+  readonly taxClass?: string;
+  readonly allowBackorder?: boolean;
+  readonly allowPreorder?: boolean;
+  readonly restockEta?: Date;
 }
 
 export class CreateProductVariantHandler implements ICommandHandler<CreateProductVariantCommand, CommandResult<ProductVariantDTO>> {

@@ -2,16 +2,16 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { VariantMediaManagementService } from "../services/variant-media-management.service";
 
 export interface GetVariantMediaStatisticsQuery extends IQuery {
-  variantId: string;
+  readonly variantId: string;
 }
 
 export interface VariantMediaStatisticsResult {
-  totalMedia: number;
-  imageCount: number;
-  videoCount: number;
-  otherCount: number;
-  totalSize: number;
-  averageFileSize: number;
+  readonly totalMedia: number;
+  readonly imageCount: number;
+  readonly videoCount: number;
+  readonly otherCount: number;
+  readonly totalSize: number;
+  readonly averageFileSize: number;
 }
 
 export class GetVariantMediaStatisticsHandler implements IQueryHandler<GetVariantMediaStatisticsQuery, VariantMediaStatisticsResult> {

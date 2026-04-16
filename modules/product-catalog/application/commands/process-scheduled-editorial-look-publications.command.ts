@@ -5,8 +5,8 @@ import { EditorialLookManagementService } from "../services/editorial-look-manag
 export interface ProcessScheduledEditorialLookPublicationsCommand extends ICommand {}
 
 export interface ProcessScheduledPublicationsResult {
-  published: EditorialLookDTO[];
-  errors: string[];
+  readonly published: EditorialLookDTO[];
+  readonly errors: string[];
 }
 
 export class ProcessScheduledEditorialLookPublicationsHandler implements ICommandHandler<ProcessScheduledEditorialLookPublicationsCommand, CommandResult<ProcessScheduledPublicationsResult>> {

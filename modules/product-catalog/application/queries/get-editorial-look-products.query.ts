@@ -2,7 +2,7 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface GetEditorialLookProductsQuery extends IQuery {
-  id: string;
+  readonly id: string;
 }
 
 export class GetEditorialLookProductsHandler implements IQueryHandler<GetEditorialLookProductsQuery, string[]> {

@@ -2,8 +2,8 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { ProductTagManagementService } from "../services/product-tag-management.service";
 
 export interface AssociateProductTagsCommand extends ICommand {
-  productId: string;
-  tagIds: string[];
+  readonly productId: string;
+  readonly tagIds: string[];
 }
 
 export class AssociateProductTagsHandler implements ICommandHandler<AssociateProductTagsCommand, CommandResult<void>> {

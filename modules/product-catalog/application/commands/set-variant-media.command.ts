@@ -2,8 +2,8 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { VariantMediaManagementService } from "../services/variant-media-management.service";
 
 export interface SetVariantMediaCommand extends ICommand {
-  variantId: string;
-  assetIds: string[];
+  readonly variantId: string;
+  readonly assetIds: string[];
 }
 
 export class SetVariantMediaHandler implements ICommandHandler<SetVariantMediaCommand, CommandResult<void>> {

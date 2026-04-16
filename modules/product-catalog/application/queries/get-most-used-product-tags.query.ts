@@ -3,7 +3,7 @@ import { ProductTagDTO } from "../../domain/entities/product-tag.entity";
 import { ProductTagManagementService } from "../services/product-tag-management.service";
 
 export interface GetMostUsedProductTagsQuery extends IQuery {
-  limit?: number;
+  readonly limit?: number;
 }
 
 export class GetMostUsedProductTagsHandler implements IQueryHandler<GetMostUsedProductTagsQuery, Array<{ tag: ProductTagDTO; usageCount: number }>> {

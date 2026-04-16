@@ -4,8 +4,8 @@ import { CategoryManagementService } from "../services/category-management.servi
 import { DomainValidationError } from "../../domain/errors/product-catalog.errors";
 
 export interface GetCategoryQuery extends IQuery {
-  categoryId?: string;
-  slug?: string;
+  readonly categoryId?: string;
+  readonly slug?: string;
 }
 
 export class GetCategoryHandler implements IQueryHandler<GetCategoryQuery, CategoryDTO> {

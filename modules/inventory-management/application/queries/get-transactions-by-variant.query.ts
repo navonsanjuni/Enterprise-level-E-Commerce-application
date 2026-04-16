@@ -3,15 +3,15 @@ import { TransactionResult } from "./get-transaction.query";
 import { StockManagementService } from "../services/stock-management.service";
 
 export interface GetTransactionsByVariantQuery extends IQuery {
-  variantId: string;
-  locationId?: string;
-  limit?: number;
-  offset?: number;
+  readonly variantId: string;
+  readonly locationId?: string;
+  readonly limit?: number;
+  readonly offset?: number;
 }
 
 export interface TransactionsByVariantResult {
-  transactions: TransactionResult[];
-  total: number;
+  readonly transactions: TransactionResult[];
+  readonly total: number;
 }
 
 export class GetTransactionsByVariantHandler implements IQueryHandler<

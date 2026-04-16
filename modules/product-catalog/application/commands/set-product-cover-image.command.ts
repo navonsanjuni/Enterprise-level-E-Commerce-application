@@ -2,8 +2,8 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface SetProductCoverImageCommand extends ICommand {
-  productId: string;
-  assetId: string;
+  readonly productId: string;
+  readonly assetId: string;
 }
 
 export class SetProductCoverImageHandler implements ICommandHandler<SetProductCoverImageCommand, CommandResult<void>> {

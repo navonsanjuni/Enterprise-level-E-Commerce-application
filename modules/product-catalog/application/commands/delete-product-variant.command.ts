@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { VariantManagementService } from "../services/variant-management.service";
 
 export interface DeleteProductVariantCommand extends ICommand {
-  variantId: string;
+  readonly variantId: string;
 }
 
 export class DeleteProductVariantHandler implements ICommandHandler<DeleteProductVariantCommand, CommandResult<void>> {

@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { CategoryManagementService } from "../services/category-management.service";
 
 export interface ReorderCategoriesCommand extends ICommand {
-  categoryOrders: Array<{ id: string; position: number }>;
+  readonly categoryOrders: Array<{ id: string; position: number }>;
 }
 
 export class ReorderCategoriesHandler implements ICommandHandler<ReorderCategoriesCommand, CommandResult<void>> {

@@ -6,8 +6,8 @@ import { ITokenBlacklistService } from '../services/itoken-blacklist.service';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface RefreshTokenCommand extends ICommand {
-  refreshToken: string;
-  currentAccessToken?: string;
+  readonly refreshToken: string;
+  readonly currentAccessToken?: string;
 }
 
 export class RefreshTokenHandler

@@ -181,6 +181,13 @@ export class Address {
     return this.getFullAddress();
   }
 
+  static create(data: AddressData): Address {
+    return new Address(data);
+  }
+
+  /** Raw factory for reconstituting from persistence — skips no validation
+   *  (validation was already applied on create). Alias kept for backwards-
+   *  compat with any persistence mappers that call fromData. */
   static fromData(data: AddressData): Address {
     return new Address(data);
   }
@@ -223,21 +230,18 @@ export interface FormattedAddress {
   country: string;
 }
 
-// Address type enum for business logic
-export enum AddressType {
-  BILLING = "billing",
-  SHIPPING = "shipping",
-}
+export class AddressType {
+  static readonly BILLING = new AddressType('billing');
+  static readonly SHIPPING = new AddressType('shipping');
 
-// ✅ ADD: Namespace with helper methods for database conversion
-export namespace AddressType {
-  export function fromString(type: string): AddressType {
+  private constructor(private readonly value: string) {}
+
+  static create(type: string): AddressType {
     const normalized = type.toLowerCase().trim();
-
     switch (normalized) {
-      case "billing":
+      case 'billing':
         return AddressType.BILLING;
-      case "shipping":
+      case 'shipping':
         return AddressType.SHIPPING;
       default:
         throw new DomainValidationError(
@@ -246,31 +250,43 @@ export namespace AddressType {
     }
   }
 
-  export function toString(type: AddressType): string {
-    return type.valueOf();
+  static fromString(type: string): AddressType {
+    return AddressType.create(type);
   }
 
-  export function isValid(type: string): boolean {
+  static isValid(type: string): boolean {
     try {
-      fromString(type);
+      AddressType.create(type);
       return true;
     } catch {
       return false;
     }
   }
 
-  export function getAllValues(): AddressType[] {
+  static getAllValues(): AddressType[] {
     return [AddressType.BILLING, AddressType.SHIPPING];
   }
 
-  export function getDisplayName(type: AddressType): string {
-    switch (type) {
-      case AddressType.BILLING:
-        return "Billing Address";
-      case AddressType.SHIPPING:
-        return "Shipping Address";
+  getValue(): string {
+    return this.value;
+  }
+
+  getDisplayName(): string {
+    switch (this.value) {
+      case 'billing':
+        return 'Billing Address';
+      case 'shipping':
+        return 'Shipping Address';
       default:
-        return type;
+        return this.value;
     }
+  }
+
+  equals(other: AddressType): boolean {
+    return this.value === other.value;
+  }
+
+  toString(): string {
+    return this.value;
   }
 }

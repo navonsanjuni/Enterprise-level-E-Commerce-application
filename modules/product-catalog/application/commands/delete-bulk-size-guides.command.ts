@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
 export interface DeleteBulkSizeGuidesCommand extends ICommand {
-  ids: string[];
+  readonly ids: string[];
 }
 
 export class DeleteBulkSizeGuidesHandler implements ICommandHandler<DeleteBulkSizeGuidesCommand, CommandResult<void>> {

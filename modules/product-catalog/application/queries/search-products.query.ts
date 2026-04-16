@@ -3,26 +3,26 @@ import { ProductDTO } from "../../domain/entities/product.entity";
 import { ProductSearchService } from "../services/product-search.service";
 
 export interface SearchProductsQuery extends IQuery {
-  searchTerm: string;
-  page?: number;
-  limit?: number;
-  categoryId?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  brand?: string;
-  tags?: string[];
-  status?: "draft" | "published" | "scheduled" | "archived";
-  sortBy?: "relevance" | "price" | "title" | "createdAt" | "publishAt";
-  sortOrder?: "asc" | "desc";
+  readonly searchTerm: string;
+  readonly page?: number;
+  readonly limit?: number;
+  readonly categoryId?: string;
+  readonly minPrice?: number;
+  readonly maxPrice?: number;
+  readonly brand?: string;
+  readonly tags?: string[];
+  readonly status?: "draft" | "published" | "scheduled" | "archived";
+  readonly sortBy?: "relevance" | "price" | "title" | "createdAt" | "publishAt";
+  readonly sortOrder?: "asc" | "desc";
 }
 
 export interface SearchProductsResult {
-  items: ProductDTO[];
-  totalCount: number;
-  page: number;
-  limit: number;
-  searchTerm: string;
-  suggestions?: string[];
+  readonly items: ProductDTO[];
+  readonly totalCount: number;
+  readonly page: number;
+  readonly limit: number;
+  readonly searchTerm: string;
+  readonly suggestions?: string[];
 }
 
 export class SearchProductsHandler implements IQueryHandler<SearchProductsQuery, SearchProductsResult> {

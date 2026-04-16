@@ -4,9 +4,9 @@ import { LocationAddressProps } from "../../domain/value-objects/location-addres
 import { LocationManagementService } from "../services/location-management.service";
 
 export interface UpdateLocationCommand extends ICommand {
-  locationId: string;
-  name?: string;
-  address?: LocationAddressProps;
+  readonly locationId: string;
+  readonly name?: string;
+  readonly address?: LocationAddressProps;
 }
 
 export class UpdateLocationHandler implements ICommandHandler<

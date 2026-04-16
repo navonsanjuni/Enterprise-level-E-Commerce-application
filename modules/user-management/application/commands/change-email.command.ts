@@ -2,9 +2,9 @@ import { AuthenticationService } from '../services/authentication.service';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface ChangeEmailCommand extends ICommand {
-  userId: string;
-  newEmail: string;
-  password: string;
+  readonly userId: string;
+  readonly newEmail: string;
+  readonly password: string;
 }
 
 export class ChangeEmailHandler

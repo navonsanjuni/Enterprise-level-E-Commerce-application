@@ -3,8 +3,8 @@ import { PurchaseOrderDTO } from "../../domain/entities/purchase-order.entity";
 import { PurchaseOrderManagementService } from "../services/purchase-order-management.service";
 
 export interface CreatePurchaseOrderCommand extends ICommand {
-  supplierId: string;
-  eta?: Date;
+  readonly supplierId: string;
+  readonly eta?: string;
 }
 
 export class CreatePurchaseOrderHandler implements ICommandHandler<
@@ -16,7 +16,7 @@ export class CreatePurchaseOrderHandler implements ICommandHandler<
   async handle(command: CreatePurchaseOrderCommand): Promise<CommandResult<PurchaseOrderDTO>> {
     const purchaseOrder = await this.poService.createPurchaseOrder(
       command.supplierId,
-      command.eta,
+      command.eta ? new Date(command.eta) : undefined,
     );
     return CommandResult.success(purchaseOrder);
   }

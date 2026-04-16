@@ -36,12 +36,7 @@ export class PickupReservationController {
     reply: FastifyReply,
   ) {
     try {
-      const { orderId, locationId, activeOnly } = request.query;
-      const result = await this.listReservationsHandler.handle({
-        orderId,
-        locationId,
-        activeOnly: activeOnly ?? true,
-      });
+      const result = await this.listReservationsHandler.handle(request.query);
       return ResponseHelper.fromQuery(reply, result, "Reservations retrieved");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);

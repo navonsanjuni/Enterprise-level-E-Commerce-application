@@ -2,8 +2,8 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { ProductMediaManagementService, ProductMediaReorderData } from "../services/product-media-management.service";
 
 export interface ReorderProductMediaCommand extends ICommand {
-  productId: string;
-  reorderData: ProductMediaReorderData[];
+  readonly productId: string;
+  readonly reorderData: ProductMediaReorderData[];
 }
 
 export class ReorderProductMediaHandler implements ICommandHandler<ReorderProductMediaCommand, CommandResult<void>> {

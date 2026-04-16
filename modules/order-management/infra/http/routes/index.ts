@@ -30,6 +30,8 @@ import {
   SetOrderAddressesCommandHandler,
   UpdateBillingAddressCommandHandler,
   UpdateShippingAddressCommandHandler,
+  // Address queries
+  GetOrderAddressHandler,
   // Order item commands
   AddOrderItemCommandHandler,
   UpdateOrderItemCommandHandler,

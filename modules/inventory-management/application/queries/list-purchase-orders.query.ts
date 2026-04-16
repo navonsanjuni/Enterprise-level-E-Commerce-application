@@ -3,17 +3,17 @@ import { PurchaseOrderResult } from "./get-purchase-order.query";
 import { PurchaseOrderManagementService } from "../services/purchase-order-management.service";
 
 export interface ListPurchaseOrdersQuery extends IQuery {
-  limit?: number;
-  offset?: number;
-  status?: string;
-  supplierId?: string;
-  sortBy?: "createdAt" | "updatedAt" | "eta";
-  sortOrder?: "asc" | "desc";
+  readonly limit?: number;
+  readonly offset?: number;
+  readonly status?: string;
+  readonly supplierId?: string;
+  readonly sortBy?: "createdAt" | "updatedAt" | "eta";
+  readonly sortOrder?: "asc" | "desc";
 }
 
 export interface ListPurchaseOrdersResult {
-  purchaseOrders: PurchaseOrderResult[];
-  total: number;
+  readonly purchaseOrders: PurchaseOrderResult[];
+  readonly total: number;
 }
 
 export class ListPurchaseOrdersHandler implements IQueryHandler<

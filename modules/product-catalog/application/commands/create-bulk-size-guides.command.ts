@@ -3,12 +3,12 @@ import { SizeGuideDTO, Region } from "../../domain/entities/size-guide.entity";
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
 export interface CreateBulkSizeGuidesCommand extends ICommand {
-  guides: Array<{ title: string; bodyHtml?: string; region: Region; category?: string }>;
+  readonly guides: Array<{ title: string; bodyHtml?: string; region: Region; category?: string }>;
 }
 
 export interface CreateBulkSizeGuidesResult {
-  created: SizeGuideDTO[];
-  skipped: Array<{ title: string; reason: string }>;
+  readonly created: SizeGuideDTO[];
+  readonly skipped: Array<{ title: string; reason: string }>;
 }
 
 export class CreateBulkSizeGuidesHandler implements ICommandHandler<CreateBulkSizeGuidesCommand, CommandResult<CreateBulkSizeGuidesResult>> {

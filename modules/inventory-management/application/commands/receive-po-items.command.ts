@@ -4,14 +4,14 @@ import { PurchaseOrderItemDTO } from "../../domain/entities/purchase-order-item.
 import { PurchaseOrderManagementService } from "../services/purchase-order-management.service";
 
 export interface ReceivePOItemsCommand extends ICommand {
-  poId: string;
-  locationId: string;
-  items: { variantId: string; receivedQty: number }[];
+  readonly poId: string;
+  readonly locationId: string;
+  readonly items: { variantId: string; receivedQty: number }[];
 }
 
 export interface ReceivePOItemsResult {
-  purchaseOrder: PurchaseOrderDTO;
-  items: PurchaseOrderItemDTO[];
+  readonly purchaseOrder: PurchaseOrderDTO;
+  readonly items: PurchaseOrderItemDTO[];
 }
 
 export class ReceivePOItemsHandler implements ICommandHandler<

@@ -2,17 +2,17 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface GetProductMediaStatisticsQuery extends IQuery {
-  productId: string;
+  readonly productId: string;
 }
 
 export interface ProductMediaStatisticsResult {
-  totalMedia: number;
-  hasCoverImage: boolean;
-  imageCount: number;
-  videoCount: number;
-  otherCount: number;
-  totalSize: number;
-  averageFileSize: number;
+  readonly totalMedia: number;
+  readonly hasCoverImage: boolean;
+  readonly imageCount: number;
+  readonly videoCount: number;
+  readonly otherCount: number;
+  readonly totalSize: number;
+  readonly averageFileSize: number;
 }
 
 export class GetProductMediaStatisticsHandler implements IQueryHandler<GetProductMediaStatisticsQuery, ProductMediaStatisticsResult> {

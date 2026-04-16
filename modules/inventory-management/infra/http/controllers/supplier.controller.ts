@@ -38,11 +38,7 @@ export class SupplierController {
     reply: FastifyReply,
   ) {
     try {
-      const { limit, offset } = request.query;
-      const result = await this.listSuppliersHandler.handle({
-        limit: limit ? Number(limit) : undefined,
-        offset: offset ? Number(offset) : undefined,
-      });
+      const result = await this.listSuppliersHandler.handle(request.query);
       return ResponseHelper.fromQuery(reply, result, "Suppliers retrieved");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);

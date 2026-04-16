@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface RemoveCoverImageCommand extends ICommand {
-  productId: string;
+  readonly productId: string;
 }
 
 export class RemoveCoverImageHandler implements ICommandHandler<RemoveCoverImageCommand, CommandResult<void>> {

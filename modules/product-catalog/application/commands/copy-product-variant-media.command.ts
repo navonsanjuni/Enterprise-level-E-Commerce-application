@@ -2,9 +2,9 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { VariantMediaManagementService } from "../services/variant-media-management.service";
 
 export interface CopyProductVariantMediaCommand extends ICommand {
-  sourceProductId: string;
-  targetProductId: string;
-  variantMapping: Record<string, string>;
+  readonly sourceProductId: string;
+  readonly targetProductId: string;
+  readonly variantMapping: Record<string, string>;
 }
 
 export class CopyProductVariantMediaHandler implements ICommandHandler<CopyProductVariantMediaCommand, CommandResult<void>> {

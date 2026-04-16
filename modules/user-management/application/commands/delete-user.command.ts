@@ -2,7 +2,7 @@ import { UserService } from '../services/user.service';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface DeleteUserCommand extends ICommand {
-  userId: string;
+  readonly userId: string;
 }
 
 export class DeleteUserHandler implements ICommandHandler<DeleteUserCommand, CommandResult<void>> {

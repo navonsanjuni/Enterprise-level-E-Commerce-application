@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { StockAlertService } from "../services/stock-alert.service";
 
 export interface DeleteStockAlertCommand extends ICommand {
-  alertId: string;
+  readonly alertId: string;
 }
 
 export class DeleteStockAlertHandler implements ICommandHandler<

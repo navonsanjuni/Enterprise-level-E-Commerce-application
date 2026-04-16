@@ -3,15 +3,15 @@ import { Region } from "../../domain/entities/size-guide.entity";
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
 export interface ValidateSizeGuideUniquenessQuery extends IQuery {
-  region: Region;
-  category?: string;
+  readonly region: Region;
+  readonly category?: string;
 }
 
 export interface SizeGuideUniquenessResult {
-  region: Region;
-  category: string | null;
-  isUnique: boolean;
-  available: boolean;
+  readonly region: Region;
+  readonly category: string | null;
+  readonly isUnique: boolean;
+  readonly available: boolean;
 }
 
 export class ValidateSizeGuideUniquenessHandler implements IQueryHandler<ValidateSizeGuideUniquenessQuery, SizeGuideUniquenessResult> {

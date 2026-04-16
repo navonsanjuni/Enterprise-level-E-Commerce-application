@@ -4,24 +4,24 @@ import { SizeGuideManagementService } from "../services/size-guide-management.se
 import { SizeGuideQueryOptions } from "../../domain/repositories/size-guide.repository";
 
 export interface GetRegionalSizeGuidesQuery extends IQuery {
-  region: Region;
-  page?: number;
-  limit?: number;
-  category?: string;
-  hasContent?: boolean;
-  sortBy?: "title" | "region" | "category";
-  sortOrder?: "asc" | "desc";
+  readonly region: Region;
+  readonly page?: number;
+  readonly limit?: number;
+  readonly category?: string;
+  readonly hasContent?: boolean;
+  readonly sortBy?: "title" | "region" | "category";
+  readonly sortOrder?: "asc" | "desc";
 }
 
 export interface RegionalSizeGuidesResult {
-  sizeGuides: SizeGuideDTO[];
-  pagination: {
+  readonly sizeGuides: SizeGuideDTO[];
+  readonly pagination: {
     page: number;
     limit: number;
     total: number;
     total_pages: number;
   };
-  meta: { region: Region; page: number; limit: number };
+  readonly meta: { region: Region; page: number; limit: number };
 }
 
 export class GetRegionalSizeGuidesHandler implements IQueryHandler<GetRegionalSizeGuidesQuery, RegionalSizeGuidesResult> {

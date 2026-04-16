@@ -3,10 +3,10 @@ import { CategoryDTO } from "../../domain/entities/category.entity";
 import { CategoryManagementService } from "../services/category-management.service";
 
 export interface CreateCategoryCommand extends ICommand {
-  name: string;
-  slug?: string;
-  parentId?: string;
-  position?: number;
+  readonly name: string;
+  readonly slug?: string;
+  readonly parentId?: string;
+  readonly position?: number;
 }
 
 export class CreateCategoryHandler implements ICommandHandler<CreateCategoryCommand, CommandResult<CategoryDTO>> {

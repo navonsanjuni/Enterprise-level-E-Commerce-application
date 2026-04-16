@@ -3,14 +3,14 @@ import { StockAlertResult } from "./get-stock-alert.query";
 import { StockAlertService } from "../services/stock-alert.service";
 
 export interface ListStockAlertsQuery extends IQuery {
-  limit?: number;
-  offset?: number;
-  includeResolved?: boolean;
+  readonly limit?: number;
+  readonly offset?: number;
+  readonly includeResolved?: boolean;
 }
 
 export interface ListStockAlertsResult {
-  alerts: StockAlertResult[];
-  total: number;
+  readonly alerts: StockAlertResult[];
+  readonly total: number;
 }
 
 export class ListStockAlertsHandler implements IQueryHandler<

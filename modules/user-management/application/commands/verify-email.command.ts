@@ -2,7 +2,7 @@ import { AuthenticationService } from '../services/authentication.service';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface VerifyEmailCommand extends ICommand {
-  userId: string;
+  readonly userId: string;
 }
 
 export class VerifyEmailHandler

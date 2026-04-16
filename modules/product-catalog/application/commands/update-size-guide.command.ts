@@ -3,11 +3,11 @@ import { SizeGuideDTO, Region } from "../../domain/entities/size-guide.entity";
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
 export interface UpdateSizeGuideCommand extends ICommand {
-  id: string;
-  title?: string;
-  bodyHtml?: string;
-  region?: Region;
-  category?: string;
+  readonly id: string;
+  readonly title?: string;
+  readonly bodyHtml?: string;
+  readonly region?: Region;
+  readonly category?: string;
 }
 
 export class UpdateSizeGuideHandler implements ICommandHandler<UpdateSizeGuideCommand, CommandResult<SizeGuideDTO>> {

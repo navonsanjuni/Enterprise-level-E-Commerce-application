@@ -3,20 +3,20 @@ import { CategoryDTO } from "../../domain/entities/category.entity";
 import { CategoryManagementService } from "../services/category-management.service";
 
 export interface ListCategoriesQuery extends IQuery {
-  page?: number;
-  limit?: number;
-  parentId?: string;
-  includeChildren?: boolean;
-  sortBy?: "name" | "position";
-  sortOrder?: "asc" | "desc";
+  readonly page?: number;
+  readonly limit?: number;
+  readonly parentId?: string;
+  readonly includeChildren?: boolean;
+  readonly sortBy?: "name" | "position";
+  readonly sortOrder?: "asc" | "desc";
 }
 
 export interface ListCategoriesResult {
-  categories: CategoryDTO[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  readonly categories: CategoryDTO[];
+  readonly total: number;
+  readonly page: number;
+  readonly limit: number;
+  readonly totalPages: number;
 }
 
 export class ListCategoriesHandler implements IQueryHandler<ListCategoriesQuery, ListCategoriesResult> {

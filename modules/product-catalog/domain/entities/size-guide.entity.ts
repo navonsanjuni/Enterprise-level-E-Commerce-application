@@ -4,8 +4,6 @@ import { DomainValidationError } from '../errors';
 import { SizeGuideId } from '../value-objects/size-guide-id.vo';
 import { Region } from '../enums/product-catalog.enums';
 
-export { SizeGuideId, Region };
-
 // Domain Events
 export class SizeGuideCreatedEvent extends DomainEvent {
   constructor(public readonly sizeGuideId: string, public readonly title: string) {

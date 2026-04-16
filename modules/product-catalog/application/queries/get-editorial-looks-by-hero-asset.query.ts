@@ -3,7 +3,7 @@ import { EditorialLookDTO } from "../../domain/entities/editorial-look.entity";
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface GetEditorialLooksByHeroAssetQuery extends IQuery {
-  assetId: string;
+  readonly assetId: string;
 }
 
 export class GetEditorialLooksByHeroAssetHandler implements IQueryHandler<GetEditorialLooksByHeroAssetQuery, EditorialLookDTO[]> {

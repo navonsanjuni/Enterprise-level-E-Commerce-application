@@ -5,8 +5,6 @@ import { ProductId } from '../value-objects/product-id.vo';
 import { DomainValidationError } from '../errors';
 import { EditorialLookId } from '../value-objects/editorial-look-id.vo';
 
-export { EditorialLookId };
-
 // Domain Events
 export class EditorialLookCreatedEvent extends DomainEvent {
   constructor(public readonly lookId: string, public readonly title: string) {

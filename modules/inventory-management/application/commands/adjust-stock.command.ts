@@ -3,11 +3,11 @@ import { StockDTO } from "../../domain/entities/stock.entity";
 import { StockManagementService } from "../services/stock-management.service";
 
 export interface AdjustStockCommand extends ICommand {
-  variantId: string;
-  locationId: string;
-  quantityDelta: number;
-  reason: string;
-  referenceId?: string;
+  readonly variantId: string;
+  readonly locationId: string;
+  readonly quantityDelta: number;
+  readonly reason: string;
+  readonly referenceId?: string;
 }
 
 export class AdjustStockHandler implements ICommandHandler<

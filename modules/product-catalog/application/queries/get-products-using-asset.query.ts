@@ -2,7 +2,7 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface GetProductsUsingAssetQuery extends IQuery {
-  assetId: string;
+  readonly assetId: string;
 }
 
 export class GetProductsUsingAssetHandler implements IQueryHandler<GetProductsUsingAssetQuery, string[]> {

@@ -4,19 +4,19 @@ import { AddressType, AddressData } from '../../domain/value-objects/address.vo'
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface AddAddressCommand extends ICommand {
-  userId: string;
-  type: 'billing' | 'shipping';
-  isDefault?: boolean;
-  firstName?: string;
-  lastName?: string;
-  company?: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  state?: string;
-  postalCode?: string;
-  country: string;
-  phone?: string;
+  readonly userId: string;
+  readonly type: 'billing' | 'shipping';
+  readonly isDefault?: boolean;
+  readonly firstName?: string;
+  readonly lastName?: string;
+  readonly company?: string;
+  readonly addressLine1: string;
+  readonly addressLine2?: string;
+  readonly city: string;
+  readonly state?: string;
+  readonly postalCode?: string;
+  readonly country: string;
+  readonly phone?: string;
 }
 
 export class AddAddressHandler implements ICommandHandler<

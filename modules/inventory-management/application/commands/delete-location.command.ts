@@ -2,7 +2,7 @@ import { ICommand, ICommandHandler, CommandResult } from "../../../../packages/c
 import { LocationManagementService } from "../services/location-management.service";
 
 export interface DeleteLocationCommand extends ICommand {
-  locationId: string;
+  readonly locationId: string;
 }
 
 export class DeleteLocationHandler implements ICommandHandler<

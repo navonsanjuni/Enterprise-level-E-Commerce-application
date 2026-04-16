@@ -3,7 +3,7 @@ import { PurchaseOrderDTO } from "../../domain/entities/purchase-order.entity";
 import { PurchaseOrderManagementService } from "../services/purchase-order-management.service";
 
 export interface GetPurchaseOrderQuery extends IQuery {
-  poId: string;
+  readonly poId: string;
 }
 
 export type PurchaseOrderResult = PurchaseOrderDTO;

@@ -2,8 +2,8 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { ProductMediaManagementService, ProductMediaServiceQueryOptions, ProductMediaSummary } from "../services/product-media-management.service";
 
 export interface GetProductMediaQuery extends IQuery {
-  productId: string;
-  options?: ProductMediaServiceQueryOptions;
+  readonly productId: string;
+  readonly options?: ProductMediaServiceQueryOptions;
 }
 
 export class GetProductMediaHandler implements IQueryHandler<GetProductMediaQuery, ProductMediaSummary> {

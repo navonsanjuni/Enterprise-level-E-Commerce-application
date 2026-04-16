@@ -47,12 +47,7 @@ export class StockAlertController {
     reply: FastifyReply,
   ) {
     try {
-      const { limit, offset, includeResolved } = request.query;
-      const result = await this.listAlertsHandler.handle({
-        limit: limit ? Number(limit) : undefined,
-        offset: offset ? Number(offset) : undefined,
-        includeResolved,
-      });
+      const result = await this.listAlertsHandler.handle(request.query);
       return ResponseHelper.fromQuery(reply, result, "Alerts retrieved");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);

@@ -3,7 +3,7 @@ import { InventoryTransactionDTO } from "../../domain/entities/inventory-transac
 import { StockManagementService } from "../services/stock-management.service";
 
 export interface GetTransactionQuery extends IQuery {
-  transactionId: string;
+  readonly transactionId: string;
 }
 
 export type TransactionResult = InventoryTransactionDTO;

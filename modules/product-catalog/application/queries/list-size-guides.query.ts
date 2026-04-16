@@ -4,18 +4,18 @@ import { SizeGuideManagementService } from "../services/size-guide-management.se
 import { SizeGuideQueryOptions } from "../../domain/repositories/size-guide.repository";
 
 export interface ListSizeGuidesQuery extends IQuery {
-  page?: number;
-  limit?: number;
-  region?: Region;
-  category?: string;
-  hasContent?: boolean;
-  sortBy?: "title" | "region" | "category";
-  sortOrder?: "asc" | "desc";
+  readonly page?: number;
+  readonly limit?: number;
+  readonly region?: Region;
+  readonly category?: string;
+  readonly hasContent?: boolean;
+  readonly sortBy?: "title" | "region" | "category";
+  readonly sortOrder?: "asc" | "desc";
 }
 
 export interface ListSizeGuidesResult {
-  sizeGuides: SizeGuideDTO[];
-  pagination: {
+  readonly sizeGuides: SizeGuideDTO[];
+  readonly pagination: {
     page: number;
     limit: number;
     total: number;

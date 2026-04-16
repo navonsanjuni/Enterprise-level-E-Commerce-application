@@ -2,8 +2,8 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { ProductSearchService, SearchFilter } from "../services/product-search.service";
 
 export interface GetSearchFiltersQuery extends IQuery {
-  query?: string;
-  category?: string;
+  readonly query?: string;
+  readonly category?: string;
 }
 
 export class GetSearchFiltersHandler implements IQueryHandler<GetSearchFiltersQuery, SearchFilter[]> {

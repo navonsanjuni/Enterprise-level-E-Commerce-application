@@ -2,12 +2,12 @@ import { IQuery, IQueryHandler } from "../../../../packages/core/src/application
 import { VariantMediaManagementService } from "../services/variant-media-management.service";
 
 export interface GetUnusedVariantMediaAssetsQuery extends IQuery {
-  productId?: string;
+  readonly productId?: string;
 }
 
 export interface UnusedVariantMediaAssetsResult {
-  assets: string[];
-  meta: { productId: string };
+  readonly assets: string[];
+  readonly meta: { productId: string };
 }
 
 export class GetUnusedVariantMediaAssetsHandler implements IQueryHandler<GetUnusedVariantMediaAssetsQuery, UnusedVariantMediaAssetsResult> {
