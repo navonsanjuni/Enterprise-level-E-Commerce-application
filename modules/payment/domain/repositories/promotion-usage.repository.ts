@@ -1,13 +1,13 @@
-import { PromotionUsage } from "../entities/promotion-usage.entity";
+import { PromotionUsage } from '../entities/promotion-usage.entity';
+import { PromotionUsageId } from '../value-objects/promotion-usage-id.vo';
+import { PromotionId } from '../value-objects/promotion-id.vo';
 
 export interface IPromotionUsageRepository {
   save(usage: PromotionUsage): Promise<void>;
-  findByPromoId(promoId: string): Promise<PromotionUsage[]>;
+  findById(id: PromotionUsageId): Promise<PromotionUsage | null>;
+  findByPromoId(promoId: PromotionId): Promise<PromotionUsage[]>;
   findByOrderId(orderId: string): Promise<PromotionUsage[]>;
-  findByPromoIdAndOrderId(
-    promoId: string,
-    orderId: string,
-  ): Promise<PromotionUsage | null>;
-  countUsageByPromoId(promoId: string): Promise<number>;
-  delete(promoId: string, orderId: string): Promise<void>;
+  findByPromoIdAndOrderId(promoId: PromotionId, orderId: string): Promise<PromotionUsage | null>;
+  countUsageByPromoId(promoId: PromotionId): Promise<number>;
+  delete(promoId: PromotionId, orderId: string): Promise<void>;
 }
