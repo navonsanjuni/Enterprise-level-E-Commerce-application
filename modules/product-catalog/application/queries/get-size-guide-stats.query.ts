@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
 import { Region } from "../../domain/enums/product-catalog.enums";
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
@@ -12,14 +12,10 @@ export interface SizeGuideStatsResult {
   readonly guidesWithoutContent: number;
 }
 
-export class GetSizeGuideStatsHandler implements IQueryHandler<GetSizeGuideStatsQuery, QueryResult<SizeGuideStatsResult>> {
+export class GetSizeGuideStatsHandler implements IQueryHandler<GetSizeGuideStatsQuery, SizeGuideStatsResult> {
   constructor(private readonly sizeGuideManagementService: SizeGuideManagementService) {}
 
-  async handle(_query: GetSizeGuideStatsQuery): Promise<QueryResult<SizeGuideStatsResult>> {
-    try {
-    return QueryResult.success(await this.sizeGuideManagementService.getSizeGuideStats());
-      } catch (error: unknown) {
-      return QueryResult.fromError(error);
-    }
+  async handle(_query: GetSizeGuideStatsQuery): Promise<SizeGuideStatsResult> {
+    return this.sizeGuideManagementService.getSizeGuideStats();
   }
 }

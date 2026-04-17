@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 
 export interface GetEditorialLookStatsQuery extends IQuery {}
@@ -13,14 +13,10 @@ export interface EditorialLookStatsResult {
   readonly looksWithContent: number;
 }
 
-export class GetEditorialLookStatsHandler implements IQueryHandler<GetEditorialLookStatsQuery, QueryResult<EditorialLookStatsResult>> {
+export class GetEditorialLookStatsHandler implements IQueryHandler<GetEditorialLookStatsQuery, EditorialLookStatsResult> {
   constructor(private readonly editorialLookManagementService: EditorialLookManagementService) {}
 
-  async handle(_query: GetEditorialLookStatsQuery): Promise<QueryResult<EditorialLookStatsResult>> {
-    try {
-    return QueryResult.success(await this.editorialLookManagementService.getEditorialLookStats());
-      } catch (error: unknown) {
-      return QueryResult.fromError(error);
-    }
+  async handle(_query: GetEditorialLookStatsQuery): Promise<EditorialLookStatsResult> {
+    return this.editorialLookManagementService.getEditorialLookStats();
   }
 }

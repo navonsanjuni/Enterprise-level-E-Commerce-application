@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
 import { ProductMediaManagementService } from "../services/product-media-management.service";
 
 export interface GetProductMediaStatisticsQuery extends IQuery {
@@ -15,14 +15,10 @@ export interface ProductMediaStatisticsResult {
   readonly averageFileSize: number;
 }
 
-export class GetProductMediaStatisticsHandler implements IQueryHandler<GetProductMediaStatisticsQuery, QueryResult<ProductMediaStatisticsResult>> {
+export class GetProductMediaStatisticsHandler implements IQueryHandler<GetProductMediaStatisticsQuery, ProductMediaStatisticsResult> {
   constructor(private readonly productMediaManagementService: ProductMediaManagementService) {}
 
-  async handle(query: GetProductMediaStatisticsQuery): Promise<QueryResult<ProductMediaStatisticsResult>> {
-    try {
-    return QueryResult.success(await this.productMediaManagementService.getProductMediaStatistics(query.productId));
-      } catch (error: unknown) {
-      return QueryResult.fromError(error);
-    }
+  async handle(query: GetProductMediaStatisticsQuery): Promise<ProductMediaStatisticsResult> {
+    return this.productMediaManagementService.getProductMediaStatistics(query.productId);
   }
 }

@@ -38,7 +38,7 @@ export class VariantController {
         productId: request.params.productId,
         ...request.query,
       });
-      return ResponseHelper.ok(reply, "Variants retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Variants retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -50,7 +50,7 @@ export class VariantController {
   ) {
     try {
       const result = await this.getVariantHandler.handle({ variantId: request.params.variantId });
-      return ResponseHelper.ok(reply, "Variant retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Variant retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

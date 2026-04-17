@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
 import { ProductTagDTO } from "../../domain/entities/product-tag.entity";
 import { ProductTagManagementService } from "../services/product-tag-management.service";
 import { ProductTagQueryOptions } from "../../domain/repositories/product-tag.repository";
@@ -21,11 +21,10 @@ export interface ListProductTagsResult {
   };
 }
 
-export class ListProductTagsHandler implements IQueryHandler<ListProductTagsQuery, QueryResult<ListProductTagsResult>> {
+export class ListProductTagsHandler implements IQueryHandler<ListProductTagsQuery, ListProductTagsResult> {
   constructor(private readonly productTagManagementService: ProductTagManagementService) {}
 
-  async handle(query: ListProductTagsQuery): Promise<QueryResult<ListProductTagsResult>> {
-    try {
+  async handle(query: ListProductTagsQuery): Promise<ListProductTagsResult> {
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
 
@@ -43,9 +42,6 @@ export class ListProductTagsHandler implements IQueryHandler<ListProductTagsQuer
     const tags = (result as { tags?: ProductTagDTO[] }).tags ?? (result as ProductTagDTO[]);
     const total = (result as { total?: number }).total ?? 0;
 
-    return QueryResult.success({ tags, pagination: { page, limit, total, total_pages: Math.ceil(total / limit) } });
-      } catch (error: unknown) {
-      return QueryResult.fromError(error);
-    }
+    return { tags, pagination: { page, limit, total, total_pages: Math.ceil(total / limit) } };
   }
 }

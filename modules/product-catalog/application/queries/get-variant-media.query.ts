@@ -1,18 +1,14 @@
-import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
 import { VariantMediaManagementService, VariantMediaSummary } from "../services/variant-media-management.service";
 
 export interface GetVariantMediaQuery extends IQuery {
   readonly variantId: string;
 }
 
-export class GetVariantMediaHandler implements IQueryHandler<GetVariantMediaQuery, QueryResult<VariantMediaSummary>> {
+export class GetVariantMediaHandler implements IQueryHandler<GetVariantMediaQuery, VariantMediaSummary> {
   constructor(private readonly variantMediaManagementService: VariantMediaManagementService) {}
 
-  async handle(query: GetVariantMediaQuery): Promise<QueryResult<VariantMediaSummary>> {
-    try {
-    return QueryResult.success(await this.variantMediaManagementService.getVariantMedia(query.variantId));
-      } catch (error: unknown) {
-      return QueryResult.fromError(error);
-    }
+  async handle(query: GetVariantMediaQuery): Promise<VariantMediaSummary> {
+    return this.variantMediaManagementService.getVariantMedia(query.variantId);
   }
 }

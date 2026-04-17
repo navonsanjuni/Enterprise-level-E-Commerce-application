@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
 import { Region } from "../../domain/enums/product-catalog.enums";
 import { SizeGuideManagementService } from "../services/size-guide-management.service";
 
@@ -11,15 +11,11 @@ export interface AvailableSizeGuideCategoriesResult {
   readonly meta: { region: string };
 }
 
-export class GetAvailableSizeGuideCategoriesHandler implements IQueryHandler<GetAvailableSizeGuideCategoriesQuery, QueryResult<AvailableSizeGuideCategoriesResult>> {
+export class GetAvailableSizeGuideCategoriesHandler implements IQueryHandler<GetAvailableSizeGuideCategoriesQuery, AvailableSizeGuideCategoriesResult> {
   constructor(private readonly sizeGuideManagementService: SizeGuideManagementService) {}
 
-  async handle(query: GetAvailableSizeGuideCategoriesQuery): Promise<QueryResult<AvailableSizeGuideCategoriesResult>> {
-    try {
+  async handle(query: GetAvailableSizeGuideCategoriesQuery): Promise<AvailableSizeGuideCategoriesResult> {
     const categories = await this.sizeGuideManagementService.getAvailableCategories(query.region);
-    return QueryResult.success({ categories, meta: { region: query.region ?? "all" } });
-      } catch (error: unknown) {
-      return QueryResult.fromError(error);
-    }
+    return { categories, meta: { region: query.region ?? "all" } };
   }
 }

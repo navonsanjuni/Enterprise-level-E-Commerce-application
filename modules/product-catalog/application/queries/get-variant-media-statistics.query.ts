@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
 import { VariantMediaManagementService } from "../services/variant-media-management.service";
 
 export interface GetVariantMediaStatisticsQuery extends IQuery {
@@ -14,14 +14,10 @@ export interface VariantMediaStatisticsResult {
   readonly averageFileSize: number;
 }
 
-export class GetVariantMediaStatisticsHandler implements IQueryHandler<GetVariantMediaStatisticsQuery, QueryResult<VariantMediaStatisticsResult>> {
+export class GetVariantMediaStatisticsHandler implements IQueryHandler<GetVariantMediaStatisticsQuery, VariantMediaStatisticsResult> {
   constructor(private readonly variantMediaManagementService: VariantMediaManagementService) {}
 
-  async handle(query: GetVariantMediaStatisticsQuery): Promise<QueryResult<VariantMediaStatisticsResult>> {
-    try {
-    return QueryResult.success(await this.variantMediaManagementService.getVariantMediaStatistics(query.variantId));
-      } catch (error: unknown) {
-      return QueryResult.fromError(error);
-    }
+  async handle(query: GetVariantMediaStatisticsQuery): Promise<VariantMediaStatisticsResult> {
+    return this.variantMediaManagementService.getVariantMediaStatistics(query.variantId);
   }
 }

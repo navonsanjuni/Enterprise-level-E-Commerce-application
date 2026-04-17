@@ -1,4 +1,4 @@
-import { IQuery, IQueryHandler, QueryResult } from "../../../../packages/core/src/application/cqrs";
+import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
 import { EditorialLookDTO } from "../../domain/entities/editorial-look.entity";
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
 import { EditorialLookQueryOptions } from "../../domain/repositories/editorial-look.repository";
@@ -22,11 +22,10 @@ export interface EditorialLooksByProductResult {
   };
 }
 
-export class GetEditorialLooksByProductHandler implements IQueryHandler<GetEditorialLooksByProductQuery, QueryResult<EditorialLooksByProductResult>> {
+export class GetEditorialLooksByProductHandler implements IQueryHandler<GetEditorialLooksByProductQuery, EditorialLooksByProductResult> {
   constructor(private readonly editorialLookManagementService: EditorialLookManagementService) {}
 
-  async handle(query: GetEditorialLooksByProductQuery): Promise<QueryResult<EditorialLooksByProductResult>> {
-    try {
+  async handle(query: GetEditorialLooksByProductQuery): Promise<EditorialLooksByProductResult> {
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
     const includeUnpublished = query.includeUnpublished ?? false;
@@ -41,9 +40,6 @@ export class GetEditorialLooksByProductHandler implements IQueryHandler<GetEdito
 
     const looks = await this.editorialLookManagementService.getLooksByProduct(query.productId, serviceOptions);
 
-    return QueryResult.success({ looks, meta: { productId: query.productId, page, limit, includeUnpublished } });
-      } catch (error: unknown) {
-      return QueryResult.fromError(error);
-    }
+    return { looks, meta: { productId: query.productId, page, limit, includeUnpublished } };
   }
 }
