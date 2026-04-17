@@ -2,7 +2,6 @@ import crypto from 'crypto';
 import { IUserRepository } from '../../domain/repositories/iuser.repository';
 import { IPasswordHasherService } from './password-hasher.service';
 import { IJwtService } from './ijwt.service';
-import { ITokenBlacklistService } from './itoken-blacklist.service';
 import { Email } from '../../domain/value-objects/email.vo';
 import { UserId } from '../../domain/value-objects/user-id.vo';
 import { User } from '../../domain/entities/user.entity';
@@ -72,48 +71,7 @@ export class AuthenticationService {
     private readonly userRepository: IUserRepository,
     private readonly passwordHasher: IPasswordHasherService,
     private readonly jwtService: IJwtService,
-    private readonly tokenBlacklistService?: ITokenBlacklistService,
   ) {}
-
-  // ============================================================================
-  // Token blacklist delegation — keeps command handlers to a single service dep
-  // ============================================================================
-
-  blacklistToken(token: string, ttlMs?: number): void {
-    this.tokenBlacklistService?.blacklistToken(token, ttlMs);
-  }
-
-  isTokenBlacklisted(token: string): boolean {
-    return this.tokenBlacklistService?.isTokenBlacklisted(token) ?? false;
-  }
-
-  isAccountLocked(identifier: string): boolean {
-    return this.tokenBlacklistService?.isAccountLocked(identifier) ?? false;
-  }
-
-  clearFailedAttempts(identifier: string): void {
-    this.tokenBlacklistService?.clearFailedAttempts(identifier);
-  }
-
-  recordFailedAttempt(identifier: string): void {
-    this.tokenBlacklistService?.recordFailedAttempt(identifier);
-  }
-
-  storePasswordResetToken(token: string, userId: string, email: string): void {
-    this.tokenBlacklistService?.storePasswordResetToken(token, userId, email);
-  }
-
-  getPasswordResetToken(token: string): { userId: string; email: string } | null {
-    return this.tokenBlacklistService?.getPasswordResetToken(token) ?? null;
-  }
-
-  storeVerificationToken(token: string, userId: string, email: string): void {
-    this.tokenBlacklistService?.storeVerificationToken(token, userId, email);
-  }
-
-  getVerificationToken(token: string): { userId: string; email: string } | null {
-    return this.tokenBlacklistService?.getVerificationToken(token) ?? null;
-  }
 
   async login(credentials: LoginCredentials): Promise<LoginResult> {
     const email = Email.create(credentials.email);
@@ -216,12 +174,13 @@ export class AuthenticationService {
     if (!user) throw new UserNotFoundError(userId);
 
     if (refreshToken) {
+      let payload;
       try {
-        const payload = this.jwtService.verifyRefresh(refreshToken);
-        if (payload.type !== 'refresh' || payload.userId !== userId) {
-          throw new DomainValidationError('Invalid refresh token');
-        }
+        payload = this.jwtService.verifyRefresh(refreshToken);
       } catch {
+        throw new DomainValidationError('Invalid refresh token');
+      }
+      if (payload.type !== 'refresh' || payload.userId !== userId) {
         throw new DomainValidationError('Invalid refresh token');
       }
     }
@@ -279,13 +238,15 @@ export class AuthenticationService {
     await this.userRepository.save(user);
   }
 
-  async verifyUserPassword(userId: string, password: string): Promise<void> {
+  async verifyUserPassword(userId: string, password: string): Promise<User> {
     const user = await this.userRepository.findById(UserId.fromString(userId));
     if (!user) throw new UserNotFoundError(userId);
     if (!user.passwordHash) throw new InvalidOperationError('User has no password set');
 
     const isPasswordValid = await this.passwordHasher.verify(password, user.passwordHash);
     if (!isPasswordValid) throw new InvalidCredentialsError();
+
+    return user;
   }
 
   async register(userData: RegisterUserData): Promise<AuthResult> {
@@ -408,9 +369,7 @@ export class AuthenticationService {
     return `guest_${timestamp}_${random}@modett.com`;
   }
   async deleteAccount(userId: string, password: string): Promise<void> {
-    await this.verifyUserPassword(userId, password);
-    const user = await this.userRepository.findById(UserId.fromString(userId));
-    if (!user) throw new UserNotFoundError(userId);
+    const user = await this.verifyUserPassword(userId, password);
     user.markAsDeleted();
     await this.userRepository.delete(user.id);
   }
