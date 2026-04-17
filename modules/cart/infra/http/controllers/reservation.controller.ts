@@ -60,7 +60,8 @@ export class ReservationController {
     try {
       const { reservationId } = request.params;
       const result = await this.getReservationHandler.handle({ reservationId });
-      return ResponseHelper.fromQuery(reply, result, "Reservation retrieved", "Reservation not found");
+      if (result === null) return ResponseHelper.notFound(reply, "Reservation not found");
+      return ResponseHelper.ok(reply, "Reservation retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -77,7 +78,7 @@ export class ReservationController {
       const { cartId } = request.params;
       const { activeOnly } = request.query;
       const result = await this.getReservationsHandler.handle({ cartId, activeOnly });
-      return ResponseHelper.fromQuery(reply, result, "Reservations retrieved");
+      return ResponseHelper.ok(reply, "Reservations retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -90,7 +91,7 @@ export class ReservationController {
     try {
       const { variantId } = request.params;
       const result = await this.getVariantReservationsHandler.handle({ variantId });
-      return ResponseHelper.fromQuery(reply, result, "Variant reservations retrieved");
+      return ResponseHelper.ok(reply, "Variant reservations retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -103,7 +104,8 @@ export class ReservationController {
     try {
       const { cartId, variantId } = request.params;
       const result = await this.getReservationByVariantHandler.handle({ cartId, variantId });
-      return ResponseHelper.fromQuery(reply, result, "Reservation retrieved", "Reservation not found");
+      if (result === null) return ResponseHelper.notFound(reply, "Reservation not found");
+      return ResponseHelper.ok(reply, "Reservation retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -182,7 +184,7 @@ export class ReservationController {
     try {
       const { variantId, requestedQuantity } = request.query;
       const result = await this.checkAvailabilityHandler.handle({ variantId, requestedQuantity });
-      return ResponseHelper.fromQuery(reply, result, "Availability checked");
+      return ResponseHelper.ok(reply, "Availability checked", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -195,7 +197,7 @@ export class ReservationController {
     try {
       const { variantId } = request.params;
       const result = await this.getReservedQuantityHandler.handle({ variantId, activeOnly: false });
-      return ResponseHelper.fromQuery(reply, result, "Total reserved quantity retrieved");
+      return ResponseHelper.ok(reply, "Total reserved quantity retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -208,7 +210,7 @@ export class ReservationController {
     try {
       const { variantId } = request.params;
       const result = await this.getReservedQuantityHandler.handle({ variantId, activeOnly: true });
-      return ResponseHelper.fromQuery(reply, result, "Active reserved quantity retrieved");
+      return ResponseHelper.ok(reply, "Active reserved quantity retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -244,8 +246,8 @@ export class ReservationController {
 
   async getReservationStatistics(_request: AuthenticatedRequest, reply: FastifyReply) {
     try {
-      const result = await this.getReservationStatisticsHandler.handle({});
-      return ResponseHelper.fromQuery(reply, result, "Reservation statistics retrieved");
+      const result = await this.getReservationStatisticsHandler.handle();
+      return ResponseHelper.ok(reply, "Reservation statistics retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -260,7 +262,7 @@ export class ReservationController {
     try {
       const { status } = request.query;
       const result = await this.getReservationsByStatusHandler.handle({ status: status! });
-      return ResponseHelper.fromQuery(reply, result, "Reservations retrieved");
+      return ResponseHelper.ok(reply, "Reservations retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

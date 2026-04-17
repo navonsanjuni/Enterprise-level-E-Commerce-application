@@ -60,7 +60,8 @@ export class CheckoutController {
       const { checkoutId } = request.params;
 
       const result = await this.getCheckoutHandler.handle({ checkoutId, userId, guestToken });
-      return ResponseHelper.fromQuery(reply, result, "Checkout retrieved", "Checkout not found");
+      if (result === null) return ResponseHelper.notFound(reply, "Checkout not found");
+      return ResponseHelper.ok(reply, "Checkout retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -178,7 +179,8 @@ export class CheckoutController {
       }
 
       const result = await this.getOrderByCheckoutHandler.handle({ checkoutId, userId, guestToken });
-      return ResponseHelper.fromQuery(reply, result, "Order retrieved", "Order not found for this checkout");
+      if (result === null) return ResponseHelper.notFound(reply, "Order not found for this checkout");
+      return ResponseHelper.ok(reply, "Order retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

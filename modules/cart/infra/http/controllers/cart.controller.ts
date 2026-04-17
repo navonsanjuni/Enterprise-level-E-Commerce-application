@@ -64,12 +64,8 @@ export class CartController {
         userId,
         guestToken,
       });
-      return ResponseHelper.fromQuery(
-        reply,
-        result,
-        "Cart retrieved",
-        "Cart not found",
-      );
+      if (result === null) return ResponseHelper.notFound(reply, "Cart not found");
+      return ResponseHelper.ok(reply, "Cart retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -82,12 +78,8 @@ export class CartController {
     try {
       const { userId } = request.params;
       const result = await this.getActiveCartByUserHandler.handle({ userId });
-      return ResponseHelper.fromQuery(
-        reply,
-        result,
-        "Active cart retrieved",
-        "No active cart found for this user",
-      );
+      if (result === null) return ResponseHelper.notFound(reply, "No active cart found for this user");
+      return ResponseHelper.ok(reply, "Active cart retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -109,12 +101,8 @@ export class CartController {
       const result = await this.getActiveCartByGuestTokenHandler.handle({
         guestToken,
       });
-      return ResponseHelper.fromQuery(
-        reply,
-        result,
-        "Active cart retrieved",
-        "No active cart found for this guest",
-      );
+      if (result === null) return ResponseHelper.notFound(reply, "No active cart found for this guest");
+      return ResponseHelper.ok(reply, "Active cart retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -364,12 +352,8 @@ export class CartController {
         userId,
         guestToken,
       });
-      return ResponseHelper.fromQuery(
-        reply,
-        result,
-        "Cart summary retrieved",
-        "Cart not found",
-      );
+      if (result === null) return ResponseHelper.notFound(reply, "Cart not found");
+      return ResponseHelper.ok(reply, "Cart summary retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -377,12 +361,8 @@ export class CartController {
 
   async getCartStatistics(_request: AuthenticatedRequest, reply: FastifyReply) {
     try {
-      const result = await this.getCartStatisticsHandler.handle({});
-      return ResponseHelper.fromQuery(
-        reply,
-        result,
-        "Cart statistics retrieved",
-      );
+      const result = await this.getCartStatisticsHandler.handle();
+      return ResponseHelper.ok(reply, "Cart statistics retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
