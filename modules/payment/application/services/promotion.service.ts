@@ -2,14 +2,21 @@ import { IPromotionRepository } from "../../domain/repositories/promotion.reposi
 import { IPromotionUsageRepository } from "../../domain/repositories/promotion-usage.repository";
 import {
   Promotion,
+  PromotionDTO,
   PromotionRule,
 } from "../../domain/entities/promotion.entity";
-import { PromotionUsage } from "../../domain/entities/promotion-usage.entity";
+import {
+  PromotionUsage,
+  PromotionUsageDTO,
+} from "../../domain/entities/promotion-usage.entity";
+import { PromotionId } from "../../domain/value-objects/promotion-id.vo";
 import { Money } from "../../domain/value-objects/money.vo";
 import { Currency } from "../../domain/value-objects/currency.vo";
 import { PromotionNotFoundError } from "../../domain/errors/payment-loyalty.errors";
 
-export interface CreatePromotionDto {
+export type { PromotionDTO } from "../../domain/entities/promotion.entity";
+
+interface CreatePromotionParams {
   code?: string;
   rule: PromotionRule;
   startsAt?: Date;
@@ -17,7 +24,7 @@ export interface CreatePromotionDto {
   usageLimit?: number;
 }
 
-export interface ApplyPromotionDto {
+interface ApplyPromotionParams {
   promoCode: string;
   orderId?: string;
   orderAmount: number;
@@ -26,35 +33,17 @@ export interface ApplyPromotionDto {
   categories?: string[];
 }
 
-export interface RecordPromotionUsageDto {
+interface RecordPromotionUsageParams {
   promoId: string;
   orderId: string;
   discountAmount: number;
   currency?: string;
 }
 
-export interface PromotionDto {
-  promoId: string;
-  code: string | null;
-  rule: PromotionRule;
-  startsAt: Date | null;
-  endsAt: Date | null;
-  usageLimit: number | null;
-  status: string | null;
-  usageCount?: number;
-}
-
-export interface PromotionUsageDto {
-  promoId: string;
-  orderId: string;
-  discountAmount: number;
-  currency: string;
-}
-
 export interface ApplyPromotionResult {
   valid: boolean;
   discountAmount?: number;
-  promotion?: PromotionDto;
+  promotion?: PromotionDTO;
   error?: string;
 }
 
@@ -64,165 +53,145 @@ export class PromotionService {
     private readonly promotionUsageRepo: IPromotionUsageRepository,
   ) {}
 
-  async createPromotion(dto: CreatePromotionDto): Promise<PromotionDto> {
+  async createPromotion(params: CreatePromotionParams): Promise<PromotionDTO> {
     const promotion = Promotion.create({
-      code: dto.code || null,
-      rule: dto.rule,
-      startsAt: dto.startsAt || null,
-      endsAt: dto.endsAt || null,
-      usageLimit: dto.usageLimit || null,
+      code: params.code ?? null,
+      rule: params.rule,
+      startsAt: params.startsAt ?? null,
+      endsAt: params.endsAt ?? null,
+      usageLimit: params.usageLimit ?? null,
     });
 
     await this.promotionRepo.save(promotion);
-
-    return this.toPromotionDto(promotion);
+    return Promotion.toDTO(promotion);
   }
 
-  async applyPromotion(dto: ApplyPromotionDto): Promise<ApplyPromotionResult> {
-    // Find promotion by code
-    const promotion = await this.promotionRepo.findByCode(dto.promoCode);
+  async applyPromotion(params: ApplyPromotionParams): Promise<ApplyPromotionResult> {
+    const promotion = await this.promotionRepo.findByCode(params.promoCode);
     if (!promotion) {
-      return {
-        valid: false,
-        error: "Promotion code not found",
-      };
+      return { valid: false, error: "Promotion code not found" };
     }
 
-    // Check if promotion is valid (active and within date range)
     if (!promotion.isValid()) {
       return {
         valid: false,
         error: "Promotion is not currently valid",
-        promotion: this.toPromotionDto(promotion),
+        promotion: Promotion.toDTO(promotion),
       };
     }
 
-    // Check usage limit
     if (promotion.usageLimit !== null) {
-      const usageCount = await this.promotionUsageRepo.countUsageByPromoId(
-        promotion.promoId,
-      );
+      const usageCount = await this.promotionUsageRepo.countUsageByPromoId(promotion.id);
       if (usageCount >= promotion.usageLimit) {
         return {
           valid: false,
           error: "Promotion usage limit reached",
-          promotion: this.toPromotionDto(promotion),
+          promotion: Promotion.toDTO(promotion),
         };
       }
     }
 
-    // Calculate discount based on rule
-    const discountAmount = this.calculateDiscount(promotion.rule, dto);
+    const discountAmount = this.calculateDiscount(promotion.rule, params);
 
     if (discountAmount <= 0) {
       return {
         valid: false,
         error: "Promotion does not apply to this order",
-        promotion: this.toPromotionDto(promotion),
+        promotion: Promotion.toDTO(promotion),
       };
     }
 
     return {
       valid: true,
       discountAmount,
-      promotion: this.toPromotionDto(promotion),
+      promotion: Promotion.toDTO(promotion),
     };
   }
 
-  async recordPromotionUsage(
-    dto: RecordPromotionUsageDto,
-  ): Promise<PromotionUsageDto> {
-    const currency = Currency.create(dto.currency || "USD");
-    const discountAmount = Money.fromAmount(dto.discountAmount, currency);
+  async recordPromotionUsage(params: RecordPromotionUsageParams): Promise<PromotionUsageDTO> {
+    const currency = Currency.create(params.currency ?? "USD");
+    const discountAmount = Money.fromAmount(params.discountAmount, currency);
 
     const usage = PromotionUsage.create({
-      promoId: dto.promoId,
-      orderId: dto.orderId,
+      promoId: PromotionId.fromString(params.promoId),
+      orderId: params.orderId,
       discountAmount,
     });
 
     await this.promotionUsageRepo.save(usage);
-
-    return this.toPromotionUsageDto(usage);
+    return PromotionUsage.toDTO(usage);
   }
 
-  async getActivePromotions(): Promise<PromotionDto[]> {
+  async getActivePromotions(): Promise<PromotionDTO[]> {
     const promotions = await this.promotionRepo.findActivePromotions();
-    return promotions.map((p) => this.toPromotionDto(p));
+    return promotions.map((p) => Promotion.toDTO(p));
   }
 
-  async getPromotionByCode(code: string): Promise<PromotionDto | null> {
+  async getPromotionByCode(code: string): Promise<PromotionDTO | null> {
     const promotion = await this.promotionRepo.findByCode(code);
-    return promotion ? this.toPromotionDto(promotion) : null;
+    return promotion ? Promotion.toDTO(promotion) : null;
   }
 
-  async getPromotionById(promoId: string): Promise<PromotionDto | null> {
-    const promotion = await this.promotionRepo.findById(promoId);
-    return promotion ? this.toPromotionDto(promotion) : null;
+  async getPromotionById(promoId: string): Promise<PromotionDTO | null> {
+    const promotion = await this.promotionRepo.findById(PromotionId.fromString(promoId));
+    return promotion ? Promotion.toDTO(promotion) : null;
   }
 
-  async getPromotionUsage(promoId: string): Promise<PromotionUsageDto[]> {
-    const usages = await this.promotionUsageRepo.findByPromoId(promoId);
-    return usages.map((u) => this.toPromotionUsageDto(u));
+  async getPromotionUsage(promoId: string): Promise<PromotionUsageDTO[]> {
+    const usages = await this.promotionUsageRepo.findByPromoId(PromotionId.fromString(promoId));
+    return usages.map((u) => PromotionUsage.toDTO(u));
   }
 
   async getPromotionUsageCount(promoId: string): Promise<number> {
-    return await this.promotionUsageRepo.countUsageByPromoId(promoId);
+    return this.promotionUsageRepo.countUsageByPromoId(PromotionId.fromString(promoId));
   }
 
-  async deactivatePromotion(promoId: string): Promise<PromotionDto> {
-    const promotion = await this.promotionRepo.findById(promoId);
-    if (!promotion) {
-      throw new PromotionNotFoundError(promoId);
-    }
+  async getPromotionUsagesByOrderId(orderId: string): Promise<PromotionUsageDTO[]> {
+    const usages = await this.promotionUsageRepo.findByOrderId(orderId);
+    return usages.map((u) => PromotionUsage.toDTO(u));
+  }
+
+  async getPromotionUsageByPromoAndOrder(promoId: string, orderId: string): Promise<PromotionUsageDTO | null> {
+    const usage = await this.promotionUsageRepo.findByPromoIdAndOrderId(
+      PromotionId.fromString(promoId),
+      orderId,
+    );
+    return usage ? PromotionUsage.toDTO(usage) : null;
+  }
+
+  async deactivatePromotion(promoId: string): Promise<PromotionDTO> {
+    const promotion = await this.promotionRepo.findById(PromotionId.fromString(promoId));
+    if (!promotion) throw new PromotionNotFoundError(promoId);
 
     promotion.deactivate();
     await this.promotionRepo.update(promotion);
-
-    return this.toPromotionDto(promotion);
+    return Promotion.toDTO(promotion);
   }
 
-  async activatePromotion(promoId: string): Promise<PromotionDto> {
-    const promotion = await this.promotionRepo.findById(promoId);
-    if (!promotion) {
-      throw new PromotionNotFoundError(promoId);
-    }
+  async activatePromotion(promoId: string): Promise<PromotionDTO> {
+    const promotion = await this.promotionRepo.findById(PromotionId.fromString(promoId));
+    if (!promotion) throw new PromotionNotFoundError(promoId);
 
     promotion.activate();
     await this.promotionRepo.update(promotion);
-
-    return this.toPromotionDto(promotion);
+    return Promotion.toDTO(promotion);
   }
 
   async deletePromotion(promoId: string): Promise<void> {
-    await this.promotionRepo.delete(promoId);
+    await this.promotionRepo.delete(PromotionId.fromString(promoId));
   }
 
-  private calculateDiscount(
-    rule: PromotionRule,
-    dto: ApplyPromotionDto,
-  ): number {
-    // Check minimum purchase requirement
-    if (rule.minPurchase && dto.orderAmount < rule.minPurchase) {
-      return 0;
-    }
+  private calculateDiscount(rule: PromotionRule, params: ApplyPromotionParams): number {
+    if (rule.minPurchase && params.orderAmount < rule.minPurchase) return 0;
 
-    // Check applicable products
     if (rule.applicableProducts && rule.applicableProducts.length > 0) {
-      if (
-        !dto.products ||
-        !dto.products.some((p) => rule.applicableProducts!.includes(p))
-      ) {
+      if (!params.products || !params.products.some((p) => rule.applicableProducts!.includes(p))) {
         return 0;
       }
     }
 
-    // Check applicable categories
     if (rule.applicableCategories && rule.applicableCategories.length > 0) {
-      if (
-        !dto.categories ||
-        !dto.categories.some((c) => rule.applicableCategories!.includes(c))
-      ) {
+      if (!params.categories || !params.categories.some((c) => rule.applicableCategories!.includes(c))) {
         return 0;
       }
     }
@@ -232,56 +201,22 @@ export class PromotionService {
     switch (rule.type) {
       case "percentage":
         if (rule.value) {
-          discount = dto.orderAmount * (rule.value / 100);
-          // Apply max discount cap if specified
+          discount = params.orderAmount * (rule.value / 100);
           if (rule.maxDiscount && discount > rule.maxDiscount) {
             discount = rule.maxDiscount;
           }
         }
         break;
-
       case "fixed_amount":
-        if (rule.value) {
-          discount = rule.value;
-        }
+        if (rule.value) discount = rule.value;
         break;
-
       case "free_shipping":
-        // Free shipping typically has a fixed value representing shipping cost
-        // This would need integration with shipping calculation
         discount = rule.value || 0;
         break;
-
       default:
         discount = 0;
     }
 
-    // Ensure discount doesn't exceed order amount
-    return Math.min(discount, dto.orderAmount);
-  }
-
-  private toPromotionDto(
-    promotion: Promotion,
-    usageCount?: number,
-  ): PromotionDto {
-    return {
-      promoId: promotion.promoId,
-      code: promotion.code,
-      rule: promotion.rule,
-      startsAt: promotion.startsAt,
-      endsAt: promotion.endsAt,
-      usageLimit: promotion.usageLimit,
-      status: promotion.status,
-      usageCount,
-    };
-  }
-
-  private toPromotionUsageDto(usage: PromotionUsage): PromotionUsageDto {
-    return {
-      promoId: usage.promoId,
-      orderId: usage.orderId,
-      discountAmount: usage.discountAmount.getAmount(),
-      currency: usage.discountAmount.getCurrency().getValue(),
-    };
+    return Math.min(discount, params.orderAmount);
   }
 }

@@ -1,33 +1,30 @@
 import {
   IPaymentWebhookEventRepository,
-  WebhookEventFilterOptions,
+  WebhookEventFilters,
 } from "../../domain/repositories/payment-webhook-event.repository";
 import {
   PaymentWebhookEvent,
+  PaymentWebhookEventDTO,
   WebhookEventData,
 } from "../../domain/entities/payment-webhook-event.entity";
+import { WebhookEventId } from "../../domain/value-objects/webhook-event-id.vo";
+import { WebhookEventType } from "../../domain/value-objects/webhook-event-type.vo";
 import * as crypto from "crypto";
 import {
   DomainValidationError,
   InvalidOperationError,
 } from "../../domain/errors/payment-loyalty.errors";
 
-export interface CreateWebhookEventDto {
+export type { PaymentWebhookEventDTO } from "../../domain/entities/payment-webhook-event.entity";
+
+interface CreateWebhookEventParams {
   provider: string;
   eventType: string;
   eventData: WebhookEventData;
   signature?: string;
 }
 
-export interface PaymentWebhookEventDto {
-  eventId: string;
-  provider: string;
-  eventType: string;
-  eventData: WebhookEventData;
-  createdAt: Date;
-}
-
-export interface WebhookSecrets {
+interface WebhookSecrets {
   stripe?: string;
   paypal?: string;
   razorpay?: string;
@@ -43,7 +40,7 @@ export class PaymentWebhookService {
     provider: string,
     eventData: WebhookEventData,
     signature?: string,
-  ) {
+  ): void {
     const secretMap: Record<string, string | undefined> = {
       stripe: this.webhookSecrets.stripe,
       paypal: this.webhookSecrets.paypal,
@@ -51,10 +48,7 @@ export class PaymentWebhookService {
     };
 
     const secret = secretMap[provider];
-    if (!secret) {
-      // No secret configured; nothing to verify
-      return;
-    }
+    if (!secret) return;
 
     if (!signature) {
       throw new DomainValidationError("Missing webhook signature");
@@ -79,56 +73,31 @@ export class PaymentWebhookService {
     }
   }
 
-  async recordWebhookEvent(
-    dto: CreateWebhookEventDto,
-  ): Promise<PaymentWebhookEventDto> {
-    this.verifySignature(dto.provider, dto.eventData, dto.signature);
+  async recordWebhookEvent(params: CreateWebhookEventParams): Promise<PaymentWebhookEventDTO> {
+    this.verifySignature(params.provider, params.eventData, params.signature);
 
     const event = PaymentWebhookEvent.create({
-      provider: dto.provider,
-      eventType: dto.eventType,
-      eventData: dto.eventData,
+      provider: params.provider,
+      eventType: WebhookEventType.create(params.eventType),
+      eventData: params.eventData,
     });
 
     await this.webhookEventRepo.save(event);
-
-    return this.toDto(event);
+    return PaymentWebhookEvent.toDTO(event);
   }
 
-  async getWebhookEvent(
-    eventId: string,
-  ): Promise<PaymentWebhookEventDto | null> {
-    const event = await this.webhookEventRepo.findById(eventId);
-    return event ? this.toDto(event) : null;
+  async getWebhookEvent(eventId: string): Promise<PaymentWebhookEventDTO | null> {
+    const event = await this.webhookEventRepo.findById(WebhookEventId.fromString(eventId));
+    return event ? PaymentWebhookEvent.toDTO(event) : null;
   }
 
-  async getWebhookEventsByProvider(
-    provider: string,
-  ): Promise<PaymentWebhookEventDto[]> {
+  async getWebhookEventsByProvider(provider: string): Promise<PaymentWebhookEventDTO[]> {
     const events = await this.webhookEventRepo.findByProvider(provider);
-    return events.map((e) => this.toDto(e));
+    return events.map((e) => PaymentWebhookEvent.toDTO(e));
   }
 
-  async getWebhookEventsWithFilters(
-    filters: WebhookEventFilterOptions,
-  ): Promise<PaymentWebhookEventDto[]> {
-    const events = await this.webhookEventRepo.findWithFilters(filters);
-    return events.map((e) => this.toDto(e));
-  }
-
-  async countWebhookEvents(
-    filters?: WebhookEventFilterOptions,
-  ): Promise<number> {
-    return await this.webhookEventRepo.count(filters);
-  }
-
-  private toDto(event: PaymentWebhookEvent): PaymentWebhookEventDto {
-    return {
-      eventId: event.eventId,
-      provider: event.provider,
-      eventType: event.eventType,
-      eventData: event.eventData,
-      createdAt: event.createdAt,
-    };
+  async getWebhookEvents(filters: WebhookEventFilters): Promise<PaymentWebhookEventDTO[]> {
+    const result = await this.webhookEventRepo.findWithFilters(filters);
+    return result.items.map((e) => PaymentWebhookEvent.toDTO(e));
   }
 }

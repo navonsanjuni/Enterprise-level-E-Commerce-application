@@ -3,35 +3,25 @@ import { IPaymentIntentRepository } from "../../domain/repositories/payment-inte
 import { IExternalOrderQueryPort } from "../../domain/external-services";
 import {
   BnplTransaction,
+  BnplTransactionDTO,
   BnplPlan,
 } from "../../domain/entities/bnpl-transaction.entity";
+import { BnplTransactionId } from "../../domain/value-objects/bnpl-transaction-id.vo";
+import { PaymentIntentId } from "../../domain/value-objects/payment-intent-id.vo";
+import { BnplProvider } from "../../domain/value-objects/bnpl-provider.vo";
 import {
   PaymentIntentNotFoundError,
   BnplTransactionNotFoundError,
   InvalidOperationError,
 } from "../../domain/errors/payment-loyalty.errors";
 
-export interface CreateBnplTransactionDto {
+export type { BnplTransactionDTO } from "../../domain/entities/bnpl-transaction.entity";
+
+interface CreateBnplTransactionParams {
   intentId: string;
   provider: string;
   plan: BnplPlan;
   userId?: string;
-}
-
-export interface UpdateBnplStatusDto {
-  bnplId: string;
-  status: "approved" | "rejected" | "active" | "completed" | "cancelled";
-  userId?: string;
-}
-
-export interface BnplTransactionDto {
-  bnplId: string;
-  intentId: string;
-  provider: string;
-  plan: BnplPlan;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export class BnplTransactionService {
@@ -41,20 +31,18 @@ export class BnplTransactionService {
     private readonly bnplTxnRepo: IBnplTransactionRepository,
   ) {}
 
-  private async assertIntentOwnership(intentId: string, userId?: string) {
+  private async assertIntentOwnership(intentId: PaymentIntentId, userId?: string): Promise<void> {
     if (!userId) return;
 
     const intent = await this.paymentIntentRepo.findById(intentId);
-
     if (!intent) {
-      throw new PaymentIntentNotFoundError(intentId);
+      throw new PaymentIntentNotFoundError(intentId.getValue());
     }
 
     const orderId = intent.orderIdOrNull;
     if (!orderId) return;
 
     const order = await this.orderQueryPort.findOrderOwner(orderId);
-
     if (order?.userId && order.userId !== userId) {
       throw new InvalidOperationError(
         "Forbidden: BNPL transaction does not belong to this user",
@@ -62,151 +50,92 @@ export class BnplTransactionService {
     }
   }
 
-  async createBnplTransaction(
-    dto: CreateBnplTransactionDto,
-  ): Promise<BnplTransactionDto> {
-    await this.assertIntentOwnership(dto.intentId, dto.userId);
+  async createBnplTransaction(params: CreateBnplTransactionParams): Promise<BnplTransactionDTO> {
+    const intentId = PaymentIntentId.fromString(params.intentId);
+    await this.assertIntentOwnership(intentId, params.userId);
 
     const transaction = BnplTransaction.create({
-      intentId: dto.intentId,
-      provider: dto.provider,
-      plan: dto.plan,
+      intentId,
+      provider: BnplProvider.create(params.provider),
+      plan: params.plan,
     });
 
     await this.bnplTxnRepo.save(transaction);
-
-    return this.toBnplTransactionDto(transaction);
+    return BnplTransaction.toDTO(transaction);
   }
 
-  async approveBnplTransaction(
-    bnplId: string,
-    userId?: string,
-  ): Promise<BnplTransactionDto> {
-    const transaction = await this.bnplTxnRepo.findById(bnplId);
-    if (!transaction) {
-      throw new BnplTransactionNotFoundError(bnplId);
-    }
+  async approveBnplTransaction(bnplId: string, userId?: string): Promise<BnplTransactionDTO> {
+    const transaction = await this.bnplTxnRepo.findById(BnplTransactionId.fromString(bnplId));
+    if (!transaction) throw new BnplTransactionNotFoundError(bnplId);
 
     await this.assertIntentOwnership(transaction.intentId, userId);
-
     transaction.approve();
     await this.bnplTxnRepo.update(transaction);
-
-    return this.toBnplTransactionDto(transaction);
+    return BnplTransaction.toDTO(transaction);
   }
 
-  async rejectBnplTransaction(
-    bnplId: string,
-    userId?: string,
-  ): Promise<BnplTransactionDto> {
-    const transaction = await this.bnplTxnRepo.findById(bnplId);
-    if (!transaction) {
-      throw new BnplTransactionNotFoundError(bnplId);
-    }
+  async rejectBnplTransaction(bnplId: string, userId?: string): Promise<BnplTransactionDTO> {
+    const transaction = await this.bnplTxnRepo.findById(BnplTransactionId.fromString(bnplId));
+    if (!transaction) throw new BnplTransactionNotFoundError(bnplId);
 
     await this.assertIntentOwnership(transaction.intentId, userId);
-
     transaction.reject();
     await this.bnplTxnRepo.update(transaction);
-
-    return this.toBnplTransactionDto(transaction);
+    return BnplTransaction.toDTO(transaction);
   }
 
-  async activateBnplTransaction(
-    bnplId: string,
-    userId?: string,
-  ): Promise<BnplTransactionDto> {
-    const transaction = await this.bnplTxnRepo.findById(bnplId);
-    if (!transaction) {
-      throw new BnplTransactionNotFoundError(bnplId);
-    }
+  async activateBnplTransaction(bnplId: string, userId?: string): Promise<BnplTransactionDTO> {
+    const transaction = await this.bnplTxnRepo.findById(BnplTransactionId.fromString(bnplId));
+    if (!transaction) throw new BnplTransactionNotFoundError(bnplId);
 
     await this.assertIntentOwnership(transaction.intentId, userId);
-
     transaction.activate();
     await this.bnplTxnRepo.update(transaction);
-
-    return this.toBnplTransactionDto(transaction);
+    return BnplTransaction.toDTO(transaction);
   }
 
-  async completeBnplTransaction(
-    bnplId: string,
-    userId?: string,
-  ): Promise<BnplTransactionDto> {
-    const transaction = await this.bnplTxnRepo.findById(bnplId);
-    if (!transaction) {
-      throw new BnplTransactionNotFoundError(bnplId);
-    }
+  async completeBnplTransaction(bnplId: string, userId?: string): Promise<BnplTransactionDTO> {
+    const transaction = await this.bnplTxnRepo.findById(BnplTransactionId.fromString(bnplId));
+    if (!transaction) throw new BnplTransactionNotFoundError(bnplId);
 
     await this.assertIntentOwnership(transaction.intentId, userId);
-
     transaction.complete();
     await this.bnplTxnRepo.update(transaction);
-
-    return this.toBnplTransactionDto(transaction);
+    return BnplTransaction.toDTO(transaction);
   }
 
-  async cancelBnplTransaction(
-    bnplId: string,
-    userId?: string,
-  ): Promise<BnplTransactionDto> {
-    const transaction = await this.bnplTxnRepo.findById(bnplId);
-    if (!transaction) {
-      throw new BnplTransactionNotFoundError(bnplId);
-    }
+  async cancelBnplTransaction(bnplId: string, userId?: string): Promise<BnplTransactionDTO> {
+    const transaction = await this.bnplTxnRepo.findById(BnplTransactionId.fromString(bnplId));
+    if (!transaction) throw new BnplTransactionNotFoundError(bnplId);
 
     await this.assertIntentOwnership(transaction.intentId, userId);
-
     transaction.cancel();
     await this.bnplTxnRepo.update(transaction);
-
-    return this.toBnplTransactionDto(transaction);
+    return BnplTransaction.toDTO(transaction);
   }
 
-  async getBnplTransaction(
-    bnplId: string,
-    userId?: string,
-  ): Promise<BnplTransactionDto | null> {
-    const transaction = await this.bnplTxnRepo.findById(bnplId);
+  async getBnplTransaction(bnplId: string, userId?: string): Promise<BnplTransactionDTO | null> {
+    const transaction = await this.bnplTxnRepo.findById(BnplTransactionId.fromString(bnplId));
     if (!transaction) return null;
     await this.assertIntentOwnership(transaction.intentId, userId);
-    return this.toBnplTransactionDto(transaction);
+    return BnplTransaction.toDTO(transaction);
   }
 
-  async getBnplTransactionByIntentId(
-    intentId: string,
-    userId?: string,
-  ): Promise<BnplTransactionDto | null> {
-    const transaction = await this.bnplTxnRepo.findByIntentId(intentId);
+  async getBnplTransactionByIntentId(intentId: string, userId?: string): Promise<BnplTransactionDTO | null> {
+    const intentIdVO = PaymentIntentId.fromString(intentId);
+    const transaction = await this.bnplTxnRepo.findByIntentId(intentIdVO);
     if (!transaction) return null;
     await this.assertIntentOwnership(transaction.intentId, userId);
-    return this.toBnplTransactionDto(transaction);
+    return BnplTransaction.toDTO(transaction);
   }
 
-  async getBnplTransactionsByOrderId(
-    orderId: string,
-    userId?: string,
-  ): Promise<BnplTransactionDto[]> {
+  async getBnplTransactionsByOrderId(orderId: string, userId?: string): Promise<BnplTransactionDTO[]> {
     const transactions = await this.bnplTxnRepo.findByOrderId(orderId);
-    const filtered = [];
+    const result: BnplTransactionDTO[] = [];
     for (const t of transactions) {
       await this.assertIntentOwnership(t.intentId, userId);
-      filtered.push(t);
+      result.push(BnplTransaction.toDTO(t));
     }
-    return filtered.map((t) => this.toBnplTransactionDto(t));
-  }
-
-  private toBnplTransactionDto(
-    transaction: BnplTransaction,
-  ): BnplTransactionDto {
-    return {
-      bnplId: transaction.bnplId,
-      intentId: transaction.intentId,
-      provider: transaction.provider,
-      plan: transaction.plan,
-      status: transaction.status,
-      createdAt: transaction.createdAt,
-      updatedAt: transaction.updatedAt,
-    };
+    return result;
   }
 }
