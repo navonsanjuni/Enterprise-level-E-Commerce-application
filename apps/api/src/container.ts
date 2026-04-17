@@ -265,9 +265,9 @@ import {
   GiftCardService,
   PromotionService,
   PaymentWebhookService,
-  LoyaltyService,
-  LoyaltyTransactionService,
 } from "../../../modules/payment/application/services";
+import { LoyaltyService } from "../../../modules/loyalty/application/services/loyalty.service";
+import { LoyaltyTransactionService } from "../../../modules/loyalty/application/services/loyalty-transaction.service";
 import type { IExternalOrderQueryPort } from "../../../modules/payment/domain/external-services";
 
 /**
@@ -948,7 +948,6 @@ export class Container {
     );
     const loyaltyService = new LoyaltyService(
       loyaltyAccountRepository,
-      loyaltyProgramRepository,
       loyaltyTransactionRepository,
     );
     const loyaltyTransactionService = new LoyaltyTransactionService(
@@ -963,6 +962,7 @@ export class Container {
     this.services.set("paymentWebhookService", paymentWebhookService);
     this.services.set("loyaltyService", loyaltyService);
     this.services.set("loyaltyTransactionService", loyaltyTransactionService);
+    this.services.set("loyaltyProgramRepository", loyaltyProgramRepository);
   }
 
   get<T>(name: string): T {
@@ -1076,6 +1076,9 @@ export class Container {
       loyaltyService: this.get<LoyaltyService>("loyaltyService"),
       loyaltyTxnService: this.get<LoyaltyTransactionService>(
         "loyaltyTransactionService",
+      ),
+      loyaltyProgramRepository: this.get<LoyaltyProgramRepository>(
+        "loyaltyProgramRepository",
       ),
     };
   }

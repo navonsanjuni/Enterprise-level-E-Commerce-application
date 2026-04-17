@@ -1,54 +1,91 @@
 import { FastifyInstance } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
+import { LoyaltyController } from "../../../../loyalty/infra/http/controllers/loyalty.controller";
 import {
-  LoyaltyProgramController,
-  CreateLoyaltyProgramRequest,
-} from "../controllers/loyalty-program.controller";
-import {
-  LoyaltyAccountController,
-  GetLoyaltyAccountQuerystring,
-} from "../controllers/loyalty-account.controller";
-import {
-  LoyaltyTransactionController,
-  AwardPointsRequest,
-  RedeemPointsRequest,
-  ListLoyaltyTransactionsQuerystring,
-} from "../controllers/loyalty-transaction.controller";
-import {
-  authenticateUser,
-  requireAdmin,
-  requireRole,
+  RolePermissions,
+  createRateLimiter,
+  RateLimitPresets,
+  userKeyGenerator,
 } from "@/api/src/shared/middleware";
+import { validateBody, validateQuery } from "../validation/validator";
+import {
+  createLoyaltyProgramSchema,
+  awardPointsSchema,
+  redeemPointsSchema,
+  getLoyaltyAccountQuerySchema,
+  listLoyaltyTransactionsQuerySchema,
+} from "../validation/loyalty.schema";
 
-const errorResponses = {
-  400: {
-    description: "Bad request",
-    type: "object",
-    properties: { success: { type: "boolean" }, error: { type: "string" } },
+const writeRateLimiter = createRateLimiter({
+  ...RateLimitPresets.writeOperations,
+  keyGenerator: userKeyGenerator,
+});
+
+const loyaltyProgramSchema = {
+  type: "object",
+  properties: {
+    id: { type: "string", format: "uuid" },
+    name: { type: "string" },
+    earnRules: { type: "array", items: { type: "object", additionalProperties: true } },
+    burnRules: { type: "array", items: { type: "object", additionalProperties: true } },
+    tiers: { type: "array", items: { type: "object", additionalProperties: true } },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
   },
-  401: {
-    description: "Unauthorized",
-    type: "object",
-    properties: { success: { type: "boolean" }, error: { type: "string" } },
+} as const;
+
+const loyaltyAccountSchema = {
+  type: "object",
+  properties: {
+    id: { type: "string", format: "uuid" },
+    userId: { type: "string", format: "uuid" },
+    currentBalance: { type: "number" },
+    totalPointsEarned: { type: "number" },
+    totalPointsRedeemed: { type: "number" },
+    lifetimePoints: { type: "number" },
+    tier: { type: "string" },
+    tierMultiplier: { type: "number" },
+    joinedAt: { type: "string", format: "date-time" },
+    lastActivityAt: { type: "string", format: "date-time" },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
   },
-  404: {
-    description: "Not found",
-    type: "object",
-    properties: { success: { type: "boolean" }, error: { type: "string" } },
+} as const;
+
+const loyaltyTransactionSchema = {
+  type: "object",
+  properties: {
+    id: { type: "string", format: "uuid" },
+    accountId: { type: "string", format: "uuid" },
+    type: { type: "string" },
+    points: { type: "number" },
+    reason: { type: "string" },
+    description: { type: "string" },
+    referenceId: { type: "string" },
+    orderId: { type: "string", format: "uuid" },
+    createdBy: { type: "string" },
+    expiresAt: { type: "string", format: "date-time" },
+    balanceAfter: { type: "number" },
+    createdAt: { type: "string", format: "date-time" },
   },
-};
+} as const;
 
 export async function registerLoyaltyRoutes(
   fastify: FastifyInstance,
-  programController: LoyaltyProgramController,
-  accountController: LoyaltyAccountController,
-  txnController: LoyaltyTransactionController,
+  controller: LoyaltyController,
 ): Promise<void> {
-  // ── Programs ────────────────────────────────────────────────────────────────
+  fastify.addHook("onRequest", async (request, reply) => {
+    if (request.method !== "GET") {
+      await writeRateLimiter(request, reply);
+    }
+  });
 
-  fastify.post<{ Body: CreateLoyaltyProgramRequest }>(
+  // POST /loyalty/programs — Admin only
+  fastify.post(
     "/loyalty/programs",
     {
-      preHandler: requireAdmin,
+      preValidation: [validateBody(createLoyaltyProgramSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new loyalty program — Admin only.",
         tags: ["Loyalty Programs"],
@@ -59,27 +96,28 @@ export async function registerLoyaltyRoutes(
           required: ["name", "earnRules", "burnRules", "tiers"],
           properties: {
             name: { type: "string" },
-            earnRules: { type: "object" },
-            burnRules: { type: "object" },
-            tiers: { type: "array" },
+            earnRules: { type: "array", items: { type: "object", additionalProperties: true } },
+            burnRules: { type: "array", items: { type: "object", additionalProperties: true } },
+            tiers: { type: "array", items: { type: "object", additionalProperties: true } },
           },
         },
         response: {
           201: {
-            description: "Loyalty program created successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
-              data: { type: "object", additionalProperties: true },
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+              data: loyaltyProgramSchema,
             },
           },
-          ...errorResponses,
         },
       },
     },
-    programController.create.bind(programController),
+    (request, reply) => controller.createProgram(request as any, reply),
   );
 
+  // GET /loyalty/programs — public
   fastify.get(
     "/loyalty/programs",
     {
@@ -89,63 +127,63 @@ export async function registerLoyaltyRoutes(
         summary: "List Loyalty Programs",
         response: {
           200: {
-            description: "Loyalty programs retrieved successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
               data: {
                 type: "array",
-                items: { type: "object", additionalProperties: true },
+                items: loyaltyProgramSchema,
               },
             },
           },
         },
       },
     },
-    programController.list.bind(programController),
+    (request, reply) => controller.listPrograms(request as any, reply),
   );
 
-  // ── Accounts ────────────────────────────────────────────────────────────────────────
-
-  fastify.get<{ Querystring: GetLoyaltyAccountQuerystring }>(
+  // GET /loyalty/account — authenticated
+  fastify.get(
     "/loyalty/account",
     {
-      preHandler: authenticateUser,
+      preValidation: [validateQuery(getLoyaltyAccountQuerySchema)],
+      preHandler: [RolePermissions.AUTHENTICATED],
       schema: {
-        description: "Get loyalty account details for a user in a program.",
+        description: "Get loyalty account details for a user.",
         tags: ["Loyalty Accounts"],
         summary: "Get Loyalty Account",
         security: [{ bearerAuth: [] }],
         querystring: {
           type: "object",
-          required: ["userId", "programId"],
+          required: ["userId"],
           properties: {
             userId: { type: "string", format: "uuid" },
-            programId: { type: "string", format: "uuid" },
           },
         },
         response: {
           200: {
-            description: "Loyalty account retrieved successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
-              data: { type: "object", additionalProperties: true },
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+              data: loyaltyAccountSchema,
             },
           },
-          ...errorResponses,
         },
       },
     },
-    accountController.get.bind(accountController),
+    (request, reply) => controller.getAccount(request as AuthenticatedRequest, reply),
   );
 
-  // ── Transactions ────────────────────────────────────────────────────────────────────
-
-  fastify.post<{ Body: AwardPointsRequest }>(
+  // POST /loyalty/points/award — Staff/Admin only
+  fastify.post(
     "/loyalty/points/award",
     {
-      preHandler: requireRole(["STAFF"]),
+      preValidation: [validateBody(awardPointsSchema)],
+      preHandler: [RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Award loyalty points to a customer — Staff/Admin only.",
         tags: ["Loyalty Transactions"],
@@ -153,74 +191,76 @@ export async function registerLoyaltyRoutes(
         security: [{ bearerAuth: [] }],
         body: {
           type: "object",
-          required: ["userId", "programId", "points", "reason"],
+          required: ["userId", "points", "reason"],
           properties: {
             userId: { type: "string", format: "uuid" },
-            programId: { type: "string", format: "uuid" },
             points: { type: "number", minimum: 1 },
             reason: { type: "string" },
             orderId: { type: "string", format: "uuid" },
+            description: { type: "string" },
           },
         },
         response: {
           201: {
-            description: "Loyalty points awarded successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
-              data: { type: "object", additionalProperties: true },
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+              data: loyaltyTransactionSchema,
             },
           },
-          ...errorResponses,
         },
       },
     },
-    txnController.award.bind(txnController),
+    (request, reply) => controller.awardPoints(request as any, reply),
   );
 
-  fastify.post<{ Body: RedeemPointsRequest }>(
+  // POST /loyalty/points/redeem — Staff/Admin only
+  fastify.post(
     "/loyalty/points/redeem",
     {
-      preHandler: requireRole(["STAFF"]),
+      preValidation: [validateBody(redeemPointsSchema)],
+      preHandler: [RolePermissions.STAFF_LEVEL],
       schema: {
-        description:
-          "Redeem loyalty points for a discount or reward — Staff/Admin only.",
+        description: "Redeem loyalty points for a discount or reward — Staff/Admin only.",
         tags: ["Loyalty Transactions"],
         summary: "Redeem Loyalty Points",
         security: [{ bearerAuth: [] }],
         body: {
           type: "object",
-          required: ["userId", "programId", "points", "orderId"],
+          required: ["userId", "points", "orderId"],
           properties: {
             userId: { type: "string", format: "uuid" },
-            programId: { type: "string", format: "uuid" },
             points: { type: "number", minimum: 1 },
             orderId: { type: "string", format: "uuid" },
+            reason: { type: "string" },
           },
         },
         response: {
           201: {
-            description: "Loyalty points redeemed successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
-              data: { type: "object", additionalProperties: true },
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+              data: loyaltyTransactionSchema,
             },
           },
-          ...errorResponses,
         },
       },
     },
-    txnController.redeem.bind(txnController),
+    (request, reply) => controller.redeemPoints(request as any, reply),
   );
 
-  fastify.get<{ Querystring: ListLoyaltyTransactionsQuerystring }>(
+  // GET /loyalty/transactions — authenticated
+  fastify.get(
     "/loyalty/transactions",
     {
-      preHandler: authenticateUser,
+      preValidation: [validateQuery(listLoyaltyTransactionsQuerySchema)],
+      preHandler: [RolePermissions.AUTHENTICATED],
       schema: {
-        description:
-          "List loyalty transaction history filtered by account or order.",
+        description: "List loyalty transaction history filtered by account or order.",
         tags: ["Loyalty Transactions"],
         summary: "List Loyalty Transactions",
         security: [{ bearerAuth: [] }],
@@ -233,20 +273,20 @@ export async function registerLoyaltyRoutes(
         },
         response: {
           200: {
-            description: "Loyalty transactions retrieved successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
               data: {
                 type: "array",
-                items: { type: "object", additionalProperties: true },
+                items: loyaltyTransactionSchema,
               },
             },
           },
-          ...errorResponses,
         },
       },
     },
-    txnController.list.bind(txnController),
+    (request, reply) => controller.listTransactions(request as AuthenticatedRequest, reply),
   );
 }

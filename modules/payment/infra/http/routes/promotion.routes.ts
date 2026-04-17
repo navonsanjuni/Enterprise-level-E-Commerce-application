@@ -1,37 +1,81 @@
 import { FastifyInstance } from "fastify";
+import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
+import { PromotionController } from "../controllers/promotion.controller";
 import {
-  PromotionController,
-  CreatePromotionRequest,
-  ApplyPromotionRequest,
-} from "../controllers/promotion.controller";
+  RolePermissions,
+  createRateLimiter,
+  RateLimitPresets,
+  userKeyGenerator,
+} from "@/api/src/shared/middleware";
+import { validateBody, validateParams } from "../validation/validator";
 import {
-  PromotionUsageController,
-  RecordPromotionUsageRequest,
-} from "../controllers/promotion-usage.controller";
-import { authenticateUser, requireAdmin } from "@/api/src/shared/middleware";
+  createPromotionSchema,
+  applyPromotionSchema,
+  recordPromotionUsageSchema,
+  promoIdParamsSchema,
+} from "../validation/promotion.schema";
 
-const errorResponses = {
-  400: {
-    description: "Bad request",
-    type: "object",
-    properties: { success: { type: "boolean" }, error: { type: "string" } },
+const writeRateLimiter = createRateLimiter({
+  ...RateLimitPresets.writeOperations,
+  keyGenerator: userKeyGenerator,
+});
+
+const promotionSchema = {
+  type: "object",
+  properties: {
+    id: { type: "string", format: "uuid" },
+    code: { type: "string" },
+    rule: { type: "object", additionalProperties: true },
+    startsAt: { type: "string", format: "date-time" },
+    endsAt: { type: "string", format: "date-time" },
+    usageLimit: { type: "number" },
+    status: { type: "string" },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
   },
-  401: {
-    description: "Unauthorized",
-    type: "object",
-    properties: { success: { type: "boolean" }, error: { type: "string" } },
+} as const;
+
+const promotionUsageSchema = {
+  type: "object",
+  properties: {
+    id: { type: "string", format: "uuid" },
+    promoId: { type: "string", format: "uuid" },
+    orderId: { type: "string", format: "uuid" },
+    discountAmount: { type: "number" },
+    currency: { type: "string" },
+    createdAt: { type: "string", format: "date-time" },
   },
-};
+} as const;
+
+const applyResultSchema = {
+  type: "object",
+  properties: {
+    applicable: { type: "boolean" },
+    discountAmount: { type: "number" },
+    discountedTotal: { type: "number" },
+    currency: { type: "string" },
+    promotionId: { type: "string", format: "uuid" },
+    promotionCode: { type: "string" },
+    message: { type: "string" },
+  },
+} as const;
 
 export async function registerPromotionRoutes(
   fastify: FastifyInstance,
   controller: PromotionController,
-  usageController: PromotionUsageController,
 ): Promise<void> {
-  fastify.post<{ Body: CreatePromotionRequest }>(
+  fastify.addHook("onRequest", async (request, reply) => {
+    if (request.method !== "GET") {
+      await writeRateLimiter(request, reply);
+    }
+  });
+
+  // POST /promotions — Admin only
+  fastify.post(
     "/promotions",
     {
-      preHandler: requireAdmin,
+      preValidation: [validateBody(createPromotionSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Create a new promotion — Admin only.",
         tags: ["Promotions"],
@@ -42,34 +86,35 @@ export async function registerPromotionRoutes(
           required: ["rule"],
           properties: {
             code: { type: "string" },
-            rule: { type: "object" },
+            rule: { type: "object", additionalProperties: true },
             startsAt: { type: "string", format: "date-time" },
             endsAt: { type: "string", format: "date-time" },
-            usageLimit: { type: "number", minimum: 0 },
+            usageLimit: { type: "number", minimum: 1 },
           },
         },
         response: {
           201: {
-            description: "Promotion created successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
-              data: { type: "object", additionalProperties: true },
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+              data: promotionSchema,
             },
           },
-          ...errorResponses,
         },
       },
     },
-    controller.create.bind(controller),
+    (request, reply) => controller.create(request as AuthenticatedRequest, reply),
   );
 
-  fastify.post<{ Body: ApplyPromotionRequest }>(
+  // POST /promotions/apply — public
+  fastify.post(
     "/promotions/apply",
     {
+      preValidation: [validateBody(applyPromotionSchema)],
       schema: {
-        description:
-          "Apply a promotion code to calculate discount for an order or cart.",
+        description: "Apply a promotion code to calculate discount for an order or cart.",
         tags: ["Promotions"],
         summary: "Apply Promotion",
         body: {
@@ -86,20 +131,21 @@ export async function registerPromotionRoutes(
         },
         response: {
           200: {
-            description: "Promotion applied successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
-              data: { type: "object", additionalProperties: true },
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+              data: applyResultSchema,
             },
           },
-          400: errorResponses[400],
         },
       },
     },
-    controller.apply.bind(controller),
+    (request, reply) => controller.apply(request as any, reply),
   );
 
+  // GET /promotions/active — public
   fastify.get(
     "/promotions/active",
     {
@@ -109,29 +155,29 @@ export async function registerPromotionRoutes(
         summary: "List Active Promotions",
         response: {
           200: {
-            description: "Active promotions retrieved successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
               data: {
                 type: "array",
-                items: { type: "object", additionalProperties: true },
+                items: promotionSchema,
               },
             },
           },
         },
       },
     },
-    controller.listActive.bind(controller),
+    (request, reply) => controller.listActive(request as any, reply),
   );
 
-  fastify.post<{
-    Params: { promoId: string };
-    Body: RecordPromotionUsageRequest;
-  }>(
+  // POST /promotions/:promoId/usage — authenticated
+  fastify.post(
     "/promotions/:promoId/usage",
     {
-      preHandler: authenticateUser,
+      preValidation: [validateParams(promoIdParamsSchema), validateBody(recordPromotionUsageSchema)],
+      preHandler: [RolePermissions.AUTHENTICATED],
       schema: {
         description: "Record that a promotion was used in an order.",
         tags: ["Promotions"],
@@ -153,24 +199,26 @@ export async function registerPromotionRoutes(
         },
         response: {
           201: {
-            description: "Promotion usage recorded successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
-              data: { type: "object", additionalProperties: true },
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+              data: promotionUsageSchema,
             },
           },
-          ...errorResponses,
         },
       },
     },
-    usageController.record.bind(usageController),
+    (request, reply) => controller.recordUsage(request as any, reply),
   );
 
-  fastify.get<{ Params: { promoId: string } }>(
+  // GET /promotions/:promoId/usage — Admin only
+  fastify.get(
     "/promotions/:promoId/usage",
     {
-      preHandler: requireAdmin,
+      preValidation: [validateParams(promoIdParamsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "List all usage records for a promotion — Admin only.",
         tags: ["Promotions"],
@@ -183,19 +231,20 @@ export async function registerPromotionRoutes(
         },
         response: {
           200: {
-            description: "Promotion usage records retrieved successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
               data: {
                 type: "array",
-                items: { type: "object", additionalProperties: true },
+                items: promotionUsageSchema,
               },
             },
           },
         },
       },
     },
-    usageController.list.bind(usageController),
+    (request, reply) => controller.listUsage(request as any, reply),
   );
 }

@@ -579,8 +579,11 @@ export class OrderManagementService {
     return history.map(OrderStatusHistory.toDTO);
   }
 
-  async getShipmentByTrackingNumber(trackingNumber: string): Promise<OrderShipmentDTO | null> {
-    const shipment = await this.orderShipmentRepository.findByTrackingNumber(trackingNumber);
+  async getShipmentByTrackingNumber(
+    trackingNumber: string,
+  ): Promise<OrderShipmentDTO | null> {
+    const shipment =
+      await this.orderShipmentRepository.findByTrackingNumber(trackingNumber);
     return shipment ? OrderShipment.toDTO(shipment) : null;
   }
 
@@ -599,8 +602,10 @@ export class OrderManagementService {
 
       const contactLower = query.contact.toLowerCase().trim();
       const contactMatches =
-        contactLower === (billing?.email as string | undefined)?.toLowerCase().trim() ||
-        contactLower === (shipping?.email as string | undefined)?.toLowerCase().trim() ||
+        contactLower ===
+          (billing?.email as string | undefined)?.toLowerCase().trim() ||
+        contactLower ===
+          (shipping?.email as string | undefined)?.toLowerCase().trim() ||
         query.contact === (billing?.phone as string | undefined)?.trim() ||
         query.contact === (shipping?.phone as string | undefined)?.trim();
 
@@ -625,8 +630,11 @@ export class OrderManagementService {
     }
 
     if (query.trackingNumber) {
-      const shipmentDTO = await this.getShipmentByTrackingNumber(query.trackingNumber);
-      if (!shipmentDTO) throw new OrderShipmentNotFoundError(query.trackingNumber);
+      const shipmentDTO = await this.getShipmentByTrackingNumber(
+        query.trackingNumber,
+      );
+      if (!shipmentDTO)
+        throw new OrderShipmentNotFoundError(query.trackingNumber);
 
       return {
         orderId: shipmentDTO.orderId,
