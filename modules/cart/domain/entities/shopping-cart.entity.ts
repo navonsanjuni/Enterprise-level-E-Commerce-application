@@ -185,12 +185,18 @@ export interface ShoppingCartDTO {
 export class ShoppingCart extends AggregateRoot {
   private constructor(private props: ShoppingCartProps) {
     super();
-    if (props.userId && props.guestToken) {
+  }
+
+  private static validateOwnership(
+    userId: CartOwnerId | null,
+    guestToken: GuestToken | null,
+  ): void {
+    if (userId && guestToken) {
       throw new DomainValidationError(
         "Cart cannot belong to both user and guest",
       );
     }
-    if (!props.userId && !props.guestToken) {
+    if (!userId && !guestToken) {
       throw new DomainValidationError(
         "Cart must belong to either user or guest",
       );
@@ -207,12 +213,14 @@ export class ShoppingCart extends AggregateRoot {
   static createForUser(
     data: CreateShoppingCartData & { userId: string },
   ): ShoppingCart {
+    const userId = CartOwnerId.fromString(data.userId);
+    ShoppingCart.validateOwnership(userId, null);
     const cartId = CartId.create();
     const now = new Date();
 
     const cart = new ShoppingCart({
       cartId,
-      userId: CartOwnerId.fromString(data.userId),
+      userId,
       guestToken: null,
       currency: Currency.fromString(data.currency),
       items: [],
@@ -230,13 +238,15 @@ export class ShoppingCart extends AggregateRoot {
   static createForGuest(
     data: CreateShoppingCartData & { guestToken: string },
   ): ShoppingCart {
+    const guestToken = GuestToken.fromString(data.guestToken);
+    ShoppingCart.validateOwnership(null, guestToken);
     const cartId = CartId.create();
     const now = new Date();
 
     const cart = new ShoppingCart({
       cartId,
       userId: null,
-      guestToken: GuestToken.fromString(data.guestToken),
+      guestToken,
       currency: Currency.fromString(data.currency),
       items: [],
       reservationExpiresAt: data.reservationExpiresAt || null,

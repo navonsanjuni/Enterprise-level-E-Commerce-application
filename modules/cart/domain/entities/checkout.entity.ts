@@ -160,18 +160,32 @@ export interface CheckoutDTO {
 export class Checkout extends AggregateRoot {
   private constructor(private props: CheckoutProps) {
     super();
-    if (props.userId && props.guestToken) {
+  }
+
+  private static validateOwnership(
+    userId: CartOwnerId | null,
+    guestToken: GuestToken | null,
+  ): void {
+    if (userId && guestToken) {
       throw new DomainValidationError("Checkout cannot belong to both user and guest");
     }
-    if (!props.userId && !props.guestToken) {
+    if (!userId && !guestToken) {
       throw new DomainValidationError("Checkout must belong to either user or guest");
     }
-    if (props.totalAmount < 0) {
+  }
+
+  private static validateTotalAmount(totalAmount: number): void {
+    if (totalAmount < 0) {
       throw new DomainValidationError("Total amount cannot be negative");
     }
   }
 
   static create(data: CreateCheckoutData): Checkout {
+    const userId = data.userId ? CartOwnerId.fromString(data.userId) : null;
+    const guestToken = data.guestToken ? GuestToken.fromString(data.guestToken) : null;
+    Checkout.validateOwnership(userId, guestToken);
+    Checkout.validateTotalAmount(data.totalAmount);
+
     const checkoutId = CheckoutId.create();
     const now = new Date();
     const expiresInMinutes = data.expiresInMinutes || CHECKOUT_DEFAULT_EXPIRY_MINUTES;
@@ -180,8 +194,8 @@ export class Checkout extends AggregateRoot {
     const checkout = new Checkout({
       checkoutId,
       cartId: CartId.fromString(data.cartId),
-      userId: data.userId ? CartOwnerId.fromString(data.userId) : null,
-      guestToken: data.guestToken ? GuestToken.fromString(data.guestToken) : null,
+      userId,
+      guestToken,
       status: CheckoutStatus.pending(),
       totalAmount: data.totalAmount,
       currency: Currency.fromString(data.currency),
