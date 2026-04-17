@@ -3,8 +3,8 @@ import {
   ICommandHandler,
   CommandResult,
 } from '../../../../packages/core/src/application/cqrs';
-import { BnplTransactionService, BnplTransactionDto } from '../services/bnpl-transaction.service';
-import { BnplPlan } from '../../domain/entities/bnpl-transaction.entity';
+import { BnplTransactionService } from '../services/bnpl-transaction.service';
+import { BnplTransactionDTO, BnplPlan } from '../../domain/entities/bnpl-transaction.entity';
 
 export interface CreateBnplTransactionCommand extends ICommand {
   readonly intentId: string;
@@ -15,11 +15,11 @@ export interface CreateBnplTransactionCommand extends ICommand {
 
 export class CreateBnplTransactionHandler implements ICommandHandler<
   CreateBnplTransactionCommand,
-  CommandResult<BnplTransactionDto>
+  CommandResult<BnplTransactionDTO>
 > {
   constructor(private readonly bnplService: BnplTransactionService) {}
 
-  async handle(command: CreateBnplTransactionCommand): Promise<CommandResult<BnplTransactionDto>> {
+  async handle(command: CreateBnplTransactionCommand): Promise<CommandResult<BnplTransactionDTO>> {
     const txn = await this.bnplService.createBnplTransaction({
       intentId: command.intentId,
       provider: command.provider,
