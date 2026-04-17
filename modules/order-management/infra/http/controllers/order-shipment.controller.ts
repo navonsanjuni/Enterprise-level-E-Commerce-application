@@ -97,7 +97,7 @@ export class OrderShipmentController {
     try {
       const query: ListOrderShipmentsQuery = { orderId: request.params.orderId };
       const result = await this.listOrderShipmentsHandler.handle(query);
-      return ResponseHelper.ok(reply, "Shipments retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Shipments retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -113,7 +113,7 @@ export class OrderShipmentController {
         shipmentId: request.params.shipmentId,
       };
       const result = await this.getShipmentHandler.handle(query);
-      return ResponseHelper.ok(reply, "Shipment retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Shipment retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

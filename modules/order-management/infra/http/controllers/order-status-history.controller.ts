@@ -60,7 +60,7 @@ export class OrderStatusHistoryController {
         offset: request.query.offset,
       };
       const result = await this.getStatusHistoryHandler.handle(query);
-      return ResponseHelper.ok(reply, "Status history retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Status history retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

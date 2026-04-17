@@ -79,7 +79,7 @@ export class OrderAddressController {
     try {
       const query: GetOrderAddressQuery = { orderId: request.params.orderId };
       const result = await this.getAddressesHandler.handle(query);
-      return ResponseHelper.ok(reply, "Order addresses retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Order addresses retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

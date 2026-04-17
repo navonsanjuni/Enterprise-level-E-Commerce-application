@@ -85,7 +85,7 @@ export class BackorderController {
     try {
       const query: GetBackorderQuery = { orderItemId: request.params.orderItemId };
       const result = await this.getBackorderHandler.handle(query);
-      return ResponseHelper.ok(reply, "Backorder retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Backorder retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -104,7 +104,7 @@ export class BackorderController {
         filterType: request.query.filterType,
       };
       const result = await this.listBackordersHandler.handle(query);
-      return ResponseHelper.ok(reply, "Backorders retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Backorders retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

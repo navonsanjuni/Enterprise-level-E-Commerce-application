@@ -80,7 +80,7 @@ export class OrderItemController {
     try {
       const query: ListOrderItemsQuery = { orderId: request.params.orderId };
       const result = await this.listOrderItemsHandler.handle(query);
-      return ResponseHelper.ok(reply, "Order items retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Order items retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -93,7 +93,7 @@ export class OrderItemController {
     try {
       const query: GetOrderItemQuery = { itemId: request.params.itemId };
       const result = await this.getOrderItemHandler.handle(query);
-      return ResponseHelper.ok(reply, "Order item retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Order item retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

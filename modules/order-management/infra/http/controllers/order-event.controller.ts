@@ -74,7 +74,7 @@ export class OrderEventController {
         sortOrder: request.query.sortOrder,
       };
       const result = await this.listOrderEventsHandler.handle(query);
-      return ResponseHelper.ok(reply, "Order events retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Order events retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -87,7 +87,7 @@ export class OrderEventController {
     try {
       const query: GetOrderEventQuery = { eventId: request.params.eventId };
       const result = await this.getOrderEventHandler.handle(query);
-      return ResponseHelper.ok(reply, "Order event retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Order event retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }

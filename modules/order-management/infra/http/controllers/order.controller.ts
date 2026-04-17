@@ -92,18 +92,14 @@ export class OrderController {
     try {
       const result = await this.getOrderHandler.handle({ orderId: request.params.orderId });
 
-      if (!result.success || !result.data) {
-        return ResponseHelper.notFound(reply, "Order not found");
-      }
-
       const { userId: requesterId, role: userRole } = request.user;
       const isAdminOrStaff = STAFF_ROLES.includes(userRole ?? "");
 
-      if (!isAdminOrStaff && result.data.userId && requesterId && result.data.userId !== requesterId) {
+      if (!isAdminOrStaff && result.userId && requesterId && result.userId !== requesterId) {
         return ResponseHelper.forbidden(reply, "You are not allowed to view this order");
       }
 
-      return ResponseHelper.ok(reply, "Order retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Order retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -116,18 +112,14 @@ export class OrderController {
     try {
       const result = await this.getOrderHandler.handle({ orderNumber: request.params.orderNumber });
 
-      if (!result.success || !result.data) {
-        return ResponseHelper.notFound(reply, "Order not found");
-      }
-
       const { userId: requesterId, role: userRole } = request.user;
       const isAdminOrStaff = STAFF_ROLES.includes(userRole ?? "");
 
-      if (!isAdminOrStaff && result.data.userId && requesterId && result.data.userId !== requesterId) {
+      if (!isAdminOrStaff && result.userId && requesterId && result.userId !== requesterId) {
         return ResponseHelper.forbidden(reply, "You are not allowed to view this order");
       }
 
-      return ResponseHelper.ok(reply, "Order retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Order retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -187,7 +179,7 @@ export class OrderController {
         sortOrder,
       });
 
-      return ResponseHelper.ok(reply, "Orders retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Orders retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -288,11 +280,7 @@ export class OrderController {
 
       const result = await this.trackOrderHandler.handle({ orderNumber, contact, trackingNumber });
 
-      if (!result.success || !result.data) {
-        return ResponseHelper.notFound(reply, "Order not found");
-      }
-
-      return ResponseHelper.ok(reply, "Order tracking retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Order tracking retrieved successfully", result);
     } catch (error: unknown) {
       if (error instanceof Error && error.message === "CONTACT_MISMATCH") {
         return ResponseHelper.forbidden(reply, "The email or phone number does not match our records for this order.");

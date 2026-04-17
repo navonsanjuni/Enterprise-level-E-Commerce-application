@@ -85,7 +85,7 @@ export class PreorderController {
     try {
       const query: GetPreorderQuery = { orderItemId: request.params.orderItemId };
       const result = await this.getPreorderHandler.handle(query);
-      return ResponseHelper.ok(reply, "Preorder retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Preorder retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
@@ -104,7 +104,7 @@ export class PreorderController {
         filterType: request.query.filterType,
       };
       const result = await this.listPreordersHandler.handle(query);
-      return ResponseHelper.ok(reply, "Preorders retrieved successfully", result.data);
+      return ResponseHelper.ok(reply, "Preorders retrieved successfully", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
