@@ -17,6 +17,8 @@ export interface CartItemProps {
   appliedPromos: AppliedPromos;
   isGift: boolean;
   giftMessage?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateCartItemData {
@@ -38,6 +40,8 @@ export interface CartItemEntityData {
   appliedPromos: PromoData[];
   isGift: boolean;
   giftMessage?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // ============================================================================
@@ -56,6 +60,8 @@ export interface CartItemDTO {
   subtotal: number;
   discountAmount: number;
   totalPrice: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ============================================================================
@@ -74,6 +80,7 @@ export class CartItem {
       throw new DomainValidationError("Gift message is required for gift items");
     }
 
+    const now = new Date();
     return new CartItem({
       id: randomUUID(),
       cartId: data.cartId,
@@ -83,6 +90,8 @@ export class CartItem {
       appliedPromos: AppliedPromos.fromArray(data.appliedPromos || []),
       isGift: data.isGift || false,
       giftMessage: data.giftMessage,
+      createdAt: now,
+      updatedAt: now,
     });
   }
 
@@ -96,6 +105,8 @@ export class CartItem {
       appliedPromos: AppliedPromos.fromArray(data.appliedPromos),
       isGift: data.isGift,
       giftMessage: data.giftMessage,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
     });
   }
 
@@ -132,9 +143,18 @@ export class CartItem {
     return this.props.giftMessage;
   }
 
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+
   // Business methods
   updateQuantity(newQuantity: number): void {
     this.props.quantity = Quantity.fromNumber(newQuantity);
+    this.props.updatedAt = new Date();
   }
 
   incrementQuantity(amount: number = 1): void {
@@ -147,14 +167,17 @@ export class CartItem {
 
   addPromo(promo: PromoData): void {
     this.props.appliedPromos = this.props.appliedPromos.addPromo(promo);
+    this.props.updatedAt = new Date();
   }
 
   removePromo(promoId: string): void {
     this.props.appliedPromos = this.props.appliedPromos.removePromo(promoId);
+    this.props.updatedAt = new Date();
   }
 
   clearPromos(): void {
     this.props.appliedPromos = AppliedPromos.empty();
+    this.props.updatedAt = new Date();
   }
 
   markAsGift(giftMessage: string): void {
@@ -163,11 +186,13 @@ export class CartItem {
     }
     this.props.isGift = true;
     this.props.giftMessage = giftMessage.trim();
+    this.props.updatedAt = new Date();
   }
 
   unmarkAsGift(): void {
     this.props.isGift = false;
     this.props.giftMessage = undefined;
+    this.props.updatedAt = new Date();
   }
 
   updateGiftMessage(giftMessage: string): void {
@@ -178,6 +203,7 @@ export class CartItem {
       throw new DomainValidationError("Gift message cannot be empty");
     }
     this.props.giftMessage = giftMessage.trim();
+    this.props.updatedAt = new Date();
   }
 
   // Price calculations
@@ -224,6 +250,8 @@ export class CartItem {
       appliedPromos: this.props.appliedPromos.getValue(),
       isGift: this.props.isGift,
       giftMessage: this.props.giftMessage,
+      createdAt: this.props.createdAt,
+      updatedAt: this.props.updatedAt,
     };
   }
 
@@ -240,6 +268,8 @@ export class CartItem {
       subtotal: item.subtotal,
       discountAmount: item.discountAmount,
       totalPrice: item.totalPrice,
+      createdAt: item.props.createdAt.toISOString(),
+      updatedAt: item.props.updatedAt.toISOString(),
     };
   }
 }

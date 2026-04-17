@@ -1,7 +1,7 @@
-import { AggregateRoot } from '../../../../packages/core/src/domain/aggregate-root';
-import { DomainEvent } from '../../../../packages/core/src/domain/events/domain-event';
-import { PromotionId } from '../value-objects/promotion-id.vo';
-import { PromotionStatus } from '../value-objects/promotion-status.vo';
+import { AggregateRoot } from "../../../../packages/core/src/domain/aggregate-root";
+import { DomainEvent } from "../../../../packages/core/src/domain/events/domain-event";
+import { PromotionId } from "../value-objects/promotion-id.vo";
+import { PromotionStatus } from "../value-objects/promotion-status.vo";
 
 // ============================================================================
 // 1. Domain Events
@@ -11,10 +11,12 @@ export class PromotionCreatedEvent extends DomainEvent {
     public readonly promoId: string,
     public readonly code: string | null,
   ) {
-    super(promoId, 'Promotion');
+    super(promoId, "Promotion");
   }
 
-  get eventType(): string { return 'promotion.created'; }
+  get eventType(): string {
+    return "promotion.created";
+  }
 
   getPayload(): Record<string, unknown> {
     return { promoId: this.promoId, code: this.code };
@@ -26,10 +28,12 @@ export class PromotionStatusChangedEvent extends DomainEvent {
     public readonly promoId: string,
     public readonly status: string,
   ) {
-    super(promoId, 'Promotion');
+    super(promoId, "Promotion");
   }
 
-  get eventType(): string { return 'promotion.status_changed'; }
+  get eventType(): string {
+    return "promotion.status_changed";
+  }
 
   getPayload(): Record<string, unknown> {
     return { promoId: this.promoId, status: this.status };
@@ -60,6 +64,8 @@ export interface PromotionProps {
   endsAt: Date | null;
   usageLimit: number | null;
   status: PromotionStatus;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // ============================================================================
@@ -73,28 +79,33 @@ export interface PromotionDTO {
   endsAt: string | null;
   usageLimit: number | null;
   status: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ============================================================================
 // 5. Entity Class
 // ============================================================================
 export class Promotion extends AggregateRoot {
-
   private constructor(private props: PromotionProps) {
     super();
   }
 
-  static create(params: Omit<PromotionProps, 'id' | 'status'>): Promotion {
+  static create(
+    params: Omit<PromotionProps, "id" | "status" | "createdAt" | "updatedAt">,
+  ): Promotion {
+    const now = new Date();
     const entity = new Promotion({
       ...params,
       id: PromotionId.create(),
       status: PromotionStatus.active(),
+      createdAt: now,
+      updatedAt: now,
     });
 
-    entity.addDomainEvent(new PromotionCreatedEvent(
-      entity.props.id.getValue(),
-      entity.props.code,
-    ));
+    entity.addDomainEvent(
+      new PromotionCreatedEvent(entity.props.id.getValue(), entity.props.code),
+    );
 
     return entity;
   }
@@ -103,13 +114,33 @@ export class Promotion extends AggregateRoot {
     return new Promotion(props);
   }
 
-  get id(): PromotionId { return this.props.id; }
-  get code(): string | null { return this.props.code; }
-  get rule(): PromotionRule { return this.props.rule; }
-  get startsAt(): Date | null { return this.props.startsAt; }
-  get endsAt(): Date | null { return this.props.endsAt; }
-  get usageLimit(): number | null { return this.props.usageLimit; }
-  get status(): PromotionStatus { return this.props.status; }
+  get id(): PromotionId {
+    return this.props.id;
+  }
+  get code(): string | null {
+    return this.props.code;
+  }
+  get rule(): PromotionRule {
+    return this.props.rule;
+  }
+  get startsAt(): Date | null {
+    return this.props.startsAt;
+  }
+  get endsAt(): Date | null {
+    return this.props.endsAt;
+  }
+  get usageLimit(): number | null {
+    return this.props.usageLimit;
+  }
+  get status(): PromotionStatus {
+    return this.props.status;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   isValid(now: Date = new Date()): boolean {
     if (!this.props.status.isActive()) return false;
@@ -120,17 +151,26 @@ export class Promotion extends AggregateRoot {
 
   deactivate(): void {
     this.props.status = PromotionStatus.inactive();
-    this.addDomainEvent(new PromotionStatusChangedEvent(this.props.id.getValue(), 'inactive'));
+    this.props.updatedAt = new Date();
+    this.addDomainEvent(
+      new PromotionStatusChangedEvent(this.props.id.getValue(), "inactive"),
+    );
   }
 
   activate(): void {
     this.props.status = PromotionStatus.active();
-    this.addDomainEvent(new PromotionStatusChangedEvent(this.props.id.getValue(), 'active'));
+    this.props.updatedAt = new Date();
+    this.addDomainEvent(
+      new PromotionStatusChangedEvent(this.props.id.getValue(), "active"),
+    );
   }
 
   expire(): void {
     this.props.status = PromotionStatus.expired();
-    this.addDomainEvent(new PromotionStatusChangedEvent(this.props.id.getValue(), 'expired'));
+    this.props.updatedAt = new Date();
+    this.addDomainEvent(
+      new PromotionStatusChangedEvent(this.props.id.getValue(), "expired"),
+    );
   }
 
   equals(other: Promotion): boolean {
@@ -142,10 +182,14 @@ export class Promotion extends AggregateRoot {
       id: entity.props.id.getValue(),
       code: entity.props.code,
       rule: entity.props.rule,
-      startsAt: entity.props.startsAt ? entity.props.startsAt.toISOString() : null,
+      startsAt: entity.props.startsAt
+        ? entity.props.startsAt.toISOString()
+        : null,
       endsAt: entity.props.endsAt ? entity.props.endsAt.toISOString() : null,
       usageLimit: entity.props.usageLimit,
       status: entity.props.status.getValue(),
+      createdAt: entity.props.createdAt.toISOString(),
+      updatedAt: entity.props.updatedAt.toISOString(),
     };
   }
 }

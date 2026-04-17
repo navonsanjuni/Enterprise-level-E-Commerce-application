@@ -41,6 +41,8 @@ export interface StockAlertProps {
   type: AlertTypeVO;
   triggeredAt: Date;
   resolvedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface StockAlertDTO {
@@ -50,6 +52,8 @@ export interface StockAlertDTO {
   triggeredAt: string;
   resolvedAt?: string;
   isResolved: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ── Entity ─────────────────────────────────────────────────────────────
@@ -63,11 +67,14 @@ export class StockAlert extends AggregateRoot {
     variantId: string;
     type: string;
   }): StockAlert {
+    const now = new Date();
     const alert = new StockAlert({
       alertId: AlertId.create(),
       variantId: params.variantId,
       type: AlertTypeVO.create(params.type),
-      triggeredAt: new Date(),
+      triggeredAt: now,
+      createdAt: now,
+      updatedAt: now,
     });
     alert.addDomainEvent(
       new StockAlertCreatedEvent(
@@ -90,6 +97,8 @@ export class StockAlert extends AggregateRoot {
   get type(): AlertTypeVO { return this.props.type; }
   get triggeredAt(): Date { return this.props.triggeredAt; }
   get resolvedAt(): Date | undefined { return this.props.resolvedAt; }
+  get createdAt(): Date { return this.props.createdAt; }
+  get updatedAt(): Date { return this.props.updatedAt; }
 
   // ── Business Logic ─────────────────────────────────────────────────
 
@@ -102,6 +111,7 @@ export class StockAlert extends AggregateRoot {
       throw new InvalidOperationError("Alert is already resolved");
     }
     this.props.resolvedAt = resolvedAt;
+    this.props.updatedAt = new Date();
     this.addDomainEvent(
       new StockAlertResolvedEvent(
         this.props.alertId.getValue(),
@@ -124,6 +134,8 @@ export class StockAlert extends AggregateRoot {
       triggeredAt: entity.props.triggeredAt.toISOString(),
       resolvedAt: entity.props.resolvedAt?.toISOString(),
       isResolved: entity.isResolved(),
+      createdAt: entity.props.createdAt.toISOString(),
+      updatedAt: entity.props.updatedAt.toISOString(),
     };
   }
 }
