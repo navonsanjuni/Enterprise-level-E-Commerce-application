@@ -8,7 +8,6 @@ import {
   AddressType,
 } from "../value-objects/address.vo";
 
-export { AddressId };
 
 // ── Domain Events ──────────────────────────────────────────────────────
 

@@ -5,9 +5,26 @@ export enum LoyaltyTier {
   VIP_STYLIST = 'VIP_STYLIST',
 }
 
-export enum LoyaltyReasonEnum {
-  PURCHASE = "purchase",
-  REVIEW = "review",
-  GOODWILL = "goodwill",
-  REFUND = "refund",
+export enum LoyaltyTransactionType {
+  EARN = 'EARN',
+  REDEEM = 'REDEEM',
+  EXPIRE = 'EXPIRE',
+  ADJUST = 'ADJUST',
+}
+
+export enum LoyaltyTransactionReason {
+  PURCHASE = 'PURCHASE',
+  SIGNUP = 'SIGNUP',
+  REVIEW = 'REVIEW',
+  STYLE_QUIZ = 'STYLE_QUIZ',
+  OUTFIT_PHOTO = 'OUTFIT_PHOTO',
+  SOCIAL_SHARE = 'SOCIAL_SHARE',
+  BIRTHDAY = 'BIRTHDAY',
+  REFERRAL = 'REFERRAL',
+  GOODWILL = 'GOODWILL',
+  REFUND = 'REFUND',
+  DISCOUNT_REDEMPTION = 'DISCOUNT_REDEMPTION',
+  PRODUCT_REDEMPTION = 'PRODUCT_REDEMPTION',
+  EXPIRY = 'EXPIRY',
+  ADMIN_ADJUSTMENT = 'ADMIN_ADJUSTMENT',
 }

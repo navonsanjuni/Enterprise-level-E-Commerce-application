@@ -5,7 +5,6 @@ import { SocialLoginId } from '../value-objects/social-login-id';
 import { DomainValidationError, InvalidOperationError } from '../errors/user-management.errors';
 import { SocialProvider } from '../enums/social-provider.enum';
 
-export { SocialProvider, SocialLoginId };
 
 // ── Domain Events ──────────────────────────────────────────────────────
 
@@ -33,6 +32,7 @@ export interface SocialLoginProps {
   provider: SocialProvider;
   providerUserId: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 // ============================================================================
@@ -46,6 +46,7 @@ export interface SocialLoginDTO {
   providerUserId: string;
   displayName: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 // ============================================================================
@@ -59,19 +60,35 @@ export class SocialLogin extends AggregateRoot {
 
   // --- Static factories ---
 
+  private static validateProvider(provider: SocialProvider): void {
+    if (!SocialProvider.getAllValues().includes(provider)) {
+      throw new InvalidOperationError(`Invalid social provider: ${provider}`);
+    }
+  }
+
+  private static validateProviderUserId(providerUserId: string): void {
+    if (!providerUserId || providerUserId.trim() === '') {
+      throw new DomainValidationError('Provider user ID cannot be empty');
+    }
+  }
+
   static create(params: {
     userId: string;
     provider: SocialProvider;
     providerUserId: string;
   }): SocialLogin {
+    SocialLogin.validateProvider(params.provider);
+    SocialLogin.validateProviderUserId(params.providerUserId);
+
+    const now = new Date();
     const socialLogin = new SocialLogin({
       id: SocialLoginId.create(),
       userId: UserId.fromString(params.userId),
       provider: params.provider,
       providerUserId: params.providerUserId,
-      createdAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
     });
-    socialLogin.validate();
     socialLogin.addDomainEvent(
       new SocialLoginConnectedEvent(
         socialLogin.props.id.getValue(),
@@ -93,6 +110,7 @@ export class SocialLogin extends AggregateRoot {
   get provider(): SocialProvider { return this.props.provider; }
   get providerUserId(): string { return this.props.providerUserId; }
   get createdAt(): Date { return this.props.createdAt; }
+  get updatedAt(): Date { return this.props.updatedAt; }
 
   // --- Business methods ---
 
@@ -106,15 +124,6 @@ export class SocialLogin extends AggregateRoot {
 
   getDisplayName(): string {
     return `${SocialProvider.getDisplayName(this.props.provider)} User (${this.props.providerUserId.substring(0, 8)}...)`;
-  }
-
-  validate(): void {
-    if (!SocialProvider.getAllValues().includes(this.props.provider)) {
-      throw new InvalidOperationError(`Invalid social provider: ${this.props.provider}`);
-    }
-    if (!this.props.providerUserId || this.props.providerUserId.trim() === '') {
-      throw new DomainValidationError('Provider user ID cannot be empty');
-    }
   }
 
   isSameProviderConnection(provider: SocialProvider, providerUserId: string): boolean {
@@ -135,6 +144,7 @@ export class SocialLogin extends AggregateRoot {
       providerUserId: socialLogin.providerUserId,
       displayName: socialLogin.getDisplayName(),
       createdAt: socialLogin.createdAt.toISOString(),
+      updatedAt: socialLogin.updatedAt.toISOString(),
     };
   }
 }
