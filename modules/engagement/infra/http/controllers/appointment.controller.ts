@@ -118,7 +118,7 @@ export class AppointmentController {
       const result = await this.cancelAppointmentHandler.handle({
         appointmentId: request.params.appointmentId,
       });
-      return ResponseHelper.fromCommand(reply, result, "Appointment cancelled successfully", undefined, 204);
+      return ResponseHelper.fromCommand(reply, result, "Appointment cancelled successfully");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
