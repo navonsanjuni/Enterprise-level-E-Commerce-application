@@ -53,6 +53,7 @@ import {
   GetPendingReceivalHandler,
   CreateStockAlertHandler,
   ResolveStockAlertHandler,
+  DeleteStockAlertHandler,
   GetStockAlertHandler,
   GetActiveAlertsHandler,
   ListStockAlertsHandler,
@@ -151,6 +152,7 @@ export async function registerInventoryManagementRoutes(
   const alertController = new StockAlertController(
     new CreateStockAlertHandler(services.alertService),
     new ResolveStockAlertHandler(services.alertService),
+    new DeleteStockAlertHandler(services.alertService),
     new GetStockAlertHandler(services.alertService),
     new GetActiveAlertsHandler(services.alertService),
     new ListStockAlertsHandler(services.alertService),
