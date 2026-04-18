@@ -9,6 +9,8 @@ import {
 } from "../../../application";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 import {
+  LocationParams,
+  ListLocationsQuery,
   CreateLocationBody,
   UpdateLocationBody,
 } from "../validation/location.schema";
@@ -23,7 +25,7 @@ export class LocationController {
   ) {}
 
   async getLocation(
-    request: AuthenticatedRequest<{ Params: { locationId: string } }>,
+    request: AuthenticatedRequest<{ Params: LocationParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -36,9 +38,7 @@ export class LocationController {
   }
 
   async listLocations(
-    request: AuthenticatedRequest<{
-      Querystring: { limit?: number; offset?: number; type?: string };
-    }>,
+    request: AuthenticatedRequest<{ Querystring: ListLocationsQuery }>,
     reply: FastifyReply,
   ) {
     try {
@@ -76,10 +76,7 @@ export class LocationController {
   }
 
   async updateLocation(
-    request: AuthenticatedRequest<{
-      Params: { locationId: string };
-      Body: UpdateLocationBody;
-    }>,
+    request: AuthenticatedRequest<{ Params: LocationParams; Body: UpdateLocationBody }>,
     reply: FastifyReply,
   ) {
     try {
@@ -93,7 +90,7 @@ export class LocationController {
   }
 
   async deleteLocation(
-    request: AuthenticatedRequest<{ Params: { locationId: string } }>,
+    request: AuthenticatedRequest<{ Params: LocationParams }>,
     reply: FastifyReply,
   ) {
     try {

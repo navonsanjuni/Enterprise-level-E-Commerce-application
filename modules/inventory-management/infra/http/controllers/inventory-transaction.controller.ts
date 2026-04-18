@@ -6,6 +6,12 @@ import {
   GetTransactionHandler,
 } from "../../../application";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
+import {
+  TransactionParams,
+  TransactionVariantParams,
+  TransactionsByVariantQuery,
+  ListTransactionsQuery,
+} from "../validation/inventory-transaction.schema";
 
 export class InventoryTransactionController {
   constructor(
@@ -15,7 +21,7 @@ export class InventoryTransactionController {
   ) {}
 
   async getTransaction(
-    request: AuthenticatedRequest<{ Params: { transactionId: string } }>,
+    request: AuthenticatedRequest<{ Params: TransactionParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -28,10 +34,7 @@ export class InventoryTransactionController {
   }
 
   async getTransactionsByVariant(
-    request: AuthenticatedRequest<{
-      Params: { variantId: string };
-      Querystring: { locationId?: string; limit?: number; offset?: number };
-    }>,
+    request: AuthenticatedRequest<{ Params: TransactionVariantParams; Querystring: TransactionsByVariantQuery }>,
     reply: FastifyReply,
   ) {
     try {
@@ -50,9 +53,7 @@ export class InventoryTransactionController {
   }
 
   async listTransactions(
-    request: AuthenticatedRequest<{
-      Querystring: { variantId?: string; locationId?: string; limit?: number; offset?: number };
-    }>,
+    request: AuthenticatedRequest<{ Querystring: ListTransactionsQuery }>,
     reply: FastifyReply,
   ) {
     try {

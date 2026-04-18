@@ -18,7 +18,10 @@ import {
 } from "../../../application";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 import {
+  POParams,
+  POItemParams,
   ListPurchaseOrdersQuery,
+  CreatePurchaseOrderBody,
   CreatePurchaseOrderWithItemsBody,
   UpdatePOStatusBody,
   UpdatePOEtaBody,
@@ -46,7 +49,7 @@ export class PurchaseOrderController {
   ) {}
 
   async getPurchaseOrder(
-    request: AuthenticatedRequest<{ Params: { poId: string } }>,
+    request: AuthenticatedRequest<{ Params: POParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -59,9 +62,7 @@ export class PurchaseOrderController {
   }
 
   async createPurchaseOrder(
-    request: AuthenticatedRequest<{
-      Body: { supplierId: string; eta?: string };
-    }>,
+    request: AuthenticatedRequest<{ Body: CreatePurchaseOrderBody }>,
     reply: FastifyReply,
   ) {
     try {
@@ -107,7 +108,7 @@ export class PurchaseOrderController {
   }
 
   async getPOItems(
-    request: AuthenticatedRequest<{ Params: { poId: string } }>,
+    request: AuthenticatedRequest<{ Params: POParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -120,10 +121,7 @@ export class PurchaseOrderController {
   }
 
   async addPOItem(
-    request: AuthenticatedRequest<{
-      Params: { poId: string };
-      Body: AddPOItemBody;
-    }>,
+    request: AuthenticatedRequest<{ Params: POParams; Body: AddPOItemBody }>,
     reply: FastifyReply,
   ) {
     try {
@@ -137,10 +135,7 @@ export class PurchaseOrderController {
   }
 
   async updatePOItem(
-    request: AuthenticatedRequest<{
-      Params: { poId: string; variantId: string };
-      Body: UpdatePOItemBody;
-    }>,
+    request: AuthenticatedRequest<{ Params: POItemParams; Body: UpdatePOItemBody }>,
     reply: FastifyReply,
   ) {
     try {
@@ -154,9 +149,7 @@ export class PurchaseOrderController {
   }
 
   async removePOItem(
-    request: AuthenticatedRequest<{
-      Params: { poId: string; variantId: string };
-    }>,
+    request: AuthenticatedRequest<{ Params: POItemParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -169,10 +162,7 @@ export class PurchaseOrderController {
   }
 
   async updatePOStatus(
-    request: AuthenticatedRequest<{
-      Params: { poId: string };
-      Body: UpdatePOStatusBody;
-    }>,
+    request: AuthenticatedRequest<{ Params: POParams; Body: UpdatePOStatusBody }>,
     reply: FastifyReply,
   ) {
     try {
@@ -186,10 +176,7 @@ export class PurchaseOrderController {
   }
 
   async receivePOItems(
-    request: AuthenticatedRequest<{
-      Params: { poId: string };
-      Body: ReceivePOItemsBody;
-    }>,
+    request: AuthenticatedRequest<{ Params: POParams; Body: ReceivePOItemsBody }>,
     reply: FastifyReply,
   ) {
     try {
@@ -221,10 +208,7 @@ export class PurchaseOrderController {
   }
 
   async updatePOEta(
-    request: AuthenticatedRequest<{
-      Params: { poId: string };
-      Body: UpdatePOEtaBody;
-    }>,
+    request: AuthenticatedRequest<{ Params: POParams; Body: UpdatePOEtaBody }>,
     reply: FastifyReply,
   ) {
     try {
@@ -238,7 +222,7 @@ export class PurchaseOrderController {
   }
 
   async deletePurchaseOrder(
-    request: AuthenticatedRequest<{ Params: { poId: string } }>,
+    request: AuthenticatedRequest<{ Params: POParams }>,
     reply: FastifyReply,
   ) {
     try {

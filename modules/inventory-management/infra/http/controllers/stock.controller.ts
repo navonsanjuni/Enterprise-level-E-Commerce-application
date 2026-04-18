@@ -17,6 +17,8 @@ import {
 } from "../../../application";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
 import {
+  StockParams,
+  VariantParams,
   AddStockBody,
   AdjustStockBody,
   TransferStockBody,
@@ -53,9 +55,7 @@ export class StockController {
   }
 
   async getStock(
-    request: AuthenticatedRequest<{
-      Params: { variantId: string; locationId: string };
-    }>,
+    request: AuthenticatedRequest<{ Params: StockParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -68,9 +68,7 @@ export class StockController {
   }
 
   async getStockByVariant(
-    request: AuthenticatedRequest<{
-      Params: { variantId: string };
-    }>,
+    request: AuthenticatedRequest<{ Params: VariantParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -83,9 +81,7 @@ export class StockController {
   }
 
   async getTotalAvailableStock(
-    request: AuthenticatedRequest<{
-      Params: { variantId: string };
-    }>,
+    request: AuthenticatedRequest<{ Params: VariantParams }>,
     reply: FastifyReply,
   ) {
     try {
@@ -202,10 +198,7 @@ export class StockController {
   }
 
   async setStockThresholds(
-    request: AuthenticatedRequest<{
-      Params: { variantId: string; locationId: string };
-      Body: SetStockThresholdsBody;
-    }>,
+    request: AuthenticatedRequest<{ Params: StockParams; Body: SetStockThresholdsBody }>,
     reply: FastifyReply,
   ) {
     try {
