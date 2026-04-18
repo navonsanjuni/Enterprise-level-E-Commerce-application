@@ -106,6 +106,9 @@ export class OrderManagementService {
   async createOrder(params: CreateOrderParams): Promise<OrderDTO> {
     const defaultLocationId = this.getDefaultWarehouseId();
 
+    // Build items using a placeholder orderId — the real orderId is assigned
+    // after Order.create() generates it, then items are re-stamped below.
+    const placeholderOrderId = OrderId.create().getValue();
     const items: OrderItem[] = [];
     let subtotal = 0;
 
@@ -138,9 +141,8 @@ export class OrderManagementService {
         price: product.getPrice().getValue(),
       });
 
-      const orderId = OrderId.create();
       const orderItem = OrderItem.create({
-        orderId: orderId.getValue(),
+        orderId: placeholderOrderId,
         variantId: itemData.variantId,
         quantity: itemData.quantity,
         productSnapshot,
@@ -170,13 +172,19 @@ export class OrderManagementService {
       currency: Currency.fromString(params.currency ?? "USD"),
     });
 
+    // Stamp the real orderId onto all items now that Order.create() has assigned it
+    const realOrderId = order.id.getValue();
+    for (const item of items) {
+      item.setOrderId(realOrderId);
+    }
+
     const billingSnap = AddressSnapshot.create(
       params.billingAddress ?? params.shippingAddress,
     );
     const shippingSnap = AddressSnapshot.create(params.shippingAddress);
 
     const address = OrderAddress.create({
-      orderId: order.id.getValue(),
+      orderId: realOrderId,
       billingAddress: billingSnap,
       shippingAddress: shippingSnap,
     });
@@ -184,13 +192,15 @@ export class OrderManagementService {
     await this.orderRepository.save(order);
     await this.orderAddressRepository.save(address);
 
-    for (const itemData of params.items) {
-      await this.stockManagementService.reserveStock(
-        itemData.variantId,
-        defaultLocationId,
-        itemData.quantity,
-      );
-    }
+    await Promise.all(
+      params.items.map((itemData) =>
+        this.stockManagementService.reserveStock(
+          itemData.variantId,
+          defaultLocationId,
+          itemData.quantity,
+        ),
+      ),
+    );
 
     const statusHistory = OrderStatusHistory.create({
       orderId: order.id.getValue(),
@@ -330,9 +340,10 @@ export class OrderManagementService {
   }
 
   async deleteOrder(id: string): Promise<void> {
-    const order = await this.orderRepository.findById(OrderId.fromString(id));
+    const orderId = OrderId.fromString(id);
+    const order = await this.orderRepository.findById(orderId);
     if (!order) throw new OrderNotFoundError(id);
-    await this.orderRepository.delete(OrderId.fromString(id));
+    await this.orderRepository.delete(orderId);
   }
 
   // ============================================================================
@@ -377,13 +388,6 @@ export class OrderManagementService {
     if (!order) throw new OrderNotFoundError(orderId);
 
     const existing = await this.orderAddressRepository.findByOrderId(orderId);
-    const address =
-      existing ??
-      OrderAddress.create({
-        orderId,
-        billingAddress: AddressSnapshot.create(billingAddress),
-        shippingAddress: AddressSnapshot.create(shippingAddress),
-      });
 
     if (existing) {
       existing.updateBillingAddress(AddressSnapshot.create(billingAddress));
@@ -392,6 +396,11 @@ export class OrderManagementService {
       return OrderAddress.toDTO(existing);
     }
 
+    const address = OrderAddress.create({
+      orderId,
+      billingAddress: AddressSnapshot.create(billingAddress),
+      shippingAddress: AddressSnapshot.create(shippingAddress),
+    });
     await this.orderAddressRepository.save(address);
     return OrderAddress.toDTO(address);
   }
@@ -651,7 +660,9 @@ export class OrderManagementService {
       };
     }
 
-    throw new Error("INVALID_TRACK_REQUEST");
+    throw new DomainValidationError(
+      "Provide either orderNumber + contact, or a trackingNumber",
+    );
   }
 
   private getDefaultWarehouseId(): string {
