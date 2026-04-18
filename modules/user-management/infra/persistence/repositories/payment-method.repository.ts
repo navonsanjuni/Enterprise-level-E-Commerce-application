@@ -55,7 +55,6 @@ export class PaymentMethodRepository
       providerRef: paymentMethod.providerRef,
       isDefault: paymentMethod.isDefault,
       createdAt: paymentMethod.createdAt,
-      updatedAt: paymentMethod.updatedAt,
     };
 
     const { id, userId, createdAt, ...update } = create;

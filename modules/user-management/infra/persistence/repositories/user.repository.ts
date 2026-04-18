@@ -204,7 +204,6 @@ export class UserRepository
         phoneVerified: user.phoneVerified,
         isGuest: user.isGuest,
         createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
       },
       update: {
         email: user.email.getValue(),
@@ -221,7 +220,6 @@ export class UserRepository
         emailVerified: user.emailVerified,
         phoneVerified: user.phoneVerified,
         isGuest: user.isGuest,
-        updatedAt: user.updatedAt,
       },
     };
   }
