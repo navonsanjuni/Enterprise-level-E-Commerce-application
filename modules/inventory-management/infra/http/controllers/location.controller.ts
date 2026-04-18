@@ -8,6 +8,10 @@ import {
   ListLocationsHandler,
 } from "../../../application";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
+import {
+  CreateLocationBody,
+  UpdateLocationBody,
+} from "../validation/location.schema";
 
 export class LocationController {
   constructor(
@@ -38,7 +42,8 @@ export class LocationController {
     reply: FastifyReply,
   ) {
     try {
-      const result = await this.listLocationsHandler.handle(request.query);
+      const { limit, offset, type } = request.query;
+      const result = await this.listLocationsHandler.handle({ limit, offset, type });
       return ResponseHelper.ok(reply, "Locations retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -46,19 +51,7 @@ export class LocationController {
   }
 
   async createLocation(
-    request: AuthenticatedRequest<{
-      Body: {
-        type: string;
-        name: string;
-        address?: {
-          street?: string;
-          city?: string;
-          state?: string;
-          postalCode?: string;
-          country?: string;
-        };
-      };
-    }>,
+    request: AuthenticatedRequest<{ Body: CreateLocationBody }>,
     reply: FastifyReply,
   ) {
     try {
@@ -85,7 +78,7 @@ export class LocationController {
   async updateLocation(
     request: AuthenticatedRequest<{
       Params: { locationId: string };
-      Body: { name?: string; address?: any };
+      Body: UpdateLocationBody;
     }>,
     reply: FastifyReply,
   ) {

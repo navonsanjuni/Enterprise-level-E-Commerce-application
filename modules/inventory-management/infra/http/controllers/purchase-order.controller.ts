@@ -17,6 +17,15 @@ import {
   UpdatePOEtaHandler,
 } from "../../../application";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
+import {
+  ListPurchaseOrdersQuery,
+  CreatePurchaseOrderWithItemsBody,
+  UpdatePOStatusBody,
+  UpdatePOEtaBody,
+  ReceivePOItemsBody,
+  AddPOItemBody,
+  UpdatePOItemBody,
+} from "../validation/purchase-order.schema";
 
 export class PurchaseOrderController {
   constructor(
@@ -56,7 +65,8 @@ export class PurchaseOrderController {
     reply: FastifyReply,
   ) {
     try {
-      const result = await this.createPurchaseOrderHandler.handle(request.body);
+      const { supplierId, eta } = request.body;
+      const result = await this.createPurchaseOrderHandler.handle({ supplierId, eta });
       return ResponseHelper.fromCommand(reply, result, "Purchase order created successfully", 201);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -64,17 +74,12 @@ export class PurchaseOrderController {
   }
 
   async createPurchaseOrderWithItems(
-    request: AuthenticatedRequest<{
-      Body: {
-        supplierId: string;
-        eta?: string;
-        items: Array<{ variantId: string; orderedQty: number }>;
-      };
-    }>,
+    request: AuthenticatedRequest<{ Body: CreatePurchaseOrderWithItemsBody }>,
     reply: FastifyReply,
   ) {
     try {
-      const result = await this.createPurchaseOrderWithItemsHandler.handle(request.body);
+      const { supplierId, eta, items } = request.body;
+      const result = await this.createPurchaseOrderWithItemsHandler.handle({ supplierId, eta, items });
       return ResponseHelper.fromCommand(reply, result, "Purchase order with items created successfully", 201);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -82,20 +87,19 @@ export class PurchaseOrderController {
   }
 
   async listPurchaseOrders(
-    request: AuthenticatedRequest<{
-      Querystring: {
-        limit?: number;
-        offset?: number;
-        status?: string;
-        supplierId?: string;
-        sortBy?: "createdAt" | "updatedAt" | "eta";
-        sortOrder?: "asc" | "desc";
-      };
-    }>,
+    request: AuthenticatedRequest<{ Querystring: ListPurchaseOrdersQuery }>,
     reply: FastifyReply,
   ) {
     try {
-      const result = await this.listPurchaseOrdersHandler.handle(request.query);
+      const { limit, offset, status, supplierId, sortBy, sortOrder } = request.query;
+      const result = await this.listPurchaseOrdersHandler.handle({
+        limit,
+        offset,
+        status,
+        supplierId,
+        sortBy,
+        sortOrder,
+      });
       return ResponseHelper.ok(reply, "Purchase orders retrieved", result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -118,7 +122,7 @@ export class PurchaseOrderController {
   async addPOItem(
     request: AuthenticatedRequest<{
       Params: { poId: string };
-      Body: { variantId: string; orderedQty: number };
+      Body: AddPOItemBody;
     }>,
     reply: FastifyReply,
   ) {
@@ -135,7 +139,7 @@ export class PurchaseOrderController {
   async updatePOItem(
     request: AuthenticatedRequest<{
       Params: { poId: string; variantId: string };
-      Body: { orderedQty: number };
+      Body: UpdatePOItemBody;
     }>,
     reply: FastifyReply,
   ) {
@@ -167,7 +171,7 @@ export class PurchaseOrderController {
   async updatePOStatus(
     request: AuthenticatedRequest<{
       Params: { poId: string };
-      Body: { status: string };
+      Body: UpdatePOStatusBody;
     }>,
     reply: FastifyReply,
   ) {
@@ -184,7 +188,7 @@ export class PurchaseOrderController {
   async receivePOItems(
     request: AuthenticatedRequest<{
       Params: { poId: string };
-      Body: { locationId: string; items: Array<{ variantId: string; receivedQty: number }> };
+      Body: ReceivePOItemsBody;
     }>,
     reply: FastifyReply,
   ) {
@@ -219,7 +223,7 @@ export class PurchaseOrderController {
   async updatePOEta(
     request: AuthenticatedRequest<{
       Params: { poId: string };
-      Body: { eta: string };
+      Body: UpdatePOEtaBody;
     }>,
     reply: FastifyReply,
   ) {

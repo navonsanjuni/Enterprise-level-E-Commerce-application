@@ -7,6 +7,10 @@ import {
   GetPOItemsHandler,
 } from "../../../application";
 import { ResponseHelper } from "@/api/src/shared/response.helper";
+import {
+  AddPOItemBody,
+  UpdatePOItemBody,
+} from "../validation/purchase-order.schema";
 
 export class PurchaseOrderItemController {
   constructor(
@@ -32,7 +36,7 @@ export class PurchaseOrderItemController {
   async addItem(
     request: AuthenticatedRequest<{
       Params: { poId: string };
-      Body: { variantId: string; orderedQty: number };
+      Body: AddPOItemBody;
     }>,
     reply: FastifyReply,
   ) {
@@ -49,7 +53,7 @@ export class PurchaseOrderItemController {
   async updateItem(
     request: AuthenticatedRequest<{
       Params: { poId: string; variantId: string };
-      Body: { orderedQty: number };
+      Body: UpdatePOItemBody;
     }>,
     reply: FastifyReply,
   ) {
