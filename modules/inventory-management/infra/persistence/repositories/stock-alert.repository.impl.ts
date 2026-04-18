@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
+import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
 import { StockAlert } from "../../../domain/entities/stock-alert.entity";
 import { AlertId } from "../../../domain/value-objects/alert-id.vo";
 import {
@@ -109,7 +110,7 @@ export class StockAlertRepositoryImpl
     limit?: number;
     offset?: number;
     includeResolved?: boolean;
-  }): Promise<{ alerts: StockAlert[]; total: number }> {
+  }): Promise<PaginatedResult<StockAlert>> {
     const { limit = 50, offset = 0, includeResolved = false } = options || {};
 
     const where = includeResolved ? {} : { resolvedAt: null };
@@ -124,10 +125,8 @@ export class StockAlertRepositoryImpl
       this.prisma.stockAlert.count({ where }),
     ]);
 
-    return {
-      alerts: rows.map((r) => this.toEntity(r)),
-      total,
-    };
+    const items = rows.map((r) => this.toEntity(r));
+    return { items, total, limit, offset, hasMore: offset + items.length < total };
   }
 
   async findActiveAlertsByVariant(variantId: string): Promise<StockAlert[]> {

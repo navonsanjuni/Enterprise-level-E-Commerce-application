@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
+import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
 import { Location } from "../../../domain/entities/location.entity";
 import { LocationId } from "../../../domain/value-objects/location-id.vo";
 import {
@@ -99,7 +100,7 @@ export class LocationRepositoryImpl
   async findAll(options?: {
     limit?: number;
     offset?: number;
-  }): Promise<{ locations: Location[]; total: number }> {
+  }): Promise<PaginatedResult<Location>> {
     const { limit = 50, offset = 0 } = options || {};
 
     const [rows, total] = await Promise.all([
@@ -111,10 +112,8 @@ export class LocationRepositoryImpl
       this.prisma.location.count(),
     ]);
 
-    return {
-      locations: rows.map((r) => this.toEntity(r)),
-      total,
-    };
+    const items = rows.map((r) => this.toEntity(r));
+    return { items, total, limit, offset, hasMore: offset + items.length < total };
   }
 
   async exists(locationId: LocationId): Promise<boolean> {

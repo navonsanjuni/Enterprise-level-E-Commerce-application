@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
+import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
 import { Stock } from "../../../domain/entities/stock.entity";
 import { StockLevel } from "../../../domain/value-objects/stock-level.vo";
 import { IStockRepository } from "../../../domain/repositories/stock.repository";
@@ -103,7 +104,7 @@ export class StockRepositoryImpl
     locationId?: string;
     sortBy?: "available" | "onHand" | "location" | "product";
     sortOrder?: "asc" | "desc";
-  }): Promise<{ stocks: Stock[]; total: number }> {
+  }): Promise<PaginatedResult<Stock>> {
     const {
       limit = 50,
       offset = 0,
@@ -224,15 +225,12 @@ export class StockRepositoryImpl
       });
     }
 
-    const finalTotal = stockEntities.length;
-    const paginatedStocks = shouldFetchAll
+    const finalTotal = shouldFetchAll ? stockEntities.length : total;
+    const items = shouldFetchAll
       ? stockEntities.slice(offset, offset + limit)
       : stockEntities;
 
-    return {
-      stocks: paginatedStocks,
-      total: shouldFetchAll ? finalTotal : total,
-    };
+    return { items, total: finalTotal, limit, offset, hasMore: offset + items.length < finalTotal };
   }
 
   async findLowStockItems(): Promise<Stock[]> {

@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
+import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
 import { Supplier } from "../../../domain/entities/supplier.entity";
 import { SupplierId } from "../../../domain/value-objects/supplier-id.vo";
 import { SupplierName } from "../../../domain/value-objects/supplier-name.vo";
@@ -80,7 +81,7 @@ export class SupplierRepositoryImpl
   async findAll(options?: {
     limit?: number;
     offset?: number;
-  }): Promise<{ suppliers: Supplier[]; total: number }> {
+  }): Promise<PaginatedResult<Supplier>> {
     const { limit = 50, offset = 0 } = options || {};
 
     const [rows, total] = await Promise.all([
@@ -92,10 +93,8 @@ export class SupplierRepositoryImpl
       this.prisma.supplier.count(),
     ]);
 
-    return {
-      suppliers: rows.map((r) => this.toEntity(r)),
-      total,
-    };
+    const items = rows.map((r) => this.toEntity(r));
+    return { items, total, limit, offset, hasMore: offset + items.length < total };
   }
 
   async exists(supplierId: SupplierId): Promise<boolean> {

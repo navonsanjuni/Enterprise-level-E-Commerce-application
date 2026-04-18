@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
+import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
 import { InventoryTransaction } from "../../../domain/entities/inventory-transaction.entity";
 import { TransactionId } from "../../../domain/value-objects/transaction-id.vo";
 import { TransactionReasonVO } from "../../../domain/value-objects/transaction-reason.vo";
@@ -65,7 +66,7 @@ export class InventoryTransactionRepositoryImpl
   async findByVariant(
     variantId: string,
     options?: InventoryTransactionPageOptions,
-  ): Promise<{ transactions: InventoryTransaction[]; total: number }> {
+  ): Promise<PaginatedResult<InventoryTransaction>> {
     const { limit = 50, offset = 0 } = options || {};
 
     const [rows, total] = await Promise.all([
@@ -78,13 +79,14 @@ export class InventoryTransactionRepositoryImpl
       this.prisma.inventoryTransaction.count({ where: { variantId } }),
     ]);
 
-    return { transactions: rows.map((r) => this.toEntity(r)), total };
+    const items = rows.map((r) => this.toEntity(r));
+    return { items, total, limit, offset, hasMore: offset + items.length < total };
   }
 
   async findByLocation(
     locationId: string,
     options?: InventoryTransactionPageOptions,
-  ): Promise<{ transactions: InventoryTransaction[]; total: number }> {
+  ): Promise<PaginatedResult<InventoryTransaction>> {
     const { limit = 50, offset = 0 } = options || {};
 
     const [rows, total] = await Promise.all([
@@ -97,14 +99,15 @@ export class InventoryTransactionRepositoryImpl
       this.prisma.inventoryTransaction.count({ where: { locationId } }),
     ]);
 
-    return { transactions: rows.map((r) => this.toEntity(r)), total };
+    const items = rows.map((r) => this.toEntity(r));
+    return { items, total, limit, offset, hasMore: offset + items.length < total };
   }
 
   async findByVariantAndLocation(
     variantId: string,
     locationId: string,
     options?: InventoryTransactionPageOptions,
-  ): Promise<{ transactions: InventoryTransaction[]; total: number }> {
+  ): Promise<PaginatedResult<InventoryTransaction>> {
     const { limit = 50, offset = 0 } = options || {};
 
     const [rows, total] = await Promise.all([
@@ -117,7 +120,8 @@ export class InventoryTransactionRepositoryImpl
       this.prisma.inventoryTransaction.count({ where: { variantId, locationId } }),
     ]);
 
-    return { transactions: rows.map((r) => this.toEntity(r)), total };
+    const items = rows.map((r) => this.toEntity(r));
+    return { items, total, limit, offset, hasMore: offset + items.length < total };
   }
 
   async findByReference(referenceId: string): Promise<InventoryTransaction[]> {
@@ -131,7 +135,7 @@ export class InventoryTransactionRepositoryImpl
 
   async findAll(
     options?: InventoryTransactionQueryOptions,
-  ): Promise<{ transactions: InventoryTransaction[]; total: number }> {
+  ): Promise<PaginatedResult<InventoryTransaction>> {
     const {
       limit = 50,
       offset = 0,
@@ -148,6 +152,7 @@ export class InventoryTransactionRepositoryImpl
       this.prisma.inventoryTransaction.count(),
     ]);
 
-    return { transactions: rows.map((r) => this.toEntity(r)), total };
+    const items = rows.map((r) => this.toEntity(r));
+    return { items, total, limit, offset, hasMore: offset + items.length < total };
   }
 }

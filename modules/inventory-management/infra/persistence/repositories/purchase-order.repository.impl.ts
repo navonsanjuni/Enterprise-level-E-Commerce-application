@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
+import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
 import { PurchaseOrder } from "../../../domain/entities/purchase-order.entity";
 import { PurchaseOrderId } from "../../../domain/value-objects/purchase-order-id.vo";
 import { SupplierId } from "../../../domain/value-objects/supplier-id.vo";
@@ -96,7 +97,7 @@ export class PurchaseOrderRepositoryImpl
     supplierId?: string;
     sortBy?: "createdAt" | "updatedAt" | "eta";
     sortOrder?: "asc" | "desc";
-  }): Promise<{ purchaseOrders: PurchaseOrder[]; total: number }> {
+  }): Promise<PaginatedResult<PurchaseOrder>> {
     const {
       limit = 50,
       offset = 0,
@@ -120,10 +121,8 @@ export class PurchaseOrderRepositoryImpl
       this.prisma.purchaseOrder.count({ where }),
     ]);
 
-    return {
-      purchaseOrders: rows.map((r) => this.toEntity(r)),
-      total,
-    };
+    const items = rows.map((r) => this.toEntity(r));
+    return { items, total, limit, offset, hasMore: offset + items.length < total };
   }
 
   async findOverduePurchaseOrders(): Promise<PurchaseOrder[]> {
