@@ -19,8 +19,8 @@ export class BackorderRepositoryImpl implements IBackorderRepository {
   private toEntity(row: BackorderDatabaseRow): Backorder {
     return Backorder.fromPersistence({
       orderItemId: row.orderItemId,
-      promisedEta: row.promisedEta || undefined,
-      notifiedAt: row.notifiedAt || undefined,
+      promisedEta: row.promisedEta ?? undefined,
+      notifiedAt: row.notifiedAt ?? undefined,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });
@@ -28,8 +28,8 @@ export class BackorderRepositoryImpl implements IBackorderRepository {
 
   async save(backorder: Backorder): Promise<void> {
     const data = {
-      promisedEta: backorder.promisedEta || null,
-      notifiedAt: backorder.notifiedAt || null,
+      promisedEta: backorder.promisedEta ?? null,
+      notifiedAt: backorder.notifiedAt ?? null,
     };
     await this.prisma.backorder.upsert({
       where: { orderItemId: backorder.orderItemId },

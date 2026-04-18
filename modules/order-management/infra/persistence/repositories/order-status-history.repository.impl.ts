@@ -26,7 +26,7 @@ export class OrderStatusHistoryRepositoryImpl implements IOrderStatusHistoryRepo
         ? OrderStatus.fromString(row.fromStatus)
         : undefined,
       toStatus: OrderStatus.fromString(row.toStatus),
-      changedBy: row.changedBy || undefined,
+      changedBy: row.changedBy ?? undefined,
       createdAt: row.changedAt,
       updatedAt: row.changedAt,
     });
@@ -36,9 +36,9 @@ export class OrderStatusHistoryRepositoryImpl implements IOrderStatusHistoryRepo
     await this.prisma.orderStatusHistory.create({
       data: {
         orderId: statusHistory.orderId,
-        fromStatus: (statusHistory.fromStatus?.getValue() || null) as any,
+        fromStatus: (statusHistory.fromStatus?.getValue() ?? null) as any,
         toStatus: statusHistory.toStatus.getValue() as any,
-        changedBy: statusHistory.changedBy || null,
+        changedBy: statusHistory.changedBy ?? null,
       },
     });
   }

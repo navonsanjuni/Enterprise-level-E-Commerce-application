@@ -29,7 +29,7 @@ export class OrderItemRepositoryImpl implements IOrderItemRepository {
       quantity: row.qty,
       productSnapshot: ProductSnapshot.create(row.productSnapshot),
       isGift: row.isGift,
-      giftMessage: row.giftMessage || undefined,
+      giftMessage: row.giftMessage ?? undefined,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });
@@ -64,7 +64,7 @@ export class OrderItemRepositoryImpl implements IOrderItemRepository {
         qty: item.quantity,
         productSnapshot: item.productSnapshot.getValue() as any,
         isGift: item.isGift,
-        giftMessage: item.giftMessage || null,
+        giftMessage: item.giftMessage ?? null,
       })),
     });
   }
@@ -171,7 +171,7 @@ export class OrderItemRepositoryImpl implements IOrderItemRepository {
       },
     });
 
-    return result._sum.qty || 0;
+    return result._sum.qty ?? 0;
   }
 
   async exists(orderItemId: string): Promise<boolean> {

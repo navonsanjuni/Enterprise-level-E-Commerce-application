@@ -10,25 +10,26 @@ import {
 } from "../../../domain/value-objects/purchase-order-status.vo";
 import { IPurchaseOrderRepository } from "../../../domain/repositories/purchase-order.repository";
 
-interface PurchaseOrderDatabaseRow {
-  poId: string;
-  supplierId: string;
-  eta: Date | null;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export class PurchaseOrderRepositoryImpl extends PrismaRepository<PurchaseOrder> implements IPurchaseOrderRepository {
+export class PurchaseOrderRepositoryImpl
+  extends PrismaRepository<PurchaseOrder>
+  implements IPurchaseOrderRepository
+{
   constructor(prisma: PrismaClient, eventBus?: IEventBus) {
     super(prisma, eventBus);
   }
 
-  private toEntity(row: PurchaseOrderDatabaseRow): PurchaseOrder {
+  private toEntity(row: {
+    poId: string;
+    supplierId: string;
+    eta: Date | null;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }): PurchaseOrder {
     return PurchaseOrder.fromPersistence({
       poId: PurchaseOrderId.fromString(row.poId),
       supplierId: SupplierId.fromString(row.supplierId),
-      eta: row.eta || undefined,
+      eta: row.eta ?? undefined,
       status: PurchaseOrderStatusVO.create(row.status),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
@@ -36,19 +37,19 @@ export class PurchaseOrderRepositoryImpl extends PrismaRepository<PurchaseOrder>
   }
 
   async save(purchaseOrder: PurchaseOrder): Promise<void> {
-    await (this.prisma as any).purchaseOrder.upsert({
+    await this.prisma.purchaseOrder.upsert({
       where: { poId: purchaseOrder.poId.getValue() },
       create: {
         poId: purchaseOrder.poId.getValue(),
         supplierId: purchaseOrder.supplierId.getValue(),
         eta: purchaseOrder.eta,
-        status: purchaseOrder.status.getValue(),
+        status: purchaseOrder.status.getValue() as any,
         createdAt: purchaseOrder.createdAt,
         updatedAt: purchaseOrder.updatedAt,
       },
       update: {
         eta: purchaseOrder.eta,
-        status: purchaseOrder.status.getValue(),
+        status: purchaseOrder.status.getValue() as any,
         updatedAt: purchaseOrder.updatedAt,
       },
     });
@@ -57,43 +58,35 @@ export class PurchaseOrderRepositoryImpl extends PrismaRepository<PurchaseOrder>
   }
 
   async findById(poId: PurchaseOrderId): Promise<PurchaseOrder | null> {
-    const purchaseOrder = await (this.prisma as any).purchaseOrder.findUnique({
+    const row = await this.prisma.purchaseOrder.findUnique({
       where: { poId: poId.getValue() },
     });
 
-    if (!purchaseOrder) {
-      return null;
-    }
-
-    return this.toEntity(purchaseOrder as PurchaseOrderDatabaseRow);
+    return row ? this.toEntity(row) : null;
   }
 
   async delete(poId: PurchaseOrderId): Promise<void> {
-    await (this.prisma as any).purchaseOrder.delete({
+    await this.prisma.purchaseOrder.delete({
       where: { poId: poId.getValue() },
     });
   }
 
   async findBySupplier(supplierId: string): Promise<PurchaseOrder[]> {
-    const purchaseOrders = await (this.prisma as any).purchaseOrder.findMany({
+    const rows = await this.prisma.purchaseOrder.findMany({
       where: { supplierId },
       orderBy: { createdAt: "desc" },
     });
 
-    return purchaseOrders.map((po: PurchaseOrderDatabaseRow) =>
-      this.toEntity(po),
-    );
+    return rows.map((r) => this.toEntity(r));
   }
 
   async findByStatus(status: PurchaseOrderStatus): Promise<PurchaseOrder[]> {
-    const purchaseOrders = await (this.prisma as any).purchaseOrder.findMany({
-      where: { status },
+    const rows = await this.prisma.purchaseOrder.findMany({
+      where: { status: status as any },
       orderBy: { createdAt: "desc" },
     });
 
-    return purchaseOrders.map((po: PurchaseOrderDatabaseRow) =>
-      this.toEntity(po),
-    );
+    return rows.map((r) => this.toEntity(r));
   }
 
   async findAll(options?: {
@@ -113,31 +106,29 @@ export class PurchaseOrderRepositoryImpl extends PrismaRepository<PurchaseOrder>
       sortOrder = "desc",
     } = options || {};
 
-    const whereClause: any = {};
-    if (status) whereClause.status = status;
-    if (supplierId) whereClause.supplierId = supplierId;
+    const where: any = {};
+    if (status) where.status = status;
+    if (supplierId) where.supplierId = supplierId;
 
-    const [purchaseOrders, total] = await Promise.all([
-      (this.prisma as any).purchaseOrder.findMany({
-        where: whereClause,
+    const [rows, total] = await Promise.all([
+      this.prisma.purchaseOrder.findMany({
+        where,
         take: limit,
         skip: offset,
         orderBy: { [sortBy]: sortOrder },
       }),
-      (this.prisma as any).purchaseOrder.count({ where: whereClause }),
+      this.prisma.purchaseOrder.count({ where }),
     ]);
 
     return {
-      purchaseOrders: purchaseOrders.map((po: PurchaseOrderDatabaseRow) =>
-        this.toEntity(po),
-      ),
+      purchaseOrders: rows.map((r) => this.toEntity(r)),
       total,
     };
   }
 
   async findOverduePurchaseOrders(): Promise<PurchaseOrder[]> {
     const now = new Date();
-    const purchaseOrders = await (this.prisma as any).purchaseOrder.findMany({
+    const rows = await this.prisma.purchaseOrder.findMany({
       where: {
         eta: { lt: now },
         status: { in: ["sent", "part_received"] },
@@ -145,26 +136,20 @@ export class PurchaseOrderRepositoryImpl extends PrismaRepository<PurchaseOrder>
       orderBy: { eta: "asc" },
     });
 
-    return purchaseOrders.map((po: PurchaseOrderDatabaseRow) =>
-      this.toEntity(po),
-    );
+    return rows.map((r) => this.toEntity(r));
   }
 
   async findPendingReceival(): Promise<PurchaseOrder[]> {
-    const purchaseOrders = await (this.prisma as any).purchaseOrder.findMany({
-      where: {
-        status: { in: ["sent", "part_received"] },
-      },
+    const rows = await this.prisma.purchaseOrder.findMany({
+      where: { status: { in: ["sent", "part_received"] } },
       orderBy: { eta: "asc" },
     });
 
-    return purchaseOrders.map((po: PurchaseOrderDatabaseRow) =>
-      this.toEntity(po),
-    );
+    return rows.map((r) => this.toEntity(r));
   }
 
   async exists(poId: PurchaseOrderId): Promise<boolean> {
-    const count = await (this.prisma as any).purchaseOrder.count({
+    const count = await this.prisma.purchaseOrder.count({
       where: { poId: poId.getValue() },
     });
 
