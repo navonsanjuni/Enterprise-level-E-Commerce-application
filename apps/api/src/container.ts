@@ -347,7 +347,6 @@ import { LocationType } from "../../../modules/inventory-management/domain/value
 import {
   IExternalVariantService,
   IExternalProductService,
-  IExternalProductMediaService,
   IExternalStockService as IOrderExternalStockService,
 } from "../../../modules/order-management/domain/external-services";
 
@@ -850,7 +849,8 @@ export class Container {
     const purchaseOrderManagementService = new PurchaseOrderManagementService(
       purchaseOrderRepository,
       purchaseOrderItemRepository,
-      stockManagementService,
+      stockRepository,
+      inventoryTransactionRepository,
     );
     const stockAlertService = new StockAlertService(
       stockAlertRepository,
@@ -858,7 +858,8 @@ export class Container {
     );
     const pickupReservationService = new PickupReservationService(
       pickupReservationRepository,
-      stockManagementService,
+      stockRepository,
+      inventoryTransactionRepository,
     );
 
     // Store Inventory Management services
@@ -1084,19 +1085,6 @@ export class Container {
       },
     };
 
-    const externalProductMediaService: IExternalProductMediaService = {
-      getProductMedia: async (productId: string, options?: { coverOnly?: boolean }) => {
-        const summary = await productMediaManagementService.getProductMedia(productId, {
-          coverOnly: options?.coverOnly,
-        });
-        return {
-          mediaAssets: summary.mediaAssets.map((a) => ({
-            isCover: a.isCover,
-            storageKey: a.storageKey,
-          })),
-        };
-      },
-    };
 
     const externalStockService: IOrderExternalStockService = {
       getStock: async (variantId: string, locationId: string) => {
@@ -1113,14 +1101,11 @@ export class Container {
     const orderManagementService = new OrderManagementService(
       orderRepository,
       orderAddressRepository,
-      orderItemRepository,
       orderShipmentRepository,
       orderStatusHistoryRepository,
       externalVariantService,
       externalProductService,
-      externalProductMediaService,
       externalStockService,
-      orderEventService,
     );
 
     const orderItemManagementService = new OrderItemManagementService(

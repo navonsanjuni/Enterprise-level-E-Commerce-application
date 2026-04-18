@@ -16,6 +16,8 @@ export const updateProfileSchema = z.object({
   preferredSizes: z.record(z.string(), z.unknown()).optional(),
 });
 
+export type UpdateProfileBody = z.infer<typeof updateProfileSchema>;
+
 // JSON Schema response objects (for Swagger docs)
 export const profileResponseSchema = {
   type: 'object',

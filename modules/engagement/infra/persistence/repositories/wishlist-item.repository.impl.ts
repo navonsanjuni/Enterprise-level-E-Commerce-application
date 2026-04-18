@@ -67,7 +67,7 @@ export class WishlistItemRepositoryImpl
   }
 
   async findByWishlistId(
-    wishlistId: WishlistId,
+    wishlistId: string,
     options?: WishlistItemQueryOptions,
   ): Promise<PaginatedResult<WishlistItem>> {
     const {
@@ -76,7 +76,7 @@ export class WishlistItemRepositoryImpl
       sortOrder = "desc",
     } = options || {};
 
-    const where = { wishlistId: wishlistId.getValue() };
+    const where = { wishlistId };
 
     const [records, total] = await Promise.all([
       this.prisma.wishlistItem.findMany({
@@ -165,9 +165,15 @@ export class WishlistItemRepositoryImpl
     });
   }
 
-  async deleteByWishlistId(wishlistId: WishlistId): Promise<void> {
+  async deleteByWishlistId(wishlistId: string): Promise<void> {
     await this.prisma.wishlistItem.deleteMany({
-      where: { wishlistId: wishlistId.getValue() },
+      where: { wishlistId },
+    });
+  }
+
+  async deleteByWishlistIdAndVariantId(wishlistId: string, variantId: string): Promise<void> {
+    await this.prisma.wishlistItem.deleteMany({
+      where: { wishlistId, variantId },
     });
   }
 
@@ -179,9 +185,9 @@ export class WishlistItemRepositoryImpl
     );
   }
 
-  async countByWishlistId(wishlistId: WishlistId): Promise<number> {
+  async countByWishlistId(wishlistId: string): Promise<number> {
     return await this.prisma.wishlistItem.count({
-      where: { wishlistId: wishlistId.getValue() },
+      where: { wishlistId },
     });
   }
 
@@ -197,12 +203,12 @@ export class WishlistItemRepositoryImpl
   }
 
   async isVariantInWishlist(
-    wishlistId: WishlistId,
+    wishlistId: string,
     variantId: string,
   ): Promise<boolean> {
     const count = await this.prisma.wishlistItem.count({
       where: {
-        wishlistId: wishlistId.getValue(),
+        wishlistId,
         variantId,
       },
     });

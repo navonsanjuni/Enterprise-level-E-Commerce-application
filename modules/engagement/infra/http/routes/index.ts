@@ -16,7 +16,7 @@ import {
   GetPublicWishlistsHandler,
   GetWishlistItemsHandler,
   CreateReminderHandler,
-  UpdateReminderStatusHandler,
+  MarkReminderAsSentHandler,
   UnsubscribeReminderHandler,
   DeleteReminderHandler,
   GetReminderHandler,
@@ -25,7 +25,7 @@ import {
   ScheduleNotificationHandler,
   SendNotificationHandler,
   GetNotificationHandler,
-  GetUserNotificationsHandler,
+  GetNotificationsByTypeHandler,
   CreateAppointmentHandler,
   UpdateAppointmentHandler,
   CancelAppointmentHandler,
@@ -82,7 +82,7 @@ export async function registerEngagementRoutes(
 
   const reminderController = new ReminderController(
     new CreateReminderHandler(services.reminderService),
-    new UpdateReminderStatusHandler(services.reminderService),
+    new MarkReminderAsSentHandler(services.reminderService),
     new UnsubscribeReminderHandler(services.reminderService),
     new DeleteReminderHandler(services.reminderService),
     new GetReminderHandler(services.reminderService),
@@ -94,7 +94,7 @@ export async function registerEngagementRoutes(
     new ScheduleNotificationHandler(services.notificationService),
     new SendNotificationHandler(services.notificationService),
     new GetNotificationHandler(services.notificationService),
-    new GetUserNotificationsHandler(services.notificationService),
+    new GetNotificationsByTypeHandler(services.notificationService),
   );
 
   const appointmentController = new AppointmentController(

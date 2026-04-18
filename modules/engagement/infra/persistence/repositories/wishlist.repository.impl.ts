@@ -69,7 +69,6 @@ export class WishlistRepositoryImpl
         isDefault: wishlist.isDefault,
         isPublic: wishlist.isPublic,
         description: wishlist.description,
-        updatedAt: wishlist.updatedAt,
       },
     });
     await this.dispatchEvents(wishlist);

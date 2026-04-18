@@ -49,7 +49,7 @@ export const addToWishlistSchema = z.object({
 export const wishlistResponseSchema = {
   type: "object",
   properties: {
-    wishlistId: { type: "string", format: "uuid" },
+    id: { type: "string", format: "uuid" },
     userId: { type: "string", format: "uuid" },
     guestToken: { type: "string" },
     name: { type: "string" },

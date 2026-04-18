@@ -73,7 +73,6 @@ export class AppointmentRepositoryImpl
         startAt: appointment.startAt,
         endAt: appointment.endAt,
         notes: appointment.notes,
-        updatedAt: appointment.updatedAt,
       },
     });
     await this.dispatchEvents(appointment);
@@ -158,7 +157,7 @@ export class AppointmentRepositoryImpl
   }
 
   async findByType(
-    type: AppointmentType,
+    type: string,
     options?: AppointmentQueryOptions,
   ): Promise<PaginatedResult<Appointment>> {
     const {
@@ -168,7 +167,7 @@ export class AppointmentRepositoryImpl
       sortOrder = "asc",
     } = options || {};
 
-    const where = { type: type.getValue() as any };
+    const where = { type: type as any };
 
     const [records, total] = await Promise.all([
       this.prisma.appointment.findMany({
@@ -231,7 +230,7 @@ export class AppointmentRepositoryImpl
     const where: any = {};
     if (filters.userId) where.userId = filters.userId;
     if (filters.locationId) where.locationId = filters.locationId;
-    if (filters.type) where.type = filters.type.getValue() as any;
+    if (filters.type) where.type = filters.type as any;
     if (filters.startDate || filters.endDate) {
       where.startAt = {};
       if (filters.startDate) where.startAt.gte = filters.startDate;
@@ -396,10 +395,12 @@ export class AppointmentRepositoryImpl
     userId: string,
     startAt: Date,
     endAt: Date,
+    excludeId?: string,
   ): Promise<Appointment[]> {
     const records = await this.prisma.appointment.findMany({
       where: {
         userId,
+        ...(excludeId ? { id: { not: excludeId } } : {}),
         OR: [
           {
             AND: [{ startAt: { gte: startAt } }, { startAt: { lt: endAt } }],
@@ -429,9 +430,9 @@ export class AppointmentRepositoryImpl
     });
   }
 
-  async countByType(type: AppointmentType): Promise<number> {
+  async countByType(type: string): Promise<number> {
     return await this.prisma.appointment.count({
-      where: { type: type.getValue() as any },
+      where: { type: type as any },
     });
   }
 
@@ -439,7 +440,7 @@ export class AppointmentRepositoryImpl
     const where: any = {};
     if (filters?.userId) where.userId = filters.userId;
     if (filters?.locationId) where.locationId = filters.locationId;
-    if (filters?.type) where.type = filters.type.getValue() as any;
+    if (filters?.type) where.type = filters.type as any;
     if (filters?.startDate || filters?.endDate) {
       where.startAt = {};
       if (filters.startDate) where.startAt.gte = filters.startDate;
@@ -477,11 +478,13 @@ export class AppointmentRepositoryImpl
     userId: string,
     startAt: Date,
     endAt: Date,
+    excludeId?: string,
   ): Promise<boolean> {
     const conflicts = await this.findConflictingAppointments(
       userId,
       startAt,
       endAt,
+      excludeId,
     );
     return conflicts.length > 0;
   }
