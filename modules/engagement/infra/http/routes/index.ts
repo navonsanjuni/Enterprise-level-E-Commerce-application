@@ -121,10 +121,15 @@ export async function registerEngagementRoutes(
     new GetNewsletterSubscriptionHandler(services.newsletterService),
   );
 
-  await wishlistRoutes(fastify, wishlistController);
-  await reminderRoutes(fastify, reminderController);
-  await notificationRoutes(fastify, notificationController);
-  await appointmentRoutes(fastify, appointmentController);
-  await productReviewRoutes(fastify, productReviewController);
-  await newsletterRoutes(fastify, newsletterController);
+  await fastify.register(
+    async (instance) => {
+      await wishlistRoutes(instance, wishlistController);
+      await reminderRoutes(instance, reminderController);
+      await notificationRoutes(instance, notificationController);
+      await appointmentRoutes(instance, appointmentController);
+      await productReviewRoutes(instance, productReviewController);
+      await newsletterRoutes(instance, newsletterController);
+    },
+    { prefix: "/api/v1" },
+  );
 }
