@@ -43,6 +43,7 @@ import {
   OrderShipmentNotFoundError,
   DomainValidationError,
   InvalidOperationError,
+  ContactMismatchError,
 } from "../../domain/errors/order-management.errors";
 
 interface AddressParams {
@@ -70,7 +71,7 @@ interface CreateOrderParams {
   shippingAddress: AddressParams;
   billingAddress?: AddressParams;
   source?: string;
-  currency: string;
+  currency?: string;
 }
 
 export interface ListOrdersResult {
@@ -166,7 +167,7 @@ export class OrderManagementService {
       shipments: [],
       totals,
       source: OrderSource.fromString(params.source ?? "web"),
-      currency: Currency.fromString(params.currency),
+      currency: Currency.fromString(params.currency ?? "USD"),
     });
 
     const billingSnap = AddressSnapshot.create(
@@ -610,7 +611,7 @@ export class OrderManagementService {
         query.contact === (shipping?.phone as string | undefined)?.trim();
 
       if (!contactMatches) {
-        throw new Error("CONTACT_MISMATCH");
+        throw new ContactMismatchError();
       }
 
       const shipments = await this.getOrderShipments(order.id);

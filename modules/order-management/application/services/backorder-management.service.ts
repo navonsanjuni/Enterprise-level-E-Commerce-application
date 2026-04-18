@@ -178,6 +178,10 @@ export class BackorderManagementService {
     return this.backorderRepository.countUnnotified();
   }
 
+  async getOverdueCount(): Promise<number> {
+    return this.backorderRepository.countByPromisedEtaBefore(new Date());
+  }
+
   async backorderExists(orderItemId: string): Promise<boolean> {
     if (!orderItemId || orderItemId.trim().length === 0) {
       throw new DomainValidationError("Order item ID is required");
