@@ -66,16 +66,16 @@ export class ProductRepositoryImpl
       countryOfOrigin: product.countryOfOrigin,
       seoTitle: product.seoTitle,
       seoDescription: product.seoDescription,
+      price: product.price.getValue(),
+      priceSgd: product.priceSgd?.getValue() ?? null,
+      priceUsd: product.priceUsd?.getValue() ?? null,
+      compareAtPrice: product.compareAtPrice?.getValue() ?? null,
       updatedAt: product.updatedAt,
     };
     await this.prisma.product.upsert({
       where: { id: product.id.getValue() },
       create: {
         id: product.id.getValue(),
-        price: product.price.getValue(),
-        priceSgd: product.priceSgd?.getValue() ?? null,
-        priceUsd: product.priceUsd?.getValue() ?? null,
-        compareAtPrice: product.compareAtPrice?.getValue() ?? null,
         createdAt: product.createdAt,
         ...updateData,
       },
