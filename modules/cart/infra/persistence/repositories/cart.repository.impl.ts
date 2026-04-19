@@ -41,14 +41,21 @@ export class CartRepositoryImpl implements ICartRepository {
         },
       });
 
-      // Replace all items
+      const incomingIds = (data.items ?? []).map((i) => i.id);
+
+      // Delete items that were removed from the cart
       await tx.cartItem.deleteMany({
-        where: { cartId: data.cartId },
+        where: {
+          cartId: data.cartId,
+          ...(incomingIds.length > 0 ? { id: { notIn: incomingIds } } : {}),
+        },
       });
 
-      if (data.items && data.items.length > 0) {
-        await tx.cartItem.createMany({
-          data: data.items.map((item) => ({
+      // Upsert each item — preserves createdAt, only updates changed fields
+      for (const item of data.items ?? []) {
+        await tx.cartItem.upsert({
+          where: { id: item.id },
+          create: {
             id: item.id,
             cartId: data.cartId,
             variantId: item.variantId,
@@ -56,8 +63,18 @@ export class CartRepositoryImpl implements ICartRepository {
             unitPriceSnapshot: item.unitPriceSnapshot,
             appliedPromos: item.appliedPromos as any,
             isGift: item.isGift,
-            giftMessage: item.giftMessage,
-          })),
+            giftMessage: item.giftMessage ?? null,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+          },
+          update: {
+            qty: item.quantity,
+            unitPriceSnapshot: item.unitPriceSnapshot,
+            appliedPromos: item.appliedPromos as any,
+            isGift: item.isGift,
+            giftMessage: item.giftMessage ?? null,
+            updatedAt: item.updatedAt,
+          },
         });
       }
     });
@@ -818,6 +835,8 @@ export class CartRepositoryImpl implements ICartRepository {
               appliedPromos: item.appliedPromos as any,
               isGift: item.isGift,
               giftMessage: item.giftMessage,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
             })) || [],
         },
       },
@@ -882,9 +901,9 @@ export class CartRepositoryImpl implements ICartRepository {
     });
   }
 
-  async getCartWithCheckoutInfo(cartId: string): Promise<CartWithCheckoutInfo | null> {
+  async getCartWithCheckoutInfo(cartId: CartId): Promise<CartWithCheckoutInfo | null> {
     return await this.prisma.shoppingCart.findUnique({
-      where: { id: cartId },
+      where: { id: cartId.getValue() },
       include: { items: true },
     });
   }
@@ -904,10 +923,12 @@ export class CartRepositoryImpl implements ICartRepository {
         cartId: item.cartId,
         variantId: item.variantId,
         quantity: item.qty,
-        unitPriceSnapshot: item.unitPriceSnapshot,
+        unitPriceSnapshot: Number(item.unitPriceSnapshot),
         appliedPromos: item.appliedPromos ?? [],
         isGift: item.isGift,
         giftMessage: item.giftMessage ?? undefined,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
       })),
     };
     return ShoppingCart.fromPersistence(entityData);
