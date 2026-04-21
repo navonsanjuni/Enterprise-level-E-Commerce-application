@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
 import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
@@ -23,7 +23,7 @@ export class SupplierRepositoryImpl
     contacts: unknown;
   }): Supplier {
     const contacts: SupplierContact[] = Array.isArray(row.contacts)
-      ? row.contacts.map((c: any) => SupplierContact.create(c))
+      ? (row.contacts as Record<string, unknown>[]).map((c) => SupplierContact.create(c))
       : [];
 
     const fallbackDate = new Date(0);
@@ -44,12 +44,12 @@ export class SupplierRepositoryImpl
         supplierId: supplier.supplierId.getValue(),
         name: supplier.name.getValue(),
         leadTimeDays: supplier.leadTimeDays,
-        contacts: supplier.contacts.map((c) => c.getValue()) as any,
+        contacts: supplier.contacts.map((c) => c.getValue()) as Prisma.InputJsonValue,
       },
       update: {
         name: supplier.name.getValue(),
         leadTimeDays: supplier.leadTimeDays,
-        contacts: supplier.contacts.map((c) => c.getValue()) as any,
+        contacts: supplier.contacts.map((c) => c.getValue()) as Prisma.InputJsonValue,
       },
     });
 

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
 import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
@@ -115,7 +115,7 @@ export class StockRepositoryImpl
       sortOrder = "asc",
     } = options || {};
 
-    const where: any = {};
+    const where: Prisma.InventoryStockWhereInput = {};
 
     if (search) {
       where.variant = {
@@ -131,7 +131,7 @@ export class StockRepositoryImpl
       where.locationId = locationId;
     }
 
-    let orderBy: any = { variantId: "asc" };
+    let orderBy: Prisma.InventoryStockOrderByWithRelationInput = { variantId: "asc" };
     if (sortBy === "onHand") {
       orderBy = { onHand: sortOrder };
     } else if (sortBy === "location") {

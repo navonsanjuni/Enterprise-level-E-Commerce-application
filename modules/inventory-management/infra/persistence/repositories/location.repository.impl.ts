@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma, LocationTypeEnum } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
 import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
@@ -31,7 +31,7 @@ export class LocationRepositoryImpl
       type: LocationTypeVO.create(row.type),
       name: row.name,
       address: row.address
-        ? LocationAddress.create(row.address as any)
+        ? LocationAddress.create(row.address as Record<string, unknown>)
         : undefined,
       createdAt: fallbackDate,
       updatedAt: fallbackDate,
@@ -43,14 +43,16 @@ export class LocationRepositoryImpl
       where: { id: location.locationId.getValue() },
       create: {
         id: location.locationId.getValue(),
-        type: location.type.getValue() as any,
+        type: location.type.getValue() as LocationTypeEnum,
         name: location.name,
-        address: location.address?.getValue() as any,
+        address: (location.address?.getValue() ??
+          null) as Prisma.InputJsonValue,
       },
       update: {
-        type: location.type.getValue() as any,
+        type: location.type.getValue() as LocationTypeEnum,
         name: location.name,
-        address: location.address?.getValue() as any,
+        address: (location.address?.getValue() ??
+          null) as Prisma.InputJsonValue,
       },
     });
 
@@ -83,7 +85,7 @@ export class LocationRepositoryImpl
 
   async findByType(type: LocationType): Promise<Location[]> {
     const rows = await this.prisma.location.findMany({
-      where: { type: type as any },
+      where: { type: type as LocationTypeEnum },
     });
 
     return rows.map((r) => this.toEntity(r));
@@ -113,7 +115,13 @@ export class LocationRepositoryImpl
     ]);
 
     const items = rows.map((r) => this.toEntity(r));
-    return { items, total, limit, offset, hasMore: offset + items.length < total };
+    return {
+      items,
+      total,
+      limit,
+      offset,
+      hasMore: offset + items.length < total,
+    };
   }
 
   async exists(locationId: LocationId): Promise<boolean> {

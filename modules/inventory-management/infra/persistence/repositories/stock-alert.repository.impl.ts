@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, StockAlertTypeEnum } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
 import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
@@ -42,12 +42,12 @@ export class StockAlertRepositoryImpl
       create: {
         alertId: alert.alertId.getValue(),
         variantId: alert.variantId,
-        type: alert.type.getValue() as any,
+        type: alert.type.getValue() as StockAlertTypeEnum,
         triggeredAt: alert.triggeredAt,
         resolvedAt: alert.resolvedAt,
       },
       update: {
-        type: alert.type.getValue() as any,
+        type: alert.type.getValue() as StockAlertTypeEnum,
         triggeredAt: alert.triggeredAt,
         resolvedAt: alert.resolvedAt,
       },
@@ -99,7 +99,7 @@ export class StockAlertRepositoryImpl
 
   async findByType(type: AlertType): Promise<StockAlert[]> {
     const rows = await this.prisma.stockAlert.findMany({
-      where: { type: type as any },
+      where: { type: type as StockAlertTypeEnum },
       orderBy: { triggeredAt: "desc" },
     });
 
@@ -140,7 +140,7 @@ export class StockAlertRepositoryImpl
 
   async hasActiveAlert(variantId: string, type: AlertType): Promise<boolean> {
     const count = await this.prisma.stockAlert.count({
-      where: { variantId, type: type as any, resolvedAt: null },
+      where: { variantId, type: type as StockAlertTypeEnum, resolvedAt: null },
     });
 
     return count > 0;

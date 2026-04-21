@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma, PoStatusEnum } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
 import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
@@ -44,13 +44,13 @@ export class PurchaseOrderRepositoryImpl
         poId: purchaseOrder.poId.getValue(),
         supplierId: purchaseOrder.supplierId.getValue(),
         eta: purchaseOrder.eta,
-        status: purchaseOrder.status.getValue() as any,
+        status: purchaseOrder.status.getValue() as PoStatusEnum,
         createdAt: purchaseOrder.createdAt,
         updatedAt: purchaseOrder.updatedAt,
       },
       update: {
         eta: purchaseOrder.eta,
-        status: purchaseOrder.status.getValue() as any,
+        status: purchaseOrder.status.getValue() as PoStatusEnum,
         updatedAt: purchaseOrder.updatedAt,
       },
     });
@@ -83,7 +83,7 @@ export class PurchaseOrderRepositoryImpl
 
   async findByStatus(status: PurchaseOrderStatus): Promise<PurchaseOrder[]> {
     const rows = await this.prisma.purchaseOrder.findMany({
-      where: { status: status as any },
+      where: { status: status as PoStatusEnum },
       orderBy: { createdAt: "desc" },
     });
 
@@ -107,8 +107,8 @@ export class PurchaseOrderRepositoryImpl
       sortOrder = "desc",
     } = options || {};
 
-    const where: any = {};
-    if (status) where.status = status;
+    const where: Prisma.PurchaseOrderWhereInput = {};
+    if (status) where.status = status as PoStatusEnum;
     if (supplierId) where.supplierId = supplierId;
 
     const [rows, total] = await Promise.all([

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, InvTxnReasonEnum } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
 import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
@@ -46,7 +46,7 @@ export class InventoryTransactionRepositoryImpl
         variantId: transaction.variantId,
         locationId: transaction.locationId,
         qtyDelta: transaction.qtyDelta,
-        reason: transaction.reason.getValue() as any,
+        reason: transaction.reason.getValue() as InvTxnReasonEnum,
         referenceId: transaction.referenceId ?? null,
         createdAt: transaction.createdAt,
       },
