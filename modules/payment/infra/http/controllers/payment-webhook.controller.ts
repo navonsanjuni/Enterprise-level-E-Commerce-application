@@ -28,7 +28,7 @@ export class PaymentWebhookController {
 
       const result = await this.processHandler.handle({
         provider,
-        eventType: (eventData as any)?.type || (eventData as any)?.event_type || "unknown",
+        eventType: (eventData.type as string | undefined) || (eventData.event_type as string | undefined) || "unknown",
         eventData,
         signature,
         timestamp: new Date(),

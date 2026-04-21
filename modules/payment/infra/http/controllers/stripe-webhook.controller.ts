@@ -8,6 +8,9 @@ import { CreateStripeIntentBody } from "../validation/payment-intent.schema";
 
 type RawBodyRequest = FastifyRequest & { rawBody: Buffer };
 
+type StripeEventObject = { id?: string; last_payment_error?: { message?: string } };
+type StripeWebhookEvent = { type: string; data: { object: StripeEventObject } };
+
 export class StripeWebhookController {
   private stripeProvider: StripeProvider;
   private webhookSecret: string;
@@ -75,14 +78,14 @@ export class StripeWebhookController {
         return ResponseHelper.badRequest(reply, "Missing Stripe-Signature header");
       }
 
-      let event: any;
+      let event: StripeWebhookEvent;
       if (this.webhookSecret) {
         try {
           event = this.stripeProvider.constructWebhookEvent(
             rawBody,
             signature,
             this.webhookSecret,
-          );
+          ) as unknown as StripeWebhookEvent;
         } catch (err: unknown) {
           req.log.warn(
             `Stripe webhook signature validation failed: ${err instanceof Error ? err.message : String(err)}`,
@@ -93,7 +96,7 @@ export class StripeWebhookController {
         req.log.warn(
           "Stripe webhook signature validation skipped (STRIPE_WEBHOOK_SECRET not configured)",
         );
-        event = req.body;
+        event = req.body as StripeWebhookEvent;
       }
 
       req.log.info(`Stripe webhook received: ${event.type}`);
