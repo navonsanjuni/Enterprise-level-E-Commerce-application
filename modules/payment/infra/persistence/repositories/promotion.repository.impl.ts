@@ -1,51 +1,50 @@
 import { PrismaClient } from "@prisma/client";
+import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
+import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import {
   IPromotionRepository,
   PromotionFilters,
   PromotionQueryOptions,
 } from "../../../domain/repositories/promotion.repository";
-import {
-  Promotion,
-  PromotionRule,
-} from "../../../domain/entities/promotion.entity";
+import { Promotion, PromotionRule } from "../../../domain/entities/promotion.entity";
 import { PromotionId } from "../../../domain/value-objects/promotion-id.vo";
 import { PromotionStatus } from "../../../domain/value-objects/promotion-status.vo";
-import {
-  PaginatedResult,
-} from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
+import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
 
-export class PromotionRepositoryImpl implements IPromotionRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+export class PromotionRepositoryImpl
+  extends PrismaRepository<Promotion>
+  implements IPromotionRepository
+{
+  constructor(prisma: PrismaClient, eventBus?: IEventBus) {
+    super(prisma, eventBus);
+  }
 
   async save(promotion: Promotion): Promise<void> {
     const data = this.dehydrate(promotion);
-    await (this.prisma as any).promotion.create({ data });
-  }
-
-  async update(promotion: Promotion): Promise<void> {
-    const data = this.dehydrate(promotion);
     const { promoId, ...updateData } = data;
-    await (this.prisma as any).promotion.update({
+    await this.prisma.promotion.upsert({
       where: { promoId },
-      data: updateData,
+      create: data,
+      update: updateData,
     });
+    await this.dispatchEvents(promotion);
   }
 
   async delete(id: PromotionId): Promise<void> {
-    await (this.prisma as any).promotion.delete({
+    await this.prisma.promotion.delete({
       where: { promoId: id.getValue() },
     });
   }
 
   async findById(id: PromotionId): Promise<Promotion | null> {
-    const record = await (this.prisma as any).promotion.findUnique({
+    const record = await this.prisma.promotion.findUnique({
       where: { promoId: id.getValue() },
     });
     return record ? this.hydrate(record) : null;
   }
 
   async findByCode(code: string): Promise<Promotion | null> {
-    const record = await (this.prisma as any).promotion.findUnique({
+    const record = await this.prisma.promotion.findUnique({
       where: { code },
     });
     return record ? this.hydrate(record) : null;
@@ -53,7 +52,7 @@ export class PromotionRepositoryImpl implements IPromotionRepository {
 
   async findActivePromotions(now?: Date): Promise<Promotion[]> {
     const currentDate = now ?? new Date();
-    const records = await (this.prisma as any).promotion.findMany({
+    const records = await this.prisma.promotion.findMany({
       where: {
         status: "active",
         OR: [{ startsAt: null }, { startsAt: { lte: currentDate } }],
@@ -79,7 +78,7 @@ export class PromotionRepositoryImpl implements IPromotionRepository {
     }
 
     const [records, total] = await Promise.all([
-      (this.prisma as any).promotion.findMany({
+      this.prisma.promotion.findMany({
         where,
         take: options?.limit,
         skip: options?.offset,
@@ -87,7 +86,7 @@ export class PromotionRepositoryImpl implements IPromotionRepository {
           ? { [options.sortBy]: options.sortOrder ?? "desc" }
           : { createdAt: "desc" },
       }),
-      (this.prisma as any).promotion.count({ where }),
+      this.prisma.promotion.count({ where }),
     ]);
 
     const items = records.map((r: any) => this.hydrate(r));
@@ -112,11 +111,11 @@ export class PromotionRepositoryImpl implements IPromotionRepository {
         { OR: [{ endsAt: null }, { endsAt: { gte: filters.activeAt } }] },
       ];
     }
-    return (this.prisma as any).promotion.count({ where });
+    return this.prisma.promotion.count({ where });
   }
 
   async exists(id: PromotionId): Promise<boolean> {
-    const count = await (this.prisma as any).promotion.count({
+    const count = await this.prisma.promotion.count({
       where: { promoId: id.getValue() },
     });
     return count > 0;
