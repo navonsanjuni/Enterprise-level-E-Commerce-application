@@ -1,4 +1,6 @@
 import { PrismaClient } from "@prisma/client";
+import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
+import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import {
   IGiftCardRepository,
   GiftCardFilters,
@@ -9,42 +11,42 @@ import { GiftCardId } from "../../../domain/value-objects/gift-card-id.vo";
 import { GiftCardStatus } from "../../../domain/value-objects/gift-card-status.vo";
 import { Money } from "../../../domain/value-objects/money.vo";
 import { Currency } from "../../../domain/value-objects/currency.vo";
-import {
-  PaginatedResult,
-} from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
+import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
 
-export class GiftCardRepositoryImpl implements IGiftCardRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+export class GiftCardRepositoryImpl
+  extends PrismaRepository<GiftCard>
+  implements IGiftCardRepository
+{
+  constructor(prisma: PrismaClient, eventBus?: IEventBus) {
+    super(prisma, eventBus);
+  }
 
   async save(giftCard: GiftCard): Promise<void> {
     const data = this.dehydrate(giftCard);
-    await (this.prisma as any).giftCard.create({ data });
-  }
-
-  async update(giftCard: GiftCard): Promise<void> {
-    const data = this.dehydrate(giftCard);
     const { giftCardId, ...updateData } = data;
-    await (this.prisma as any).giftCard.update({
+    await this.prisma.giftCard.upsert({
       where: { giftCardId },
-      data: updateData,
+      create: data,
+      update: updateData,
     });
+    await this.dispatchEvents(giftCard);
   }
 
   async delete(id: GiftCardId): Promise<void> {
-    await (this.prisma as any).giftCard.delete({
+    await this.prisma.giftCard.delete({
       where: { giftCardId: id.getValue() },
     });
   }
 
   async findById(id: GiftCardId): Promise<GiftCard | null> {
-    const record = await (this.prisma as any).giftCard.findUnique({
+    const record = await this.prisma.giftCard.findUnique({
       where: { giftCardId: id.getValue() },
     });
     return record ? this.hydrate(record) : null;
   }
 
   async findByCode(code: string): Promise<GiftCard | null> {
-    const record = await (this.prisma as any).giftCard.findUnique({
+    const record = await this.prisma.giftCard.findUnique({
       where: { code },
     });
     return record ? this.hydrate(record) : null;
@@ -63,7 +65,7 @@ export class GiftCardRepositoryImpl implements IGiftCardRepository {
     }
 
     const [records, total] = await Promise.all([
-      (this.prisma as any).giftCard.findMany({
+      this.prisma.giftCard.findMany({
         where,
         take: options?.limit,
         skip: options?.offset,
@@ -71,7 +73,7 @@ export class GiftCardRepositoryImpl implements IGiftCardRepository {
           ? { [options.sortBy]: options.sortOrder ?? "desc" }
           : { createdAt: "desc" },
       }),
-      (this.prisma as any).giftCard.count({ where }),
+      this.prisma.giftCard.count({ where }),
     ]);
 
     const items = records.map((r: any) => this.hydrate(r));
@@ -94,11 +96,11 @@ export class GiftCardRepositoryImpl implements IGiftCardRepository {
     if (filters?.hasBalance !== undefined) {
       where.currentBalance = filters.hasBalance ? { gt: 0 } : 0;
     }
-    return (this.prisma as any).giftCard.count({ where });
+    return this.prisma.giftCard.count({ where });
   }
 
   async exists(id: GiftCardId): Promise<boolean> {
-    const count = await (this.prisma as any).giftCard.count({
+    const count = await this.prisma.giftCard.count({
       where: { giftCardId: id.getValue() },
     });
     return count > 0;
@@ -130,6 +132,9 @@ export class GiftCardRepositoryImpl implements IGiftCardRepository {
       currency: giftCard.balance.getCurrency().getValue(),
       status: giftCard.status.getValue(),
       expiresAt: giftCard.expiresAt ?? null,
+      recipientEmail: giftCard.recipientEmail ?? null,
+      recipientName: giftCard.recipientName ?? null,
+      message: giftCard.message ?? null,
     };
   }
 }
