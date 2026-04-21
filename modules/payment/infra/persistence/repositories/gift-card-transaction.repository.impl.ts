@@ -1,4 +1,6 @@
 import { PrismaClient } from "@prisma/client";
+import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
+import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import {
   IGiftCardTransactionRepository,
   GiftCardTransactionFilters,
@@ -10,27 +12,31 @@ import { GiftCardId } from "../../../domain/value-objects/gift-card-id.vo";
 import { GiftCardTransactionType } from "../../../domain/value-objects/gift-card-transaction-type.vo";
 import { Money } from "../../../domain/value-objects/money.vo";
 import { Currency } from "../../../domain/value-objects/currency.vo";
-import {
-  PaginatedResult,
-} from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
+import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
 
-export class GiftCardTransactionRepositoryImpl implements IGiftCardTransactionRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+export class GiftCardTransactionRepositoryImpl
+  extends PrismaRepository<GiftCardTransaction>
+  implements IGiftCardTransactionRepository
+{
+  constructor(prisma: PrismaClient, eventBus?: IEventBus) {
+    super(prisma, eventBus);
+  }
 
   async save(transaction: GiftCardTransaction): Promise<void> {
     const data = this.dehydrate(transaction);
-    await (this.prisma as any).giftCardTransaction.create({ data });
+    await this.prisma.giftCardTransaction.create({ data });
+    await this.dispatchEvents(transaction);
   }
 
   async findById(id: GiftCardTransactionId): Promise<GiftCardTransaction | null> {
-    const record = await (this.prisma as any).giftCardTransaction.findUnique({
+    const record = await this.prisma.giftCardTransaction.findUnique({
       where: { gcTxnId: id.getValue() },
     });
     return record ? this.hydrate(record) : null;
   }
 
   async findByGiftCardId(giftCardId: GiftCardId): Promise<GiftCardTransaction[]> {
-    const records = await (this.prisma as any).giftCardTransaction.findMany({
+    const records = await this.prisma.giftCardTransaction.findMany({
       where: { giftCardId: giftCardId.getValue() },
       orderBy: { createdAt: "desc" },
     });
@@ -38,7 +44,7 @@ export class GiftCardTransactionRepositoryImpl implements IGiftCardTransactionRe
   }
 
   async findByOrderId(orderId: string): Promise<GiftCardTransaction[]> {
-    const records = await (this.prisma as any).giftCardTransaction.findMany({
+    const records = await this.prisma.giftCardTransaction.findMany({
       where: { orderId },
       orderBy: { createdAt: "desc" },
     });
@@ -55,13 +61,13 @@ export class GiftCardTransactionRepositoryImpl implements IGiftCardTransactionRe
     if (filters.type) where.type = filters.type.getValue();
 
     const [records, total] = await Promise.all([
-      (this.prisma as any).giftCardTransaction.findMany({
+      this.prisma.giftCardTransaction.findMany({
         where,
         take: options?.limit,
         skip: options?.offset,
         orderBy: { createdAt: options?.sortOrder ?? "desc" },
       }),
-      (this.prisma as any).giftCardTransaction.count({ where }),
+      this.prisma.giftCardTransaction.count({ where }),
     ]);
 
     const items = records.map((r: any) => this.hydrate(r));
@@ -81,7 +87,7 @@ export class GiftCardTransactionRepositoryImpl implements IGiftCardTransactionRe
     if (filters?.giftCardId) where.giftCardId = filters.giftCardId.getValue();
     if (filters?.orderId) where.orderId = filters.orderId;
     if (filters?.type) where.type = filters.type.getValue();
-    return (this.prisma as any).giftCardTransaction.count({ where });
+    return this.prisma.giftCardTransaction.count({ where });
   }
 
   private hydrate(record: any): GiftCardTransaction {
