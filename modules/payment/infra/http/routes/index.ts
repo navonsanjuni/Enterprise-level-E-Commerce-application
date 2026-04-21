@@ -59,7 +59,7 @@ import { registerBnplTransactionRoutes } from "./bnpl-transaction.routes";
 import { registerGiftCardRoutes } from "./gift-card.routes";
 import { registerPromotionRoutes } from "./promotion.routes";
 import { registerWebhookRoutes } from "./webhook.routes";
-import { registerLoyaltyRoutes } from "./loyalty.routes";
+import { registerLoyaltyRoutes } from "../../../../loyalty/infra/http/routes";
 
 export interface PaymentRouteServices {
   paymentService: PaymentService;
