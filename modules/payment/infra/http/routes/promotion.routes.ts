@@ -13,52 +13,15 @@ import {
   applyPromotionSchema,
   recordPromotionUsageSchema,
   promoIdParamsSchema,
+  promotionResponseSchema,
+  promotionUsageResponseSchema,
+  applyPromotionResponseSchema,
 } from "../validation/promotion.schema";
 
 const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
   keyGenerator: userKeyGenerator,
 });
-
-const promotionSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string", format: "uuid" },
-    code: { type: "string" },
-    rule: { type: "object", additionalProperties: true },
-    startsAt: { type: "string", format: "date-time" },
-    endsAt: { type: "string", format: "date-time" },
-    usageLimit: { type: "number" },
-    status: { type: "string" },
-    createdAt: { type: "string", format: "date-time" },
-    updatedAt: { type: "string", format: "date-time" },
-  },
-} as const;
-
-const promotionUsageSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string", format: "uuid" },
-    promoId: { type: "string", format: "uuid" },
-    orderId: { type: "string", format: "uuid" },
-    discountAmount: { type: "number" },
-    currency: { type: "string" },
-    createdAt: { type: "string", format: "date-time" },
-  },
-} as const;
-
-const applyResultSchema = {
-  type: "object",
-  properties: {
-    applicable: { type: "boolean" },
-    discountAmount: { type: "number" },
-    discountedTotal: { type: "number" },
-    currency: { type: "string" },
-    promotionId: { type: "string", format: "uuid" },
-    promotionCode: { type: "string" },
-    message: { type: "string" },
-  },
-} as const;
 
 export async function registerPromotionRoutes(
   fastify: FastifyInstance,
@@ -86,7 +49,17 @@ export async function registerPromotionRoutes(
           required: ["rule"],
           properties: {
             code: { type: "string" },
-            rule: { type: "object", additionalProperties: true },
+            rule: {
+              type: "object",
+              properties: {
+                type: { type: "string" },
+                value: { type: "number" },
+                minPurchase: { type: "number" },
+                maxDiscount: { type: "number" },
+                applicableProducts: { type: "array", items: { type: "string" } },
+                applicableCategories: { type: "array", items: { type: "string" } },
+              },
+            },
             startsAt: { type: "string", format: "date-time" },
             endsAt: { type: "string", format: "date-time" },
             usageLimit: { type: "number", minimum: 1 },
@@ -99,7 +72,7 @@ export async function registerPromotionRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: promotionSchema,
+              data: promotionResponseSchema,
             },
           },
         },
@@ -136,13 +109,13 @@ export async function registerPromotionRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: applyResultSchema,
+              data: applyPromotionResponseSchema,
             },
           },
         },
       },
     },
-    (request, reply) => controller.apply(request as any, reply),
+    (request, reply) => controller.apply(request as AuthenticatedRequest, reply),
   );
 
   // GET /promotions/active — public
@@ -162,14 +135,14 @@ export async function registerPromotionRoutes(
               message: { type: "string" },
               data: {
                 type: "array",
-                items: promotionSchema,
+                items: promotionResponseSchema,
               },
             },
           },
         },
       },
     },
-    (request, reply) => controller.listActive(request as any, reply),
+    (request, reply) => controller.listActive(request as AuthenticatedRequest, reply),
   );
 
   // POST /promotions/:promoId/usage — authenticated
@@ -204,13 +177,13 @@ export async function registerPromotionRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: promotionUsageSchema,
+              data: promotionUsageResponseSchema,
             },
           },
         },
       },
     },
-    (request, reply) => controller.recordUsage(request as any, reply),
+    (request, reply) => controller.recordUsage(request as AuthenticatedRequest, reply),
   );
 
   // GET /promotions/:promoId/usage — Admin only
@@ -238,13 +211,13 @@ export async function registerPromotionRoutes(
               message: { type: "string" },
               data: {
                 type: "array",
-                items: promotionUsageSchema,
+                items: promotionUsageResponseSchema,
               },
             },
           },
         },
       },
     },
-    (request, reply) => controller.listUsage(request as any, reply),
+    (request, reply) => controller.listUsage(request as AuthenticatedRequest, reply),
   );
 }

@@ -12,25 +12,13 @@ import {
   createBnplTransactionSchema,
   bnplParamsSchema,
   listBnplQuerySchema,
+  bnplTransactionResponseSchema,
 } from "../validation/bnpl.schema";
 
 const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
   keyGenerator: userKeyGenerator,
 });
-
-const bnplTransactionSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string", format: "uuid" },
-    intentId: { type: "string", format: "uuid" },
-    provider: { type: "string" },
-    plan: { type: "object", additionalProperties: true },
-    status: { type: "string" },
-    createdAt: { type: "string", format: "date-time" },
-    updatedAt: { type: "string", format: "date-time" },
-  },
-} as const;
 
 export async function registerBnplTransactionRoutes(
   fastify: FastifyInstance,
@@ -59,7 +47,16 @@ export async function registerBnplTransactionRoutes(
           properties: {
             intentId: { type: "string", format: "uuid" },
             provider: { type: "string" },
-            plan: { type: "object", additionalProperties: true },
+            plan: {
+              type: "object",
+              required: ["installments", "frequency"],
+              properties: {
+                installments: { type: "integer", minimum: 1 },
+                frequency: { type: "string" },
+                downPayment: { type: "number" },
+                interestRate: { type: "number" },
+              },
+            },
           },
         },
         response: {
@@ -69,7 +66,7 @@ export async function registerBnplTransactionRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: bnplTransactionSchema,
+              data: bnplTransactionResponseSchema,
             },
           },
         },
@@ -85,7 +82,7 @@ export async function registerBnplTransactionRoutes(
       preValidation: [validateParams(bnplParamsSchema)],
       preHandler: [RolePermissions.STAFF_LEVEL],
       schema: {
-        description: "Process a BNPL transaction (approve, reject, activate, complete, cancel) — Staff/Admin only.",
+        description: "Process a BNPL transaction (approve, reject, activate, complete, cancel, fail) — Staff/Admin only.",
         tags: ["BNPL"],
         summary: "Process BNPL Transaction",
         security: [{ bearerAuth: [] }],
@@ -96,7 +93,7 @@ export async function registerBnplTransactionRoutes(
             bnplId: { type: "string", format: "uuid" },
             action: {
               type: "string",
-              enum: ["approve", "reject", "activate", "complete", "cancel"],
+              enum: ["approve", "reject", "activate", "complete", "cancel", "fail"],
             },
           },
         },
@@ -107,7 +104,7 @@ export async function registerBnplTransactionRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: bnplTransactionSchema,
+              data: bnplTransactionResponseSchema,
             },
           },
         },
@@ -144,7 +141,7 @@ export async function registerBnplTransactionRoutes(
               message: { type: "string" },
               data: {
                 type: "array",
-                items: bnplTransactionSchema,
+                items: bnplTransactionResponseSchema,
               },
             },
           },

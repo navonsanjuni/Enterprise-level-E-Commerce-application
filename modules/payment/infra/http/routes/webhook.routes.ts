@@ -9,34 +9,17 @@ import {
   userKeyGenerator,
 } from "@/api/src/shared/middleware";
 import { validateBody, validateQuery } from "../validation/validator";
-import { createStripeIntentSchema, listWebhookEventsQuerySchema } from "../validation/webhook.schema";
+import { createStripeIntentSchema } from "../validation/payment-intent.schema";
+import {
+  listWebhookEventsQuerySchema,
+  stripeIntentResultSchema,
+  webhookEventResponseSchema,
+} from "../validation/webhook.schema";
 
 const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
   keyGenerator: userKeyGenerator,
 });
-
-const stripeIntentResultSchema = {
-  type: "object",
-  properties: {
-    clientSecret: { type: "string" },
-    intentId: { type: "string", format: "uuid" },
-    amount: { type: "number" },
-    currency: { type: "string" },
-    status: { type: "string" },
-  },
-} as const;
-
-const webhookEventSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string", format: "uuid" },
-    provider: { type: "string" },
-    eventType: { type: "string" },
-    eventData: { type: "object", additionalProperties: true },
-    createdAt: { type: "string", format: "date-time" },
-  },
-} as const;
 
 export async function registerWebhookRoutes(
   fastify: FastifyInstance,
@@ -102,7 +85,7 @@ export async function registerWebhookRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
+              data: { type: "object" },
             },
           },
         },
@@ -140,13 +123,13 @@ export async function registerWebhookRoutes(
               message: { type: "string" },
               data: {
                 type: "array",
-                items: webhookEventSchema,
+                items: webhookEventResponseSchema,
               },
             },
           },
         },
       },
     },
-    (request, reply) => webhookController.listWebhookEvents(request as any, reply),
+    (request, reply) => webhookController.listWebhookEvents(request as AuthenticatedRequest, reply),
   );
 }

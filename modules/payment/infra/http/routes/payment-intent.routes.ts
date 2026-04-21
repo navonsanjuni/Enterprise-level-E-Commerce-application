@@ -15,46 +15,14 @@ import {
   voidPaymentSchema,
   getPaymentIntentQuerySchema,
   intentIdParamsSchema,
+  paymentIntentResponseSchema,
+  paymentTransactionResponseSchema,
 } from "../validation/payment-intent.schema";
 
 const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
   keyGenerator: userKeyGenerator,
 });
-
-const paymentIntentSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string", format: "uuid" },
-    orderId: { type: "string", format: "uuid" },
-    checkoutId: { type: "string", format: "uuid" },
-    idempotencyKey: { type: "string" },
-    provider: { type: "string" },
-    status: { type: "string" },
-    amount: { type: "number" },
-    currency: { type: "string" },
-    clientSecret: { type: "string" },
-    metadata: { type: "object", additionalProperties: true },
-    createdAt: { type: "string", format: "date-time" },
-    updatedAt: { type: "string", format: "date-time" },
-  },
-} as const;
-
-const paymentTransactionSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string", format: "uuid" },
-    intentId: { type: "string", format: "uuid" },
-    type: { type: "string" },
-    amount: { type: "number" },
-    currency: { type: "string" },
-    status: { type: "string" },
-    failureReason: { type: "string" },
-    pspReference: { type: "string" },
-    createdAt: { type: "string", format: "date-time" },
-    updatedAt: { type: "string", format: "date-time" },
-  },
-} as const;
 
 export async function registerPaymentIntentRoutes(
   fastify: FastifyInstance,
@@ -96,7 +64,7 @@ export async function registerPaymentIntentRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: paymentIntentSchema,
+              data: paymentIntentResponseSchema,
             },
           },
         },
@@ -131,7 +99,7 @@ export async function registerPaymentIntentRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: paymentIntentSchema,
+              data: paymentIntentResponseSchema,
             },
           },
         },
@@ -167,7 +135,7 @@ export async function registerPaymentIntentRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: paymentIntentSchema,
+              data: paymentIntentResponseSchema,
             },
           },
         },
@@ -202,7 +170,7 @@ export async function registerPaymentIntentRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: paymentIntentSchema,
+              data: paymentIntentResponseSchema,
             },
           },
         },
@@ -236,7 +204,7 @@ export async function registerPaymentIntentRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: paymentIntentSchema,
+              data: paymentIntentResponseSchema,
             },
           },
         },
@@ -272,7 +240,7 @@ export async function registerPaymentIntentRoutes(
               message: { type: "string" },
               data: {
                 type: "array",
-                items: paymentTransactionSchema,
+                items: paymentTransactionResponseSchema,
               },
             },
           },

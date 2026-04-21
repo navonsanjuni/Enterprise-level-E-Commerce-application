@@ -13,43 +13,15 @@ import {
   redeemGiftCardSchema,
   giftCardIdParamsSchema,
   giftCardBalanceQuerySchema,
+  giftCardResponseSchema,
+  giftCardTransactionResponseSchema,
+  giftCardBalanceResponseSchema,
 } from "../validation/gift-card.schema";
 
 const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
   keyGenerator: userKeyGenerator,
 });
-
-const giftCardSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string", format: "uuid" },
-    code: { type: "string" },
-    balance: { type: "number" },
-    initialAmount: { type: "number" },
-    currency: { type: "string" },
-    status: { type: "string" },
-    expiresAt: { type: "string", format: "date-time" },
-    recipientEmail: { type: "string", format: "email" },
-    recipientName: { type: "string" },
-    message: { type: "string" },
-    createdAt: { type: "string", format: "date-time" },
-    updatedAt: { type: "string", format: "date-time" },
-  },
-} as const;
-
-const giftCardTransactionSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string", format: "uuid" },
-    giftCardId: { type: "string", format: "uuid" },
-    orderId: { type: "string", format: "uuid" },
-    amount: { type: "number" },
-    currency: { type: "string" },
-    type: { type: "string" },
-    createdAt: { type: "string", format: "date-time" },
-  },
-} as const;
 
 export async function registerGiftCardRoutes(
   fastify: FastifyInstance,
@@ -92,7 +64,7 @@ export async function registerGiftCardRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: giftCardSchema,
+              data: giftCardResponseSchema,
             },
           },
         },
@@ -132,7 +104,7 @@ export async function registerGiftCardRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: giftCardSchema,
+              data: giftCardResponseSchema,
             },
           },
         },
@@ -162,13 +134,13 @@ export async function registerGiftCardRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: giftCardSchema,
+              data: giftCardBalanceResponseSchema,
             },
           },
         },
       },
     },
-    (request, reply) => controller.getBalance(request as any, reply),
+    (request, reply) => controller.getBalance(request as AuthenticatedRequest, reply),
   );
 
   // GET /gift-cards/:giftCardId/transactions — Admin only
@@ -196,13 +168,13 @@ export async function registerGiftCardRoutes(
               message: { type: "string" },
               data: {
                 type: "array",
-                items: giftCardTransactionSchema,
+                items: giftCardTransactionResponseSchema,
               },
             },
           },
         },
       },
     },
-    (request, reply) => controller.listTransactions(request as any, reply),
+    (request, reply) => controller.listTransactions(request as AuthenticatedRequest, reply),
   );
 }

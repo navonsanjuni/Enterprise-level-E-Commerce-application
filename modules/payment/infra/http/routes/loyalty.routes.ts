@@ -12,63 +12,21 @@ import {
   createLoyaltyProgramSchema,
   awardPointsSchema,
   redeemPointsSchema,
+  adjustPointsSchema,
   getLoyaltyAccountQuerySchema,
   listLoyaltyTransactionsQuerySchema,
+  loyaltyProgramResponseSchema,
+  loyaltyAccountResponseSchema,
+  loyaltyTransactionResponseSchema,
+  loyaltyEarnRuleResponseSchema,
+  loyaltyBurnRuleResponseSchema,
+  loyaltyTierResponseSchema,
 } from "../validation/loyalty.schema";
 
 const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
   keyGenerator: userKeyGenerator,
 });
-
-const loyaltyProgramSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string", format: "uuid" },
-    name: { type: "string" },
-    earnRules: { type: "array", items: { type: "object", additionalProperties: true } },
-    burnRules: { type: "array", items: { type: "object", additionalProperties: true } },
-    tiers: { type: "array", items: { type: "object", additionalProperties: true } },
-    createdAt: { type: "string", format: "date-time" },
-    updatedAt: { type: "string", format: "date-time" },
-  },
-} as const;
-
-const loyaltyAccountSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string", format: "uuid" },
-    userId: { type: "string", format: "uuid" },
-    currentBalance: { type: "number" },
-    totalPointsEarned: { type: "number" },
-    totalPointsRedeemed: { type: "number" },
-    lifetimePoints: { type: "number" },
-    tier: { type: "string" },
-    tierMultiplier: { type: "number" },
-    joinedAt: { type: "string", format: "date-time" },
-    lastActivityAt: { type: "string", format: "date-time" },
-    createdAt: { type: "string", format: "date-time" },
-    updatedAt: { type: "string", format: "date-time" },
-  },
-} as const;
-
-const loyaltyTransactionSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string", format: "uuid" },
-    accountId: { type: "string", format: "uuid" },
-    type: { type: "string" },
-    points: { type: "number" },
-    reason: { type: "string" },
-    description: { type: "string" },
-    referenceId: { type: "string" },
-    orderId: { type: "string", format: "uuid" },
-    createdBy: { type: "string" },
-    expiresAt: { type: "string", format: "date-time" },
-    balanceAfter: { type: "number" },
-    createdAt: { type: "string", format: "date-time" },
-  },
-} as const;
 
 export async function registerLoyaltyRoutes(
   fastify: FastifyInstance,
@@ -96,9 +54,9 @@ export async function registerLoyaltyRoutes(
           required: ["name", "earnRules", "burnRules", "tiers"],
           properties: {
             name: { type: "string" },
-            earnRules: { type: "array", items: { type: "object", additionalProperties: true } },
-            burnRules: { type: "array", items: { type: "object", additionalProperties: true } },
-            tiers: { type: "array", items: { type: "object", additionalProperties: true } },
+            earnRules: { type: "array", items: loyaltyEarnRuleResponseSchema },
+            burnRules: { type: "array", items: loyaltyBurnRuleResponseSchema },
+            tiers: { type: "array", items: loyaltyTierResponseSchema },
           },
         },
         response: {
@@ -108,13 +66,13 @@ export async function registerLoyaltyRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: loyaltyProgramSchema,
+              data: loyaltyProgramResponseSchema,
             },
           },
         },
       },
     },
-    (request, reply) => controller.createProgram(request as any, reply),
+    (request, reply) => controller.createProgram(request as AuthenticatedRequest, reply),
   );
 
   // GET /loyalty/programs — public
@@ -134,14 +92,14 @@ export async function registerLoyaltyRoutes(
               message: { type: "string" },
               data: {
                 type: "array",
-                items: loyaltyProgramSchema,
+                items: loyaltyProgramResponseSchema,
               },
             },
           },
         },
       },
     },
-    (request, reply) => controller.listPrograms(request as any, reply),
+    (request, reply) => controller.listPrograms(request as AuthenticatedRequest, reply),
   );
 
   // GET /loyalty/account — authenticated
@@ -169,7 +127,7 @@ export async function registerLoyaltyRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: loyaltyAccountSchema,
+              data: loyaltyAccountResponseSchema,
             },
           },
         },
@@ -207,23 +165,23 @@ export async function registerLoyaltyRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: loyaltyTransactionSchema,
+              data: loyaltyAccountResponseSchema,
             },
           },
         },
       },
     },
-    (request, reply) => controller.awardPoints(request as any, reply),
+    (request, reply) => controller.awardPoints(request as AuthenticatedRequest, reply),
   );
 
-  // POST /loyalty/points/redeem — Staff/Admin only
+  // POST /loyalty/points/redeem — authenticated
   fastify.post(
     "/loyalty/points/redeem",
     {
       preValidation: [validateBody(redeemPointsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [RolePermissions.AUTHENTICATED],
       schema: {
-        description: "Redeem loyalty points for a discount or reward — Staff/Admin only.",
+        description: "Redeem loyalty points for a discount or reward.",
         tags: ["Loyalty Transactions"],
         summary: "Redeem Loyalty Points",
         security: [{ bearerAuth: [] }],
@@ -238,19 +196,57 @@ export async function registerLoyaltyRoutes(
           },
         },
         response: {
-          201: {
+          200: {
             type: "object",
             properties: {
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: loyaltyTransactionSchema,
+              data: loyaltyAccountResponseSchema,
             },
           },
         },
       },
     },
-    (request, reply) => controller.redeemPoints(request as any, reply),
+    (request, reply) => controller.redeemPoints(request as AuthenticatedRequest, reply),
+  );
+
+  // POST /loyalty/points/adjust — Admin only
+  fastify.post(
+    "/loyalty/points/adjust",
+    {
+      preValidation: [validateBody(adjustPointsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
+      schema: {
+        description: "Manually adjust loyalty points for a user — Admin only.",
+        tags: ["Loyalty Transactions"],
+        summary: "Adjust Loyalty Points",
+        security: [{ bearerAuth: [] }],
+        body: {
+          type: "object",
+          required: ["userId", "points", "isAddition", "reason", "createdBy"],
+          properties: {
+            userId: { type: "string", format: "uuid" },
+            points: { type: "number", minimum: 1 },
+            isAddition: { type: "boolean" },
+            reason: { type: "string" },
+            createdBy: { type: "string" },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+              data: loyaltyTransactionResponseSchema,
+            },
+          },
+        },
+      },
+    },
+    (request, reply) => controller.adjustPoints(request as AuthenticatedRequest, reply),
   );
 
   // GET /loyalty/transactions — authenticated
@@ -280,7 +276,7 @@ export async function registerLoyaltyRoutes(
               message: { type: "string" },
               data: {
                 type: "array",
-                items: loyaltyTransactionSchema,
+                items: loyaltyTransactionResponseSchema,
               },
             },
           },

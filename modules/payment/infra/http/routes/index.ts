@@ -47,6 +47,7 @@ import {
   CreateLoyaltyProgramHandler,
   AwardLoyaltyPointsHandler,
   RedeemLoyaltyPointsHandler,
+  AdjustPointsHandler,
 } from "../../../../loyalty/application/commands";
 import {
   GetLoyaltyProgramsHandler,
@@ -111,6 +112,7 @@ export async function registerPaymentRoutes(
     new GetLoyaltyAccountHandler(services.loyaltyService),
     new AwardLoyaltyPointsHandler(services.loyaltyService),
     new RedeemLoyaltyPointsHandler(services.loyaltyService),
+    new AdjustPointsHandler(services.loyaltyService),
     new GetLoyaltyTransactionsHandler(services.loyaltyTxnService),
   );
 
