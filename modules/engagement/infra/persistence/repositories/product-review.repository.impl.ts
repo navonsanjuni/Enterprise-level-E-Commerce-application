@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
 import {
@@ -227,20 +227,23 @@ export class ProductReviewRepositoryImpl
       sortOrder = "desc",
     } = options || {};
 
-    const where: any = {};
-    if (filters.productId) where.productId = filters.productId;
-    if (filters.userId) where.userId = filters.userId;
-    if (filters.status) where.status = filters.status;
-    if (filters.minRating || filters.maxRating) {
-      where.rating = {};
-      if (filters.minRating) where.rating.gte = filters.minRating;
-      if (filters.maxRating) where.rating.lte = filters.maxRating;
-    }
-    if (filters.startDate || filters.endDate) {
-      where.createdAt = {};
-      if (filters.startDate) where.createdAt.gte = filters.startDate;
-      if (filters.endDate) where.createdAt.lte = filters.endDate;
-    }
+    const where: Prisma.ProductReviewWhereInput = {
+      ...(filters.productId ? { productId: filters.productId } : {}),
+      ...(filters.userId ? { userId: filters.userId } : {}),
+      ...(filters.status ? { status: filters.status } : {}),
+      ...((filters.minRating || filters.maxRating) ? {
+        rating: {
+          ...(filters.minRating ? { gte: filters.minRating } : {}),
+          ...(filters.maxRating ? { lte: filters.maxRating } : {}),
+        },
+      } : {}),
+      ...((filters.startDate || filters.endDate) ? {
+        createdAt: {
+          ...(filters.startDate ? { gte: filters.startDate } : {}),
+          ...(filters.endDate ? { lte: filters.endDate } : {}),
+        },
+      } : {}),
+    };
 
     const [records, total] = await Promise.all([
       this.prisma.productReview.findMany({
@@ -368,10 +371,11 @@ export class ProductReviewRepositoryImpl
   }
 
   async count(filters?: ProductReviewFilters): Promise<number> {
-    const where: any = {};
-    if (filters?.productId) where.productId = filters.productId;
-    if (filters?.userId) where.userId = filters.userId;
-    if (filters?.status) where.status = filters.status;
+    const where: Prisma.ProductReviewWhereInput = {
+      ...(filters?.productId ? { productId: filters.productId } : {}),
+      ...(filters?.userId ? { userId: filters.userId } : {}),
+      ...(filters?.status ? { status: filters.status } : {}),
+    };
 
     return await this.prisma.productReview.count({ where });
   }

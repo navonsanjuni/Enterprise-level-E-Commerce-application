@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient, Prisma, NotificationTypeEnum, ChannelEnum } from "@prisma/client";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
 import {
@@ -64,8 +64,8 @@ export class NotificationRepositoryImpl
       where: { id: notification.id.getValue() },
       create: {
         id: notification.id.getValue(),
-        type: notification.type.getValue() as any,
-        channel: notification.channel?.getValue() as any,
+        type: notification.type.getValue() as NotificationTypeEnum,
+        channel: notification.channel?.getValue() as ChannelEnum | undefined,
         templateId: notification.templateId,
         payload: (notification.payload || {}) as Prisma.InputJsonValue,
         status: notification.status.getValue(),
@@ -109,7 +109,7 @@ export class NotificationRepositoryImpl
       sortOrder = "desc",
     } = options || {};
 
-    const where = { type: type as any };
+    const where = { type: type as NotificationTypeEnum };
 
     const [records, total] = await Promise.all([
       this.prisma.notification.findMany({
@@ -141,7 +141,7 @@ export class NotificationRepositoryImpl
       sortOrder = "desc",
     } = options || {};
 
-    const where = { channel: channel as any };
+    const where = { channel: channel as ChannelEnum };
 
     const [records, total] = await Promise.all([
       this.prisma.notification.findMany({
@@ -233,15 +233,17 @@ export class NotificationRepositoryImpl
       sortOrder = "desc",
     } = options || {};
 
-    const where: any = {};
-    if (filters.type) where.type = filters.type as any;
-    if (filters.channel) where.channel = filters.channel as any;
-    if (filters.status) where.status = filters.status;
-    if (filters.startDate || filters.endDate) {
-      where.createdAt = {};
-      if (filters.startDate) where.createdAt.gte = filters.startDate;
-      if (filters.endDate) where.createdAt.lte = filters.endDate;
-    }
+    const where: Prisma.NotificationWhereInput = {
+      ...(filters.type ? { type: filters.type as NotificationTypeEnum } : {}),
+      ...(filters.channel ? { channel: filters.channel as ChannelEnum } : {}),
+      ...(filters.status ? { status: filters.status } : {}),
+      ...((filters.startDate || filters.endDate) ? {
+        createdAt: {
+          ...(filters.startDate ? { gte: filters.startDate } : {}),
+          ...(filters.endDate ? { lte: filters.endDate } : {}),
+        },
+      } : {}),
+    };
 
     const [records, total] = await Promise.all([
       this.prisma.notification.findMany({
@@ -313,7 +315,7 @@ export class NotificationRepositoryImpl
         where,
         take: limit,
         skip: offset,
-        orderBy: { [sortBy]: sortOrder as any },
+        orderBy: { [sortBy]: sortOrder as Prisma.SortOrder },
       }),
       this.prisma.notification.count({ where }),
     ]);
@@ -348,7 +350,7 @@ export class NotificationRepositoryImpl
         where,
         take: limit,
         skip: offset,
-        orderBy: { [sortBy]: sortOrder as any },
+        orderBy: { [sortBy]: sortOrder as Prisma.SortOrder },
       }),
       this.prisma.notification.count({ where }),
     ]);
@@ -379,7 +381,7 @@ export class NotificationRepositoryImpl
         where,
         take: limit,
         skip: offset,
-        orderBy: { [sortBy]: sortOrder as any },
+        orderBy: { [sortBy]: sortOrder as Prisma.SortOrder },
       }),
       this.prisma.notification.count({ where }),
     ]);
@@ -395,13 +397,13 @@ export class NotificationRepositoryImpl
 
   async countByType(type: string): Promise<number> {
     return await this.prisma.notification.count({
-      where: { type: type as any },
+      where: { type: type as NotificationTypeEnum },
     });
   }
 
   async countByChannel(channel: string): Promise<number> {
     return await this.prisma.notification.count({
-      where: { channel: channel as any },
+      where: { channel: channel as ChannelEnum },
     });
   }
 
@@ -412,15 +414,17 @@ export class NotificationRepositoryImpl
   }
 
   async count(filters?: NotificationFilters): Promise<number> {
-    const where: any = {};
-    if (filters?.type) where.type = filters.type as any;
-    if (filters?.channel) where.channel = filters.channel as any;
-    if (filters?.status) where.status = filters.status;
-    if (filters?.startDate || filters?.endDate) {
-      where.createdAt = {};
-      if (filters.startDate) where.createdAt.gte = filters.startDate;
-      if (filters.endDate) where.createdAt.lte = filters.endDate;
-    }
+    const where: Prisma.NotificationWhereInput = {
+      ...(filters?.type ? { type: filters.type as NotificationTypeEnum } : {}),
+      ...(filters?.channel ? { channel: filters.channel as ChannelEnum } : {}),
+      ...(filters?.status ? { status: filters.status } : {}),
+      ...((filters?.startDate || filters?.endDate) ? {
+        createdAt: {
+          ...(filters.startDate ? { gte: filters.startDate } : {}),
+          ...(filters.endDate ? { lte: filters.endDate } : {}),
+        },
+      } : {}),
+    };
 
     return await this.prisma.notification.count({ where });
   }
