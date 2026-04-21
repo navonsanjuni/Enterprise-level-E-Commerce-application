@@ -104,7 +104,7 @@ export class PaymentService {
     });
     transaction.markAsSucceeded(params.pspReference ?? '');
 
-    await this.paymentIntentRepository.update(intent);
+    await this.paymentIntentRepository.save(intent);
     await this.paymentTransactionRepository.save(transaction);
     return PaymentIntent.toDTO(intent);
   }
@@ -130,7 +130,7 @@ export class PaymentService {
     });
     transaction.markAsSucceeded(pspReference ?? '');
 
-    await this.paymentIntentRepository.update(intent);
+    await this.paymentIntentRepository.save(intent);
     await this.paymentTransactionRepository.save(transaction);
     return PaymentIntent.toDTO(intent);
   }
@@ -165,7 +165,7 @@ export class PaymentService {
     transaction.markAsSucceeded('');
 
     intent.cancel();
-    await this.paymentIntentRepository.update(intent);
+    await this.paymentIntentRepository.save(intent);
     await this.paymentTransactionRepository.save(transaction);
     return PaymentIntent.toDTO(intent);
   }
@@ -177,7 +177,7 @@ export class PaymentService {
     if (!intent) throw new PaymentIntentNotFoundError(intentId);
 
     intent.cancel();
-    await this.paymentIntentRepository.update(intent);
+    await this.paymentIntentRepository.save(intent);
     return PaymentIntent.toDTO(intent);
   }
 
@@ -206,7 +206,7 @@ export class PaymentService {
     });
     transaction.markAsSucceeded(params.pspReference ?? '');
 
-    await this.paymentIntentRepository.update(intent);
+    await this.paymentIntentRepository.save(intent);
     await this.paymentTransactionRepository.save(transaction);
     return PaymentIntent.toDTO(intent);
   }
@@ -224,7 +224,7 @@ export class PaymentService {
       intent.updateClientSecret(data.clientSecret);
     }
 
-    await this.paymentIntentRepository.update(intent);
+    await this.paymentIntentRepository.save(intent);
     return PaymentIntent.toDTO(intent);
   }
 
@@ -245,7 +245,7 @@ export class PaymentService {
     });
     transaction.markAsFailed(failureReason);
 
-    await this.paymentIntentRepository.update(intent);
+    await this.paymentIntentRepository.save(intent);
     await this.paymentTransactionRepository.save(transaction);
     return PaymentIntent.toDTO(intent);
   }

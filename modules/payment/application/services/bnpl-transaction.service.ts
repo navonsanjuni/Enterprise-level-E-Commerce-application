@@ -70,7 +70,7 @@ export class BnplTransactionService {
 
     await this.assertIntentOwnership(transaction.intentId, userId);
     transaction.approve();
-    await this.bnplTxnRepo.update(transaction);
+    await this.bnplTxnRepo.save(transaction);
     return BnplTransaction.toDTO(transaction);
   }
 
@@ -80,7 +80,7 @@ export class BnplTransactionService {
 
     await this.assertIntentOwnership(transaction.intentId, userId);
     transaction.reject();
-    await this.bnplTxnRepo.update(transaction);
+    await this.bnplTxnRepo.save(transaction);
     return BnplTransaction.toDTO(transaction);
   }
 
@@ -90,7 +90,7 @@ export class BnplTransactionService {
 
     await this.assertIntentOwnership(transaction.intentId, userId);
     transaction.activate();
-    await this.bnplTxnRepo.update(transaction);
+    await this.bnplTxnRepo.save(transaction);
     return BnplTransaction.toDTO(transaction);
   }
 
@@ -100,7 +100,7 @@ export class BnplTransactionService {
 
     await this.assertIntentOwnership(transaction.intentId, userId);
     transaction.complete();
-    await this.bnplTxnRepo.update(transaction);
+    await this.bnplTxnRepo.save(transaction);
     return BnplTransaction.toDTO(transaction);
   }
 
@@ -110,7 +110,7 @@ export class BnplTransactionService {
 
     await this.assertIntentOwnership(transaction.intentId, userId);
     transaction.cancel();
-    await this.bnplTxnRepo.update(transaction);
+    await this.bnplTxnRepo.save(transaction);
     return BnplTransaction.toDTO(transaction);
   }
 
@@ -120,7 +120,7 @@ export class BnplTransactionService {
 
     await this.assertIntentOwnership(transaction.intentId, userId);
     transaction.fail();
-    await this.bnplTxnRepo.update(transaction);
+    await this.bnplTxnRepo.save(transaction);
     return BnplTransaction.toDTO(transaction);
   }
 
