@@ -1,60 +1,59 @@
 import { PrismaClient } from "@prisma/client";
+import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
+import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import {
   IBnplTransactionRepository,
   BnplTransactionFilters,
   BnplTransactionQueryOptions,
 } from "../../../domain/repositories/bnpl-transaction.repository";
-import {
-  BnplTransaction,
-  BnplPlan,
-} from "../../../domain/entities/bnpl-transaction.entity";
+import { BnplTransaction, BnplPlan } from "../../../domain/entities/bnpl-transaction.entity";
 import { BnplTransactionId } from "../../../domain/value-objects/bnpl-transaction-id.vo";
 import { PaymentIntentId } from "../../../domain/value-objects/payment-intent-id.vo";
 import { BnplProvider } from "../../../domain/value-objects/bnpl-provider.vo";
 import { BnplStatus } from "../../../domain/value-objects/bnpl-status.vo";
-import {
-  PaginatedResult,
-} from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
+import { PaginatedResult } from "../../../../../packages/core/src/domain/interfaces/paginated-result.interface";
 
-export class BnplTransactionRepositoryImpl implements IBnplTransactionRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+export class BnplTransactionRepositoryImpl
+  extends PrismaRepository<BnplTransaction>
+  implements IBnplTransactionRepository
+{
+  constructor(prisma: PrismaClient, eventBus?: IEventBus) {
+    super(prisma, eventBus);
+  }
 
   async save(transaction: BnplTransaction): Promise<void> {
     const data = this.dehydrate(transaction);
-    await (this.prisma as any).bnplTransaction.create({ data });
-  }
-
-  async update(transaction: BnplTransaction): Promise<void> {
-    const data = this.dehydrate(transaction);
     const { bnplId, ...updateData } = data;
-    await (this.prisma as any).bnplTransaction.update({
+    await this.prisma.bnplTransaction.upsert({
       where: { bnplId },
-      data: updateData,
+      create: data,
+      update: updateData,
     });
+    await this.dispatchEvents(transaction);
   }
 
   async delete(id: BnplTransactionId): Promise<void> {
-    await (this.prisma as any).bnplTransaction.delete({
+    await this.prisma.bnplTransaction.delete({
       where: { bnplId: id.getValue() },
     });
   }
 
   async findById(id: BnplTransactionId): Promise<BnplTransaction | null> {
-    const record = await (this.prisma as any).bnplTransaction.findUnique({
+    const record = await this.prisma.bnplTransaction.findUnique({
       where: { bnplId: id.getValue() },
     });
     return record ? this.hydrate(record) : null;
   }
 
   async findByIntentId(intentId: PaymentIntentId): Promise<BnplTransaction | null> {
-    const record = await (this.prisma as any).bnplTransaction.findFirst({
+    const record = await this.prisma.bnplTransaction.findFirst({
       where: { intentId: intentId.getValue() },
     });
     return record ? this.hydrate(record) : null;
   }
 
   async findByOrderId(orderId: string): Promise<BnplTransaction[]> {
-    const records = await (this.prisma as any).bnplTransaction.findMany({
+    const records = await this.prisma.bnplTransaction.findMany({
       where: { orderId },
       orderBy: { createdAt: "desc" },
     });
@@ -72,7 +71,7 @@ export class BnplTransactionRepositoryImpl implements IBnplTransactionRepository
     if (filters.status) where.status = filters.status.getValue();
 
     const [records, total] = await Promise.all([
-      (this.prisma as any).bnplTransaction.findMany({
+      this.prisma.bnplTransaction.findMany({
         where,
         take: options?.limit,
         skip: options?.offset,
@@ -80,7 +79,7 @@ export class BnplTransactionRepositoryImpl implements IBnplTransactionRepository
           ? { [options.sortBy]: options.sortOrder ?? "desc" }
           : { createdAt: "desc" },
       }),
-      (this.prisma as any).bnplTransaction.count({ where }),
+      this.prisma.bnplTransaction.count({ where }),
     ]);
 
     const items = records.map((r: any) => this.hydrate(r));
@@ -101,11 +100,11 @@ export class BnplTransactionRepositoryImpl implements IBnplTransactionRepository
     if (filters?.orderId) where.orderId = filters.orderId;
     if (filters?.provider) where.provider = filters.provider.getValue();
     if (filters?.status) where.status = filters.status.getValue();
-    return (this.prisma as any).bnplTransaction.count({ where });
+    return this.prisma.bnplTransaction.count({ where });
   }
 
   async exists(id: BnplTransactionId): Promise<boolean> {
-    const count = await (this.prisma as any).bnplTransaction.count({
+    const count = await this.prisma.bnplTransaction.count({
       where: { bnplId: id.getValue() },
     });
     return count > 0;
