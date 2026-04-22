@@ -1,5 +1,71 @@
 import { PrismaClient } from "@prisma/client";
 
+// Engagement — Controllers
+import {
+  WishlistController,
+  ReminderController,
+  NotificationController,
+  AppointmentController,
+  ProductReviewController,
+  NewsletterController,
+} from "../../../modules/engagement/infra/http/controllers";
+
+// Engagement — Handlers
+import {
+  CreateWishlistHandler,
+  AddToWishlistHandler,
+  RemoveFromWishlistHandler,
+  UpdateWishlistHandler,
+  DeleteWishlistHandler,
+  GetWishlistHandler,
+  GetUserWishlistsHandler,
+  GetPublicWishlistsHandler,
+  GetWishlistItemsHandler,
+  CreateReminderHandler,
+  MarkReminderAsSentHandler,
+  UnsubscribeReminderHandler,
+  DeleteReminderHandler,
+  GetReminderHandler,
+  GetUserRemindersHandler,
+  GetVariantRemindersHandler,
+  ScheduleNotificationHandler,
+  SendNotificationHandler,
+  GetNotificationHandler,
+  GetNotificationsByTypeHandler,
+  CreateAppointmentHandler,
+  UpdateAppointmentHandler,
+  CancelAppointmentHandler,
+  GetAppointmentHandler,
+  GetUserAppointmentsHandler,
+  GetLocationAppointmentsHandler,
+  CreateProductReviewHandler,
+  UpdateReviewStatusHandler,
+  DeleteProductReviewHandler,
+  GetProductReviewHandler,
+  GetProductReviewsHandler,
+  GetUserReviewsHandler,
+  SubscribeNewsletterHandler,
+  UnsubscribeNewsletterHandler,
+  GetNewsletterSubscriptionHandler,
+} from "../../../modules/engagement/application";
+
+// Engagement — Repositories
+import { WishlistRepositoryImpl } from "../../../modules/engagement/infra/persistence/repositories/wishlist.repository.impl";
+import { WishlistItemRepositoryImpl } from "../../../modules/engagement/infra/persistence/repositories/wishlist-item.repository.impl";
+import { ReminderRepositoryImpl } from "../../../modules/engagement/infra/persistence/repositories/reminder.repository.impl";
+import { NotificationRepositoryImpl } from "../../../modules/engagement/infra/persistence/repositories/notification.repository.impl";
+import { AppointmentRepositoryImpl } from "../../../modules/engagement/infra/persistence/repositories/appointment.repository.impl";
+import { ProductReviewRepositoryImpl } from "../../../modules/engagement/infra/persistence/repositories/product-review.repository.impl";
+import { NewsletterSubscriptionRepositoryImpl } from "../../../modules/engagement/infra/persistence/repositories/newsletter-subscription.repository.impl";
+
+// Engagement — Services
+import { WishlistManagementService } from "../../../modules/engagement/application/services/wishlist-management.service";
+import { ReminderManagementService } from "../../../modules/engagement/application/services/reminder-management.service";
+import { NotificationService } from "../../../modules/engagement/application/services/notification.service";
+import { AppointmentService } from "../../../modules/engagement/application/services/appointment.service";
+import { ProductReviewService } from "../../../modules/engagement/application/services/product-review.service";
+import { NewsletterService } from "../../../modules/engagement/application/services/newsletter.service";
+
 // User Management — Repositories
 import { UserRepository } from "../../../modules/user-management/infra/persistence/repositories/user.repository";
 import { UserProfileRepository } from "../../../modules/user-management/infra/persistence/repositories/user-profile.repository";
@@ -54,6 +120,9 @@ import { ProfileController } from "../../../modules/user-management/infra/http/c
 import { AddressesController } from "../../../modules/user-management/infra/http/controllers/addresses.controller";
 import { PaymentMethodsController } from "../../../modules/user-management/infra/http/controllers/payment-methods.controller";
 import { UsersController } from "../../../modules/user-management/infra/http/controllers/users.controller";
+
+// User Management — JWT Service
+import { JwtService } from "../../../modules/user-management/infra/http/security/jwt.service";
 
 // User Management — Token Blacklist
 import { TokenBlacklistService } from "../../../modules/user-management/infra/http/security/token-blacklist";
@@ -251,6 +320,72 @@ import {
   PickupReservationService,
 } from "../../../modules/inventory-management/application/services";
 
+// Inventory Management — Controllers
+import {
+  StockController,
+  LocationController,
+  SupplierController,
+  PurchaseOrderController,
+  PurchaseOrderItemController,
+  StockAlertController,
+  PickupReservationController,
+  InventoryTransactionController,
+} from "../../../modules/inventory-management/infra/http/controllers";
+
+// Inventory Management — Handlers
+import {
+  AddStockHandler,
+  AdjustStockHandler,
+  TransferStockHandler,
+  ReserveStockHandler,
+  FulfillReservationHandler,
+  SetStockThresholdsHandler,
+  GetStockHandler,
+  GetStockByVariantHandler,
+  GetStockStatsHandler,
+  GetTotalAvailableStockHandler,
+  ListStocksHandler,
+  GetLowStockItemsHandler,
+  GetOutOfStockItemsHandler,
+  CreateLocationHandler,
+  UpdateLocationHandler,
+  DeleteLocationHandler,
+  GetLocationHandler,
+  ListLocationsHandler,
+  CreateSupplierHandler,
+  UpdateSupplierHandler,
+  DeleteSupplierHandler,
+  GetSupplierHandler,
+  ListSuppliersHandler,
+  CreatePurchaseOrderHandler,
+  CreatePurchaseOrderWithItemsHandler,
+  AddPOItemHandler,
+  UpdatePOItemHandler,
+  RemovePOItemHandler,
+  UpdatePOStatusHandler,
+  UpdatePOEtaHandler,
+  ReceivePOItemsHandler,
+  DeletePurchaseOrderHandler,
+  GetPurchaseOrderHandler,
+  GetPOItemsHandler,
+  ListPurchaseOrdersHandler,
+  GetOverduePurchaseOrdersHandler,
+  GetPendingReceivalHandler,
+  CreateStockAlertHandler,
+  ResolveStockAlertHandler,
+  DeleteStockAlertHandler,
+  GetStockAlertHandler,
+  GetActiveAlertsHandler,
+  ListStockAlertsHandler,
+  CreatePickupReservationHandler,
+  CancelPickupReservationHandler,
+  GetPickupReservationHandler,
+  ListPickupReservationsHandler,
+  GetTransactionHandler,
+  ListTransactionsHandler,
+  GetTransactionsByVariantHandler,
+} from "../../../modules/inventory-management/application";
+
 // Cart — Repositories
 import {
   CartRepositoryImpl,
@@ -336,6 +471,64 @@ import {
   PreorderRepositoryImpl,
 } from "../../../modules/order-management/infra/persistence/repositories";
 
+// Order Management — Controllers
+import {
+  OrderController,
+  OrderAddressController,
+  OrderItemController,
+  OrderShipmentController,
+  OrderStatusHistoryController,
+  OrderEventController,
+  PreorderController,
+  BackorderController,
+} from "../../../modules/order-management/infra/http/controllers";
+
+// Order Management — Handlers
+import {
+  CreateOrderHandler,
+  UpdateOrderStatusHandler,
+  UpdateOrderTotalsHandler,
+  MarkOrderPaidHandler,
+  MarkOrderFulfilledHandler,
+  CancelOrderHandler,
+  DeleteOrderHandler,
+  GetOrderHandler,
+  ListOrdersHandler,
+  TrackOrderHandler,
+  SetOrderAddressesHandler,
+  UpdateBillingAddressHandler,
+  UpdateShippingAddressHandler,
+  GetOrderAddressHandler,
+  AddOrderItemHandler,
+  UpdateOrderItemHandler,
+  RemoveOrderItemHandler,
+  ListOrderItemsHandler,
+  GetOrderItemHandler,
+  CreateShipmentHandler,
+  UpdateShipmentTrackingHandler,
+  MarkShipmentShippedHandler,
+  MarkShipmentDeliveredHandler,
+  ListOrderShipmentsHandler,
+  GetShipmentHandler,
+  LogOrderStatusChangeHandler,
+  GetOrderStatusHistoryHandler,
+  LogOrderEventHandler,
+  ListOrderEventsHandler,
+  GetOrderEventHandler,
+  CreatePreorderHandler,
+  UpdatePreorderReleaseDateHandler,
+  MarkPreorderNotifiedHandler,
+  DeletePreorderHandler,
+  GetPreorderHandler,
+  ListPreordersHandler,
+  CreateBackorderHandler,
+  UpdateBackorderEtaHandler,
+  MarkBackorderNotifiedHandler,
+  DeleteBackorderHandler,
+  GetBackorderHandler,
+  ListBackordersHandler,
+} from "../../../modules/order-management/application";
+
 // Order Management — Value Objects (used by cart adapter)
 import { ProductSnapshot } from "../../../modules/order-management/domain/value-objects/product-snapshot.vo";
 import { OrderId } from "../../../modules/order-management/domain/value-objects/order-id.vo";
@@ -360,18 +553,75 @@ import { PreorderManagementService } from "../../../modules/order-management/app
 
 // Payment & Loyalty — Repositories
 import {
-  PaymentIntentRepository,
-  PaymentTransactionRepository,
-  PaymentWebhookEventRepository,
-  BnplTransactionRepository,
-  GiftCardRepository,
-  GiftCardTransactionRepository,
-  PromotionRepository,
-  PromotionUsageRepository,
-  LoyaltyAccountRepository,
-  LoyaltyProgramRepository,
-  LoyaltyTransactionRepository,
+  PaymentIntentRepositoryImpl,
+  PaymentTransactionRepositoryImpl,
+  PaymentWebhookEventRepositoryImpl,
+  BnplTransactionRepositoryImpl,
+  GiftCardRepositoryImpl,
+  GiftCardTransactionRepositoryImpl,
+  PromotionRepositoryImpl,
+  PromotionUsageRepositoryImpl,
 } from "../../../modules/payment/infra/persistence/repositories";
+import {
+  LoyaltyAccountRepositoryImpl,
+  LoyaltyProgramRepositoryImpl,
+  LoyaltyTransactionRepositoryImpl,
+} from "../../../modules/loyalty/infra/persistence/repositories";
+
+// Payment — Controllers
+import {
+  PaymentIntentController,
+  PaymentWebhookController,
+  BnplTransactionController,
+  GiftCardController,
+  PromotionController,
+  StripeWebhookController,
+} from "../../../modules/payment/infra/http/controllers";
+
+// Payment — Handlers
+import {
+  CreatePaymentIntentHandler,
+  ProcessPaymentHandler,
+  RefundPaymentHandler,
+  VoidPaymentHandler,
+  CreateBnplTransactionHandler,
+  ProcessBnplPaymentHandler,
+  CreateGiftCardHandler,
+  RedeemGiftCardHandler,
+  CreatePromotionHandler,
+  ApplyPromotionHandler,
+  RecordPromotionUsageHandler,
+  ProcessWebhookEventHandler,
+} from "../../../modules/payment/application/commands";
+import {
+  GetPaymentIntentHandler,
+  GetPaymentTransactionsHandler,
+  GetBnplTransactionsHandler,
+  GetGiftCardBalanceHandler,
+  GetGiftCardTransactionsHandler,
+  GetActivePromotionsHandler,
+  GetPromotionUsageHandler,
+  GetWebhookEventsHandler,
+} from "../../../modules/payment/application/queries";
+
+// Payment — Config
+import { isStripeConfigured } from "../../../modules/payment/infra/config/stripe.config";
+
+// Loyalty — Controller
+import { LoyaltyController } from "../../../modules/loyalty/infra/http/controllers/loyalty.controller";
+
+// Loyalty — Handlers
+import {
+  CreateLoyaltyProgramHandler,
+  AwardLoyaltyPointsHandler,
+  RedeemLoyaltyPointsHandler,
+  AdjustLoyaltyPointsHandler,
+} from "../../../modules/loyalty/application/commands";
+import {
+  GetLoyaltyProgramsHandler,
+  GetLoyaltyAccountHandler,
+  GetLoyaltyTransactionsHandler,
+} from "../../../modules/loyalty/application/queries";
 
 // Payment & Loyalty — Services
 import {
@@ -382,7 +632,7 @@ import {
   PaymentWebhookService,
 } from "../../../modules/payment/application/services";
 import { LoyaltyService } from "../../../modules/loyalty/application/services/loyalty.service";
-import { LoyaltyTransactionService } from "../../../modules/loyalty/application/services/loyalty-transaction.service";
+import { LoyaltyProgramService } from "../../../modules/loyalty/application/services/loyalty-program.service";
 import type { IExternalOrderQueryPort } from "../../../modules/payment/domain/external-services";
 
 /**
@@ -430,15 +680,17 @@ export class Container {
     const passwordHasher = new PasswordHasherService();
 
     // Services
+    const jwtService = new JwtService({
+      accessTokenSecret: config.jwtSecret,
+      refreshTokenSecret: config.jwtSecret,
+      accessTokenExpiresIn: "15m",
+      refreshTokenExpiresIn: config.jwtExpiresIn,
+    });
+
     const authService = new AuthenticationService(
       userRepository,
       passwordHasher,
-      {
-        accessTokenSecret: config.jwtSecret,
-        refreshTokenSecret: config.jwtSecret,
-        accessTokenExpiresIn: "15m",
-        refreshTokenExpiresIn: config.jwtExpiresIn,
-      },
+      jwtService,
     );
 
     const profileService = new UserProfileService(
@@ -862,16 +1114,94 @@ export class Container {
       inventoryTransactionRepository,
     );
 
-    // Store Inventory Management services
-    this.services.set("stockManagementService", stockManagementService);
-    this.services.set("locationManagementService", locationManagementService);
-    this.services.set("supplierManagementService", supplierManagementService);
-    this.services.set(
-      "purchaseOrderManagementService",
-      purchaseOrderManagementService,
+    // Inventory Management — Controllers
+    const stockController = new StockController(
+      new AddStockHandler(stockManagementService),
+      new AdjustStockHandler(stockManagementService),
+      new TransferStockHandler(stockManagementService),
+      new ReserveStockHandler(stockManagementService),
+      new FulfillReservationHandler(stockManagementService),
+      new SetStockThresholdsHandler(stockManagementService),
+      new GetStockHandler(stockManagementService),
+      new GetStockByVariantHandler(stockManagementService),
+      new GetStockStatsHandler(stockManagementService),
+      new GetTotalAvailableStockHandler(stockManagementService),
+      new ListStocksHandler(stockManagementService),
+      new GetLowStockItemsHandler(stockManagementService),
+      new GetOutOfStockItemsHandler(stockManagementService),
     );
-    this.services.set("stockAlertService", stockAlertService);
-    this.services.set("pickupReservationService", pickupReservationService);
+
+    const locationController = new LocationController(
+      new CreateLocationHandler(locationManagementService),
+      new UpdateLocationHandler(locationManagementService),
+      new DeleteLocationHandler(locationManagementService),
+      new GetLocationHandler(locationManagementService),
+      new ListLocationsHandler(locationManagementService),
+    );
+
+    const supplierController = new SupplierController(
+      new CreateSupplierHandler(supplierManagementService),
+      new UpdateSupplierHandler(supplierManagementService),
+      new DeleteSupplierHandler(supplierManagementService),
+      new GetSupplierHandler(supplierManagementService),
+      new ListSuppliersHandler(supplierManagementService),
+    );
+
+    const poController = new PurchaseOrderController(
+      new CreatePurchaseOrderHandler(purchaseOrderManagementService),
+      new CreatePurchaseOrderWithItemsHandler(purchaseOrderManagementService),
+      new AddPOItemHandler(purchaseOrderManagementService),
+      new UpdatePOItemHandler(purchaseOrderManagementService),
+      new RemovePOItemHandler(purchaseOrderManagementService),
+      new UpdatePOStatusHandler(purchaseOrderManagementService),
+      new ReceivePOItemsHandler(purchaseOrderManagementService),
+      new DeletePurchaseOrderHandler(purchaseOrderManagementService),
+      new GetPurchaseOrderHandler(purchaseOrderManagementService),
+      new GetPOItemsHandler(purchaseOrderManagementService),
+      new ListPurchaseOrdersHandler(purchaseOrderManagementService),
+      new GetOverduePurchaseOrdersHandler(purchaseOrderManagementService),
+      new GetPendingReceivalHandler(purchaseOrderManagementService),
+      new UpdatePOEtaHandler(purchaseOrderManagementService),
+    );
+
+    const poItemController = new PurchaseOrderItemController(
+      new AddPOItemHandler(purchaseOrderManagementService),
+      new UpdatePOItemHandler(purchaseOrderManagementService),
+      new RemovePOItemHandler(purchaseOrderManagementService),
+      new GetPOItemsHandler(purchaseOrderManagementService),
+    );
+
+    const alertController = new StockAlertController(
+      new CreateStockAlertHandler(stockAlertService),
+      new ResolveStockAlertHandler(stockAlertService),
+      new DeleteStockAlertHandler(stockAlertService),
+      new GetStockAlertHandler(stockAlertService),
+      new GetActiveAlertsHandler(stockAlertService),
+      new ListStockAlertsHandler(stockAlertService),
+    );
+
+    const pickupReservationController = new PickupReservationController(
+      new CreatePickupReservationHandler(pickupReservationService),
+      new CancelPickupReservationHandler(pickupReservationService),
+      new GetPickupReservationHandler(pickupReservationService),
+      new ListPickupReservationsHandler(pickupReservationService),
+    );
+
+    const inventoryTransactionController = new InventoryTransactionController(
+      new GetTransactionsByVariantHandler(stockManagementService),
+      new ListTransactionsHandler(stockManagementService),
+      new GetTransactionHandler(stockManagementService),
+    );
+
+    // Store Inventory Management controllers
+    this.services.set("stockController", stockController);
+    this.services.set("locationController", locationController);
+    this.services.set("supplierController", supplierController);
+    this.services.set("poController", poController);
+    this.services.set("poItemController", poItemController);
+    this.services.set("alertController", alertController);
+    this.services.set("pickupReservationController", pickupReservationController);
+    this.services.set("inventoryTransactionController", inventoryTransactionController);
 
     // ============================================
     // Cart Module
@@ -1121,36 +1451,105 @@ export class Container {
       preorderRepository,
     );
 
-    // Store Order Management services
-    this.services.set("orderManagementService", orderManagementService);
-    this.services.set("orderEventService", orderEventService);
-    this.services.set("orderItemManagementService", orderItemManagementService);
-    this.services.set("shipmentManagementService", shipmentManagementService);
-    this.services.set("backorderManagementService", backorderManagementService);
-    this.services.set("preorderManagementService", preorderManagementService);
+    // Order Management — Controllers
+    const orderController = new OrderController(
+      new CreateOrderHandler(orderManagementService),
+      new GetOrderHandler(orderManagementService),
+      new ListOrdersHandler(orderManagementService),
+      new UpdateOrderStatusHandler(orderManagementService),
+      new UpdateOrderTotalsHandler(orderManagementService),
+      new MarkOrderPaidHandler(orderManagementService),
+      new MarkOrderFulfilledHandler(orderManagementService),
+      new CancelOrderHandler(orderManagementService),
+      new DeleteOrderHandler(orderManagementService),
+      new TrackOrderHandler(orderManagementService),
+    );
+
+    const orderAddressController = new OrderAddressController(
+      new SetOrderAddressesHandler(orderManagementService),
+      new UpdateBillingAddressHandler(orderManagementService),
+      new UpdateShippingAddressHandler(orderManagementService),
+      new GetOrderAddressHandler(orderManagementService),
+    );
+
+    const orderItemController = new OrderItemController(
+      new AddOrderItemHandler(orderManagementService),
+      new UpdateOrderItemHandler(orderManagementService),
+      new RemoveOrderItemHandler(orderManagementService),
+      new ListOrderItemsHandler(orderItemManagementService),
+      new GetOrderItemHandler(orderItemManagementService),
+    );
+
+    const orderShipmentController = new OrderShipmentController(
+      new CreateShipmentHandler(orderManagementService),
+      new UpdateShipmentTrackingHandler(orderManagementService),
+      new MarkShipmentShippedHandler(orderManagementService),
+      new MarkShipmentDeliveredHandler(orderManagementService),
+      new ListOrderShipmentsHandler(shipmentManagementService),
+      new GetShipmentHandler(shipmentManagementService),
+    );
+
+    const orderStatusHistoryController = new OrderStatusHistoryController(
+      new LogOrderStatusChangeHandler(orderManagementService),
+      new GetOrderStatusHistoryHandler(orderManagementService),
+    );
+
+    const orderEventController = new OrderEventController(
+      new LogOrderEventHandler(orderEventService),
+      new ListOrderEventsHandler(orderEventService),
+      new GetOrderEventHandler(orderEventService),
+    );
+
+    const preorderController = new PreorderController(
+      new CreatePreorderHandler(preorderManagementService),
+      new UpdatePreorderReleaseDateHandler(preorderManagementService),
+      new MarkPreorderNotifiedHandler(preorderManagementService),
+      new DeletePreorderHandler(preorderManagementService),
+      new GetPreorderHandler(preorderManagementService),
+      new ListPreordersHandler(preorderManagementService),
+    );
+
+    const backorderController = new BackorderController(
+      new CreateBackorderHandler(backorderManagementService),
+      new UpdateBackorderEtaHandler(backorderManagementService),
+      new MarkBackorderNotifiedHandler(backorderManagementService),
+      new DeleteBackorderHandler(backorderManagementService),
+      new GetBackorderHandler(backorderManagementService),
+      new ListBackordersHandler(backorderManagementService),
+    );
+
+    // Store Order Management controllers
+    this.services.set("orderController", orderController);
+    this.services.set("orderAddressController", orderAddressController);
+    this.services.set("orderItemController", orderItemController);
+    this.services.set("orderShipmentController", orderShipmentController);
+    this.services.set("orderStatusHistoryController", orderStatusHistoryController);
+    this.services.set("orderEventController", orderEventController);
+    this.services.set("preorderController", preorderController);
+    this.services.set("backorderController", backorderController);
 
     // ============================================
     // Payment & Loyalty Module
     // ============================================
 
     // Repositories
-    const paymentIntentRepository = new PaymentIntentRepository(prisma);
-    const paymentTransactionRepository = new PaymentTransactionRepository(
+    const paymentIntentRepository = new PaymentIntentRepositoryImpl(prisma);
+    const paymentTransactionRepository = new PaymentTransactionRepositoryImpl(
       prisma,
     );
-    const paymentWebhookEventRepository = new PaymentWebhookEventRepository(
+    const paymentWebhookEventRepository = new PaymentWebhookEventRepositoryImpl(
       prisma,
     );
-    const bnplTransactionRepository = new BnplTransactionRepository(prisma);
-    const giftCardRepository = new GiftCardRepository(prisma);
-    const giftCardTransactionRepository = new GiftCardTransactionRepository(
+    const bnplTransactionRepository = new BnplTransactionRepositoryImpl(prisma);
+    const giftCardRepository = new GiftCardRepositoryImpl(prisma);
+    const giftCardTransactionRepository = new GiftCardTransactionRepositoryImpl(
       prisma,
     );
-    const promotionRepository = new PromotionRepository(prisma);
-    const promotionUsageRepository = new PromotionUsageRepository(prisma);
-    const loyaltyAccountRepository = new LoyaltyAccountRepository(prisma);
-    const loyaltyProgramRepository = new LoyaltyProgramRepository(prisma);
-    const loyaltyTransactionRepository = new LoyaltyTransactionRepository(
+    const promotionRepository = new PromotionRepositoryImpl(prisma);
+    const promotionUsageRepository = new PromotionUsageRepositoryImpl(prisma);
+    const loyaltyAccountRepository = new LoyaltyAccountRepositoryImpl(prisma);
+    const loyaltyProgramRepository = new LoyaltyProgramRepositoryImpl(prisma);
+    const loyaltyTransactionRepository = new LoyaltyTransactionRepositoryImpl(
       prisma,
     );
 
@@ -1160,7 +1559,7 @@ export class Container {
         const order = await orderRepository.findById(
           OrderId.fromString(orderId),
         );
-        return order ? { userId: order.getUserId() ?? null } : null;
+        return order ? { userId: order.userId ?? null } : null;
       },
     };
 
@@ -1196,19 +1595,159 @@ export class Container {
       loyaltyAccountRepository,
       loyaltyTransactionRepository,
     );
-    const loyaltyTransactionService = new LoyaltyTransactionService(
-      loyaltyTransactionRepository,
+    const loyaltyProgramService = new LoyaltyProgramService(loyaltyProgramRepository);
+
+    // Payment & Loyalty — Controllers
+    const paymentIntentController = new PaymentIntentController(
+      new CreatePaymentIntentHandler(paymentService),
+      new ProcessPaymentHandler(paymentService),
+      new RefundPaymentHandler(paymentService),
+      new VoidPaymentHandler(paymentService),
+      new GetPaymentIntentHandler(paymentService),
+      new GetPaymentTransactionsHandler(paymentService),
     );
 
-    // Store Payment & Loyalty services
+    const paymentWebhookController = new PaymentWebhookController(
+      new ProcessWebhookEventHandler(paymentWebhookService),
+      new GetWebhookEventsHandler(paymentWebhookService),
+    );
+
+    const bnplController = new BnplTransactionController(
+      new CreateBnplTransactionHandler(bnplTransactionService),
+      new ProcessBnplPaymentHandler(bnplTransactionService),
+      new GetBnplTransactionsHandler(bnplTransactionService),
+    );
+
+    const giftCardController = new GiftCardController(
+      new CreateGiftCardHandler(giftCardService),
+      new RedeemGiftCardHandler(giftCardService),
+      new GetGiftCardBalanceHandler(giftCardService),
+      new GetGiftCardTransactionsHandler(giftCardService),
+    );
+
+    const promotionController = new PromotionController(
+      new CreatePromotionHandler(promotionService),
+      new ApplyPromotionHandler(promotionService),
+      new GetActivePromotionsHandler(promotionService),
+      new RecordPromotionUsageHandler(promotionService),
+      new GetPromotionUsageHandler(promotionService),
+    );
+
+    const stripeController = isStripeConfigured()
+      ? new StripeWebhookController(paymentService)
+      : null;
+
+    const loyaltyController = new LoyaltyController(
+      new CreateLoyaltyProgramHandler(loyaltyProgramService),
+      new GetLoyaltyProgramsHandler(loyaltyProgramService),
+      new GetLoyaltyAccountHandler(loyaltyService),
+      new AwardLoyaltyPointsHandler(loyaltyService),
+      new RedeemLoyaltyPointsHandler(loyaltyService),
+      new AdjustLoyaltyPointsHandler(loyaltyService),
+      new GetLoyaltyTransactionsHandler(loyaltyService),
+    );
+
+    // Store Payment & Loyalty services and controllers
     this.services.set("paymentService", paymentService);
     this.services.set("bnplTransactionService", bnplTransactionService);
     this.services.set("giftCardService", giftCardService);
     this.services.set("promotionService", promotionService);
     this.services.set("paymentWebhookService", paymentWebhookService);
     this.services.set("loyaltyService", loyaltyService);
-    this.services.set("loyaltyTransactionService", loyaltyTransactionService);
-    this.services.set("loyaltyProgramRepository", loyaltyProgramRepository);
+    this.services.set("loyaltyProgramService", loyaltyProgramService);
+    this.services.set("paymentIntentController", paymentIntentController);
+    this.services.set("paymentWebhookController", paymentWebhookController);
+    this.services.set("bnplController", bnplController);
+    this.services.set("giftCardController", giftCardController);
+    this.services.set("promotionController", promotionController);
+    this.services.set("stripeController", stripeController);
+    this.services.set("loyaltyController", loyaltyController);
+
+    // ============================================
+    // Engagement Module
+    // ============================================
+
+    // Repositories
+    const wishlistRepository = new WishlistRepositoryImpl(prisma);
+    const wishlistItemRepository = new WishlistItemRepositoryImpl(prisma);
+    const reminderRepository = new ReminderRepositoryImpl(prisma);
+    const notificationRepository = new NotificationRepositoryImpl(prisma);
+    const appointmentRepository = new AppointmentRepositoryImpl(prisma);
+    const productReviewRepository = new ProductReviewRepositoryImpl(prisma);
+    const newsletterSubscriptionRepository = new NewsletterSubscriptionRepositoryImpl(prisma);
+
+    // Services
+    const wishlistManagementService = new WishlistManagementService(
+      wishlistRepository,
+      wishlistItemRepository,
+    );
+    const reminderManagementService = new ReminderManagementService(reminderRepository);
+    const notificationService = new NotificationService(notificationRepository);
+    const appointmentService = new AppointmentService(appointmentRepository);
+    const productReviewService = new ProductReviewService(productReviewRepository);
+    const newsletterService = new NewsletterService(newsletterSubscriptionRepository);
+
+    // Engagement — Controllers
+    const wishlistController = new WishlistController(
+      new CreateWishlistHandler(wishlistManagementService),
+      new AddToWishlistHandler(wishlistManagementService),
+      new RemoveFromWishlistHandler(wishlistManagementService),
+      new UpdateWishlistHandler(wishlistManagementService),
+      new DeleteWishlistHandler(wishlistManagementService),
+      new GetWishlistHandler(wishlistManagementService),
+      new GetUserWishlistsHandler(wishlistManagementService),
+      new GetPublicWishlistsHandler(wishlistManagementService),
+      new GetWishlistItemsHandler(wishlistManagementService),
+    );
+
+    const reminderController = new ReminderController(
+      new CreateReminderHandler(reminderManagementService),
+      new MarkReminderAsSentHandler(reminderManagementService),
+      new UnsubscribeReminderHandler(reminderManagementService),
+      new DeleteReminderHandler(reminderManagementService),
+      new GetReminderHandler(reminderManagementService),
+      new GetUserRemindersHandler(reminderManagementService),
+      new GetVariantRemindersHandler(reminderManagementService),
+    );
+
+    const notificationController = new NotificationController(
+      new ScheduleNotificationHandler(notificationService),
+      new SendNotificationHandler(notificationService),
+      new GetNotificationHandler(notificationService),
+      new GetNotificationsByTypeHandler(notificationService),
+    );
+
+    const appointmentController = new AppointmentController(
+      new CreateAppointmentHandler(appointmentService),
+      new UpdateAppointmentHandler(appointmentService),
+      new CancelAppointmentHandler(appointmentService),
+      new GetAppointmentHandler(appointmentService),
+      new GetUserAppointmentsHandler(appointmentService),
+      new GetLocationAppointmentsHandler(appointmentService),
+    );
+
+    const productReviewController = new ProductReviewController(
+      new CreateProductReviewHandler(productReviewService),
+      new UpdateReviewStatusHandler(productReviewService),
+      new DeleteProductReviewHandler(productReviewService),
+      new GetProductReviewHandler(productReviewService),
+      new GetProductReviewsHandler(productReviewService),
+      new GetUserReviewsHandler(productReviewService),
+    );
+
+    const newsletterController = new NewsletterController(
+      new SubscribeNewsletterHandler(newsletterService),
+      new UnsubscribeNewsletterHandler(newsletterService),
+      new GetNewsletterSubscriptionHandler(newsletterService),
+    );
+
+    // Store Engagement controllers
+    this.services.set("wishlistController", wishlistController);
+    this.services.set("reminderController", reminderController);
+    this.services.set("notificationController", notificationController);
+    this.services.set("appointmentController", appointmentController);
+    this.services.set("productReviewController", productReviewController);
+    this.services.set("newsletterController", newsletterController);
   }
 
   get<T>(name: string): T {
@@ -1232,20 +1771,14 @@ export class Container {
 
   getInventoryManagementServices() {
     return {
-      stockService: this.get<StockManagementService>("stockManagementService"),
-      locationService: this.get<LocationManagementService>(
-        "locationManagementService",
-      ),
-      supplierService: this.get<SupplierManagementService>(
-        "supplierManagementService",
-      ),
-      poService: this.get<PurchaseOrderManagementService>(
-        "purchaseOrderManagementService",
-      ),
-      alertService: this.get<StockAlertService>("stockAlertService"),
-      reservationService: this.get<PickupReservationService>(
-        "pickupReservationService",
-      ),
+      stockController: this.get<StockController>("stockController"),
+      locationController: this.get<LocationController>("locationController"),
+      supplierController: this.get<SupplierController>("supplierController"),
+      poController: this.get<PurchaseOrderController>("poController"),
+      poItemController: this.get<PurchaseOrderItemController>("poItemController"),
+      alertController: this.get<StockAlertController>("alertController"),
+      pickupReservationController: this.get<PickupReservationController>("pickupReservationController"),
+      inventoryTransactionController: this.get<InventoryTransactionController>("inventoryTransactionController"),
     };
   }
 
@@ -1274,37 +1807,37 @@ export class Container {
 
   getOrderManagementServices() {
     return {
-      orderService: this.get<OrderManagementService>("orderManagementService"),
-      orderItemService: this.get<OrderItemManagementService>(
-        "orderItemManagementService",
-      ),
-      shipmentService: this.get<ShipmentManagementService>(
-        "shipmentManagementService",
-      ),
-      orderEventService: this.get<OrderEventService>("orderEventService"),
-      preorderService: this.get<PreorderManagementService>(
-        "preorderManagementService",
-      ),
-      backorderService: this.get<BackorderManagementService>(
-        "backorderManagementService",
-      ),
+      orderController: this.get<OrderController>("orderController"),
+      orderAddressController: this.get<OrderAddressController>("orderAddressController"),
+      orderItemController: this.get<OrderItemController>("orderItemController"),
+      orderShipmentController: this.get<OrderShipmentController>("orderShipmentController"),
+      orderStatusHistoryController: this.get<OrderStatusHistoryController>("orderStatusHistoryController"),
+      orderEventController: this.get<OrderEventController>("orderEventController"),
+      preorderController: this.get<PreorderController>("preorderController"),
+      backorderController: this.get<BackorderController>("backorderController"),
+    };
+  }
+
+  getEngagementServices() {
+    return {
+      wishlistController: this.get<WishlistController>("wishlistController"),
+      reminderController: this.get<ReminderController>("reminderController"),
+      notificationController: this.get<NotificationController>("notificationController"),
+      appointmentController: this.get<AppointmentController>("appointmentController"),
+      productReviewController: this.get<ProductReviewController>("productReviewController"),
+      newsletterController: this.get<NewsletterController>("newsletterController"),
     };
   }
 
   getPaymentLoyaltyServices() {
     return {
-      paymentService: this.get<PaymentService>("paymentService"),
-      bnplService: this.get<BnplTransactionService>("bnplTransactionService"),
-      giftCardService: this.get<GiftCardService>("giftCardService"),
-      promotionService: this.get<PromotionService>("promotionService"),
-      webhookService: this.get<PaymentWebhookService>("paymentWebhookService"),
-      loyaltyService: this.get<LoyaltyService>("loyaltyService"),
-      loyaltyTxnService: this.get<LoyaltyTransactionService>(
-        "loyaltyTransactionService",
-      ),
-      loyaltyProgramRepository: this.get<LoyaltyProgramRepository>(
-        "loyaltyProgramRepository",
-      ),
+      paymentIntentController: this.get<PaymentIntentController>("paymentIntentController"),
+      paymentWebhookController: this.get<PaymentWebhookController>("paymentWebhookController"),
+      bnplController: this.get<BnplTransactionController>("bnplController"),
+      giftCardController: this.get<GiftCardController>("giftCardController"),
+      promotionController: this.get<PromotionController>("promotionController"),
+      stripeController: this.get<StripeWebhookController | null>("stripeController"),
+      loyaltyController: this.get<LoyaltyController>("loyaltyController"),
     };
   }
 }
