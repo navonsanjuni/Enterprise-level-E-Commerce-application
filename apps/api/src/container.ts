@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { InMemoryEventBus } from "../../../packages/core/src/domain/events/in-memory-event-bus";
 
 // ============================================================
 // User Management — Imports
@@ -619,16 +620,22 @@ export class Container {
   ): void {
 
     // ============================================================
+    // Shared Infrastructure — Event Bus
+    // ============================================================
+
+    const eventBus = new InMemoryEventBus();
+
+    // ============================================================
     // User Management Module
     // ============================================================
 
-    const userRepository = new UserRepository(prisma);
+    const userRepository = new UserRepository(prisma, eventBus);
     const userProfileRepository = new UserProfileRepository(prisma);
-    const addressRepository = new AddressRepository(prisma);
-    const paymentMethodRepository = new PaymentMethodRepository(prisma);
-    const verificationTokenRepository = new VerificationTokenRepository(prisma);
-    const verificationRateLimitRepository = new VerificationRateLimitRepository(prisma);
-    const verificationAuditLogRepository = new VerificationAuditLogRepository(prisma);
+    const addressRepository = new AddressRepository(prisma, eventBus);
+    const paymentMethodRepository = new PaymentMethodRepository(prisma, eventBus);
+    const verificationTokenRepository = new VerificationTokenRepository(prisma, eventBus);
+    const verificationRateLimitRepository = new VerificationRateLimitRepository(prisma, eventBus);
+    const verificationAuditLogRepository = new VerificationAuditLogRepository(prisma, eventBus);
 
     const passwordHasher = new PasswordHasherService();
     const jwtService = new JwtService({
@@ -683,6 +690,7 @@ export class Container {
       new ToggleUserEmailVerifiedHandler(userService),
     );
 
+    this.services.set("eventBus", eventBus);
     this.services.set("prisma", prisma);
     this.services.set("userRepository", userRepository);
     this.services.set("addressRepository", addressRepository);
@@ -701,14 +709,14 @@ export class Container {
     // Product Catalog Module
     // ============================================================
 
-    const productRepository = new ProductRepositoryImpl(prisma);
-    const productVariantRepository = new ProductVariantRepositoryImpl(prisma);
-    const categoryRepository = new CategoryRepositoryImpl(prisma);
-    const mediaAssetRepository = new MediaAssetRepositoryImpl(prisma);
-    const productTagRepository = new ProductTagRepositoryImpl(prisma);
+    const productRepository = new ProductRepositoryImpl(prisma, eventBus);
+    const productVariantRepository = new ProductVariantRepositoryImpl(prisma, eventBus);
+    const categoryRepository = new CategoryRepositoryImpl(prisma, eventBus);
+    const mediaAssetRepository = new MediaAssetRepositoryImpl(prisma, eventBus);
+    const productTagRepository = new ProductTagRepositoryImpl(prisma, eventBus);
     const productTagAssociationRepository = new ProductTagAssociationRepositoryImpl(prisma);
-    const sizeGuideRepository = new SizeGuideRepositoryImpl(prisma);
-    const editorialLookRepository = new EditorialLookRepositoryImpl(prisma);
+    const sizeGuideRepository = new SizeGuideRepositoryImpl(prisma, eventBus);
+    const editorialLookRepository = new EditorialLookRepositoryImpl(prisma, eventBus);
     const productMediaRepository = new ProductMediaRepositoryImpl(prisma);
     const variantMediaRepository = new VariantMediaRepositoryImpl(prisma);
 
@@ -890,14 +898,14 @@ export class Container {
     // Inventory Management Module
     // ============================================================
 
-    const stockRepository = new StockRepositoryImpl(prisma);
-    const locationRepository = new LocationRepositoryImpl(prisma);
-    const supplierRepository = new SupplierRepositoryImpl(prisma);
-    const purchaseOrderRepository = new PurchaseOrderRepositoryImpl(prisma);
+    const stockRepository = new StockRepositoryImpl(prisma, eventBus);
+    const locationRepository = new LocationRepositoryImpl(prisma, eventBus);
+    const supplierRepository = new SupplierRepositoryImpl(prisma, eventBus);
+    const purchaseOrderRepository = new PurchaseOrderRepositoryImpl(prisma, eventBus);
     const purchaseOrderItemRepository = new PurchaseOrderItemRepositoryImpl(prisma);
-    const inventoryTransactionRepository = new InventoryTransactionRepositoryImpl(prisma);
-    const stockAlertRepository = new StockAlertRepositoryImpl(prisma);
-    const pickupReservationRepository = new PickupReservationRepositoryImpl(prisma);
+    const inventoryTransactionRepository = new InventoryTransactionRepositoryImpl(prisma, eventBus);
+    const stockAlertRepository = new StockAlertRepositoryImpl(prisma, eventBus);
+    const pickupReservationRepository = new PickupReservationRepositoryImpl(prisma, eventBus);
 
     const stockManagementService = new StockManagementService(stockRepository, inventoryTransactionRepository);
     const locationManagementService = new LocationManagementService(locationRepository);
@@ -1147,14 +1155,14 @@ export class Container {
     // Order Management Module
     // ============================================================
 
-    const orderRepository = new OrderRepositoryImpl(prisma);
+    const orderRepository = new OrderRepositoryImpl(prisma, eventBus);
     const orderItemRepository = new OrderItemRepositoryImpl(prisma);
-    const orderAddressRepository = new OrderAddressRepositoryImpl(prisma);
+    const orderAddressRepository = new OrderAddressRepositoryImpl(prisma, eventBus);
     const orderShipmentRepository = new OrderShipmentRepositoryImpl(prisma);
     const orderStatusHistoryRepository = new OrderStatusHistoryRepositoryImpl(prisma);
     const orderEventRepository = new OrderEventRepositoryImpl(prisma);
-    const backorderRepository = new BackorderRepositoryImpl(prisma);
-    const preorderRepository = new PreorderRepositoryImpl(prisma);
+    const backorderRepository = new BackorderRepositoryImpl(prisma, eventBus);
+    const preorderRepository = new PreorderRepositoryImpl(prisma, eventBus);
 
     // Cross-module port adapters: bridge product-catalog & inventory into order's external port interfaces
     const externalVariantService: IExternalVariantService = {
@@ -1280,14 +1288,14 @@ export class Container {
     // Payment Module
     // ============================================================
 
-    const paymentIntentRepository = new PaymentIntentRepositoryImpl(prisma);
-    const paymentTransactionRepository = new PaymentTransactionRepositoryImpl(prisma);
-    const paymentWebhookEventRepository = new PaymentWebhookEventRepositoryImpl(prisma);
-    const bnplTransactionRepository = new BnplTransactionRepositoryImpl(prisma);
-    const giftCardRepository = new GiftCardRepositoryImpl(prisma);
-    const giftCardTransactionRepository = new GiftCardTransactionRepositoryImpl(prisma);
-    const promotionRepository = new PromotionRepositoryImpl(prisma);
-    const promotionUsageRepository = new PromotionUsageRepositoryImpl(prisma);
+    const paymentIntentRepository = new PaymentIntentRepositoryImpl(prisma, eventBus);
+    const paymentTransactionRepository = new PaymentTransactionRepositoryImpl(prisma, eventBus);
+    const paymentWebhookEventRepository = new PaymentWebhookEventRepositoryImpl(prisma, eventBus);
+    const bnplTransactionRepository = new BnplTransactionRepositoryImpl(prisma, eventBus);
+    const giftCardRepository = new GiftCardRepositoryImpl(prisma, eventBus);
+    const giftCardTransactionRepository = new GiftCardTransactionRepositoryImpl(prisma, eventBus);
+    const promotionRepository = new PromotionRepositoryImpl(prisma, eventBus);
+    const promotionUsageRepository = new PromotionUsageRepositoryImpl(prisma, eventBus);
 
     // Cross-module port adapter: bridge order-management into payment's order query port
     const orderQueryPort: IExternalOrderQueryPort = {
@@ -1357,9 +1365,9 @@ export class Container {
     // Loyalty Module
     // ============================================================
 
-    const loyaltyAccountRepository = new LoyaltyAccountRepositoryImpl(prisma);
-    const loyaltyProgramRepository = new LoyaltyProgramRepositoryImpl(prisma);
-    const loyaltyTransactionRepository = new LoyaltyTransactionRepositoryImpl(prisma);
+    const loyaltyAccountRepository = new LoyaltyAccountRepositoryImpl(prisma, eventBus);
+    const loyaltyProgramRepository = new LoyaltyProgramRepositoryImpl(prisma, eventBus);
+    const loyaltyTransactionRepository = new LoyaltyTransactionRepositoryImpl(prisma, eventBus);
 
     const loyaltyService = new LoyaltyService(loyaltyAccountRepository, loyaltyTransactionRepository);
     const loyaltyProgramService = new LoyaltyProgramService(loyaltyProgramRepository);
@@ -1382,13 +1390,13 @@ export class Container {
     // Engagement Module
     // ============================================================
 
-    const wishlistRepository = new WishlistRepositoryImpl(prisma);
-    const wishlistItemRepository = new WishlistItemRepositoryImpl(prisma);
-    const reminderRepository = new ReminderRepositoryImpl(prisma);
-    const notificationRepository = new NotificationRepositoryImpl(prisma);
-    const appointmentRepository = new AppointmentRepositoryImpl(prisma);
-    const productReviewRepository = new ProductReviewRepositoryImpl(prisma);
-    const newsletterSubscriptionRepository = new NewsletterSubscriptionRepositoryImpl(prisma);
+    const wishlistRepository = new WishlistRepositoryImpl(prisma, eventBus);
+    const wishlistItemRepository = new WishlistItemRepositoryImpl(prisma, eventBus);
+    const reminderRepository = new ReminderRepositoryImpl(prisma, eventBus);
+    const notificationRepository = new NotificationRepositoryImpl(prisma, eventBus);
+    const appointmentRepository = new AppointmentRepositoryImpl(prisma, eventBus);
+    const productReviewRepository = new ProductReviewRepositoryImpl(prisma, eventBus);
+    const newsletterSubscriptionRepository = new NewsletterSubscriptionRepositoryImpl(prisma, eventBus);
 
     const wishlistManagementService = new WishlistManagementService(wishlistRepository, wishlistItemRepository);
     const reminderManagementService = new ReminderManagementService(reminderRepository);
@@ -1559,3 +1567,5 @@ export class Container {
 }
 
 export const container = Container.getInstance();
+
+
