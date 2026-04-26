@@ -29,24 +29,27 @@ export class UsersController {
     private readonly toggleUserEmailVerifiedHandler: ToggleUserEmailVerifiedHandler,
   ) {}
 
-  async getUser(
-    request: AuthenticatedRequest<{ Params: UserIdParams }>,
-    reply: FastifyReply,
-  ) {
+  // --- Queries ---
+
+  async getCurrentUser(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
-      const result = await this.getUserDetailsHandler.handle({ userId: request.params.userId });
+      const result = await this.getUserDetailsHandler.handle({
+        userId: request.user.userId,
+      });
       return ResponseHelper.ok(reply, 'User retrieved', result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
     }
   }
 
-  async getCurrentUser(
-    request: AuthenticatedRequest,
+  async getUser(
+    request: AuthenticatedRequest<{ Params: UserIdParams }>,
     reply: FastifyReply,
   ) {
     try {
-      const result = await this.getUserDetailsHandler.handle({ userId: request.user.userId });
+      const result = await this.getUserDetailsHandler.handle({
+        userId: request.params.userId,
+      });
       return ResponseHelper.ok(reply, 'User retrieved', result);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
@@ -68,6 +71,8 @@ export class UsersController {
       return ResponseHelper.error(reply, error);
     }
   }
+
+  // --- Commands ---
 
   async updateStatus(
     request: AuthenticatedRequest<{ Params: UserIdParams; Body: UpdateUserStatusBody }>,
@@ -122,7 +127,9 @@ export class UsersController {
     reply: FastifyReply,
   ) {
     try {
-      const result = await this.deleteUserHandler.handle({ userId: request.params.userId });
+      const result = await this.deleteUserHandler.handle({
+        userId: request.params.userId,
+      });
       return ResponseHelper.fromCommand(reply, result, 'User deleted', undefined, 204);
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);
