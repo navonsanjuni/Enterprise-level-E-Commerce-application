@@ -1,5 +1,6 @@
 import { VariantId } from '../value-objects/variant-id.vo';
 import { MediaAssetId } from '../value-objects/media-asset-id.vo';
+import { DomainValidationError } from '../errors';
 
 export interface VariantMediaProps {
   id: string;
@@ -20,8 +21,7 @@ export interface VariantMediaDTO {
 }
 
 export class VariantMedia {
-  private constructor(private props: VariantMediaProps) {
-  }
+  private constructor(private props: VariantMediaProps) {}
 
   static create(params: {
     id: string;
@@ -29,6 +29,7 @@ export class VariantMedia {
     mediaAssetId: string;
     displayOrder: number;
   }): VariantMedia {
+    VariantMedia.validateDisplayOrder(params.displayOrder);
     const now = new Date();
     return new VariantMedia({
       id: params.id,
@@ -44,36 +45,32 @@ export class VariantMedia {
     return new VariantMedia(props);
   }
 
-  // Getters
-  get id(): string {
-    return this.props.id;
+  // ── Validation ─────────────────────────────────────────────────────
+
+  private static validateDisplayOrder(order: number): void {
+    if (order < 0) {
+      throw new DomainValidationError('Display order cannot be negative');
+    }
   }
 
-  get variantId(): VariantId {
-    return this.props.variantId;
-  }
+  // ── Getters ────────────────────────────────────────────────────────
 
-  get mediaAssetId(): MediaAssetId {
-    return this.props.mediaAssetId;
-  }
+  get id(): string { return this.props.id; }
+  get variantId(): VariantId { return this.props.variantId; }
+  get mediaAssetId(): MediaAssetId { return this.props.mediaAssetId; }
+  get displayOrder(): number { return this.props.displayOrder; }
+  get createdAt(): Date { return this.props.createdAt; }
+  get updatedAt(): Date { return this.props.updatedAt; }
 
-  get displayOrder(): number {
-    return this.props.displayOrder;
-  }
+  // ── Business Logic ─────────────────────────────────────────────────
 
-  get createdAt(): Date {
-    return this.props.createdAt;
-  }
-
-  get updatedAt(): Date {
-    return this.props.updatedAt;
-  }
-
-  // Business methods
   updateDisplayOrder(order: number): void {
+    VariantMedia.validateDisplayOrder(order);
     this.props.displayOrder = order;
-    this.props.updatedAt = new Date();
+    this.markUpdated();
   }
+
+  // ── Query Methods ──────────────────────────────────────────────────
 
   isForVariant(variantId: VariantId): boolean {
     return this.props.variantId.equals(variantId);
@@ -82,6 +79,14 @@ export class VariantMedia {
   isForAsset(assetId: MediaAssetId): boolean {
     return this.props.mediaAssetId.equals(assetId);
   }
+
+  // ── Internal ───────────────────────────────────────────────────────
+
+  private markUpdated(): void {
+    this.props.updatedAt = new Date();
+  }
+
+  // ── Serialisation ──────────────────────────────────────────────────
 
   equals(other: VariantMedia): boolean {
     return this.props.id === other.props.id;

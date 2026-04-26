@@ -1,5 +1,6 @@
 import { EditorialLookId } from '../value-objects/editorial-look-id.vo';
 import { ProductId } from '../value-objects/product-id.vo';
+import { DomainValidationError } from '../errors';
 
 export interface EditorialLookProductProps {
   id: string;
@@ -20,8 +21,7 @@ export interface EditorialLookProductDTO {
 }
 
 export class EditorialLookProduct {
-  private constructor(private props: EditorialLookProductProps) {
-  }
+  private constructor(private props: EditorialLookProductProps) {}
 
   static create(params: {
     id: string;
@@ -29,6 +29,7 @@ export class EditorialLookProduct {
     productId: string;
     displayOrder: number;
   }): EditorialLookProduct {
+    EditorialLookProduct.validateDisplayOrder(params.displayOrder);
     const now = new Date();
     return new EditorialLookProduct({
       id: params.id,
@@ -44,36 +45,32 @@ export class EditorialLookProduct {
     return new EditorialLookProduct(props);
   }
 
-  // Getters
-  get id(): string {
-    return this.props.id;
+  // ── Validation ─────────────────────────────────────────────────────
+
+  private static validateDisplayOrder(order: number): void {
+    if (order < 0) {
+      throw new DomainValidationError('Display order cannot be negative');
+    }
   }
 
-  get editorialLookId(): EditorialLookId {
-    return this.props.editorialLookId;
-  }
+  // ── Getters ────────────────────────────────────────────────────────
 
-  get productId(): ProductId {
-    return this.props.productId;
-  }
+  get id(): string { return this.props.id; }
+  get editorialLookId(): EditorialLookId { return this.props.editorialLookId; }
+  get productId(): ProductId { return this.props.productId; }
+  get displayOrder(): number { return this.props.displayOrder; }
+  get createdAt(): Date { return this.props.createdAt; }
+  get updatedAt(): Date { return this.props.updatedAt; }
 
-  get displayOrder(): number {
-    return this.props.displayOrder;
-  }
+  // ── Business Logic ─────────────────────────────────────────────────
 
-  get createdAt(): Date {
-    return this.props.createdAt;
-  }
-
-  get updatedAt(): Date {
-    return this.props.updatedAt;
-  }
-
-  // Business methods
   updateDisplayOrder(order: number): void {
+    EditorialLookProduct.validateDisplayOrder(order);
     this.props.displayOrder = order;
-    this.props.updatedAt = new Date();
+    this.markUpdated();
   }
+
+  // ── Query Methods ──────────────────────────────────────────────────
 
   isForLook(lookId: EditorialLookId): boolean {
     return this.props.editorialLookId.equals(lookId);
@@ -82,6 +79,14 @@ export class EditorialLookProduct {
   isForProduct(productId: ProductId): boolean {
     return this.props.productId.equals(productId);
   }
+
+  // ── Internal ───────────────────────────────────────────────────────
+
+  private markUpdated(): void {
+    this.props.updatedAt = new Date();
+  }
+
+  // ── Serialisation ──────────────────────────────────────────────────
 
   equals(other: EditorialLookProduct): boolean {
     return this.props.id === other.props.id;

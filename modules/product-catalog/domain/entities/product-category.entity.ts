@@ -1,5 +1,6 @@
 import { ProductId } from '../value-objects/product-id.vo';
 import { CategoryId } from '../value-objects/category-id.vo';
+import { DomainValidationError } from '../errors';
 
 export interface ProductCategoryProps {
   id: string;
@@ -22,8 +23,7 @@ export interface ProductCategoryDTO {
 }
 
 export class ProductCategory {
-  private constructor(private props: ProductCategoryProps) {
-  }
+  private constructor(private props: ProductCategoryProps) {}
 
   static create(params: {
     id: string;
@@ -32,6 +32,7 @@ export class ProductCategory {
     displayOrder: number;
     isPrimary: boolean;
   }): ProductCategory {
+    ProductCategory.validateDisplayOrder(params.displayOrder);
     const now = new Date();
     return new ProductCategory({
       id: params.id,
@@ -48,50 +49,43 @@ export class ProductCategory {
     return new ProductCategory(props);
   }
 
-  // Getters
-  get id(): string {
-    return this.props.id;
+  // ── Validation ─────────────────────────────────────────────────────
+
+  private static validateDisplayOrder(order: number): void {
+    if (order < 0) {
+      throw new DomainValidationError('Display order cannot be negative');
+    }
   }
 
-  get productId(): ProductId {
-    return this.props.productId;
-  }
+  // ── Getters ────────────────────────────────────────────────────────
 
-  get categoryId(): CategoryId {
-    return this.props.categoryId;
-  }
+  get id(): string { return this.props.id; }
+  get productId(): ProductId { return this.props.productId; }
+  get categoryId(): CategoryId { return this.props.categoryId; }
+  get displayOrder(): number { return this.props.displayOrder; }
+  get isPrimary(): boolean { return this.props.isPrimary; }
+  get createdAt(): Date { return this.props.createdAt; }
+  get updatedAt(): Date { return this.props.updatedAt; }
 
-  get displayOrder(): number {
-    return this.props.displayOrder;
-  }
+  // ── Business Logic ─────────────────────────────────────────────────
 
-  get isPrimary(): boolean {
-    return this.props.isPrimary;
-  }
-
-  get createdAt(): Date {
-    return this.props.createdAt;
-  }
-
-  get updatedAt(): Date {
-    return this.props.updatedAt;
-  }
-
-  // Business methods
   updateDisplayOrder(order: number): void {
+    ProductCategory.validateDisplayOrder(order);
     this.props.displayOrder = order;
-    this.props.updatedAt = new Date();
+    this.markUpdated();
   }
 
   markAsPrimary(): void {
     this.props.isPrimary = true;
-    this.props.updatedAt = new Date();
+    this.markUpdated();
   }
 
   unmarkAsPrimary(): void {
     this.props.isPrimary = false;
-    this.props.updatedAt = new Date();
+    this.markUpdated();
   }
+
+  // ── Query Methods ──────────────────────────────────────────────────
 
   isForProduct(productId: ProductId): boolean {
     return this.props.productId.equals(productId);
@@ -100,6 +94,14 @@ export class ProductCategory {
   isForCategory(categoryId: CategoryId): boolean {
     return this.props.categoryId.equals(categoryId);
   }
+
+  // ── Internal ───────────────────────────────────────────────────────
+
+  private markUpdated(): void {
+    this.props.updatedAt = new Date();
+  }
+
+  // ── Serialisation ──────────────────────────────────────────────────
 
   equals(other: ProductCategory): boolean {
     return this.props.id === other.props.id;
