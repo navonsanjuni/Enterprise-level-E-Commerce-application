@@ -8,15 +8,11 @@ import { UserRepository } from "../../../modules/user-management/infra/persisten
 import { UserProfileRepository } from "../../../modules/user-management/infra/persistence/repositories/user-profile.repository";
 import { AddressRepository } from "../../../modules/user-management/infra/persistence/repositories/address.repository";
 import { PaymentMethodRepository } from "../../../modules/user-management/infra/persistence/repositories/payment-method.repository";
-import { VerificationTokenRepository } from "../../../modules/user-management/infra/persistence/repositories/verification-token.repository";
-import { VerificationRateLimitRepository } from "../../../modules/user-management/infra/persistence/repositories/verification-rate-limit.repository";
-import { VerificationAuditLogRepository } from "../../../modules/user-management/infra/persistence/repositories/verification-audit-log.repository";
 import { AuthenticationService } from "../../../modules/user-management/application/services/authentication.service";
 import { UserProfileService } from "../../../modules/user-management/application/services/user-profile.service";
 import { AddressManagementService } from "../../../modules/user-management/application/services/address-management.service";
 import { PaymentMethodService } from "../../../modules/user-management/application/services/payment-method.service";
 import { PasswordHasherService } from "../../../modules/user-management/application/services/password-hasher.service";
-import { VerificationService } from "../../../modules/user-management/application/services/verification.service";
 import { UserService } from "../../../modules/user-management/application/services/user.service";
 import { RegisterUserHandler } from "../../../modules/user-management/application/commands/register-user.command";
 import { LoginUserHandler } from "../../../modules/user-management/application/commands/login-user.command";
@@ -45,7 +41,7 @@ import { GetUserProfileHandler } from "../../../modules/user-management/applicat
 import { GetUserDetailsHandler } from "../../../modules/user-management/application/queries/get-user-details.query";
 import { ListAddressesHandler } from "../../../modules/user-management/application/queries/list-addresses.query";
 import { ListPaymentMethodsHandler } from "../../../modules/user-management/application/queries/list-payment-methods.query";
-import { ListUsersHandler } from "../../../modules/user-management/application/queries/list-user.query";
+import { ListUsersHandler } from "../../../modules/user-management/application/queries/list-users.query";
 import { AuthController } from "../../../modules/user-management/infra/http/controllers/auth.controller";
 import { ProfileController } from "../../../modules/user-management/infra/http/controllers/profile.controller";
 import { AddressesController } from "../../../modules/user-management/infra/http/controllers/addresses.controller";
@@ -69,13 +65,13 @@ import {
   ProductMediaRepositoryImpl,
   VariantMediaRepositoryImpl,
 } from "../../../modules/product-catalog/infra/persistence/repositories";
+import { SanitizeHtmlAdapter } from "../../../modules/product-catalog/infra/security/sanitize-html.adapter";
 import {
   ProductManagementService,
   CategoryManagementService,
   MediaManagementService,
   VariantManagementService,
   ProductSearchService,
-  SlugGeneratorService,
   ProductTagManagementService,
   SizeGuideManagementService,
   EditorialLookManagementService,
@@ -633,9 +629,6 @@ export class Container {
     const userProfileRepository = new UserProfileRepository(prisma);
     const addressRepository = new AddressRepository(prisma, eventBus);
     const paymentMethodRepository = new PaymentMethodRepository(prisma, eventBus);
-    const verificationTokenRepository = new VerificationTokenRepository(prisma, eventBus);
-    const verificationRateLimitRepository = new VerificationRateLimitRepository(prisma, eventBus);
-    const verificationAuditLogRepository = new VerificationAuditLogRepository(prisma, eventBus);
 
     const passwordHasher = new PasswordHasherService();
     const jwtService = new JwtService({
@@ -648,7 +641,6 @@ export class Container {
     const profileService = new UserProfileService(userRepository, userProfileRepository, addressRepository, paymentMethodRepository);
     const addressService = new AddressManagementService(addressRepository);
     const paymentMethodService = new PaymentMethodService(paymentMethodRepository, userRepository, addressRepository);
-    const verificationService = new VerificationService(userRepository, verificationTokenRepository, verificationRateLimitRepository, verificationAuditLogRepository);
     const userService = new UserService(userRepository);
 
     const authController = new AuthController(
@@ -698,7 +690,6 @@ export class Container {
     this.services.set("profileService", profileService);
     this.services.set("addressService", addressService);
     this.services.set("paymentMethodService", paymentMethodService);
-    this.services.set("verificationService", verificationService);
     this.services.set("authController", authController);
     this.services.set("profileController", profileController);
     this.services.set("addressesController", addressesController);
@@ -720,15 +711,15 @@ export class Container {
     const productMediaRepository = new ProductMediaRepositoryImpl(prisma);
     const variantMediaRepository = new VariantMediaRepositoryImpl(prisma);
 
-    const slugGeneratorService = new SlugGeneratorService();
-    const productManagementService = new ProductManagementService(productRepository, productTagRepository);
+    const htmlSanitizer = new SanitizeHtmlAdapter();
+    const productManagementService = new ProductManagementService(productRepository, productTagAssociationRepository, htmlSanitizer);
     const categoryManagementService = new CategoryManagementService(categoryRepository);
     const mediaManagementService = new MediaManagementService(mediaAssetRepository);
     const variantManagementService = new VariantManagementService(productVariantRepository, productRepository);
     const productSearchService = new ProductSearchService(productRepository, categoryRepository);
     const productTagManagementService = new ProductTagManagementService(productTagRepository, productTagAssociationRepository);
-    const sizeGuideManagementService = new SizeGuideManagementService(sizeGuideRepository);
-    const editorialLookManagementService = new EditorialLookManagementService(editorialLookRepository, mediaAssetRepository, productRepository);
+    const sizeGuideManagementService = new SizeGuideManagementService(sizeGuideRepository, htmlSanitizer);
+    const editorialLookManagementService = new EditorialLookManagementService(editorialLookRepository, mediaAssetRepository, productRepository, htmlSanitizer);
     const productMediaManagementService = new ProductMediaManagementService(productMediaRepository, mediaAssetRepository, productRepository);
     const variantMediaManagementService = new VariantMediaManagementService(variantMediaRepository, mediaAssetRepository, productVariantRepository, productRepository);
 
@@ -1176,7 +1167,7 @@ export class Container {
             getSize: () => dto.size,
             getColor: () => dto.color,
             getWeightG: () => dto.weightG,
-            getDims: () => dto.dims,
+            getDims: () => dto.dims as Record<string, unknown> | null,
           };
         } catch {
           return null;
