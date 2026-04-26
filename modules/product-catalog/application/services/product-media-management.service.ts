@@ -28,6 +28,8 @@ export interface ProductMediaData {
   assetId: string;
   position?: number;
   isCover?: boolean;
+  alt?: string | null;
+  caption?: string | null;
 }
 
 export interface ProductMediaReorderData {
@@ -83,6 +85,8 @@ export class ProductMediaManagementService {
     assetId: string,
     position?: number,
     isCover?: boolean,
+    alt?: string | null,
+    caption?: string | null,
   ): Promise<string> {
     const productIdVo = ProductId.fromString(productId);
     const assetIdVo = MediaAssetId.fromString(assetId);
@@ -103,6 +107,8 @@ export class ProductMediaManagementService {
       assetIdVo,
       finalPosition,
       isCover,
+      alt,
+      caption,
     );
     return created.id;
   }
@@ -205,11 +211,13 @@ export class ProductMediaManagementService {
       throw new InvalidOperationError("Only one media asset can be set as cover image");
     }
 
-    // Translate wire term `isCover` → domain term `isPrimary`.
+    // Translate wire term `isCover` → domain term `isPrimary`. Pass alt/caption through.
     const repositoryData = mediaData.map((item) => ({
       assetId: MediaAssetId.fromString(item.assetId),
       position: item.position,
       isPrimary: item.isCover ?? false,
+      alt: item.alt,
+      caption: item.caption,
     }));
 
     await this.productMediaRepository.setProductMedia(productIdVo, repositoryData);
