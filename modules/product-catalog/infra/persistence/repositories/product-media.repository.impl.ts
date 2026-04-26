@@ -98,6 +98,8 @@ export class ProductMediaRepositoryImpl implements IProductMediaRepository {
     assetId: MediaAssetId,
     position?: number,
     isPrimary?: boolean,
+    alt?: string | null,
+    caption?: string | null,
   ): Promise<ProductMedia> {
     const entity = ProductMedia.create({
       id: randomUUID(),
@@ -105,6 +107,8 @@ export class ProductMediaRepositoryImpl implements IProductMediaRepository {
       mediaAssetId: assetId.getValue(),
       displayOrder: position ?? 0,
       isPrimary: isPrimary ?? false,
+      alt,
+      caption,
     });
 
     await this.prisma.productMedia.create({
@@ -114,6 +118,8 @@ export class ProductMediaRepositoryImpl implements IProductMediaRepository {
         assetId: entity.mediaAssetId.getValue(),
         position: position ?? null,
         isCover: entity.isPrimary,
+        alt: entity.alt,
+        caption: entity.caption,
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
       },
@@ -150,6 +156,8 @@ export class ProductMediaRepositoryImpl implements IProductMediaRepository {
         mediaAssetId: data.assetId.getValue(),
         displayOrder: data.position ?? index + 1,
         isPrimary: data.isPrimary ?? false,
+        alt: data.alt,
+        caption: data.caption,
       });
       return this.prisma.productMedia.create({
         data: {
@@ -158,6 +166,8 @@ export class ProductMediaRepositoryImpl implements IProductMediaRepository {
           assetId: entity.mediaAssetId.getValue(),
           position: entity.displayOrder,
           isCover: entity.isPrimary,
+          alt: entity.alt,
+          caption: entity.caption,
           createdAt: entity.createdAt,
           updatedAt: entity.updatedAt,
         },
@@ -184,6 +194,8 @@ export class ProductMediaRepositoryImpl implements IProductMediaRepository {
           mediaAssetId: media.mediaAssetId.getValue(),
           displayOrder: media.displayOrder,
           isPrimary: media.isPrimary,
+          alt: media.alt,
+          caption: media.caption,
         });
         return this.prisma.productMedia.create({
           data: {
@@ -192,6 +204,8 @@ export class ProductMediaRepositoryImpl implements IProductMediaRepository {
             assetId: entity.mediaAssetId.getValue(),
             position: entity.displayOrder,
             isCover: entity.isPrimary,
+            alt: entity.alt,
+            caption: entity.caption,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
           },
