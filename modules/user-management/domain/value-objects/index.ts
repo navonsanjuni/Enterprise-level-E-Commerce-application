@@ -1,10 +1,11 @@
 export { UserId } from "./user-id.vo";
-export { AddressId } from "./address-id";
-export { PaymentMethodId } from "./payment-method-id";
-export { SocialLoginId } from "./social-login-id";
+export { AddressId } from "./address-id.vo";
+export { PaymentMethodId } from "./payment-method-id.vo";
+export { SocialLoginId } from "./social-login-id.vo";
 export { Email } from "./email.vo";
 export { Phone } from "./phone.vo";
 export { Password } from "./password.vo";
 export { Currency } from "./currency.vo";
 export { Locale } from "./locale.vo";
-export { Address, AddressType } from "./address.vo";
+export { Address } from "./address.vo";
+export { AddressType } from "./address-type.vo";

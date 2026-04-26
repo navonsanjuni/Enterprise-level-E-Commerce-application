@@ -1,18 +1,31 @@
 import { DomainValidationError } from '../errors/user-management.errors';
 
+interface PasswordPolicy {
+  minLength: number;
+  maxLength?: number;
+  requireUppercase: boolean;
+  requireLowercase: boolean;
+  requireNumbers: boolean;
+  requireSpecialChars: boolean;
+}
+
 export class Password {
-  private constructor(private readonly value: string) {}
+  private constructor(private readonly value: string) {
+    if (!value) throw new DomainValidationError('Password is required');
 
-  static create(password: string): Password {
-    if (!password) throw new DomainValidationError('Password is required');
-
-    if (!Password.isValidPassword(password)) {
+    if (!Password.isValidPassword(value)) {
       throw new DomainValidationError(
         'Password must be 8-128 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character'
       );
     }
+  }
 
+  static create(password: string): Password {
     return new Password(password);
+  }
+
+  static fromString(value: string): Password {
+    return new Password(value);
   }
 
   private static isValidPassword(password: string): boolean {
@@ -67,13 +80,4 @@ export class Password {
     if (policy.requireSpecialChars && !/[!@#$%^&*(),.?":{}|<>]/.test(this.value)) return false;
     return true;
   }
-}
-
-interface PasswordPolicy {
-  minLength: number;
-  maxLength?: number;
-  requireUppercase: boolean;
-  requireLowercase: boolean;
-  requireNumbers: boolean;
-  requireSpecialChars: boolean;
 }
