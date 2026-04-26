@@ -33,6 +33,8 @@ const VERIFICATION_TOKEN_TTL_MS =
   USER_MANAGEMENT_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MS;
 const PASSWORD_RESET_TOKEN_TTL_MS =
   USER_MANAGEMENT_CONSTANTS.PASSWORD_RESET_EXPIRY_MS;
+const BLACKLIST_TOKEN_DEFAULT_TTL_MS =
+  USER_MANAGEMENT_CONSTANTS.BLACKLIST_TOKEN_TTL_MS;
 
 const blacklistedTokens = new Map<string, TokenEntry>();
 const verificationTokens = new Map<string, VerificationTokenEntry>();
@@ -54,7 +56,7 @@ setInterval(() => {
 }, 60 * 1000).unref();
 
 export const TokenBlacklistService: ITokenBlacklistService = {
-  blacklistToken(token: string, ttlMs = 7 * 24 * 60 * 60 * 1000): void {
+  blacklistToken(token: string, ttlMs = BLACKLIST_TOKEN_DEFAULT_TTL_MS): void {
     blacklistedTokens.set(token, { expiresAt: Date.now() + ttlMs });
   },
 
