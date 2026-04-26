@@ -7,7 +7,7 @@ import {
   RateLimitPresets,
   userKeyGenerator,
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
-import { validateQuery } from "../validation/validator";
+import { validateQuery, toJsonSchema } from "../validation/validator";
 import {
   searchQuerySchema,
   searchSuggestionsQuerySchema,
@@ -24,6 +24,11 @@ const writeRateLimiter = createRateLimiter({
   keyGenerator: userKeyGenerator,
 });
 
+// Pre-compute JSON Schemas from Zod (single source of truth — no drift).
+const searchQueryJson = toJsonSchema(searchQuerySchema);
+const searchSuggestionsQueryJson = toJsonSchema(searchSuggestionsQuerySchema);
+const searchFiltersQueryJson = toJsonSchema(searchFiltersQuerySchema);
+
 export async function searchRoutes(
   fastify: FastifyInstance,
   controller: SearchController,
@@ -34,43 +39,18 @@ export async function searchRoutes(
     }
   });
 
+  // ── Reads ──────────────────────────────────────────────────────────────
+
   // GET /search — Search products (public)
   fastify.get(
     "/search",
     {
       preValidation: [validateQuery(searchQuerySchema)],
       schema: {
-        description:
-          "Full-text search across products with filtering and sorting",
+        description: "Full-text search across products with filtering and sorting",
         tags: ["Search"],
         summary: "Search Products",
-        querystring: {
-          type: "object",
-          required: ["q"],
-          properties: {
-            q: { type: "string", minLength: 2 },
-            page: { type: "integer", minimum: 1, default: 1 },
-            limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
-            category: { type: "string" },
-            brand: { type: "string" },
-            minPrice: { type: "number", minimum: 0 },
-            maxPrice: { type: "number", minimum: 0 },
-            status: {
-              type: "string",
-              enum: ["draft", "published", "scheduled"],
-            },
-            sortBy: {
-              type: "string",
-              enum: ["relevance", "price", "title", "createdAt"],
-              default: "relevance",
-            },
-            sortOrder: {
-              type: "string",
-              enum: ["asc", "desc"],
-              default: "desc",
-            },
-          },
-        },
+        querystring: searchQueryJson,
         response: {
           200: {
             type: "object",
@@ -88,7 +68,7 @@ export async function searchRoutes(
       controller.searchProducts(request as AuthenticatedRequest, reply),
   );
 
-  // GET /search/suggestions — Get search suggestions (public)
+  // GET /search/suggestions — Get autocomplete suggestions (public)
   fastify.get(
     "/search/suggestions",
     {
@@ -97,19 +77,7 @@ export async function searchRoutes(
         description: "Get autocomplete suggestions for a search query",
         tags: ["Search"],
         summary: "Get Search Suggestions",
-        querystring: {
-          type: "object",
-          required: ["q"],
-          properties: {
-            q: { type: "string", minLength: 1 },
-            limit: { type: "integer", minimum: 1, maximum: 20, default: 5 },
-            type: {
-              type: "string",
-              enum: ["products", "categories", "brands", "all"],
-              default: "all",
-            },
-          },
-        },
+        querystring: searchSuggestionsQueryJson,
         response: {
           200: {
             type: "object",
@@ -127,7 +95,7 @@ export async function searchRoutes(
       controller.getSearchSuggestions(request as AuthenticatedRequest, reply),
   );
 
-  // GET /search/popular — Get popular searches (public)
+  // GET /search/popular — Get popular/trending searches (public)
   fastify.get(
     "/search/popular",
     {
@@ -152,7 +120,7 @@ export async function searchRoutes(
       controller.getPopularSearches(request as AuthenticatedRequest, reply),
   );
 
-  // GET /search/filters — Get available search filters (public)
+  // GET /search/filters — Get available filters for search results (public)
   fastify.get(
     "/search/filters",
     {
@@ -161,12 +129,7 @@ export async function searchRoutes(
         description: "Get available filters for search results",
         tags: ["Search"],
         summary: "Get Search Filters",
-        querystring: {
-          type: "object",
-          properties: {
-            q: { type: "string" },
-          },
-        },
+        querystring: searchFiltersQueryJson,
         response: {
           200: {
             type: "object",
@@ -184,7 +147,7 @@ export async function searchRoutes(
       controller.getSearchFilters(request as AuthenticatedRequest, reply),
   );
 
-  // GET /search/stats — Get search statistics (Staff+)
+  // GET /search/stats — Get search analytics (Staff+)
   fastify.get(
     "/search/stats",
     {

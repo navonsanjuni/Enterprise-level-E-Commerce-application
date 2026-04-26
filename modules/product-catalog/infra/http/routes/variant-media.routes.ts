@@ -11,6 +11,7 @@ import {
   validateBody,
   validateParams,
   validateQuery,
+  toJsonSchema,
 } from "../validation/validator";
 import {
   variantMediaParamsSchema,
@@ -18,6 +19,9 @@ import {
   variantDuplicateParamsSchema,
   assetParamsSchema,
   productVariantMediaParamsSchema,
+  colorVariantParamsSchema,
+  sizeVariantParamsSchema,
+  productVariantMediaQuerySchema,
   unusedAssetsQuerySchema,
   addMediaToVariantSchema,
   setVariantMediaSchema,
@@ -40,6 +44,22 @@ const writeRateLimiter = createRateLimiter({
   keyGenerator: userKeyGenerator,
 });
 
+// Pre-compute JSON Schemas from Zod (single source of truth — no drift).
+const variantMediaParamsJson = toJsonSchema(variantMediaParamsSchema);
+const variantMediaAssetParamsJson = toJsonSchema(variantMediaAssetParamsSchema);
+const variantDuplicateParamsJson = toJsonSchema(variantDuplicateParamsSchema);
+const assetParamsJson = toJsonSchema(assetParamsSchema);
+const productVariantMediaParamsJson = toJsonSchema(productVariantMediaParamsSchema);
+const colorVariantParamsJson = toJsonSchema(colorVariantParamsSchema);
+const sizeVariantParamsJson = toJsonSchema(sizeVariantParamsSchema);
+const productVariantMediaQueryJson = toJsonSchema(productVariantMediaQuerySchema);
+const unusedAssetsQueryJson = toJsonSchema(unusedAssetsQuerySchema);
+const addMediaToVariantBodyJson = toJsonSchema(addMediaToVariantSchema);
+const setVariantMediaBodyJson = toJsonSchema(setVariantMediaSchema);
+const addMultipleMediaToVariantBodyJson = toJsonSchema(addMultipleMediaToVariantSchema);
+const addMediaToMultipleVariantsBodyJson = toJsonSchema(addMediaToMultipleVariantsSchema);
+const copyVariantMediaBodyJson = toJsonSchema(copyVariantMediaSchema);
+
 export async function variantMediaRoutes(
   fastify: FastifyInstance,
   controller: VariantMediaController,
@@ -50,6 +70,8 @@ export async function variantMediaRoutes(
     }
   });
 
+  // ── Reads ──────────────────────────────────────────────────────────────
+
   // GET /variants/:variantId/media — Get media for a variant (public)
   fastify.get(
     "/variants/:variantId/media",
@@ -59,11 +81,7 @@ export async function variantMediaRoutes(
         description: "Get all media assets associated with a product variant",
         tags: ["Variant Media"],
         summary: "Get Variant Media",
-        params: {
-          type: "object",
-          required: ["variantId"],
-          properties: { variantId: { type: "string", format: "uuid" } },
-        },
+        params: variantMediaParamsJson,
         response: {
           200: {
             type: "object",
@@ -81,20 +99,20 @@ export async function variantMediaRoutes(
       controller.getVariantMedia(request as AuthenticatedRequest, reply),
   );
 
-  // GET /products/:productId/variants/media — Get media for all variants of a product (public)
+  // GET /products/:productId/variants/media — All variant media for a product (public)
   fastify.get(
     "/products/:productId/variants/media",
     {
-      preValidation: [validateParams(productVariantMediaParamsSchema)],
+      preValidation: [
+        validateParams(productVariantMediaParamsSchema),
+        validateQuery(productVariantMediaQuerySchema),
+      ],
       schema: {
         description: "Get all variant media for a product",
         tags: ["Variant Media"],
         summary: "Get Product Variant Media",
-        params: {
-          type: "object",
-          required: ["productId"],
-          properties: { productId: { type: "string", format: "uuid" } },
-        },
+        params: productVariantMediaParamsJson,
+        querystring: productVariantMediaQueryJson,
         response: {
           200: {
             type: "object",
@@ -112,7 +130,7 @@ export async function variantMediaRoutes(
       controller.getProductVariantMedia(request as AuthenticatedRequest, reply),
   );
 
-  // GET /media/:assetId/variants — Get variants using a specific asset (Staff+)
+  // GET /media/:assetId/variants — Variants using a specific asset (Staff+)
   fastify.get(
     "/media/:assetId/variants",
     {
@@ -123,11 +141,7 @@ export async function variantMediaRoutes(
         tags: ["Variant Media"],
         summary: "Get Variants Using Asset",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["assetId"],
-          properties: { assetId: { type: "string", format: "uuid" } },
-        },
+        params: assetParamsJson,
         response: {
           200: {
             type: "object",
@@ -145,7 +159,7 @@ export async function variantMediaRoutes(
       controller.getVariantsUsingAsset(request as AuthenticatedRequest, reply),
   );
 
-  // GET /media/:assetId/usage-count — Get usage count for an asset (Staff+)
+  // GET /media/:assetId/usage-count — Asset usage count (Staff+)
   fastify.get(
     "/media/:assetId/usage-count",
     {
@@ -156,11 +170,7 @@ export async function variantMediaRoutes(
         tags: ["Variant Media"],
         summary: "Get Asset Usage Count",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["assetId"],
-          properties: { assetId: { type: "string", format: "uuid" } },
-        },
+        params: assetParamsJson,
         response: {
           200: {
             type: "object",
@@ -178,7 +188,7 @@ export async function variantMediaRoutes(
       controller.getAssetUsageCount(request as AuthenticatedRequest, reply),
   );
 
-  // GET /variants/media/unused-assets — Get unused media assets (Staff+)
+  // GET /variants/media/unused-assets — Unused media assets (Staff+, before /:variantId)
   fastify.get(
     "/variants/media/unused-assets",
     {
@@ -189,6 +199,7 @@ export async function variantMediaRoutes(
         tags: ["Variant Media"],
         summary: "Get Unused Assets",
         security: [{ bearerAuth: [] }],
+        querystring: unusedAssetsQueryJson,
         response: {
           200: {
             type: "object",
@@ -206,7 +217,7 @@ export async function variantMediaRoutes(
       controller.getUnusedAssets(request as AuthenticatedRequest, reply),
   );
 
-  // GET /variants/:variantId/media/statistics — Get variant media statistics (Staff+)
+  // GET /variants/:variantId/media/statistics — Variant media statistics (Staff+)
   fastify.get(
     "/variants/:variantId/media/statistics",
     {
@@ -217,11 +228,7 @@ export async function variantMediaRoutes(
         tags: ["Variant Media"],
         summary: "Get Variant Media Statistics",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["variantId"],
-          properties: { variantId: { type: "string", format: "uuid" } },
-        },
+        params: variantMediaParamsJson,
         response: {
           200: {
             type: "object",
@@ -236,331 +243,21 @@ export async function variantMediaRoutes(
       },
     },
     (request, reply) =>
-      controller.getVariantMediaStatistics(
-        request as AuthenticatedRequest,
-        reply,
-      ),
+      controller.getVariantMediaStatistics(request as AuthenticatedRequest, reply),
   );
 
-  // GET /products/:productId/variants/media/color/:color — Get color-specific variant media (public)
+  // GET /variants/:variantId/media/validation — Validate variant media consistency (Staff+)
   fastify.get(
-    "/products/:productId/variants/media/color/:color",
-    {
-      preValidation: [validateParams(productVariantMediaParamsSchema)],
-      schema: {
-        description:
-          "Get media assets filtered by color attribute for all variants of a product",
-        tags: ["Variant Media"],
-        summary: "Get Color Variant Media",
-        params: {
-          type: "object",
-          required: ["productId", "color"],
-          properties: {
-            productId: { type: "string", format: "uuid" },
-            color: { type: "string" },
-          },
-        },
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: colorVariantMediaResponseSchema,
-            },
-          },
-        },
-      },
-    },
-    (request, reply) =>
-      controller.getColorVariantMedia(request as AuthenticatedRequest, reply),
-  );
-
-  // GET /products/:productId/variants/media/size/:size — Get size-specific variant media (public)
-  fastify.get(
-    "/products/:productId/variants/media/size/:size",
-    {
-      preValidation: [validateParams(productVariantMediaParamsSchema)],
-      schema: {
-        description:
-          "Get media assets filtered by size attribute for all variants of a product",
-        tags: ["Variant Media"],
-        summary: "Get Size Variant Media",
-        params: {
-          type: "object",
-          required: ["productId", "size"],
-          properties: {
-            productId: { type: "string", format: "uuid" },
-            size: { type: "string" },
-          },
-        },
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: sizeVariantMediaResponseSchema,
-            },
-          },
-        },
-      },
-    },
-    (request, reply) =>
-      controller.getSizeVariantMedia(request as AuthenticatedRequest, reply),
-  );
-
-  // POST /variants/media/copy — Copy variant media between products (Admin only)
-  fastify.post(
-    "/variants/media/copy",
-    {
-      preValidation: [validateBody(copyVariantMediaSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
-      schema: {
-        description: "Copy variant media from one product to another",
-        tags: ["Variant Media"],
-        summary: "Copy Product Variant Media",
-        security: [{ bearerAuth: [] }],
-        body: {
-          type: "object",
-          required: ["sourceProductId", "targetProductId", "variantMapping"],
-          properties: {
-            sourceProductId: { type: "string", format: "uuid" },
-            targetProductId: { type: "string", format: "uuid" },
-            variantMapping: {
-              type: "object",
-              additionalProperties: { type: "string", format: "uuid" },
-            },
-          },
-        },
-        response: {
-          204: {
-            description: "Product variant media copied successfully",
-            type: "null",
-          },
-        },
-      },
-    },
-    (request, reply) =>
-      controller.copyProductVariantMedia(
-        request as AuthenticatedRequest,
-        reply,
-      ),
-  );
-
-  // POST /variants/media/bulk-assign — Add media to multiple variants (Admin only)
-  fastify.post(
-    "/variants/media/bulk-assign",
-    {
-      preValidation: [validateBody(addMediaToMultipleVariantsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
-      schema: {
-        description: "Add a single media asset to multiple variants",
-        tags: ["Variant Media"],
-        summary: "Add Media to Multiple Variants",
-        security: [{ bearerAuth: [] }],
-        body: {
-          type: "object",
-          required: ["variantIds", "assetId"],
-          properties: {
-            variantIds: {
-              type: "array",
-              minItems: 1,
-              items: { type: "string", format: "uuid" },
-            },
-            assetId: { type: "string", format: "uuid" },
-          },
-        },
-        response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-            },
-          },
-        },
-      },
-    },
-    (request, reply) =>
-      controller.addMediaToMultipleVariants(
-        request as AuthenticatedRequest,
-        reply,
-      ),
-  );
-
-  // POST /variants/:variantId/media/set — Set (replace) all media for a variant (Admin only)
-  fastify.post(
-    "/variants/:variantId/media/set",
-    {
-      preValidation: [validateParams(variantMediaParamsSchema), validateBody(setVariantMediaSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
-      schema: {
-        description: "Set (replace) all media assets for a variant",
-        tags: ["Variant Media"],
-        summary: "Set Variant Media",
-        security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["variantId"],
-          properties: { variantId: { type: "string", format: "uuid" } },
-        },
-        body: {
-          type: "object",
-          required: ["assetIds"],
-          properties: {
-            assetIds: {
-              type: "array",
-              items: { type: "string", format: "uuid" },
-            },
-          },
-        },
-        response: {
-          204: {
-            description: "Variant media set successfully",
-            type: "null",
-          },
-        },
-      },
-    },
-    (request, reply) =>
-      controller.setVariantMedia(request as AuthenticatedRequest, reply),
-  );
-
-  // POST /variants/:variantId/media/bulk — Add multiple media assets to a variant (Admin only)
-  fastify.post(
-    "/variants/:variantId/media/bulk",
-    {
-      preValidation: [validateParams(variantMediaParamsSchema), validateBody(addMultipleMediaToVariantSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
-      schema: {
-        description: "Add multiple media assets to a variant at once",
-        tags: ["Variant Media"],
-        summary: "Add Multiple Media to Variant",
-        security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["variantId"],
-          properties: { variantId: { type: "string", format: "uuid" } },
-        },
-        body: {
-          type: "object",
-          required: ["assetIds"],
-          properties: {
-            assetIds: {
-              type: "array",
-              minItems: 1,
-              items: { type: "string", format: "uuid" },
-            },
-          },
-        },
-        response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-            },
-          },
-        },
-      },
-    },
-    (request, reply) =>
-      controller.addMultipleMediaToVariant(
-        request as AuthenticatedRequest,
-        reply,
-      ),
-  );
-
-  // POST /variants/:sourceVariantId/media/duplicate-to/:targetVariantId — Duplicate variant media (Admin only)
-  fastify.post(
-    "/variants/:sourceVariantId/media/duplicate-to/:targetVariantId",
-    {
-      preValidation: [validateParams(variantDuplicateParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
-      schema: {
-        description: "Duplicate all media from one variant to another",
-        tags: ["Variant Media"],
-        summary: "Duplicate Variant Media",
-        security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["sourceVariantId", "targetVariantId"],
-          properties: {
-            sourceVariantId: { type: "string", format: "uuid" },
-            targetVariantId: { type: "string", format: "uuid" },
-          },
-        },
-        response: {
-          204: {
-            description: "Variant media duplicated successfully",
-            type: "null",
-          },
-        },
-      },
-    },
-    (request, reply) =>
-      controller.duplicateVariantMedia(request as AuthenticatedRequest, reply),
-  );
-
-  // POST /variants/:variantId/media — Add media to a variant (Admin only)
-  fastify.post(
-    "/variants/:variantId/media",
-    {
-      preValidation: [validateParams(variantMediaParamsSchema), validateBody(addMediaToVariantSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
-      schema: {
-        description: "Add a media asset to a product variant",
-        tags: ["Variant Media"],
-        summary: "Add Media to Variant",
-        security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["variantId"],
-          properties: { variantId: { type: "string", format: "uuid" } },
-        },
-        body: {
-          type: "object",
-          required: ["assetId"],
-          properties: { assetId: { type: "string", format: "uuid" } },
-        },
-        response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-            },
-          },
-        },
-      },
-    },
-    (request, reply) =>
-      controller.addMediaToVariant(request as AuthenticatedRequest, reply),
-  );
-
-  // POST /variants/:variantId/media/validate — Validate variant media (Staff+)
-  fastify.post(
-    "/variants/:variantId/media/validate",
+    "/variants/:variantId/media/validation",
     {
       preValidation: [validateParams(variantMediaParamsSchema)],
       preHandler: [RolePermissions.STAFF_LEVEL],
       schema: {
-        description:
-          "Validate that a variant's media associations are consistent",
+        description: "Validate that a variant's media associations are consistent",
         tags: ["Variant Media"],
         summary: "Validate Variant Media",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["variantId"],
-          properties: { variantId: { type: "string", format: "uuid" } },
-        },
+        params: variantMediaParamsJson,
         response: {
           200: {
             type: "object",
@@ -578,6 +275,227 @@ export async function variantMediaRoutes(
       controller.validateVariantMedia(request as AuthenticatedRequest, reply),
   );
 
+  // GET /products/:productId/variants/media/color/:color — Color-specific variant media (public)
+  fastify.get(
+    "/products/:productId/variants/media/color/:color",
+    {
+      preValidation: [validateParams(colorVariantParamsSchema)],
+      schema: {
+        description: "Get media assets filtered by color attribute for all variants of a product",
+        tags: ["Variant Media"],
+        summary: "Get Color Variant Media",
+        params: colorVariantParamsJson,
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+              data: colorVariantMediaResponseSchema,
+            },
+          },
+        },
+      },
+    },
+    (request, reply) =>
+      controller.getColorVariantMedia(request as AuthenticatedRequest, reply),
+  );
+
+  // GET /products/:productId/variants/media/size/:size — Size-specific variant media (public)
+  fastify.get(
+    "/products/:productId/variants/media/size/:size",
+    {
+      preValidation: [validateParams(sizeVariantParamsSchema)],
+      schema: {
+        description: "Get media assets filtered by size attribute for all variants of a product",
+        tags: ["Variant Media"],
+        summary: "Get Size Variant Media",
+        params: sizeVariantParamsJson,
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+              data: sizeVariantMediaResponseSchema,
+            },
+          },
+        },
+      },
+    },
+    (request, reply) =>
+      controller.getSizeVariantMedia(request as AuthenticatedRequest, reply),
+  );
+
+  // ── Writes ─────────────────────────────────────────────────────────────
+
+  // POST /variants/media/copy — Copy variant media between products (Admin only)
+  fastify.post(
+    "/variants/media/copy",
+    {
+      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(copyVariantMediaSchema)],
+      schema: {
+        description: "Copy variant media from one product to another",
+        tags: ["Variant Media"],
+        summary: "Copy Product Variant Media",
+        security: [{ bearerAuth: [] }],
+        body: copyVariantMediaBodyJson,
+        response: {
+          201: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    (request, reply) =>
+      controller.copyProductVariantMedia(request as AuthenticatedRequest, reply),
+  );
+
+  // POST /variants/media/bulk-assign — Add media to multiple variants (Admin only)
+  fastify.post(
+    "/variants/media/bulk-assign",
+    {
+      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(addMediaToMultipleVariantsSchema)],
+      schema: {
+        description: "Add a single media asset to multiple variants",
+        tags: ["Variant Media"],
+        summary: "Add Media to Multiple Variants",
+        security: [{ bearerAuth: [] }],
+        body: addMediaToMultipleVariantsBodyJson,
+        response: {
+          201: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    (request, reply) =>
+      controller.addMediaToMultipleVariants(request as AuthenticatedRequest, reply),
+  );
+
+  // POST /variants/:sourceVariantId/media/duplicate-to/:targetVariantId — Duplicate variant media (Admin only)
+  fastify.post(
+    "/variants/:sourceVariantId/media/duplicate-to/:targetVariantId",
+    {
+      preValidation: [validateParams(variantDuplicateParamsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
+      schema: {
+        description: "Duplicate all media from one variant to another",
+        tags: ["Variant Media"],
+        summary: "Duplicate Variant Media",
+        security: [{ bearerAuth: [] }],
+        params: variantDuplicateParamsJson,
+        response: {
+          201: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    (request, reply) =>
+      controller.duplicateVariantMedia(request as AuthenticatedRequest, reply),
+  );
+
+  // POST /variants/:variantId/media/set — Set (replace) all media for a variant (Admin only)
+  fastify.post(
+    "/variants/:variantId/media/set",
+    {
+      preValidation: [validateParams(variantMediaParamsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(setVariantMediaSchema)],
+      schema: {
+        description: "Set (replace) all media assets for a variant",
+        tags: ["Variant Media"],
+        summary: "Set Variant Media",
+        security: [{ bearerAuth: [] }],
+        params: variantMediaParamsJson,
+        body: setVariantMediaBodyJson,
+        response: {
+          204: {
+            description: "Variant media set successfully",
+            type: "null",
+          },
+        },
+      },
+    },
+    (request, reply) =>
+      controller.setVariantMedia(request as AuthenticatedRequest, reply),
+  );
+
+  // POST /variants/:variantId/media/bulk — Add multiple media assets to a variant (Admin only)
+  fastify.post(
+    "/variants/:variantId/media/bulk",
+    {
+      preValidation: [validateParams(variantMediaParamsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(addMultipleMediaToVariantSchema)],
+      schema: {
+        description: "Add multiple media assets to a variant at once",
+        tags: ["Variant Media"],
+        summary: "Add Multiple Media to Variant",
+        security: [{ bearerAuth: [] }],
+        params: variantMediaParamsJson,
+        body: addMultipleMediaToVariantBodyJson,
+        response: {
+          201: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    (request, reply) =>
+      controller.addMultipleMediaToVariant(request as AuthenticatedRequest, reply),
+  );
+
+  // POST /variants/:variantId/media — Add media to a variant (Admin only)
+  fastify.post(
+    "/variants/:variantId/media",
+    {
+      preValidation: [validateParams(variantMediaParamsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(addMediaToVariantSchema)],
+      schema: {
+        description: "Add a media asset to a product variant",
+        tags: ["Variant Media"],
+        summary: "Add Media to Variant",
+        security: [{ bearerAuth: [] }],
+        params: variantMediaParamsJson,
+        body: addMediaToVariantBodyJson,
+        response: {
+          201: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              statusCode: { type: "number" },
+              message: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    (request, reply) =>
+      controller.addMediaToVariant(request as AuthenticatedRequest, reply),
+  );
+
   // DELETE /variants/:variantId/media — Remove all media from a variant (Admin only)
   fastify.delete(
     "/variants/:variantId/media",
@@ -589,11 +507,7 @@ export async function variantMediaRoutes(
         tags: ["Variant Media"],
         summary: "Remove All Variant Media",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["variantId"],
-          properties: { variantId: { type: "string", format: "uuid" } },
-        },
+        params: variantMediaParamsJson,
         response: {
           204: {
             description: "All variant media removed successfully",
@@ -617,14 +531,7 @@ export async function variantMediaRoutes(
         tags: ["Variant Media"],
         summary: "Remove Media from Variant",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["variantId", "assetId"],
-          properties: {
-            variantId: { type: "string", format: "uuid" },
-            assetId: { type: "string", format: "uuid" },
-          },
-        },
+        params: variantMediaAssetParamsJson,
         response: {
           204: {
             description: "Media removed from variant successfully",

@@ -7,19 +7,31 @@ import {
   RateLimitPresets,
   userKeyGenerator,
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
-import { validateBody, validateParams, validateQuery } from "../validation/validator";
+import {
+  validateBody,
+  validateParams,
+  validateQuery,
+  toJsonSchema,
+} from "../validation/validator";
 import {
   mediaParamsSchema,
   listMediaSchema,
   createMediaSchema,
   updateMediaSchema,
   mediaResponseSchema,
+  paginatedMediaResponseSchema,
 } from "../validation/media.schema";
 
 const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
   keyGenerator: userKeyGenerator,
 });
+
+// Pre-compute JSON Schemas from Zod (single source of truth — no drift).
+const mediaParamsJson = toJsonSchema(mediaParamsSchema);
+const listMediaQueryJson = toJsonSchema(listMediaSchema);
+const createMediaBodyJson = toJsonSchema(createMediaSchema);
+const updateMediaBodyJson = toJsonSchema(updateMediaSchema);
 
 export async function mediaRoutes(
   fastify: FastifyInstance,
@@ -30,6 +42,8 @@ export async function mediaRoutes(
       await writeRateLimiter(request, reply);
     }
   });
+
+  // ── Reads ──────────────────────────────────────────────────────────────
 
   // GET /media — List media assets (Staff+)
   fastify.get(
@@ -42,21 +56,7 @@ export async function mediaRoutes(
         tags: ["Media"],
         summary: "List Media Assets",
         security: [{ bearerAuth: [] }],
-        querystring: {
-          type: "object",
-          properties: {
-            page: { type: "integer", minimum: 1, default: 1 },
-            limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
-            mimeType: { type: "string" },
-            isImage: { type: "boolean" },
-            isVideo: { type: "boolean" },
-            hasRenditions: { type: "boolean" },
-            minBytes: { type: "integer", minimum: 0 },
-            maxBytes: { type: "integer", minimum: 0 },
-            sortBy: { type: "string", enum: ["createdAt", "bytes", "width", "height", "version"], default: "createdAt" },
-            sortOrder: { type: "string", enum: ["asc", "desc"], default: "desc" },
-          },
-        },
+        querystring: listMediaQueryJson,
         response: {
           200: {
             type: "object",
@@ -64,7 +64,7 @@ export async function mediaRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: { type: "object", properties: { assets: { type: "array", items: mediaResponseSchema }, meta: { type: "object" } } },
+              data: paginatedMediaResponseSchema,
             },
           },
         },
@@ -84,7 +84,7 @@ export async function mediaRoutes(
         tags: ["Media"],
         summary: "Get Media Asset",
         security: [{ bearerAuth: [] }],
-        params: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
+        params: mediaParamsJson,
         response: {
           200: {
             type: "object",
@@ -101,32 +101,19 @@ export async function mediaRoutes(
     (request, reply) => controller.getMediaAsset(request as AuthenticatedRequest, reply),
   );
 
+  // ── Writes ─────────────────────────────────────────────────────────────
+
   // POST /media — Create media asset (Admin only)
   fastify.post(
     "/media",
     {
-      preValidation: [validateBody(createMediaSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(createMediaSchema)],
       schema: {
         description: "Create a new media asset",
         tags: ["Media"],
         summary: "Create Media Asset",
         security: [{ bearerAuth: [] }],
-        body: {
-          type: "object",
-          required: ["storageKey", "mime"],
-          properties: {
-            storageKey: { type: "string" },
-            mime: { type: "string" },
-            width: { type: "integer", minimum: 1 },
-            height: { type: "integer", minimum: 1 },
-            bytes: { type: "integer", minimum: 0 },
-            altText: { type: "string" },
-            focalX: { type: "integer" },
-            focalY: { type: "integer" },
-            renditions: { type: "object" },
-          },
-        },
+        body: createMediaBodyJson,
         response: {
           201: {
             type: "object",
@@ -147,27 +134,15 @@ export async function mediaRoutes(
   fastify.patch(
     "/media/:id",
     {
-      preValidation: [validateParams(mediaParamsSchema), validateBody(updateMediaSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(mediaParamsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateMediaSchema)],
       schema: {
         description: "Update an existing media asset",
         tags: ["Media"],
         summary: "Update Media Asset",
         security: [{ bearerAuth: [] }],
-        params: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
-        body: {
-          type: "object",
-          properties: {
-            mime: { type: "string" },
-            width: { type: "integer", minimum: 1 },
-            height: { type: "integer", minimum: 1 },
-            bytes: { type: "integer", minimum: 0 },
-            altText: { type: "string" },
-            focalX: { type: "integer" },
-            focalY: { type: "integer" },
-            renditions: { type: "object" },
-          },
-        },
+        params: mediaParamsJson,
+        body: updateMediaBodyJson,
         response: {
           200: {
             type: "object",
@@ -195,7 +170,7 @@ export async function mediaRoutes(
         tags: ["Media"],
         summary: "Delete Media Asset",
         security: [{ bearerAuth: [] }],
-        params: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
+        params: mediaParamsJson,
         response: {
           204: {
             description: "Media asset deleted successfully",
