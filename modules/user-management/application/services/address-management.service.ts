@@ -1,11 +1,10 @@
 import { IAddressRepository } from '../../domain/repositories/iaddress.repository';
 import { Address, AddressDTO } from '../../domain/entities/address.entity';
-import { AddressId } from '../../domain/value-objects/address-id';
-import {
-  AddressType,
-  AddressData,
-} from '../../domain/value-objects/address.vo';
+import { AddressId } from '../../domain/value-objects/address-id.vo';
+import { Address as AddressVO } from '../../domain/value-objects/address.vo';
+import { AddressType } from '../../domain/value-objects/address-type.vo';
 import { UserId } from '../../domain/value-objects/user-id.vo';
+import { ShippingZone } from '../../domain/enums/shipping-zone.enum';
 import {
   AddressShippingService,
 } from '../../domain/services/address-shipping.service';
@@ -13,10 +12,18 @@ import {
   AddressNotFoundError,
   InvalidOperationError,
 } from '../../domain/errors/user-management.errors';
+import { PaginatedResult } from '../../../../packages/core/src/domain/interfaces/paginated-result.interface';
+
+export interface ListUserAddressesOptions {
+  page?: number;
+  limit?: number;
+}
+
+type AddressInput = Parameters<typeof AddressVO.create>[0];
 
 interface AddAddressParams {
   userId: string;
-  addressData: AddressData;
+  addressData: AddressInput;
   type: AddressType;
   isDefault?: boolean;
 }
@@ -24,7 +31,7 @@ interface AddAddressParams {
 interface UpdateAddressParams {
   addressId: string;
   userId: string;
-  addressData?: AddressData;
+  addressData?: Partial<AddressInput>;
   type?: AddressType;
   isDefault?: boolean;
 }
@@ -34,33 +41,32 @@ export class AddressManagementService {
 
   async addAddress(params: AddAddressParams): Promise<AddressDTO> {
     const userId = UserId.fromString(params.userId);
-
     const existingAddresses = await this.addressRepository.findByUserId(userId);
-    const shouldBeDefault = params.isDefault || existingAddresses.length === 0;
 
-    // Conflict check: use domain equals on address VO
-    const address = Address.create({
-      userId: params.userId,
-      addressData: params.addressData,
-      type: params.type,
-      isDefault: false, // set default after de-defaulting others
-    });
-
-    const isDuplicate = existingAddresses.some((a) => a.isSameAddress(address));
+    // Duplicate check using domain equals on the address VO — done BEFORE
+    // creating the entity so we don't emit a stray AddressCreatedEvent.
+    const newAddressValue = AddressVO.create(params.addressData);
+    const isDuplicate = existingAddresses.some((a) =>
+      a.addressValue.equals(newAddressValue),
+    );
     if (isDuplicate) {
       throw new InvalidOperationError('A similar address already exists for this user');
     }
 
-    // De-default all existing addresses in-memory, then save each
+    const shouldBeDefault = params.isDefault || existingAddresses.length === 0;
+
+    // De-default others FIRST so the new address can be created already-default,
+    // emitting only AddressCreatedEvent (no extra AddressSetAsDefaultEvent).
     if (shouldBeDefault) {
-      for (const existing of existingAddresses) {
-        if (existing.isDefault) {
-          existing.removeAsDefault();
-          await this.addressRepository.save(existing);
-        }
-      }
-      address.setAsDefault();
+      await this.clearOtherDefaults(userId);
     }
+
+    const address = Address.create({
+      userId: params.userId,
+      addressData: params.addressData,
+      type: params.type,
+      isDefault: shouldBeDefault,
+    });
 
     await this.addressRepository.save(address);
     return Address.toDTO(address);
@@ -77,21 +83,30 @@ export class AddressManagementService {
     }
 
     if (params.addressData) {
-      address.updateAddress(params.addressData);
+      // Merge partial PATCH input with current values so the entity always
+      // receives a complete AddressInput. Required fields (addressLine1, city,
+      // country) keep their existing values when not provided in the patch.
+      const current = address.addressValue.getValue();
+      const patch = params.addressData;
+      address.updateAddress({
+        firstName: patch.firstName ?? current.firstName,
+        lastName: patch.lastName ?? current.lastName,
+        company: patch.company ?? current.company,
+        addressLine1: patch.addressLine1 ?? current.addressLine1,
+        addressLine2: patch.addressLine2 ?? current.addressLine2,
+        city: patch.city ?? current.city,
+        state: patch.state ?? current.state,
+        postalCode: patch.postalCode ?? current.postalCode,
+        country: patch.country ?? current.country,
+        phone: patch.phone ?? current.phone,
+      });
     }
     if (params.type) {
       address.changeType(params.type);
     }
 
     if (params.isDefault === true) {
-      // De-default all other addresses for this user
-      const allAddresses = await this.addressRepository.findByUserId(userId);
-      for (const existing of allAddresses) {
-        if (existing.isDefault && !existing.equals(address)) {
-          existing.removeAsDefault();
-          await this.addressRepository.save(existing);
-        }
-      }
+      await this.clearOtherDefaults(userId, address.id);
       address.setAsDefault();
     } else if (params.isDefault === false) {
       address.removeAsDefault();
@@ -124,10 +139,22 @@ export class AddressManagementService {
     }
   }
 
-  async getUserAddresses(userId: string): Promise<AddressDTO[]> {
+  // PERF: address books are user-scoped and typically small (<50). Repo
+  // returns all rows; we slice in memory. Switch to repo-side pagination if
+  // address counts ever grow large.
+  async getUserAddresses(
+    userId: string,
+    options: ListUserAddressesOptions = {},
+  ): Promise<PaginatedResult<AddressDTO>> {
+    const { page = 1, limit = 20 } = options;
+    const offset = (page - 1) * limit;
+
     const userIdVo = UserId.fromString(userId);
-    const addresses = await this.addressRepository.findByUserId(userIdVo);
-    return addresses.map((a) => Address.toDTO(a));
+    const allAddresses = await this.addressRepository.findByUserId(userIdVo);
+    const total = allAddresses.length;
+    const items = allAddresses.slice(offset, offset + limit).map((a) => Address.toDTO(a));
+
+    return { items, total, limit, offset, hasMore: offset + items.length < total };
   }
 
   async getUserAddressesByType(userId: string, type: AddressType): Promise<AddressDTO[]> {
@@ -153,19 +180,12 @@ export class AddressManagementService {
       throw new InvalidOperationError('Address does not belong to user');
     }
 
-    const allAddresses = await this.addressRepository.findByUserId(userIdVo);
-    for (const existing of allAddresses) {
-      if (existing.isDefault && !existing.equals(address)) {
-        existing.removeAsDefault();
-        await this.addressRepository.save(existing);
-      }
-    }
-
+    await this.clearOtherDefaults(userIdVo, address.id);
     address.setAsDefault();
     await this.addressRepository.save(address);
   }
 
-  async validateAddress(addressData: AddressData): Promise<{
+  async validateAddress(addressData: AddressInput): Promise<{
     isValid: boolean;
     errors: string[];
     suggestions?: string[];
@@ -200,11 +220,11 @@ export class AddressManagementService {
     return AddressShippingService.estimateDeliveryDays(address);
   }
 
-  async getShippingZone(addressId: string): Promise<string> {
+  async getShippingZone(addressId: string): Promise<ShippingZone> {
     const addressIdVo = AddressId.fromString(addressId);
     const address = await this.addressRepository.findById(addressIdVo);
     if (!address) throw new AddressNotFoundError();
-    return AddressShippingService.calculateShippingZone(address).toString();
+    return AddressShippingService.calculateShippingZone(address);
   }
 
   async requiresCustomsDeclaration(addressId: string): Promise<boolean> {
@@ -217,5 +237,19 @@ export class AddressManagementService {
   async bulkDeleteUserAddresses(userId: string): Promise<number> {
     const userIdVo = UserId.fromString(userId);
     return this.addressRepository.deleteByUserId(userIdVo);
+  }
+
+  /**
+   * Removes the `default` flag from any other address the user has, except
+   * the one being promoted (if provided). Persists each de-defaulted address.
+   */
+  private async clearOtherDefaults(userId: UserId, exceptAddressId?: AddressId): Promise<void> {
+    const allAddresses = await this.addressRepository.findByUserId(userId);
+    for (const existing of allAddresses) {
+      if (!existing.isDefault) continue;
+      if (exceptAddressId && existing.id.equals(exceptAddressId)) continue;
+      existing.removeAsDefault();
+      await this.addressRepository.save(existing);
+    }
   }
 }
