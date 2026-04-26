@@ -1,4 +1,14 @@
 import { z } from "zod";
+import { ProductStatus } from "../../../domain/enums/product-catalog.enums";
+import { productResponseSchema } from "./product.schema";
+
+// Search excludes ARCHIVED by design — archived products should not surface in
+// search results. Update by adding entries here if that policy changes.
+const SEARCHABLE_PRODUCT_STATUSES = [
+  ProductStatus.DRAFT,
+  ProductStatus.PUBLISHED,
+  ProductStatus.SCHEDULED,
+] as const;
 
 // ── Request Schemas (Zod) ─────────────────────────────────────────────────────
 
@@ -10,7 +20,7 @@ export const searchQuerySchema = z.object({
   brand: z.string().optional(),
   minPrice: z.string().regex(/^\d+(\.\d+)?$/).optional().transform(Number),
   maxPrice: z.string().regex(/^\d+(\.\d+)?$/).optional().transform(Number),
-  status: z.enum(["draft", "published", "scheduled"]).optional(),
+  status: z.enum(SEARCHABLE_PRODUCT_STATUSES).optional(),
   tags: z.union([z.string(), z.array(z.string())]).optional().transform((v) =>
     v === undefined ? undefined : Array.isArray(v) ? v : [v],
   ),
@@ -36,42 +46,87 @@ export type SearchFiltersQuery = z.infer<typeof searchFiltersQuerySchema>;
 
 // ── JSON Schema for Swagger docs ──────────────────────────────────────────────
 
+// Mirrors ProductSearchResult — extends PaginatedResult<ProductDTO> with optional `suggestions`.
 export const searchResultsResponseSchema = {
   type: "object",
   properties: {
-    items: { type: "array", items: { type: "object", additionalProperties: true } },
-    totalCount: { type: "integer" },
-    page: { type: "integer" },
+    items: { type: "array", items: productResponseSchema },
+    total: { type: "integer" },
     limit: { type: "integer" },
-    searchTerm: { type: "string" },
-    suggestions: { type: "array", items: { type: "string" } },
+    offset: { type: "integer" },
+    hasMore: { type: "boolean" },
+    suggestions: { type: "array", items: { type: "string" }, nullable: true },
+  },
+} as const;
+
+const searchSuggestionItemSchema = {
+  type: "object",
+  properties: {
+    type: { type: "string", enum: ["product", "category", "brand"] },
+    value: { type: "string" },
+    label: { type: "string" },
+    count: { type: "integer", nullable: true },
   },
 } as const;
 
 export const searchSuggestionsResponseSchema = {
+  type: "array",
+  items: searchSuggestionItemSchema,
+} as const;
+
+const popularSearchTermSchema = {
   type: "object",
   properties: {
-    suggestions: {
-      type: "array",
-      items: { type: "object", additionalProperties: true },
-    },
-    query: { type: "string" },
-    type: { type: "string" },
-    limit: { type: "integer" },
+    term: { type: "string" },
+    count: { type: "integer" },
   },
 } as const;
 
 export const popularSearchesResponseSchema = {
   type: "array",
-  items: { type: "object", additionalProperties: true },
+  items: popularSearchTermSchema,
+} as const;
+
+const searchFilterOptionSchema = {
+  type: "object",
+  properties: {
+    value: { type: "string" },
+    label: { type: "string" },
+    count: { type: "integer" },
+  },
+} as const;
+
+const searchFilterSchema = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    type: { type: "string", enum: ["select", "range", "checkbox"] },
+    options: {
+      type: "array",
+      items: searchFilterOptionSchema,
+      nullable: true,
+    },
+    min: { type: "number", nullable: true },
+    max: { type: "number", nullable: true },
+  },
 } as const;
 
 export const searchFiltersResponseSchema = {
-  type: "object",
-  additionalProperties: true,
+  type: "array",
+  items: searchFilterSchema,
 } as const;
 
 export const searchStatsResponseSchema = {
   type: "object",
-  additionalProperties: true,
+  properties: {
+    totalSearches: { type: "integer" },
+    uniqueQueries: { type: "integer" },
+    averageResultsPerSearch: { type: "number" },
+    topSearchTerms: {
+      type: "array",
+      items: popularSearchTermSchema,
+    },
+    zeroResultSearches: { type: "integer" },
+    searchConversionRate: { type: "number" },
+  },
 } as const;

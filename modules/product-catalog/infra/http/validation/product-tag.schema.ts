@@ -116,18 +116,14 @@ export const mostUsedTagsResponseSchema = {
   },
 } as const;
 
+// Matches PaginatedResult<ProductTagDTO> from packages/core.
 export const paginatedTagsResponseSchema = {
   type: "object",
   properties: {
-    tags: { type: "array", items: tagResponseSchema },
-    pagination: {
-      type: "object",
-      properties: {
-        page: { type: "integer" },
-        limit: { type: "integer" },
-        total: { type: "integer" },
-        total_pages: { type: "integer" },
-      },
-    },
+    items: { type: "array", items: tagResponseSchema },
+    total: { type: "integer" },
+    limit: { type: "integer" },
+    offset: { type: "integer" },
+    hasMore: { type: "boolean" },
   },
 } as const;

@@ -62,5 +62,6 @@ export const categoryResponseSchema = {
     parentId: { type: "string", format: "uuid", nullable: true },
     position: { type: "integer", nullable: true },
     createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
   },
 } as const;

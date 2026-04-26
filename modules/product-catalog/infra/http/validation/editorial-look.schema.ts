@@ -15,6 +15,10 @@ export const productLooksParamsSchema = z.object({
   productId: z.uuid(),
 });
 
+export const heroAssetParamsSchema = z.object({
+  assetId: z.uuid(),
+});
+
 export const listEditorialLooksSchema = z.object({
   page: z.string().regex(/^\d+$/).optional().default("1").transform(Number),
   limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
@@ -90,10 +94,18 @@ export const bulkDeleteEditorialLooksSchema = z.object({
 // ── Inferred Types ────────────────────────────────────────────────────────────
 
 export type EditorialLookParams = z.infer<typeof editorialLookParamsSchema>;
+export type EditorialLookProductParams = z.infer<typeof editorialLookProductParamsSchema>;
+export type ProductLooksParams = z.infer<typeof productLooksParamsSchema>;
+export type HeroAssetParams = z.infer<typeof heroAssetParamsSchema>;
 export type ListEditorialLooksQuery = z.infer<typeof listEditorialLooksSchema>;
+export type PopularProductsQuery = z.infer<typeof popularProductsQuerySchema>;
 export type CreateEditorialLookBody = z.infer<typeof createEditorialLookSchema>;
 export type UpdateEditorialLookBody = z.infer<typeof updateEditorialLookSchema>;
 export type SchedulePublicationBody = z.infer<typeof schedulePublicationSchema>;
+export type SetHeroImageBody = z.infer<typeof setHeroImageSchema>;
+export type UpdateStoryContentBody = z.infer<typeof updateStoryContentSchema>;
+export type SetLookProductsBody = z.infer<typeof setLookProductsSchema>;
+export type DuplicateEditorialLookBody = z.infer<typeof duplicateEditorialLookSchema>;
 export type BulkCreateEditorialLooksBody = z.infer<typeof bulkCreateEditorialLooksSchema>;
 export type BulkPublishEditorialLooksBody = z.infer<typeof bulkPublishEditorialLooksSchema>;
 export type BulkDeleteEditorialLooksBody = z.infer<typeof bulkDeleteEditorialLooksSchema>;
@@ -109,6 +121,8 @@ export const editorialLookResponseSchema = {
     heroAssetId: { type: "string", format: "uuid", nullable: true },
     publishedAt: { type: "string", format: "date-time", nullable: true },
     productIds: { type: "array", items: { type: "string", format: "uuid" } },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
   },
 } as const;
 

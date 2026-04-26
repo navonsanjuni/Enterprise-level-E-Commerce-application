@@ -61,6 +61,17 @@ export type UpdateVariantBody = z.infer<typeof updateVariantSchema>;
 
 // ── JSON Schema for Swagger docs ──────────────────────────────────────────────
 
+// Mirrors VariantDimensions interface from the domain entity.
+const dimsResponseSchema = {
+  type: "object",
+  nullable: true,
+  properties: {
+    length: { type: "number" },
+    width: { type: "number" },
+    height: { type: "number" },
+  },
+} as const;
+
 export const variantResponseSchema = {
   type: "object",
   properties: {
@@ -71,7 +82,7 @@ export const variantResponseSchema = {
     color: { type: "string", nullable: true },
     barcode: { type: "string", nullable: true },
     weightG: { type: "integer", nullable: true },
-    dims: { type: "object", nullable: true },
+    dims: dimsResponseSchema,
     taxClass: { type: "string", nullable: true },
     allowBackorder: { type: "boolean" },
     allowPreorder: { type: "boolean" },

@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { Region } from "../../../domain/enums/product-catalog.enums";
+
+const ALL_REGIONS = Object.values(Region) as [Region, ...Region[]];
 
 // ── Request Schemas (Zod) ─────────────────────────────────────────────────────
 
@@ -7,13 +10,13 @@ export const sizeGuideParamsSchema = z.object({
 });
 
 export const regionParamsSchema = z.object({
-  region: z.enum(["UK", "US", "EU"]),
+  region: z.enum(ALL_REGIONS),
 });
 
 export const listSizeGuidesSchema = z.object({
   page: z.string().regex(/^\d+$/).optional().default("1").transform(Number),
   limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
-  region: z.enum(["UK", "US", "EU"]).optional(),
+  region: z.enum(ALL_REGIONS).optional(),
   category: z.string().optional(),
   hasContent: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
   sortBy: z.enum(["title", "region", "category"]).optional().default("title"),
@@ -21,21 +24,21 @@ export const listSizeGuidesSchema = z.object({
 });
 
 export const validateSizeGuideSchema = z.object({
-  region: z.enum(["UK", "US", "EU"]),
+  region: z.enum(ALL_REGIONS),
   category: z.string().optional(),
 });
 
 export const createSizeGuideSchema = z.object({
   title: z.string().min(1),
   bodyHtml: z.string().optional(),
-  region: z.enum(["UK", "US", "EU"]),
+  region: z.enum(ALL_REGIONS),
   category: z.string().optional(),
 });
 
 export const updateSizeGuideSchema = z.object({
   title: z.string().min(1).optional(),
   bodyHtml: z.string().optional(),
-  region: z.enum(["UK", "US", "EU"]).optional(),
+  region: z.enum(ALL_REGIONS).optional(),
   category: z.string().optional(),
 });
 
@@ -48,7 +51,7 @@ export const bulkCreateSizeGuidesSchema = z.object({
     z.object({
       title: z.string().min(1),
       bodyHtml: z.string().optional(),
-      region: z.enum(["UK", "US", "EU"]),
+      region: z.enum(ALL_REGIONS),
       category: z.string().optional(),
     }),
   ).min(1),
@@ -83,7 +86,7 @@ export const sizeGuideResponseSchema = {
     id: { type: "string", format: "uuid" },
     title: { type: "string" },
     bodyHtml: { type: "string", nullable: true },
-    region: { type: "string", enum: ["UK", "US", "EU"] },
+    region: { type: "string", enum: ALL_REGIONS as unknown as string[] },
     category: { type: "string", nullable: true },
     createdAt: { type: "string", format: "date-time" },
     updatedAt: { type: "string", format: "date-time" },
@@ -99,7 +102,7 @@ export const sizeGuideStatsResponseSchema = {
       items: {
         type: "object",
         properties: {
-          region: { type: "string", enum: ["UK", "US", "EU"] },
+          region: { type: "string", enum: ALL_REGIONS as unknown as string[] },
           count: { type: "integer" },
         },
       },
@@ -121,7 +124,7 @@ export const sizeGuideStatsResponseSchema = {
 
 export const availableRegionsResponseSchema = {
   type: "array",
-  items: { type: "string", enum: ["UK", "US", "EU"] },
+  items: { type: "string", enum: ALL_REGIONS as unknown as string[] },
 } as const;
 
 export const availableCategoriesResponseSchema = {
@@ -159,25 +162,19 @@ export const validateSizeGuideUniquenessResponseSchema = {
   },
 } as const;
 
+// Matches PaginatedResult<SizeGuideDTO> from packages/core, with `meta` for context.
 export const regionalSizeGuidesResponseSchema = {
   type: "object",
   properties: {
-    sizeGuides: { type: "array", items: sizeGuideResponseSchema },
-    pagination: {
-      type: "object",
-      properties: {
-        page: { type: "integer" },
-        limit: { type: "integer" },
-        total: { type: "integer" },
-        total_pages: { type: "integer" },
-      },
-    },
+    items: { type: "array", items: sizeGuideResponseSchema },
+    total: { type: "integer" },
+    limit: { type: "integer" },
+    offset: { type: "integer" },
+    hasMore: { type: "boolean" },
     meta: {
       type: "object",
       properties: {
         region: { type: "string" },
-        page: { type: "integer" },
-        limit: { type: "integer" },
       },
     },
   },
