@@ -1,6 +1,6 @@
 import { AuthenticationService } from '../services/authentication.service';
 import { ITokenBlacklistService } from '../services/itoken-blacklist.service';
-import { DomainValidationError } from '../../domain/errors/user-management.errors';
+import { InvalidVerificationTokenError } from '../../domain/errors/user-management.errors';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface VerifyEmailCommand extends ICommand {
@@ -20,7 +20,7 @@ export class VerifyEmailHandler
   ): Promise<CommandResult<void>> {
     const tokenData = this.tokenBlacklistService.getVerificationToken(command.token);
     if (!tokenData) {
-      throw new DomainValidationError('Invalid or expired verification token');
+      throw new InvalidVerificationTokenError();
     }
 
     await this.authService.verifyEmail(tokenData.userId);
