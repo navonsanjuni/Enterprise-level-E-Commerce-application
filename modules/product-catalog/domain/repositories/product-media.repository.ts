@@ -11,6 +11,8 @@ export interface SetProductMediaItem {
   assetId: MediaAssetId;
   position?: number;
   isPrimary?: boolean;
+  alt?: string | null;
+  caption?: string | null;
 }
 
 export interface IProductMediaRepository {
@@ -28,6 +30,8 @@ export interface IProductMediaRepository {
     assetId: MediaAssetId,
     position?: number,
     isPrimary?: boolean,
+    alt?: string | null,
+    caption?: string | null,
   ): Promise<ProductMedia>;
   removeMediaFromProduct(
     productId: ProductId,
