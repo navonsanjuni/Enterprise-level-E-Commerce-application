@@ -11,6 +11,7 @@ import {
   validateBody,
   validateParams,
   validateQuery,
+  toJsonSchema,
 } from "../validation/validator";
 import {
   userIdParamsSchema,
@@ -27,6 +28,13 @@ const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
   keyGenerator: userKeyGenerator,
 });
+
+// Pre-compute JSON Schemas from Zod (single source of truth — no drift).
+const userIdParamsJson = toJsonSchema(userIdParamsSchema);
+const listUsersQueryJson = toJsonSchema(listUsersQuerySchema);
+const updateUserStatusBodyJson = toJsonSchema(updateUserStatusSchema);
+const updateUserRoleBodyJson = toJsonSchema(updateUserRoleSchema);
+const toggleEmailVerifiedBodyJson = toJsonSchema(toggleEmailVerifiedSchema);
 
 export async function userRoutes(
   fastify: FastifyInstance,
@@ -76,19 +84,7 @@ export async function userRoutes(
         summary: "List all users",
         description: "Admin only. Retrieve a paginated list of all users.",
         security: [{ bearerAuth: [] }],
-        querystring: {
-          type: "object",
-          properties: {
-            page: { type: "integer", minimum: 1 },
-            limit: { type: "integer", minimum: 1, maximum: 100 },
-            role: { type: "string" },
-            status: { type: "string" },
-            search: { type: "string" },
-            emailVerified: { type: "string", enum: ["true", "false"] },
-            sortBy: { type: "string", enum: ["createdAt", "email"] },
-            sortOrder: { type: "string", enum: ["asc", "desc"] },
-          },
-        },
+        querystring: listUsersQueryJson,
         response: {
           200: {
             type: "object",
@@ -118,13 +114,7 @@ export async function userRoutes(
         description:
           "Admin only. Retrieve any user's full details by their UUID.",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["userId"],
-          properties: {
-            userId: { type: "string", format: "uuid" },
-          },
-        },
+        params: userIdParamsJson,
         response: {
           200: {
             type: "object",
@@ -132,7 +122,7 @@ export async function userRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: profileResponseSchema,
+              data: userDetailResponseSchema,
             },
           },
         },
@@ -146,29 +136,16 @@ export async function userRoutes(
   fastify.patch(
     "/users/:userId/status",
     {
-      preValidation: [validateParams(userIdParamsSchema), validateBody(updateUserStatusSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(userIdParamsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateUserStatusSchema)],
       schema: {
         tags: ["Users"],
         summary: "Update user status",
         description:
           "Admin only. Activate, deactivate, or block a user account.",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["userId"],
-          properties: {
-            userId: { type: "string", format: "uuid" },
-          },
-        },
-        body: {
-          type: "object",
-          required: ["status"],
-          properties: {
-            status: { type: "string", enum: ["active", "inactive", "blocked"] },
-            notes: { type: "string" },
-          },
-        },
+        params: userIdParamsJson,
+        body: updateUserStatusBodyJson,
         response: {
           200: {
             type: "object",
@@ -179,7 +156,7 @@ export async function userRoutes(
               data: {
                 type: "object",
                 properties: {
-                  userId: { type: "string" },
+                  userId: { type: "string", format: "uuid" },
                   status: { type: "string" },
                 },
               },
@@ -196,31 +173,15 @@ export async function userRoutes(
   fastify.patch(
     "/users/:userId/role",
     {
-      preValidation: [validateParams(userIdParamsSchema), validateBody(updateUserRoleSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(userIdParamsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateUserRoleSchema)],
       schema: {
         tags: ["Users"],
         summary: "Update user role",
         description: "Admin only. Change a user's role.",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["userId"],
-          properties: {
-            userId: { type: "string", format: "uuid" },
-          },
-        },
-        body: {
-          type: "object",
-          required: ["role"],
-          properties: {
-            role: {
-              type: "string",
-              enum: ["GUEST", "CUSTOMER", "ADMIN", "INVENTORY_STAFF", "CUSTOMER_SERVICE", "ANALYST", "VENDOR"],
-            },
-            reason: { type: "string" },
-          },
-        },
+        params: userIdParamsJson,
+        body: updateUserRoleBodyJson,
         response: {
           200: {
             type: "object",
@@ -231,7 +192,7 @@ export async function userRoutes(
               data: {
                 type: "object",
                 properties: {
-                  userId: { type: "string" },
+                  userId: { type: "string", format: "uuid" },
                   role: { type: "string" },
                 },
               },
@@ -248,28 +209,15 @@ export async function userRoutes(
   fastify.patch(
     "/users/:userId/email-verified",
     {
-      preValidation: [validateParams(userIdParamsSchema), validateBody(toggleEmailVerifiedSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preValidation: [validateParams(userIdParamsSchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(toggleEmailVerifiedSchema)],
       schema: {
         tags: ["Users"],
         summary: "Toggle email verification",
         description: "Admin only. Manually verify or unverify a user's email.",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["userId"],
-          properties: {
-            userId: { type: "string", format: "uuid" },
-          },
-        },
-        body: {
-          type: "object",
-          required: ["isVerified"],
-          properties: {
-            isVerified: { type: "boolean" },
-            reason: { type: "string" },
-          },
-        },
+        params: userIdParamsJson,
+        body: toggleEmailVerifiedBodyJson,
         response: {
           200: {
             type: "object",
@@ -277,7 +225,13 @@ export async function userRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: { type: "object" },
+              data: {
+                type: "object",
+                properties: {
+                  userId: { type: "string", format: "uuid" },
+                  emailVerified: { type: "boolean" },
+                },
+              },
             },
           },
         },
@@ -301,13 +255,7 @@ export async function userRoutes(
         summary: "Delete a user",
         description: "Admin only. Permanently delete a user account.",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["userId"],
-          properties: {
-            userId: { type: "string", format: "uuid" },
-          },
-        },
+        params: userIdParamsJson,
         response: {
           204: {
             type: "null",

@@ -7,7 +7,7 @@ import {
   RateLimitPresets,
   userKeyGenerator,
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
-import { validateBody } from "../validation/validator";
+import { validateBody, toJsonSchema } from "../validation/validator";
 import {
   updateProfileSchema,
   profileResponseSchema,
@@ -18,6 +18,8 @@ const writeRateLimiter = createRateLimiter({
   keyGenerator: userKeyGenerator,
 });
 
+// Pre-compute JSON Schema from Zod (single source of truth — no drift).
+const updateProfileBodyJson = toJsonSchema(updateProfileSchema);
 
 export async function profileRoutes(
   fastify: FastifyInstance,
@@ -61,35 +63,14 @@ export async function profileRoutes(
   fastify.patch(
     "/users/me/profile",
     {
-      preValidation: [validateBody(updateProfileSchema)],
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [RolePermissions.AUTHENTICATED, validateBody(updateProfileSchema)],
       schema: {
         tags: ["Profile"],
         summary: "Update current user profile",
         description:
           "Partially update the authenticated user's profile. All fields are optional.",
         security: [{ bearerAuth: [] }],
-        body: {
-          type: "object",
-          properties: {
-            firstName: { type: "string", maxLength: 100 },
-            lastName: { type: "string", maxLength: 100 },
-            displayName: { type: "string", maxLength: 100 },
-            bio: { type: "string", maxLength: 500 },
-            avatarUrl: { type: "string", format: "uri" },
-            dateOfBirth: { type: "string" },
-            gender: {
-              type: "string",
-              enum: ["male", "female", "non_binary", "prefer_not_to_say"],
-            },
-            locale: { type: "string", maxLength: 10 },
-            currency: { type: "string", minLength: 3, maxLength: 3 },
-            defaultAddressId: { type: "string", format: "uuid" },
-            defaultPaymentMethodId: { type: "string", format: "uuid" },
-            stylePreferences: { type: "object", additionalProperties: true },
-            preferredSizes: { type: "object", additionalProperties: true },
-          },
-        },
+        body: updateProfileBodyJson,
         response: {
           200: {
             type: "object",
