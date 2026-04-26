@@ -1,11 +1,28 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { ZodSchema, ZodError } from "zod";
+import { z, ZodSchema, ZodError } from "zod";
 
 function formatZodErrors(error: ZodError) {
   return error.issues.map((issue) => ({
     field: issue.path.join("."),
     message: issue.message,
   }));
+}
+
+/**
+ * Convert a Zod schema to a JSON Schema (draft-07) for use in Fastify
+ * route schemas — `body`, `params`, `querystring` — and Swagger docs.
+ *
+ * Lets Zod be the single source of truth; eliminates manually maintaining
+ * parallel inline JSON-Schema definitions in route files.
+ *
+ * @example
+ *   fastify.post('/x', {
+ *     preHandler: [validateBody(createXSchema)],
+ *     schema: { body: toJsonSchema(createXSchema) },
+ *   }, ...);
+ */
+export function toJsonSchema(schema: ZodSchema): object {
+  return z.toJSONSchema(schema, { target: "draft-7" });
 }
 
 export function validateBody<T extends ZodSchema>(schema: T) {
