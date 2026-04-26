@@ -72,3 +72,15 @@ export const mediaResponseSchema = {
     updatedAt: { type: "string", format: "date-time" },
   },
 } as const;
+
+// Matches PaginatedResult<MediaAssetDTO> from packages/core.
+export const paginatedMediaResponseSchema = {
+  type: "object",
+  properties: {
+    items: { type: "array", items: mediaResponseSchema },
+    total: { type: "integer" },
+    limit: { type: "integer" },
+    offset: { type: "integer" },
+    hasMore: { type: "boolean" },
+  },
+} as const;

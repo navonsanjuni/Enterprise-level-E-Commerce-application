@@ -65,3 +65,20 @@ export const categoryResponseSchema = {
     updatedAt: { type: "string", format: "date-time" },
   },
 } as const;
+
+// Matches PaginatedResult<CategoryDTO> from packages/core.
+export const paginatedCategoriesResponseSchema = {
+  type: "object",
+  properties: {
+    items: { type: "array", items: categoryResponseSchema },
+    total: { type: "integer" },
+    limit: { type: "integer" },
+    offset: { type: "integer" },
+    hasMore: { type: "boolean" },
+  },
+} as const;
+
+export const categoryListResponseSchema = {
+  type: "array",
+  items: categoryResponseSchema,
+} as const;

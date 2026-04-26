@@ -164,3 +164,56 @@ export const productLooksResponseSchema = {
   type: "array",
   items: { type: "string", format: "uuid" },
 } as const;
+
+// Matches PaginatedResult<EditorialLookDTO> from packages/core.
+export const paginatedEditorialLooksResponseSchema = {
+  type: "object",
+  properties: {
+    items: { type: "array", items: editorialLookResponseSchema },
+    total: { type: "integer" },
+    limit: { type: "integer" },
+    offset: { type: "integer" },
+    hasMore: { type: "boolean" },
+  },
+} as const;
+
+export const editorialLooksArrayResponseSchema = {
+  type: "array",
+  items: editorialLookResponseSchema,
+} as const;
+
+// Mirrors BatchPublishResult from editorial-look-management.service.
+export const bulkPublishLooksResponseSchema = {
+  type: "object",
+  properties: {
+    published: { type: "array", items: { type: "string", format: "uuid" } },
+    failed: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          error: { type: "string" },
+        },
+      },
+    },
+  },
+} as const;
+
+// Mirrors ScheduledPublicationResult from editorial-look-management.service.
+export const scheduledPublicationsResponseSchema = {
+  type: "object",
+  properties: {
+    published: { type: "array", items: editorialLookResponseSchema },
+    errors: { type: "array", items: { type: "string" } },
+  },
+} as const;
+
+// Mirrors PublicationValidationResult from editorial-look-management.service.
+export const publicationValidationResponseSchema = {
+  type: "object",
+  properties: {
+    isValid: { type: "boolean" },
+    errors: { type: "array", items: { type: "string" } },
+  },
+} as const;

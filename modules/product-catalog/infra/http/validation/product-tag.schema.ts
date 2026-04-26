@@ -63,11 +63,21 @@ export const associateTagsSchema = z.object({
   tagIds: z.array(z.uuid()).min(1),
 });
 
+export const tagNameParamsSchema = z.object({
+  name: z.string().min(1),
+});
+
 // ── Inferred Types ────────────────────────────────────────────────────────────
 
 export type TagParams = z.infer<typeof tagParamsSchema>;
 export type TagByTagIdParams = z.infer<typeof tagByTagIdParamsSchema>;
+export type TagNameParams = z.infer<typeof tagNameParamsSchema>;
+export type ProductTagParams = z.infer<typeof productTagParamsSchema>;
+export type ProductTagAssocParams = z.infer<typeof productTagAssocParamsSchema>;
 export type ListTagsQuery = z.infer<typeof listTagsSchema>;
+export type TagSuggestionsQuery = z.infer<typeof tagSuggestionsSchema>;
+export type MostUsedTagsQuery = z.infer<typeof mostUsedTagsSchema>;
+export type TagProductsQuery = z.infer<typeof tagProductsQuerySchema>;
 export type CreateTagBody = z.infer<typeof createTagSchema>;
 export type UpdateTagBody = z.infer<typeof updateTagSchema>;
 export type BulkCreateTagsBody = z.infer<typeof bulkCreateTagsSchema>;
@@ -121,6 +131,33 @@ export const paginatedTagsResponseSchema = {
   type: "object",
   properties: {
     items: { type: "array", items: tagResponseSchema },
+    total: { type: "integer" },
+    limit: { type: "integer" },
+    offset: { type: "integer" },
+    hasMore: { type: "boolean" },
+  },
+} as const;
+
+export const tagsArrayResponseSchema = {
+  type: "array",
+  items: tagResponseSchema,
+} as const;
+
+// Mirrors ProductTagValidationResult.
+export const tagValidationResponseSchema = {
+  type: "object",
+  properties: {
+    tagName: { type: "string" },
+    isValid: { type: "boolean" },
+    available: { type: "boolean" },
+  },
+} as const;
+
+// PaginatedResult<string> — getTagProducts returns product IDs, not full DTOs.
+export const paginatedTagProductsResponseSchema = {
+  type: "object",
+  properties: {
+    items: { type: "array", items: { type: "string", format: "uuid" } },
     total: { type: "integer" },
     limit: { type: "integer" },
     offset: { type: "integer" },

@@ -36,6 +36,7 @@ export const searchSuggestionsQuerySchema = z.object({
 
 export const searchFiltersQuerySchema = z.object({
   q: z.string().optional(),
+  category: z.string().optional(),
 });
 
 // ── Inferred Types ────────────────────────────────────────────────────────────

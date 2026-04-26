@@ -51,10 +51,36 @@ export const copyVariantMediaSchema = z.object({
   variantMapping: z.record(z.string(), z.uuid()),
 });
 
+export const colorVariantParamsSchema = z.object({
+  productId: z.uuid(),
+  color: z.string().min(1),
+});
+
+export const sizeVariantParamsSchema = z.object({
+  productId: z.uuid(),
+  size: z.string().min(1),
+});
+
+// Pagination/sort options for the product-variant-media listing endpoint;
+// mirrors VariantMediaServiceQueryOptions (minus productId, which is a path param).
+export const productVariantMediaQuerySchema = z.object({
+  page: z.string().regex(/^\d+$/).optional().transform((v) => v === undefined ? undefined : Number(v)),
+  limit: z.string().regex(/^\d+$/).optional().transform((v) => v === undefined ? undefined : Number(v)),
+  sortBy: z.enum(["variantId", "assetId"]).optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
+});
+
 // ── Inferred Types ────────────────────────────────────────────────────────────
 
 export type VariantMediaParams = z.infer<typeof variantMediaParamsSchema>;
 export type VariantMediaAssetParams = z.infer<typeof variantMediaAssetParamsSchema>;
+export type VariantDuplicateParams = z.infer<typeof variantDuplicateParamsSchema>;
+export type AssetParams = z.infer<typeof assetParamsSchema>;
+export type ProductVariantMediaParams = z.infer<typeof productVariantMediaParamsSchema>;
+export type ColorVariantParams = z.infer<typeof colorVariantParamsSchema>;
+export type SizeVariantParams = z.infer<typeof sizeVariantParamsSchema>;
+export type UnusedAssetsQuery = z.infer<typeof unusedAssetsQuerySchema>;
+export type ProductVariantMediaQuery = z.infer<typeof productVariantMediaQuerySchema>;
 export type AddMediaToVariantBody = z.infer<typeof addMediaToVariantSchema>;
 export type SetVariantMediaBody = z.infer<typeof setVariantMediaSchema>;
 export type AddMultipleMediaToVariantBody = z.infer<typeof addMultipleMediaToVariantSchema>;

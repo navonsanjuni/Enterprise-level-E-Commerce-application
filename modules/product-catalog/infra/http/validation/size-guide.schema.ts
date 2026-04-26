@@ -67,13 +67,26 @@ export const regionalSizeGuideSchema = z.object({
   category: z.string().optional(),
 });
 
+export const regionCategoryParamsSchema = z.object({
+  region: z.enum(ALL_REGIONS),
+  category: z.string().min(1),
+});
+
+export const categoriesQuerySchema = z.object({
+  region: z.enum(ALL_REGIONS).optional(),
+});
+
 // ── Inferred Types ────────────────────────────────────────────────────────────
 
 export type SizeGuideParams = z.infer<typeof sizeGuideParamsSchema>;
 export type RegionParams = z.infer<typeof regionParamsSchema>;
+export type RegionCategoryParams = z.infer<typeof regionCategoryParamsSchema>;
 export type ListSizeGuidesQuery = z.infer<typeof listSizeGuidesSchema>;
+export type ValidateSizeGuideQuery = z.infer<typeof validateSizeGuideSchema>;
+export type CategoriesQuery = z.infer<typeof categoriesQuerySchema>;
 export type CreateSizeGuideBody = z.infer<typeof createSizeGuideSchema>;
 export type UpdateSizeGuideBody = z.infer<typeof updateSizeGuideSchema>;
+export type UpdateSizeGuideContentBody = z.infer<typeof updateSizeGuideContentSchema>;
 export type BulkCreateSizeGuidesBody = z.infer<typeof bulkCreateSizeGuidesSchema>;
 export type BulkDeleteSizeGuidesBody = z.infer<typeof bulkDeleteSizeGuidesSchema>;
 export type RegionalSizeGuideBody = z.infer<typeof regionalSizeGuideSchema>;
@@ -160,6 +173,23 @@ export const validateSizeGuideUniquenessResponseSchema = {
     isUnique: { type: "boolean" },
     available: { type: "boolean" },
   },
+} as const;
+
+// Matches PaginatedResult<SizeGuideDTO> from packages/core.
+export const paginatedSizeGuidesResponseSchema = {
+  type: "object",
+  properties: {
+    items: { type: "array", items: sizeGuideResponseSchema },
+    total: { type: "integer" },
+    limit: { type: "integer" },
+    offset: { type: "integer" },
+    hasMore: { type: "boolean" },
+  },
+} as const;
+
+export const sizeGuidesArrayResponseSchema = {
+  type: "array",
+  items: sizeGuideResponseSchema,
 } as const;
 
 // Matches PaginatedResult<SizeGuideDTO> from packages/core, with `meta` for context.

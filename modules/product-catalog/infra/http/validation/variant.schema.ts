@@ -91,3 +91,15 @@ export const variantResponseSchema = {
     updatedAt: { type: "string", format: "date-time" },
   },
 } as const;
+
+// Matches PaginatedResult<ProductVariantDTO> from packages/core.
+export const paginatedVariantsResponseSchema = {
+  type: "object",
+  properties: {
+    items: { type: "array", items: variantResponseSchema },
+    total: { type: "integer" },
+    limit: { type: "integer" },
+    offset: { type: "integer" },
+    hasMore: { type: "boolean" },
+  },
+} as const;
