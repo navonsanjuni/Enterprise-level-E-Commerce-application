@@ -1,17 +1,22 @@
 import { z } from "zod";
 
+// ============================================================================
+// Request body schemas
+// ============================================================================
+
 export const registerSchema = z.object({
   email: z.email(),
   password: z.string().min(8).max(128),
   phone: z.string().optional(),
   firstName: z.string().max(100).optional(),
   lastName: z.string().max(100).optional(),
-  role: z.enum(["CUSTOMER", "ADMIN", "VENDOR"]).optional(),
+  // role is intentionally NOT accepted from clients — defaults to CUSTOMER server-side.
+  // Admin/staff roles are assigned via separate admin endpoints.
 });
 
 export const loginSchema = z.object({
   email: z.email(),
-  password: z.string().min(1),
+  password: z.string().min(1).max(128),
   rememberMe: z.boolean().optional(),
 });
 
@@ -20,7 +25,7 @@ export const refreshTokenSchema = z.object({
 });
 
 export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1),
+  currentPassword: z.string().min(1).max(128),
   newPassword: z.string().min(8).max(128),
 });
 
@@ -31,7 +36,6 @@ export const forgotPasswordSchema = z.object({
 export const resetPasswordSchema = z.object({
   token: z.string().min(1),
   newPassword: z.string().min(8).max(128),
-  confirmPassword: z.string().min(8).max(128),
 });
 
 export const verifyEmailSchema = z.object({
@@ -44,12 +48,16 @@ export const resendVerificationSchema = z.object({
 
 export const changeEmailSchema = z.object({
   newEmail: z.email(),
-  password: z.string().min(1),
+  password: z.string().min(1).max(128),
 });
 
 export const deleteAccountSchema = z.object({
-  password: z.string().min(1),
+  password: z.string().min(1).max(128),
 });
+
+// ============================================================================
+// Inferred body types
+// ============================================================================
 
 export type RegisterBody = z.infer<typeof registerSchema>;
 export type LoginBody = z.infer<typeof loginSchema>;
@@ -62,7 +70,10 @@ export type ResendVerificationBody = z.infer<typeof resendVerificationSchema>;
 export type ChangeEmailBody = z.infer<typeof changeEmailSchema>;
 export type DeleteAccountBody = z.infer<typeof deleteAccountSchema>;
 
-// JSON Schema response objects (for Swagger docs)
+// ============================================================================
+// JSON Schema response objects (for Swagger / Fastify schema docs)
+// ============================================================================
+
 export const userResponseSchema = {
   type: 'object',
   properties: {
@@ -81,15 +92,34 @@ export const authResultResponseSchema = {
     accessToken: { type: 'string' },
     refreshToken: { type: 'string' },
     expiresIn: { type: 'number' },
+    tokenType: { type: 'string' },
     user: userResponseSchema,
   },
 };
 
-export const successResponseSchema = {
+export const userIdentityResponseSchema = {
   type: 'object',
   properties: {
-    success: { type: 'boolean' },
-    statusCode: { type: 'number' },
-    message: { type: 'string' },
+    userId: { type: 'string', format: 'uuid' },
+    email: { type: 'string', format: 'email' },
+    role: { type: 'string' },
+  },
+};
+
+export const refreshTokenResponseSchema = {
+  type: 'object',
+  properties: {
+    accessToken: { type: 'string' },
+    refreshToken: { type: 'string' },
+    expiresIn: { type: 'number' },
+  },
+};
+
+// Standard "action confirmation" payload returned by lifecycle endpoints
+// (forgot/reset password, verify email, etc.).
+export const actionResponseSchema = {
+  type: 'object',
+  properties: {
+    action: { type: 'string' },
   },
 };
