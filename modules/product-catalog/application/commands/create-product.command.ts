@@ -14,6 +14,7 @@ export interface CreateProductCommand extends ICommand {
   readonly seoTitle?: string;
   readonly seoDescription?: string;
   readonly price?: number;
+  readonly currency?: string;
   readonly priceSgd?: number;
   readonly priceUsd?: number;
   readonly compareAtPrice?: number;

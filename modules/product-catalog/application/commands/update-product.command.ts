@@ -15,6 +15,7 @@ export interface UpdateProductCommand extends ICommand {
   readonly seoTitle?: string;
   readonly seoDescription?: string;
   readonly price?: number;
+  readonly currency?: string;
   readonly priceSgd?: number | null;
   readonly priceUsd?: number | null;
   readonly compareAtPrice?: number | null;
