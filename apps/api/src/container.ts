@@ -108,10 +108,8 @@ import {
   SetProductCoverImageHandler,
   RemoveCoverImageHandler,
   ReorderProductMediaHandler,
-  MoveMediaPositionHandler,
   SetProductMediaHandler,
   DuplicateProductMediaHandler,
-  CompactProductMediaPositionsHandler,
   GetProductMediaHandler,
   GetProductsUsingAssetHandler,
   GetProductMediaAssetUsageCountHandler,
@@ -218,7 +216,6 @@ import {
   LocationRepositoryImpl,
   SupplierRepositoryImpl,
   PurchaseOrderRepositoryImpl,
-  PurchaseOrderItemRepositoryImpl,
   InventoryTransactionRepositoryImpl,
   StockAlertRepositoryImpl,
   PickupReservationRepositoryImpl,
@@ -293,7 +290,7 @@ import {
   ListTransactionsHandler,
   GetTransactionsByVariantHandler,
 } from "../../../modules/inventory-management/application";
-import { LocationType } from "../../../modules/inventory-management/domain/value-objects/location-type.vo";
+import { LocationTypeVO } from "../../../modules/inventory-management/domain/value-objects/location-type.vo";
 
 // ============================================================
 // Cart — Imports
@@ -371,7 +368,6 @@ import { SettingsService } from "../../../modules/admin/application/services/set
 // ============================================================
 import {
   OrderRepositoryImpl,
-  OrderItemRepositoryImpl,
   OrderAddressRepositoryImpl,
   OrderShipmentRepositoryImpl,
   OrderStatusHistoryRepositoryImpl,
@@ -381,15 +377,13 @@ import {
 } from "../../../modules/order-management/infra/persistence/repositories";
 import { OrderManagementService } from "../../../modules/order-management/application/services/order-management.service";
 import { OrderEventService } from "../../../modules/order-management/application/services/order-event.service";
-import { OrderItemManagementService } from "../../../modules/order-management/application/services/order-item-management.service";
-import { ShipmentManagementService } from "../../../modules/order-management/application/services/shipment-management.service";
 import { BackorderManagementService } from "../../../modules/order-management/application/services/backorder-management.service";
 import { PreorderManagementService } from "../../../modules/order-management/application/services/preorder-management.service";
 import {
   IExternalVariantService,
   IExternalProductService,
   IExternalStockService as IOrderExternalStockService,
-} from "../../../modules/order-management/domain/external-services";
+} from "../../../modules/order-management/domain/ports/external-services";
 import { ProductSnapshot } from "../../../modules/order-management/domain/value-objects/product-snapshot.vo";
 import { OrderId } from "../../../modules/order-management/domain/value-objects/order-id.vo";
 import {
@@ -729,7 +723,6 @@ export class Container {
       new DeleteProductHandler(productManagementService),
       new GetProductHandler(productManagementService),
       new ListProductsHandler(productManagementService),
-      new SearchProductsHandler(productSearchService),
     );
     const categoryController = new CategoryController(
       new CreateCategoryHandler(categoryManagementService),
@@ -761,10 +754,8 @@ export class Container {
       new SetProductCoverImageHandler(productMediaManagementService),
       new RemoveCoverImageHandler(productMediaManagementService),
       new ReorderProductMediaHandler(productMediaManagementService),
-      new MoveMediaPositionHandler(productMediaManagementService),
       new SetProductMediaHandler(productMediaManagementService),
       new DuplicateProductMediaHandler(productMediaManagementService),
-      new CompactProductMediaPositionsHandler(productMediaManagementService),
       new GetProductMediaHandler(productMediaManagementService),
       new GetProductsUsingAssetHandler(productMediaManagementService),
       new GetProductMediaAssetUsageCountHandler(productMediaManagementService),
@@ -893,7 +884,11 @@ export class Container {
     const locationRepository = new LocationRepositoryImpl(prisma, eventBus);
     const supplierRepository = new SupplierRepositoryImpl(prisma, eventBus);
     const purchaseOrderRepository = new PurchaseOrderRepositoryImpl(prisma, eventBus);
-    const purchaseOrderItemRepository = new PurchaseOrderItemRepositoryImpl(prisma);
+    // `IPurchaseOrderItemRepository` exists (read-only cross-PO queries —
+    // `findByVariant`, `getTotalOrderedQty`, `getTotalReceivedQty`) but no
+    // current service consumes it. PO item writes flow through the
+    // `PurchaseOrder` aggregate root via `IPurchaseOrderRepository.save()`.
+    // Wire `purchaseOrderItemRepository` here once a query handler needs it.
     const inventoryTransactionRepository = new InventoryTransactionRepositoryImpl(prisma, eventBus);
     const stockAlertRepository = new StockAlertRepositoryImpl(prisma, eventBus);
     const pickupReservationRepository = new PickupReservationRepositoryImpl(prisma, eventBus);
@@ -901,7 +896,7 @@ export class Container {
     const stockManagementService = new StockManagementService(stockRepository, inventoryTransactionRepository);
     const locationManagementService = new LocationManagementService(locationRepository);
     const supplierManagementService = new SupplierManagementService(supplierRepository);
-    const purchaseOrderManagementService = new PurchaseOrderManagementService(purchaseOrderRepository, purchaseOrderItemRepository, stockRepository, inventoryTransactionRepository);
+    const purchaseOrderManagementService = new PurchaseOrderManagementService(purchaseOrderRepository, stockRepository, inventoryTransactionRepository);
     const stockAlertService = new StockAlertService(stockAlertRepository, stockRepository);
     const pickupReservationService = new PickupReservationService(pickupReservationRepository, stockRepository, inventoryTransactionRepository);
 
@@ -937,14 +932,10 @@ export class Container {
     const poController = new PurchaseOrderController(
       new CreatePurchaseOrderHandler(purchaseOrderManagementService),
       new CreatePurchaseOrderWithItemsHandler(purchaseOrderManagementService),
-      new AddPOItemHandler(purchaseOrderManagementService),
-      new UpdatePOItemHandler(purchaseOrderManagementService),
-      new RemovePOItemHandler(purchaseOrderManagementService),
       new UpdatePOStatusHandler(purchaseOrderManagementService),
       new ReceivePOItemsHandler(purchaseOrderManagementService),
       new DeletePurchaseOrderHandler(purchaseOrderManagementService),
       new GetPurchaseOrderHandler(purchaseOrderManagementService),
-      new GetPOItemsHandler(purchaseOrderManagementService),
       new ListPurchaseOrdersHandler(purchaseOrderManagementService),
       new GetOverduePurchaseOrdersHandler(purchaseOrderManagementService),
       new GetPendingReceivalHandler(purchaseOrderManagementService),
@@ -999,7 +990,7 @@ export class Container {
       adjustStock: (...args) => stockManagementService.adjustStock(...args),
       getTotalAvailableStock: (variantId) => stockManagementService.getTotalAvailableStock(variantId),
       async findWarehouseId() {
-        const locations = await locationRepository.findByType(LocationType.WAREHOUSE);
+        const locations = await locationRepository.findByType(LocationTypeVO.WAREHOUSE);
         return locations.length > 0 ? locations[0].locationId.getValue() : null;
       },
     };
@@ -1147,7 +1138,6 @@ export class Container {
     // ============================================================
 
     const orderRepository = new OrderRepositoryImpl(prisma, eventBus);
-    const orderItemRepository = new OrderItemRepositoryImpl(prisma);
     const orderAddressRepository = new OrderAddressRepositoryImpl(prisma, eventBus);
     const orderShipmentRepository = new OrderShipmentRepositoryImpl(prisma);
     const orderStatusHistoryRepository = new OrderStatusHistoryRepositoryImpl(prisma);
@@ -1202,8 +1192,6 @@ export class Container {
 
     const orderEventService = new OrderEventService(orderEventRepository);
     const orderManagementService = new OrderManagementService(orderRepository, orderAddressRepository, orderShipmentRepository, orderStatusHistoryRepository, externalVariantService, externalProductService, externalStockService);
-    const orderItemManagementService = new OrderItemManagementService(orderItemRepository);
-    const shipmentManagementService = new ShipmentManagementService(orderShipmentRepository);
     const backorderManagementService = new BackorderManagementService(backorderRepository);
     const preorderManagementService = new PreorderManagementService(preorderRepository);
 
@@ -1229,16 +1217,16 @@ export class Container {
       new AddOrderItemHandler(orderManagementService),
       new UpdateOrderItemHandler(orderManagementService),
       new RemoveOrderItemHandler(orderManagementService),
-      new ListOrderItemsHandler(orderItemManagementService),
-      new GetOrderItemHandler(orderItemManagementService),
+      new ListOrderItemsHandler(orderManagementService),
+      new GetOrderItemHandler(orderManagementService),
     );
     const orderShipmentController = new OrderShipmentController(
       new CreateShipmentHandler(orderManagementService),
       new UpdateShipmentTrackingHandler(orderManagementService),
       new MarkShipmentShippedHandler(orderManagementService),
       new MarkShipmentDeliveredHandler(orderManagementService),
-      new ListOrderShipmentsHandler(shipmentManagementService),
-      new GetShipmentHandler(shipmentManagementService),
+      new ListOrderShipmentsHandler(orderManagementService),
+      new GetShipmentHandler(orderManagementService),
     );
     const orderStatusHistoryController = new OrderStatusHistoryController(
       new LogOrderStatusChangeHandler(orderManagementService),
