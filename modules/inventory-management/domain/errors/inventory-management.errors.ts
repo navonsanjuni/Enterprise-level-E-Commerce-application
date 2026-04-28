@@ -1,11 +1,18 @@
 import { DomainError } from "../../../../packages/core/src/domain/domain-error";
 export { EmptyFieldError } from "../../../../packages/core/src/domain/domain-error";
 
+// Stable error codes are exposed in API responses so clients can branch on
+// them without parsing message strings. Codes are SCREAMING_SNAKE_CASE and
+// stable across versions; messages may evolve. Previously every class in this
+// file used the 2-arg `super(message, status)` form, which silently defaulted
+// `code` to "DOMAIN_ERROR" — every API error in the inventory module shared
+// the same code, breaking client-side error branching.
+
 // ─── Validation Errors (400) ─────────────────────────────────────────────────
 
 export class DomainValidationError extends DomainError {
   constructor(message: string) {
-    super(message, 400);
+    super(message, "INVENTORY_VALIDATION_ERROR", 400);
   }
 }
 
@@ -15,6 +22,7 @@ export class StockNotFoundError extends DomainError {
   constructor(identifier?: string) {
     super(
       identifier ? `Stock '${identifier}' not found` : "Stock not found",
+      "STOCK_NOT_FOUND",
       404,
     );
   }
@@ -26,6 +34,7 @@ export class LocationNotFoundError extends DomainError {
       identifier
         ? `Location '${identifier}' not found`
         : "Location not found",
+      "LOCATION_NOT_FOUND",
       404,
     );
   }
@@ -37,6 +46,7 @@ export class SupplierNotFoundError extends DomainError {
       identifier
         ? `Supplier '${identifier}' not found`
         : "Supplier not found",
+      "SUPPLIER_NOT_FOUND",
       404,
     );
   }
@@ -48,6 +58,7 @@ export class PurchaseOrderNotFoundError extends DomainError {
       identifier
         ? `Purchase order '${identifier}' not found`
         : "Purchase order not found",
+      "PURCHASE_ORDER_NOT_FOUND",
       404,
     );
   }
@@ -59,6 +70,7 @@ export class PurchaseOrderItemNotFoundError extends DomainError {
       identifier
         ? `Purchase order item '${identifier}' not found`
         : "Purchase order item not found",
+      "PURCHASE_ORDER_ITEM_NOT_FOUND",
       404,
     );
   }
@@ -70,6 +82,7 @@ export class StockAlertNotFoundError extends DomainError {
       identifier
         ? `Stock alert '${identifier}' not found`
         : "Stock alert not found",
+      "STOCK_ALERT_NOT_FOUND",
       404,
     );
   }
@@ -81,6 +94,7 @@ export class PickupReservationNotFoundError extends DomainError {
       identifier
         ? `Pickup reservation '${identifier}' not found`
         : "Pickup reservation not found",
+      "PICKUP_RESERVATION_NOT_FOUND",
       404,
     );
   }
@@ -92,6 +106,7 @@ export class InventoryTransactionNotFoundError extends DomainError {
       identifier
         ? `Inventory transaction '${identifier}' not found`
         : "Inventory transaction not found",
+      "INVENTORY_TRANSACTION_NOT_FOUND",
       404,
     );
   }
@@ -101,13 +116,21 @@ export class InventoryTransactionNotFoundError extends DomainError {
 
 export class LocationAlreadyExistsError extends DomainError {
   constructor(name: string) {
-    super(`Location with name '${name}' already exists`, 409);
+    super(
+      `Location with name '${name}' already exists`,
+      "LOCATION_ALREADY_EXISTS",
+      409,
+    );
   }
 }
 
 export class SupplierAlreadyExistsError extends DomainError {
   constructor(name: string) {
-    super(`Supplier with name '${name}' already exists`, 409);
+    super(
+      `Supplier with name '${name}' already exists`,
+      "SUPPLIER_ALREADY_EXISTS",
+      409,
+    );
   }
 }
 
@@ -115,6 +138,7 @@ export class StockAlertAlreadyExistsError extends DomainError {
   constructor(variantId: string, type: string) {
     super(
       `Active '${type}' alert already exists for variant '${variantId}'`,
+      "STOCK_ALERT_ALREADY_EXISTS",
       409,
     );
   }
@@ -124,6 +148,7 @@ export class PurchaseOrderItemAlreadyExistsError extends DomainError {
   constructor(variantId: string) {
     super(
       `Item with variant '${variantId}' already exists in this purchase order`,
+      "PURCHASE_ORDER_ITEM_ALREADY_EXISTS",
       409,
     );
   }
@@ -133,7 +158,7 @@ export class PurchaseOrderItemAlreadyExistsError extends DomainError {
 
 export class InvalidOperationError extends DomainError {
   constructor(message: string) {
-    super(message, 422);
+    super(message, "INVALID_OPERATION", 422);
   }
 }
 
@@ -141,6 +166,7 @@ export class InsufficientStockError extends DomainError {
   constructor(variantId: string, locationId: string, requested: number, available: number) {
     super(
       `Insufficient stock for variant '${variantId}' at location '${locationId}': requested ${requested}, available ${available}`,
+      "INSUFFICIENT_STOCK",
       422,
     );
   }
@@ -148,30 +174,50 @@ export class InsufficientStockError extends DomainError {
 
 export class PurchaseOrderNotEditableError extends DomainError {
   constructor(status: string) {
-    super(`Purchase order cannot be edited in '${status}' status`, 422);
+    super(
+      `Purchase order cannot be edited in '${status}' status`,
+      "PURCHASE_ORDER_NOT_EDITABLE",
+      422,
+    );
   }
 }
 
 export class PurchaseOrderNotDeletableError extends DomainError {
   constructor(status: string) {
-    super(`Only draft purchase orders can be deleted, current status: '${status}'`, 422);
+    super(
+      `Only draft purchase orders can be deleted, current status: '${status}'`,
+      "PURCHASE_ORDER_NOT_DELETABLE",
+      422,
+    );
   }
 }
 
-export class InvalidStockTransitionError extends DomainError {
+export class InvalidPurchaseOrderStatusTransitionError extends DomainError {
   constructor(from: string, to: string) {
-    super(`Cannot transition purchase order from '${from}' to '${to}'`, 422);
+    super(
+      `Cannot transition purchase order from '${from}' to '${to}'`,
+      "INVALID_PURCHASE_ORDER_STATUS_TRANSITION",
+      422,
+    );
   }
 }
 
 export class StockAlertAlreadyResolvedError extends DomainError {
   constructor(alertId: string) {
-    super(`Stock alert '${alertId}' is already resolved`, 422);
+    super(
+      `Stock alert '${alertId}' is already resolved`,
+      "STOCK_ALERT_ALREADY_RESOLVED",
+      422,
+    );
   }
 }
 
 export class ReservationNotActiveError extends DomainError {
   constructor(reservationId: string, reason: string) {
-    super(`Reservation '${reservationId}' is not active: ${reason}`, 422);
+    super(
+      `Reservation '${reservationId}' is not active: ${reason}`,
+      "RESERVATION_NOT_ACTIVE",
+      422,
+    );
   }
 }
