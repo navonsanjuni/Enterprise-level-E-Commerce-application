@@ -68,6 +68,7 @@ export class EditorialLook extends AggregateRoot {
 
   private constructor(private props: EditorialLookProps) {
     super();
+    EditorialLook.validate(props);
   }
 
   static create(params: {
@@ -77,8 +78,6 @@ export class EditorialLook extends AggregateRoot {
     publishedAt?: Date | null;
     productIds?: string[];
   }): EditorialLook {
-    EditorialLook.validateTitle(params.title);
-
     const lookId = EditorialLookId.create();
     const now = new Date();
 
@@ -111,6 +110,11 @@ export class EditorialLook extends AggregateRoot {
   }
 
   // ── Validation ─────────────────────────────────────────────────────
+
+  // Always-applicable invariants. Run on every construction path.
+  private static validate(props: EditorialLookProps): void {
+    EditorialLook.validateTitle(props.title);
+  }
 
   private static validateTitle(title: string): void {
     if (!title || title.trim().length === 0) {

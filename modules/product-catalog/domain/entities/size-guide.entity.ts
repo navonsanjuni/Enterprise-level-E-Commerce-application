@@ -49,6 +49,7 @@ export class SizeGuide extends AggregateRoot {
 
   private constructor(private props: SizeGuideProps) {
     super();
+    SizeGuide.validate(props);
   }
 
   static create(params: {
@@ -57,9 +58,6 @@ export class SizeGuide extends AggregateRoot {
     region: Region;
     category?: string | null;
   }): SizeGuide {
-    SizeGuide.validateTitle(params.title);
-    SizeGuide.validateCategory(params.category ?? null);
-
     const sizeGuideId = SizeGuideId.create();
     const now = new Date();
 
@@ -85,6 +83,12 @@ export class SizeGuide extends AggregateRoot {
   }
 
   // ── Validation ─────────────────────────────────────────────────────
+
+  // Always-applicable invariants. Run on every construction path.
+  private static validate(props: SizeGuideProps): void {
+    SizeGuide.validateTitle(props.title);
+    SizeGuide.validateCategory(props.category);
+  }
 
   private static validateTitle(title: string): void {
     if (!title || title.trim().length === 0) {

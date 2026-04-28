@@ -27,7 +27,9 @@ export interface ProductMediaDTO {
 }
 
 export class ProductMedia {
-  private constructor(private props: ProductMediaProps) {}
+  private constructor(private props: ProductMediaProps) {
+    ProductMedia.validate(props);
+  }
 
   static create(params: {
     id: string;
@@ -38,7 +40,6 @@ export class ProductMedia {
     alt?: string | null;
     caption?: string | null;
   }): ProductMedia {
-    ProductMedia.validateDisplayOrder(params.displayOrder);
     const now = new Date();
     return new ProductMedia({
       id: params.id,
@@ -58,6 +59,11 @@ export class ProductMedia {
   }
 
   // ── Validation ─────────────────────────────────────────────────────
+
+  // Always-applicable invariants. Run on every construction path.
+  private static validate(props: ProductMediaProps): void {
+    ProductMedia.validateDisplayOrder(props.displayOrder);
+  }
 
   private static validateDisplayOrder(order: number): void {
     if (order < 0) {

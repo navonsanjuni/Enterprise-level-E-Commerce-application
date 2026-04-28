@@ -57,6 +57,7 @@ export interface MediaAssetDTO {
 export class MediaAsset extends AggregateRoot {
   private constructor(private props: MediaAssetProps) {
     super();
+    MediaAsset.validate(props);
   }
 
   static create(params: {
@@ -70,12 +71,6 @@ export class MediaAsset extends AggregateRoot {
     focalY?: number | null;
     renditions?: Record<string, unknown>;
   }): MediaAsset {
-    MediaAsset.validateStorageKey(params.storageKey);
-    MediaAsset.validateMime(params.mime);
-    MediaAsset.validateDimensions(params.width ?? null, params.height ?? null);
-    MediaAsset.validateBytes(params.bytes ?? null);
-    MediaAsset.validateFocalPoint(params.focalX ?? null, params.focalY ?? null);
-
     const assetId = MediaAssetId.create();
     const now = new Date();
 
@@ -107,6 +102,15 @@ export class MediaAsset extends AggregateRoot {
   }
 
   // ── Validation ─────────────────────────────────────────────────────
+
+  // Always-applicable invariants. Run on every construction path.
+  private static validate(props: MediaAssetProps): void {
+    MediaAsset.validateStorageKey(props.storageKey);
+    MediaAsset.validateMime(props.mime);
+    MediaAsset.validateDimensions(props.width, props.height);
+    MediaAsset.validateBytes(props.bytes);
+    MediaAsset.validateFocalPoint(props.focalX, props.focalY);
+  }
 
   private static validateStorageKey(storageKey: string): void {
     if (!storageKey || storageKey.trim().length === 0) {

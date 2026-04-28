@@ -21,7 +21,9 @@ export interface VariantMediaDTO {
 }
 
 export class VariantMedia {
-  private constructor(private props: VariantMediaProps) {}
+  private constructor(private props: VariantMediaProps) {
+    VariantMedia.validate(props);
+  }
 
   static create(params: {
     id: string;
@@ -29,7 +31,6 @@ export class VariantMedia {
     mediaAssetId: string;
     displayOrder: number;
   }): VariantMedia {
-    VariantMedia.validateDisplayOrder(params.displayOrder);
     const now = new Date();
     return new VariantMedia({
       id: params.id,
@@ -46,6 +47,11 @@ export class VariantMedia {
   }
 
   // ── Validation ─────────────────────────────────────────────────────
+
+  // Always-applicable invariants. Run on every construction path.
+  private static validate(props: VariantMediaProps): void {
+    VariantMedia.validateDisplayOrder(props.displayOrder);
+  }
 
   private static validateDisplayOrder(order: number): void {
     if (order < 0) {

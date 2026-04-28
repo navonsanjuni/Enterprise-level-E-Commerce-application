@@ -44,12 +44,10 @@ export class ProductTag extends AggregateRoot {
 
   private constructor(private props: ProductTagProps) {
     super();
+    ProductTag.validate(props);
   }
 
   static create(params: { tag: string; kind?: string | null }): ProductTag {
-    ProductTag.validateTag(params.tag);
-    ProductTag.validateKind(params.kind ?? null);
-
     const tagId = ProductTagId.create();
     const now = new Date();
 
@@ -71,6 +69,12 @@ export class ProductTag extends AggregateRoot {
   }
 
   // ── Validation ─────────────────────────────────────────────────────
+
+  // Always-applicable invariants. Run on every construction path.
+  private static validate(props: ProductTagProps): void {
+    ProductTag.validateTag(props.tag);
+    ProductTag.validateKind(props.kind);
+  }
 
   private static validateTag(tag: string): void {
     if (!tag || tag.trim().length === 0) {

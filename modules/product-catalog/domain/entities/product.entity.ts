@@ -93,6 +93,7 @@ export interface ProductDTO {
 export class Product extends AggregateRoot {
   private constructor(private props: ProductProps) {
     super();
+    Product.validate(props);
   }
 
   static create(params: {
@@ -111,8 +112,6 @@ export class Product extends AggregateRoot {
     priceUsd?: number | null;
     compareAtPrice?: number | null;
   }): Product {
-    Product.validateTitle(params.title);
-
     const productId = ProductId.create();
     const slug = Slug.create(params.title);
     const baseCurrency = params.currency ?? DEFAULT_CURRENCY;
@@ -153,6 +152,11 @@ export class Product extends AggregateRoot {
   }
 
   // ── Validation ─────────────────────────────────────────────────────
+
+  // Always-applicable invariants. Run on every construction path.
+  private static validate(props: ProductProps): void {
+    Product.validateTitle(props.title);
+  }
 
   private static validateTitle(title: string): void {
     if (!title || title.trim().length === 0) {

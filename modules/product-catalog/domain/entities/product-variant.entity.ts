@@ -69,6 +69,7 @@ export interface ProductVariantDTO {
 export class ProductVariant extends AggregateRoot {
   private constructor(private props: ProductVariantProps) {
     super();
+    ProductVariant.validate(props);
   }
 
   static create(params: {
@@ -84,7 +85,8 @@ export class ProductVariant extends AggregateRoot {
     allowPreorder?: boolean;
     restockEta?: Date | null;
   }): ProductVariant {
-    ProductVariant.validateWeight(params.weightG ?? null);
+    // Future-only check is a business rule for new variants, not an invariant —
+    // historical variants whose restock date has passed must reload from persistence.
     ProductVariant.validateRestockEta(params.restockEta ?? null);
 
     const variantId = VariantId.create();
@@ -119,6 +121,11 @@ export class ProductVariant extends AggregateRoot {
   }
 
   // ── Validation ─────────────────────────────────────────────────────
+
+  // Always-applicable invariants. Run on every construction path.
+  private static validate(props: ProductVariantProps): void {
+    ProductVariant.validateWeight(props.weightG);
+  }
 
   private static validateWeight(weightG: number | null): void {
     if (weightG !== null && weightG < 0) {

@@ -47,11 +47,8 @@ export {
 } from "./editorial-look.entity";
 
 // Association entities
-export {
-  ProductCategory,
-  type ProductCategoryProps,
-  type ProductCategoryDTO,
-} from "./product-category.entity";
+// (Product↔Category and Look↔Product are managed directly via Prisma relations
+// on their parent aggregates — no domain entity needed for those join tables.)
 export {
   ProductMedia,
   type ProductMediaProps,
@@ -67,8 +64,3 @@ export {
   type ProductTagAssociationProps,
   type ProductTagAssociationDTO,
 } from "./product-tag-association.entity";
-export {
-  EditorialLookProduct,
-  type EditorialLookProductProps,
-  type EditorialLookProductDTO,
-} from "./editorial-look-product.entity";

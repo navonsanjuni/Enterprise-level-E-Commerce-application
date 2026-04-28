@@ -46,6 +46,7 @@ export interface CategoryDTO {
 export class Category extends AggregateRoot {
   private constructor(private props: CategoryProps) {
     super();
+    Category.validate(props);
   }
 
   static create(params: {
@@ -53,9 +54,6 @@ export class Category extends AggregateRoot {
     parentId?: string | null;
     position?: number | null;
   }): Category {
-    Category.validateName(params.name);
-    Category.validatePosition(params.position ?? null);
-
     const categoryId = CategoryId.create();
     const slug = Slug.create(params.name);
     const now = new Date();
@@ -82,6 +80,12 @@ export class Category extends AggregateRoot {
   }
 
   // ── Validation ─────────────────────────────────────────────────────
+
+  // Always-applicable invariants. Run on every construction path.
+  private static validate(props: CategoryProps): void {
+    Category.validateName(props.name);
+    Category.validatePosition(props.position);
+  }
 
   private static validateName(name: string): void {
     if (!name || name.trim().length === 0) {
