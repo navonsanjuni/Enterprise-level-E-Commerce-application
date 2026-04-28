@@ -6,7 +6,6 @@ import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/c
 export interface UpdateUserStatusCommand extends ICommand {
   readonly userId: string;
   readonly status: UserStatus;
-  readonly notes?: string;
 }
 
 export class UpdateUserStatusHandler implements ICommandHandler<UpdateUserStatusCommand, CommandResult<UserDTO>> {

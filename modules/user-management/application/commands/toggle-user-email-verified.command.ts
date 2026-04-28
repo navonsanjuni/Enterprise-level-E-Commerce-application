@@ -5,7 +5,6 @@ import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/c
 export interface ToggleUserEmailVerifiedCommand extends ICommand {
   readonly userId: string;
   readonly isVerified: boolean;
-  readonly reason?: string;
 }
 
 export class ToggleUserEmailVerifiedHandler implements ICommandHandler<

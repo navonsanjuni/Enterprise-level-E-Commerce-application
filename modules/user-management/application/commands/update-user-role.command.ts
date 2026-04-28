@@ -6,7 +6,6 @@ import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/c
 export interface UpdateUserRoleCommand extends ICommand {
   readonly userId: string;
   readonly role: UserRole;
-  readonly reason?: string;
 }
 
 export class UpdateUserRoleHandler implements ICommandHandler<UpdateUserRoleCommand, CommandResult<UserDTO>> {

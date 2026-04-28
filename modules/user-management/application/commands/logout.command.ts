@@ -5,6 +5,7 @@ import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/c
 export interface LogoutCommand extends ICommand {
   readonly userId: string;
   readonly token?: string;
+  readonly refreshToken?: string;
 }
 
 export class LogoutHandler
@@ -20,6 +21,10 @@ export class LogoutHandler
 
     if (command.token) {
       this.tokenBlacklistService.blacklistToken(command.token);
+    }
+
+    if (command.refreshToken) {
+      this.tokenBlacklistService.blacklistToken(command.refreshToken);
     }
 
     return CommandResult.success();
