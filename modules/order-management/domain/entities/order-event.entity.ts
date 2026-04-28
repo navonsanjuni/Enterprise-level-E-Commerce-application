@@ -5,8 +5,11 @@ export interface OrderEventProps {
   orderId: string;
   eventType: string;
   payload: Record<string, unknown>;
+  // Optional actor attribution. UUID for staff-logged events from the API;
+  // free string (e.g. "system") for events emitted by internal sagas/handlers.
+  // Absent for legacy rows written before this column existed.
+  loggedBy?: string;
   createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface OrderEventDTO {
@@ -14,28 +17,23 @@ export interface OrderEventDTO {
   orderId: string;
   eventType: string;
   payload: Record<string, unknown>;
+  loggedBy?: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export class OrderEvent {
-  private constructor(private props: OrderEventProps) {}
+  private constructor(private props: OrderEventProps) {
+    OrderEvent.validate(props);
+  }
 
   static create(
-    params: Omit<OrderEventProps, "eventId" | "createdAt" | "updatedAt">,
+    params: Omit<OrderEventProps, "eventId" | "createdAt">,
   ): OrderEvent {
-    OrderEvent.validateEventType(params.eventType);
-
-    if (!params.orderId || params.orderId.trim().length === 0) {
-      throw new DomainValidationError("Order ID is required");
-    }
-
     return new OrderEvent({
       ...params,
       eventId: null,
       payload: params.payload || {},
       createdAt: new Date(),
-      updatedAt: new Date(),
     });
   }
 
@@ -43,8 +41,12 @@ export class OrderEvent {
     return new OrderEvent(props);
   }
 
-  private static validateEventType(eventType: string): void {
-    if (!eventType || eventType.trim().length === 0) {
+  // Always-applicable invariants. Run on every construction path.
+  private static validate(props: OrderEventProps): void {
+    if (!props.orderId || props.orderId.trim().length === 0) {
+      throw new DomainValidationError("Order ID is required");
+    }
+    if (!props.eventType || props.eventType.trim().length === 0) {
       throw new DomainValidationError("Event type is required");
     }
   }
@@ -65,12 +67,12 @@ export class OrderEvent {
     return this.props.payload;
   }
 
-  get createdAt(): Date {
-    return this.props.createdAt;
+  get loggedBy(): string | undefined {
+    return this.props.loggedBy;
   }
 
-  get updatedAt(): Date {
-    return this.props.updatedAt;
+  get createdAt(): Date {
+    return this.props.createdAt;
   }
 
   equals(other: OrderEvent): boolean {
@@ -86,8 +88,8 @@ export class OrderEvent {
       orderId: entity.props.orderId,
       eventType: entity.props.eventType,
       payload: entity.props.payload,
+      loggedBy: entity.props.loggedBy,
       createdAt: entity.props.createdAt.toISOString(),
-      updatedAt: entity.props.updatedAt.toISOString(),
     };
   }
 }
