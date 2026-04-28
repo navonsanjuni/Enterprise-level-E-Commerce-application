@@ -46,9 +46,18 @@ export interface InventoryTransactionDTO {
 
 // ── Entity ─────────────────────────────────────────────────────────────
 
+// Aggregate root: this is an immutable ledger/audit entry with its own
+// identity (`TransactionId`), independent lifecycle, and domain event.
+// It is NOT a child of Stock — transactions can be recorded against a
+// (variantId, locationId) before a Stock row exists (adjustment workflow,
+// stock-creation-by-receipt). Canonical "ledger aggregate" shape.
 export class InventoryTransaction extends AggregateRoot {
+  // Validation lives in the constructor so BOTH `create()` and `fromPersistence()`
+  // validate. Audit-shaped row, but defending the invariant on hydration too
+  // catches DB drift (e.g. a manually inserted row with qtyDelta = 0).
   private constructor(private props: InventoryTransactionProps) {
     super();
+    InventoryTransaction.validateQtyDelta(props.qtyDelta);
   }
 
   private static validateQtyDelta(qtyDelta: number): void {
@@ -64,7 +73,6 @@ export class InventoryTransaction extends AggregateRoot {
     reason: string;
     referenceId?: string;
   }): InventoryTransaction {
-    InventoryTransaction.validateQtyDelta(params.qtyDelta);
     const txn = new InventoryTransaction({
       invTxnId: TransactionId.create(),
       variantId: params.variantId,

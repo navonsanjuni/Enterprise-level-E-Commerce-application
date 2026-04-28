@@ -3,7 +3,15 @@ import { DomainEvent } from "../../../../packages/core/src/domain/events/domain-
 import { PurchaseOrderId } from "../value-objects/purchase-order-id.vo";
 import { SupplierId } from "../value-objects/supplier-id.vo";
 import { PurchaseOrderStatusVO, PurchaseOrderStatus } from "../value-objects/purchase-order-status.vo";
-import { InvalidOperationError } from "../errors";
+import { PurchaseOrderItem } from "./purchase-order-item.entity";
+import {
+  InvalidOperationError,
+  InvalidPurchaseOrderStatusTransitionError,
+  PurchaseOrderItemAlreadyExistsError,
+  PurchaseOrderItemNotFoundError,
+  PurchaseOrderNotDeletableError,
+  PurchaseOrderNotEditableError,
+} from "../errors";
 
 // ── Domain Events ──────────────────────────────────────────────────────
 
@@ -78,8 +86,17 @@ export interface PurchaseOrderDTO {
 
 // ── Entity ─────────────────────────────────────────────────────────────
 
+// `PurchaseOrderItem` is a child entity of this aggregate. Mutations to
+// items flow through aggregate methods (`addItem`, `updateItem`,
+// `removeItem`, `receiveItem`) so the root can enforce invariants like
+// "PO is editable only when DRAFT" and "PO status auto-transitions when
+// all items are received". The repository persists root + items together;
+// `IPurchaseOrderItemRepository` is reduced to read-only cross-PO queries.
 export class PurchaseOrder extends AggregateRoot {
-  private constructor(private props: PurchaseOrderProps) {
+  private constructor(
+    private props: PurchaseOrderProps,
+    private _items: PurchaseOrderItem[] = [],
+  ) {
     super();
   }
 
@@ -92,7 +109,7 @@ export class PurchaseOrder extends AggregateRoot {
       poId: PurchaseOrderId.create(),
       supplierId: SupplierId.fromString(params.supplierId),
       eta: params.eta,
-      status: PurchaseOrderStatusVO.create("draft"),
+      status: PurchaseOrderStatusVO.create(PurchaseOrderStatus.DRAFT),
       createdAt: now,
       updatedAt: now,
     });
@@ -105,8 +122,11 @@ export class PurchaseOrder extends AggregateRoot {
     return po;
   }
 
-  static fromPersistence(props: PurchaseOrderProps): PurchaseOrder {
-    return new PurchaseOrder(props);
+  static fromPersistence(
+    props: PurchaseOrderProps,
+    items: PurchaseOrderItem[] = [],
+  ): PurchaseOrder {
+    return new PurchaseOrder(props, items);
   }
 
   // ── Getters ────────────────────────────────────────────────────────
@@ -117,6 +137,13 @@ export class PurchaseOrder extends AggregateRoot {
   get status(): PurchaseOrderStatusVO { return this.props.status; }
   get createdAt(): Date { return this.props.createdAt; }
   get updatedAt(): Date { return this.props.updatedAt; }
+  // Returned as readonly to prevent external mutation; use aggregate
+  // methods (`addItem`/`updateItem`/`removeItem`/`receiveItem`) to mutate.
+  get items(): readonly PurchaseOrderItem[] { return this._items; }
+
+  getItem(variantId: string): PurchaseOrderItem | undefined {
+    return this._items.find((i) => i.variantId === variantId);
+  }
 
   // ── Business Logic ─────────────────────────────────────────────────
 
@@ -128,8 +155,9 @@ export class PurchaseOrder extends AggregateRoot {
 
   updateStatus(newStatus: PurchaseOrderStatusVO): void {
     if (!this.props.status.canTransitionTo(newStatus)) {
-      throw new InvalidOperationError(
-        `Cannot transition from ${this.props.status.getValue()} to ${newStatus.getValue()}`,
+      throw new InvalidPurchaseOrderStatusTransitionError(
+        this.props.status.getValue(),
+        newStatus.getValue(),
       );
     }
     this.props.status = newStatus;
@@ -142,7 +170,14 @@ export class PurchaseOrder extends AggregateRoot {
     );
   }
 
+  // Only DRAFT POs can be deleted (a sent/received PO would leave dangling
+  // supplier-facing or warehouse-facing state). The previous implementation
+  // only emitted the event without enforcing this — any PO could be "deleted".
   markDeleted(): void {
+    if (!this.canEdit()) {
+      throw new PurchaseOrderNotDeletableError(this.props.status.getValue());
+    }
+    this.props.updatedAt = new Date();
     this.addDomainEvent(new PurchaseOrderDeletedEvent(this.props.poId.getValue()));
   }
 
@@ -152,6 +187,78 @@ export class PurchaseOrder extends AggregateRoot {
   isFullyReceived(): boolean { return this.props.status.getValue() === PurchaseOrderStatus.RECEIVED; }
   isCancelled(): boolean { return this.props.status.getValue() === PurchaseOrderStatus.CANCELLED; }
   canEdit(): boolean { return this.isDraft(); }
+  canReceive(): boolean { return this.isSent() || this.isPartiallyReceived(); }
+
+  // ── Items collection (aggregate methods) ───────────────────────────
+
+  addItem(variantId: string, orderedQty: number): PurchaseOrderItem {
+    if (!this.canEdit()) {
+      throw new PurchaseOrderNotEditableError(this.props.status.getValue());
+    }
+    if (this._items.some((i) => i.variantId === variantId)) {
+      throw new PurchaseOrderItemAlreadyExistsError(variantId);
+    }
+    const item = PurchaseOrderItem.create({ poId: this.props.poId, variantId, orderedQty });
+    this._items.push(item);
+    this.props.updatedAt = new Date();
+    return item;
+  }
+
+  updateItemQty(variantId: string, orderedQty: number): PurchaseOrderItem {
+    if (!this.canEdit()) {
+      throw new PurchaseOrderNotEditableError(this.props.status.getValue());
+    }
+    const item = this._items.find((i) => i.variantId === variantId);
+    if (!item) {
+      throw new PurchaseOrderItemNotFoundError(variantId);
+    }
+    item.updateOrderedQty(orderedQty);
+    this.props.updatedAt = new Date();
+    return item;
+  }
+
+  removeItem(variantId: string): void {
+    if (!this.canEdit()) {
+      throw new PurchaseOrderNotEditableError(this.props.status.getValue());
+    }
+    const idx = this._items.findIndex((i) => i.variantId === variantId);
+    if (idx === -1) {
+      throw new PurchaseOrderItemNotFoundError(variantId);
+    }
+    this._items.splice(idx, 1);
+    this.props.updatedAt = new Date();
+  }
+
+  // Records a receipt against an item. Consumers handle the stock side-effects
+  // (adding to inventory, recording the InventoryTransaction) — this method
+  // only governs the PO aggregate's own state, including auto-transitioning
+  // status when all items are fully received.
+  receiveItem(variantId: string, receivedQty: number): PurchaseOrderItem {
+    if (!this.canReceive()) {
+      throw new InvalidOperationError(
+        `Cannot receive items for a purchase order in '${this.props.status.getValue()}' status`,
+      );
+    }
+    const item = this._items.find((i) => i.variantId === variantId);
+    if (!item) {
+      throw new PurchaseOrderItemNotFoundError(variantId);
+    }
+    item.receiveQuantity(receivedQty);
+    this.props.updatedAt = new Date();
+    this.autoTransitionStatusOnReceive();
+    return item;
+  }
+
+  private autoTransitionStatusOnReceive(): void {
+    if (this._items.length === 0) return;
+    const allFullyReceived = this._items.every((i) => i.isFullyReceived());
+    const anyReceived = this._items.some((i) => i.receivedQty > 0);
+    if (allFullyReceived) {
+      this.updateStatus(PurchaseOrderStatusVO.create(PurchaseOrderStatus.RECEIVED));
+    } else if (anyReceived && this.isSent()) {
+      this.updateStatus(PurchaseOrderStatusVO.create(PurchaseOrderStatus.PART_RECEIVED));
+    }
+  }
 
   equals(other: PurchaseOrder): boolean {
     return this.props.poId.equals(other.props.poId);
