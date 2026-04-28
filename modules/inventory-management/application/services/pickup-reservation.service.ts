@@ -2,6 +2,9 @@ import { PickupReservation, PickupReservationDTO } from "../../domain/entities/p
 import { Stock } from "../../domain/entities/stock.entity";
 import { InventoryTransaction } from "../../domain/entities/inventory-transaction.entity";
 import { ReservationId } from "../../domain/value-objects/reservation-id.vo";
+import { LocationId } from "../../domain/value-objects/location-id.vo";
+import { VariantId } from "../../../product-catalog/domain/value-objects/variant-id.vo";
+import { OrderId } from "../../../order-management/domain/value-objects/order-id.vo";
 import { IPickupReservationRepository } from "../../domain/repositories/pickup-reservation.repository";
 import { IStockRepository } from "../../domain/repositories/stock.repository";
 import { IInventoryTransactionRepository } from "../../domain/repositories/inventory-transaction.repository";
@@ -30,7 +33,9 @@ export class PickupReservationService {
       throw new DomainValidationError("Reservation quantity must be greater than zero");
     }
 
-    const stock = await this.stockRepository.findByVariantAndLocation(variantId, locationId);
+    const variantVo = VariantId.fromString(variantId);
+    const locationVo = LocationId.fromString(locationId);
+    const stock = await this.stockRepository.findByVariantAndLocation(variantVo, locationVo);
     if (!stock) {
       throw new StockNotFoundError(`${variantId} at ${locationId}`);
     }
@@ -60,8 +65,8 @@ export class PickupReservationService {
     }
 
     const stock = await this.stockRepository.findByVariantAndLocation(
-      reservation.variantId,
-      reservation.locationId,
+      VariantId.fromString(reservation.variantId),
+      LocationId.fromString(reservation.locationId),
     );
     if (stock) {
       stock.unreserveStock(reservation.qty);
@@ -110,12 +115,16 @@ export class PickupReservationService {
   }
 
   async getReservationsByOrder(orderId: string): Promise<PickupReservationDTO[]> {
-    const reservations = await this.pickupReservationRepository.findByOrder(orderId);
+    const reservations = await this.pickupReservationRepository.findByOrder(
+      OrderId.fromString(orderId),
+    );
     return reservations.map(PickupReservation.toDTO);
   }
 
   async getReservationsByLocation(locationId: string): Promise<PickupReservationDTO[]> {
-    const reservations = await this.pickupReservationRepository.findByLocation(locationId);
+    const reservations = await this.pickupReservationRepository.findByLocation(
+      LocationId.fromString(locationId),
+    );
     return reservations.map(PickupReservation.toDTO);
   }
 
@@ -124,9 +133,14 @@ export class PickupReservationService {
     return reservations.map(PickupReservation.toDTO);
   }
 
+  // FLAG: returns flat DTO[] but the underlying repo now paginates. This
+  // service method should be reshaped to accept pagination options and
+  // return `{ items, total, limit, offset, hasMore }` so callers can avoid
+  // the implicit 50-row cap. Left as-is until the application-layer audit
+  // pass — changing the signature is a controller-level cascade.
   async getAllReservations(): Promise<PickupReservationDTO[]> {
-    const reservations = await this.pickupReservationRepository.findAllReservations();
-    return reservations.map(PickupReservation.toDTO);
+    const result = await this.pickupReservationRepository.findAll();
+    return result.items.map(PickupReservation.toDTO);
   }
 
   async fulfillPickupReservation(reservationId: string): Promise<PickupReservationDTO> {
@@ -143,8 +157,8 @@ export class PickupReservationService {
     }
 
     const stock = await this.stockRepository.findByVariantAndLocation(
-      reservation.variantId,
-      reservation.locationId,
+      VariantId.fromString(reservation.variantId),
+      LocationId.fromString(reservation.locationId),
     );
     if (!stock) {
       throw new StockNotFoundError(`${reservation.variantId} at ${reservation.locationId}`);
@@ -167,6 +181,9 @@ export class PickupReservationService {
   }
 
   async getTotalReservedQty(variantId: string, locationId: string): Promise<number> {
-    return this.pickupReservationRepository.getTotalReservedQty(variantId, locationId);
+    return this.pickupReservationRepository.getTotalReservedQty(
+      VariantId.fromString(variantId),
+      LocationId.fromString(locationId),
+    );
   }
 }
