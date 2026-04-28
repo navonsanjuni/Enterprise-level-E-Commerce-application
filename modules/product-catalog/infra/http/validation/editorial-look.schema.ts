@@ -1,4 +1,10 @@
 import { z } from "zod";
+import {
+  MIN_PAGE,
+  MIN_LIMIT,
+  MAX_PAGE_SIZE,
+  MAX_SUGGESTIONS_LIMIT,
+} from "../../../application/constants/pagination.constants";
 
 // ── Request Schemas (Zod) ─────────────────────────────────────────────────────
 
@@ -20,8 +26,8 @@ export const heroAssetParamsSchema = z.object({
 });
 
 export const listEditorialLooksSchema = z.object({
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
+  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
+  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
   published: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
   scheduled: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
   draft: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
@@ -33,7 +39,7 @@ export const listEditorialLooksSchema = z.object({
 });
 
 export const popularProductsQuerySchema = z.object({
-  limit: z.string().regex(/^\d+$/).optional().default("10").transform(Number),
+  limit: z.string().regex(/^\d+$/).optional().default("10").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_SUGGESTIONS_LIMIT)),
 });
 
 export const createEditorialLookSchema = z.object({

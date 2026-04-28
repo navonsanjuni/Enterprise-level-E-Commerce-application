@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  MIN_PAGE,
+  MIN_LIMIT,
+  MAX_PAGE_SIZE,
+} from "../../../application/constants/pagination.constants";
 
 // ── Request Schemas (Zod) ─────────────────────────────────────────────────────
 
@@ -11,8 +16,8 @@ export const variantByProductParamsSchema = z.object({
 });
 
 export const listVariantsSchema = z.object({
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
+  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
+  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
   size: z.string().optional(),
   color: z.string().optional(),
   sortBy: z.enum(["sku", "createdAt", "size", "color"]).optional().default("createdAt"),

@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  MIN_PAGE,
+  MIN_LIMIT,
+  MAX_PAGE_SIZE,
+} from "../../../application/constants/pagination.constants";
 
 // ── Request Schemas (Zod) ─────────────────────────────────────────────────────
 
@@ -7,8 +12,8 @@ export const mediaParamsSchema = z.object({
 });
 
 export const listMediaSchema = z.object({
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
+  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
+  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
   mimeType: z.string().optional(),
   isImage: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
   isVideo: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),

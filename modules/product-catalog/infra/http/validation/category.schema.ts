@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  MIN_PAGE,
+  MIN_LIMIT,
+  MAX_PAGE_SIZE,
+} from "../../../application/constants/pagination.constants";
 
 // ── Request Schemas (Zod) ─────────────────────────────────────────────────────
 
@@ -11,8 +16,9 @@ export const categorySlugParamsSchema = z.object({
 });
 
 export const listCategoriesSchema = z.object({
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
+  // Bounded so handler-level clamps become visible 400s instead of silent truncation.
+  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
+  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
   parentId: z.uuid().optional(),
   includeChildren: z.string().optional().transform((v) => v === "true"),
   sortBy: z.enum(["name", "position"]).optional().default("position"),

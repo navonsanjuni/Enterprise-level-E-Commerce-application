@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { ProductStatus } from "../../../domain/enums/product-catalog.enums";
+import {
+  MIN_PAGE,
+  MIN_LIMIT,
+  MAX_PAGE_SIZE,
+} from "../../../application/constants/pagination.constants";
 
 // Statuses allowed when authoring products (clients cannot create directly into ARCHIVED).
 const CREATABLE_PRODUCT_STATUSES = [
@@ -21,8 +26,9 @@ export const productSlugParamsSchema = z.object({
 });
 
 export const listProductsSchema = z.object({
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
+  // Bounded so handler-level clamps become visible 400s instead of silent truncation.
+  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
+  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
   status: z.enum(ALL_PRODUCT_STATUSES).optional(),
   categoryId: z.uuid().optional(),
   brand: z.string().optional(),

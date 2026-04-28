@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { Region } from "../../../domain/enums/product-catalog.enums";
+import {
+  MIN_PAGE,
+  MIN_LIMIT,
+  MAX_PAGE_SIZE,
+} from "../../../application/constants/pagination.constants";
 
 const ALL_REGIONS = Object.values(Region) as [Region, ...Region[]];
 
@@ -14,8 +19,8 @@ export const regionParamsSchema = z.object({
 });
 
 export const listSizeGuidesSchema = z.object({
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
+  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
+  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
   region: z.enum(ALL_REGIONS).optional(),
   category: z.string().optional(),
   hasContent: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),

@@ -1,4 +1,10 @@
 import { z } from "zod";
+import {
+  MIN_PAGE,
+  MIN_LIMIT,
+  MAX_PAGE_SIZE,
+  MAX_SUGGESTIONS_LIMIT,
+} from "../../../application/constants/pagination.constants";
 
 // ── Request Schemas (Zod) ─────────────────────────────────────────────────────
 
@@ -20,25 +26,27 @@ export const productTagAssocParamsSchema = z.object({
 });
 
 export const listTagsSchema = z.object({
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
+  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
+  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
   kind: z.string().optional(),
   sortBy: z.enum(["tag", "kind"]).optional().default("tag"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
 });
 
+// Suggestions are bounded tighter than list endpoints — no use case for pulling
+// 100 type-ahead candidates, and a smaller cap reduces blast radius from abuse.
 export const tagSuggestionsSchema = z.object({
   query: z.string().min(1),
-  limit: z.string().regex(/^\d+$/).optional().default("10").transform(Number),
+  limit: z.string().regex(/^\d+$/).optional().default("10").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_SUGGESTIONS_LIMIT)),
 });
 
 export const tagProductsQuerySchema = z.object({
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number),
+  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
+  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
 });
 
 export const mostUsedTagsSchema = z.object({
-  limit: z.string().regex(/^\d+$/).optional().default("10").transform(Number),
+  limit: z.string().regex(/^\d+$/).optional().default("10").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_SUGGESTIONS_LIMIT)),
 });
 
 export const createTagSchema = z.object({
