@@ -96,6 +96,20 @@ export function userKeyGenerator(request: FastifyRequest): string {
   return `rate_limit:user:${userId}`;
 }
 
+// Hybrid keyer for routes that mix authenticated and unauthenticated traffic
+// (e.g. optionalAuth-gated guest checkout). Authenticated callers get a per-
+// user bucket; anonymous callers fall back to a per-IP bucket. Avoids the
+// "anonymous" collision that userKeyGenerator alone would cause for guests.
+export function userOrIpKeyGenerator(request: FastifyRequest): string {
+  const user = request.user as { id?: string; userId?: string } | undefined;
+  const userId = user?.userId || user?.id;
+  if (userId) return `rate_limit:user:${userId}`;
+  const forwarded = request.headers["x-forwarded-for"];
+  const ip =
+    typeof forwarded === "string" ? forwarded.split(",")[0].trim() : request.ip;
+  return `rate_limit:ip:${ip}`;
+}
+
 // Preset configurations for athletic shoes e-commerce
 export const RateLimitPresets = {
   auth: {
