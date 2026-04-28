@@ -2,28 +2,16 @@ import { DomainValidationError } from "../errors/order-management.errors";
 import { OrderSourceEnum } from "../enums";
 
 export class OrderSource {
-  private readonly value: OrderSourceEnum;
-
-  private constructor(value: OrderSourceEnum) {
-    this.value = value;
+  private constructor(private readonly value: OrderSourceEnum) {
+    OrderSource.validate(value);
   }
 
   static create(value: string): OrderSource {
-    return OrderSource.fromString(value);
+    return new OrderSource(value.toLowerCase() as OrderSourceEnum);
   }
 
   static fromString(value: string): OrderSource {
-    const normalizedValue = value.toLowerCase();
-
-    if (
-      !Object.values(OrderSourceEnum).includes(
-        normalizedValue as OrderSourceEnum,
-      )
-    ) {
-      throw new DomainValidationError(`Invalid order source: ${value}`);
-    }
-
-    return new OrderSource(normalizedValue as OrderSourceEnum);
+    return OrderSource.create(value);
   }
 
   static web(): OrderSource {
@@ -32,6 +20,12 @@ export class OrderSource {
 
   static mobile(): OrderSource {
     return new OrderSource(OrderSourceEnum.MOBILE);
+  }
+
+  private static validate(value: string): void {
+    if (!Object.values(OrderSourceEnum).includes(value as OrderSourceEnum)) {
+      throw new DomainValidationError(`Invalid order source: ${value}`);
+    }
   }
 
   getValue(): OrderSourceEnum {

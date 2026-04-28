@@ -2,24 +2,16 @@ import { DomainValidationError } from "../errors/order-management.errors";
 import { OrderStatusEnum } from "../enums";
 
 export class OrderStatus {
-  private readonly value: OrderStatusEnum;
+  private constructor(private readonly value: OrderStatusEnum) {
+    OrderStatus.validate(value);
+  }
 
-  private constructor(value: OrderStatusEnum) {
-    this.value = value;
+  static create(value: string): OrderStatus {
+    return new OrderStatus(value.toLowerCase() as OrderStatusEnum);
   }
 
   static fromString(value: string): OrderStatus {
-    const normalizedValue = value.toLowerCase();
-
-    if (
-      !Object.values(OrderStatusEnum).includes(
-        normalizedValue as OrderStatusEnum,
-      )
-    ) {
-      throw new DomainValidationError(`Invalid order status: ${value}`);
-    }
-
-    return new OrderStatus(normalizedValue as OrderStatusEnum);
+    return OrderStatus.create(value);
   }
 
   static created(): OrderStatus {
@@ -66,53 +58,27 @@ export class OrderStatus {
     return new OrderStatus(OrderStatusEnum.CANCELLED);
   }
 
-  getValue(): string {
+  private static validate(value: string): void {
+    if (!Object.values(OrderStatusEnum).includes(value as OrderStatusEnum)) {
+      throw new DomainValidationError(`Invalid order status: ${value}`);
+    }
+  }
+
+  getValue(): OrderStatusEnum {
     return this.value;
   }
 
-  isCreated(): boolean {
-    return this.value === OrderStatusEnum.CREATED;
-  }
-
-  isPending(): boolean {
-    return this.value === OrderStatusEnum.PENDING;
-  }
-
-  isConfirmed(): boolean {
-    return this.value === OrderStatusEnum.CONFIRMED;
-  }
-
-  isPaid(): boolean {
-    return this.value === OrderStatusEnum.PAID;
-  }
-
-  isProcessing(): boolean {
-    return this.value === OrderStatusEnum.PROCESSING;
-  }
-
-  isShipped(): boolean {
-    return this.value === OrderStatusEnum.SHIPPED;
-  }
-
-  isDelivered(): boolean {
-    return this.value === OrderStatusEnum.DELIVERED;
-  }
-
-  isFulfilled(): boolean {
-    return this.value === OrderStatusEnum.FULFILLED;
-  }
-
-  isPartiallyReturned(): boolean {
-    return this.value === OrderStatusEnum.PARTIALLY_RETURNED;
-  }
-
-  isRefunded(): boolean {
-    return this.value === OrderStatusEnum.REFUNDED;
-  }
-
-  isCancelled(): boolean {
-    return this.value === OrderStatusEnum.CANCELLED;
-  }
+  isCreated(): boolean { return this.value === OrderStatusEnum.CREATED; }
+  isPending(): boolean { return this.value === OrderStatusEnum.PENDING; }
+  isConfirmed(): boolean { return this.value === OrderStatusEnum.CONFIRMED; }
+  isPaid(): boolean { return this.value === OrderStatusEnum.PAID; }
+  isProcessing(): boolean { return this.value === OrderStatusEnum.PROCESSING; }
+  isShipped(): boolean { return this.value === OrderStatusEnum.SHIPPED; }
+  isDelivered(): boolean { return this.value === OrderStatusEnum.DELIVERED; }
+  isFulfilled(): boolean { return this.value === OrderStatusEnum.FULFILLED; }
+  isPartiallyReturned(): boolean { return this.value === OrderStatusEnum.PARTIALLY_RETURNED; }
+  isRefunded(): boolean { return this.value === OrderStatusEnum.REFUNDED; }
+  isCancelled(): boolean { return this.value === OrderStatusEnum.CANCELLED; }
 
   canTransitionTo(newStatus: OrderStatus): boolean {
     const transitions: Record<OrderStatusEnum, OrderStatusEnum[]> = {
@@ -123,19 +89,19 @@ export class OrderStatus {
         OrderStatusEnum.CANCELLED,
       ],
       [OrderStatusEnum.PENDING]: [
-        OrderStatusEnum.CREATED, // Correction
+        OrderStatusEnum.CREATED,
         OrderStatusEnum.CONFIRMED,
         OrderStatusEnum.PAID,
         OrderStatusEnum.CANCELLED,
       ],
       [OrderStatusEnum.CONFIRMED]: [
-        OrderStatusEnum.PENDING, // Correction
+        OrderStatusEnum.PENDING,
         OrderStatusEnum.PAID,
         OrderStatusEnum.PROCESSING,
         OrderStatusEnum.CANCELLED,
       ],
       [OrderStatusEnum.PAID]: [
-        OrderStatusEnum.CONFIRMED, // Correction
+        OrderStatusEnum.CONFIRMED,
         OrderStatusEnum.PROCESSING,
         OrderStatusEnum.SHIPPED,
         OrderStatusEnum.FULFILLED,
@@ -143,14 +109,14 @@ export class OrderStatus {
         OrderStatusEnum.CANCELLED,
       ],
       [OrderStatusEnum.PROCESSING]: [
-        OrderStatusEnum.PAID, // Correction
+        OrderStatusEnum.PAID,
         OrderStatusEnum.SHIPPED,
         OrderStatusEnum.FULFILLED,
         OrderStatusEnum.REFUNDED,
         OrderStatusEnum.CANCELLED,
       ],
       [OrderStatusEnum.SHIPPED]: [
-        OrderStatusEnum.PROCESSING, // Correction
+        OrderStatusEnum.PROCESSING,
         OrderStatusEnum.DELIVERED,
         OrderStatusEnum.PARTIALLY_RETURNED,
         OrderStatusEnum.REFUNDED,
