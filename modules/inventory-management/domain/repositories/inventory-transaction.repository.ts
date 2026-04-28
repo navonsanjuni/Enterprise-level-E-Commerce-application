@@ -1,21 +1,26 @@
 import { PaginatedResult } from "../../../../packages/core/src/domain/interfaces/paginated-result.interface";
+import { VariantId } from "../../../product-catalog/domain/value-objects/variant-id.vo";
 import { InventoryTransaction } from "../entities/inventory-transaction.entity";
 import { TransactionId } from "../value-objects/transaction-id.vo";
+import { LocationId } from "../value-objects/location-id.vo";
 
+// `referenceId` stays as `string` — it's a polymorphic reference across
+// modules (order, PO, return, etc.) with no single owning VO. Inventory
+// consumes `VariantId` from product-catalog (Customer/Supplier DDD pattern).
 export interface IInventoryTransactionRepository {
   save(transaction: InventoryTransaction): Promise<void>;
   findById(invTxnId: TransactionId): Promise<InventoryTransaction | null>;
   findByVariant(
-    variantId: string,
+    variantId: VariantId,
     options?: InventoryTransactionPageOptions,
   ): Promise<PaginatedResult<InventoryTransaction>>;
   findByLocation(
-    locationId: string,
+    locationId: LocationId,
     options?: InventoryTransactionPageOptions,
   ): Promise<PaginatedResult<InventoryTransaction>>;
   findByVariantAndLocation(
-    variantId: string,
-    locationId: string,
+    variantId: VariantId,
+    locationId: LocationId,
     options?: InventoryTransactionPageOptions,
   ): Promise<PaginatedResult<InventoryTransaction>>;
   findByReference(referenceId: string): Promise<InventoryTransaction[]>;
