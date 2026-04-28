@@ -1,11 +1,110 @@
-export * from "./errors";
+// Public surface of the inventory-management domain layer.
+//
+// Each section explicitly names what is re-exported — wildcard `export *`
+// would silently broadcast every internal symbol (including `XxxData`
+// interfaces and helper types) through this barrel. Explicit listing keeps
+// the public API auditable.
+//
+// Note: TS enums (AlertType, LocationType, etc.) come from `./value-objects`
+// — the `./enums` directory is a deprecated passthrough kept only for direct
+// imports; do NOT re-export from it here or downstream code sees the same
+// enum exported through two paths.
 
-export * from "./enums";
+// ─── Errors ──────────────────────────────────────────────────────────────
+export {
+  EmptyFieldError,
+  DomainValidationError,
+  StockNotFoundError,
+  LocationNotFoundError,
+  SupplierNotFoundError,
+  PurchaseOrderNotFoundError,
+  PurchaseOrderItemNotFoundError,
+  StockAlertNotFoundError,
+  PickupReservationNotFoundError,
+  InventoryTransactionNotFoundError,
+  LocationAlreadyExistsError,
+  SupplierAlreadyExistsError,
+  StockAlertAlreadyExistsError,
+  PurchaseOrderItemAlreadyExistsError,
+  InvalidOperationError,
+  InsufficientStockError,
+  PurchaseOrderNotEditableError,
+  PurchaseOrderNotDeletableError,
+  InvalidPurchaseOrderStatusTransitionError,
+  StockAlertAlreadyResolvedError,
+  ReservationNotActiveError,
+} from "./errors";
 
-export * from "./value-objects";
+// ─── Value Objects (IDs, enums, single-value, composite) ────────────────
+export {
+  // ID VOs
+  StockId,
+  LocationId,
+  SupplierId,
+  PurchaseOrderId,
+  AlertId,
+  ReservationId,
+  TransactionId,
+  // Enum VOs (TS enum + wrapper class)
+  LocationType,
+  LocationTypeVO,
+  TransactionReason,
+  TransactionReasonVO,
+  AlertType,
+  AlertTypeVO,
+  PurchaseOrderStatus,
+  PurchaseOrderStatusVO,
+  ReservationStatus,
+  ReservationStatusVO,
+  // Pattern B
+  SupplierName,
+  LocationName,
+  // Pattern C
+  SupplierContact,
+  LocationAddress,
+  // Complex
+  StockLevel,
+} from "./value-objects";
+export type {
+  // Composite-VO data shapes (kept exported for entity DTO reuse)
+  StockIdData,
+  SupplierContactData,
+  SupplierContactProps,
+  LocationAddressData,
+  LocationAddressProps,
+} from "./value-objects";
 
-export * from "./entities";
+// ─── Entities ────────────────────────────────────────────────────────────
+export {
+  Stock,
+  StockDTO,
+  InventoryTransaction,
+  InventoryTransactionDTO,
+  StockAlert,
+  StockAlertDTO,
+  Location,
+  LocationDTO,
+  Supplier,
+  SupplierDTO,
+  PurchaseOrder,
+  PurchaseOrderDTO,
+  PurchaseOrderItem,
+  PurchaseOrderItemDTO,
+  PickupReservation,
+  PickupReservationDTO,
+} from "./entities";
 
-export * from "./repositories";
+// ─── Repository interfaces ───────────────────────────────────────────────
+export {
+  IStockRepository,
+  IInventoryTransactionRepository,
+  IStockAlertRepository,
+  ILocationRepository,
+  ISupplierRepository,
+  IPurchaseOrderRepository,
+  IPurchaseOrderItemRepository,
+  IPickupReservationRepository,
+} from "./repositories";
 
+// ─── Constants ───────────────────────────────────────────────────────────
 export * from "./constants";
