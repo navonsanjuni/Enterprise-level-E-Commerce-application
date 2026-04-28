@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { ProductMediaController } from "../controllers/product-media.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -95,7 +96,7 @@ export async function productMediaRoutes(
     "/products/:productId/media/statistics",
     {
       preValidation: [validateParams(productMediaParamsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get media statistics for a product",
         tags: ["Product Media"],
@@ -124,7 +125,7 @@ export async function productMediaRoutes(
     "/products/:productId/media/validation",
     {
       preValidation: [validateParams(productMediaParamsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Validate that a product's media associations are consistent",
         tags: ["Product Media"],
@@ -153,7 +154,7 @@ export async function productMediaRoutes(
     "/products/by-asset/:assetId",
     {
       preValidation: [validateParams(assetIdParamsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "List products that use a specific media asset",
         tags: ["Product Media"],
@@ -182,7 +183,7 @@ export async function productMediaRoutes(
     "/products/by-asset/:assetId/count",
     {
       preValidation: [validateParams(assetIdParamsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get the number of products that use a specific media asset",
         tags: ["Product Media"],
@@ -213,7 +214,7 @@ export async function productMediaRoutes(
     "/products/:productId/media/cover",
     {
       preValidation: [validateParams(productMediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(setProductCoverImageSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(setProductCoverImageSchema)],
       schema: {
         description: "Set a media asset as the product cover/primary image",
         tags: ["Product Media"],
@@ -238,7 +239,7 @@ export async function productMediaRoutes(
     "/products/:productId/media/reorder",
     {
       preValidation: [validateParams(productMediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(reorderProductMediaSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(reorderProductMediaSchema)],
       schema: {
         description: "Reorder media assets for a product",
         tags: ["Product Media"],
@@ -263,7 +264,7 @@ export async function productMediaRoutes(
     "/products/:sourceProductId/media/duplicate-to/:targetProductId",
     {
       preValidation: [validateParams(duplicateProductMediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Duplicate all media from one product to another",
         tags: ["Product Media"],
@@ -291,7 +292,7 @@ export async function productMediaRoutes(
     "/products/:productId/media",
     {
       preValidation: [validateParams(productMediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(addMediaToProductSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(addMediaToProductSchema)],
       schema: {
         description: "Add/attach a media asset to a product",
         tags: ["Product Media"],
@@ -321,7 +322,7 @@ export async function productMediaRoutes(
     "/products/:productId/media",
     {
       preValidation: [validateParams(productMediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(setProductMediaSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(setProductMediaSchema)],
       schema: {
         description: "Replace the entire set of media assets for a product",
         tags: ["Product Media"],
@@ -346,7 +347,7 @@ export async function productMediaRoutes(
     "/products/:productId/media/cover",
     {
       preValidation: [validateParams(productMediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Remove the cover/primary image flag from a product",
         tags: ["Product Media"],
@@ -370,7 +371,7 @@ export async function productMediaRoutes(
     "/products/:productId/media",
     {
       preValidation: [validateParams(productMediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Remove all media assets from a product",
         tags: ["Product Media"],
@@ -394,7 +395,7 @@ export async function productMediaRoutes(
     "/products/:productId/media/:assetId",
     {
       preValidation: [validateParams(productMediaAssetParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Remove a specific media asset from a product",
         tags: ["Product Media"],

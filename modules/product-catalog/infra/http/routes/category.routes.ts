@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { CategoryController } from "../controllers/category.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -158,7 +159,7 @@ export async function categoryRoutes(
   fastify.post(
     "/categories/reorder",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(reorderCategoriesSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(reorderCategoriesSchema)],
       schema: {
         description: "Reorder categories by updating positions",
         tags: ["Categories"],
@@ -181,7 +182,7 @@ export async function categoryRoutes(
   fastify.post(
     "/categories",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(createCategorySchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(createCategorySchema)],
       schema: {
         description: "Create a new category",
         tags: ["Categories"],
@@ -210,7 +211,7 @@ export async function categoryRoutes(
     "/categories/:id",
     {
       preValidation: [validateParams(categoryParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateCategorySchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(updateCategorySchema)],
       schema: {
         description: "Update an existing category",
         tags: ["Categories"],
@@ -240,7 +241,7 @@ export async function categoryRoutes(
     "/categories/:id",
     {
       preValidation: [validateParams(categoryParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Delete a category",
         tags: ["Categories"],

@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { SearchController } from "../controllers/search.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -151,7 +152,7 @@ export async function searchRoutes(
   fastify.get(
     "/search/stats",
     {
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get search analytics and statistics",
         tags: ["Search"],

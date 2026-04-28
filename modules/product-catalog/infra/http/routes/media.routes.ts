@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { MediaController } from "../controllers/media.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -50,7 +51,7 @@ export async function mediaRoutes(
     "/media",
     {
       preValidation: [validateQuery(listMediaSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get paginated list of media assets with filtering options",
         tags: ["Media"],
@@ -78,7 +79,7 @@ export async function mediaRoutes(
     "/media/:id",
     {
       preValidation: [validateParams(mediaParamsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get media asset by ID",
         tags: ["Media"],
@@ -107,7 +108,7 @@ export async function mediaRoutes(
   fastify.post(
     "/media",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(createMediaSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(createMediaSchema)],
       schema: {
         description: "Create a new media asset",
         tags: ["Media"],
@@ -135,7 +136,7 @@ export async function mediaRoutes(
     "/media/:id",
     {
       preValidation: [validateParams(mediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateMediaSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(updateMediaSchema)],
       schema: {
         description: "Update an existing media asset",
         tags: ["Media"],
@@ -164,7 +165,7 @@ export async function mediaRoutes(
     "/media/:id",
     {
       preValidation: [validateParams(mediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Delete a media asset",
         tags: ["Media"],

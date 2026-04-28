@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { ProductTagController } from "../controllers/product-tag.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -182,7 +183,7 @@ export async function productTagRoutes(
   fastify.get(
     "/tags/stats",
     {
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get tag usage statistics",
         tags: ["Product Tags"],
@@ -323,7 +324,7 @@ export async function productTagRoutes(
   fastify.post(
     "/tags/bulk",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(bulkCreateTagsSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(bulkCreateTagsSchema)],
       schema: {
         description: "Bulk create product tags",
         tags: ["Product Tags"],
@@ -351,7 +352,7 @@ export async function productTagRoutes(
   fastify.post(
     "/tags",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(createTagSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(createTagSchema)],
       schema: {
         description: "Create a new product tag",
         tags: ["Product Tags"],
@@ -380,7 +381,7 @@ export async function productTagRoutes(
     "/products/:productId/tags",
     {
       preValidation: [validateParams(productTagParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(associateTagsSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(associateTagsSchema)],
       schema: {
         description: "Associate one or more tags with a product",
         tags: ["Product Tags"],
@@ -405,7 +406,7 @@ export async function productTagRoutes(
     "/tags/:id",
     {
       preValidation: [validateParams(tagParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateTagSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(updateTagSchema)],
       schema: {
         description: "Update an existing product tag",
         tags: ["Product Tags"],
@@ -434,7 +435,7 @@ export async function productTagRoutes(
   fastify.delete(
     "/tags/bulk",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(bulkDeleteTagsSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(bulkDeleteTagsSchema)],
       schema: {
         description: "Bulk delete product tags",
         tags: ["Product Tags"],
@@ -458,7 +459,7 @@ export async function productTagRoutes(
     "/tags/:id",
     {
       preValidation: [validateParams(tagParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Delete a product tag",
         tags: ["Product Tags"],
@@ -482,7 +483,7 @@ export async function productTagRoutes(
     "/products/:productId/tags/:tagId",
     {
       preValidation: [validateParams(productTagAssocParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Remove a tag association from a product",
         tags: ["Product Tags"],

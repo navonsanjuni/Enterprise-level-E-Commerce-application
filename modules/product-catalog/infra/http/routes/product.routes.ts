@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { ProductController } from "../controllers/product.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -135,7 +136,7 @@ export async function productRoutes(
   fastify.post(
     "/products",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(createProductSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(createProductSchema)],
       schema: {
         description: "Create a new product",
         tags: ["Products"],
@@ -164,7 +165,7 @@ export async function productRoutes(
     "/products/:productId",
     {
       preValidation: [validateParams(productParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateProductSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(updateProductSchema)],
       schema: {
         description: "Update an existing product",
         tags: ["Products"],
@@ -194,7 +195,7 @@ export async function productRoutes(
     "/products/:productId",
     {
       preValidation: [validateParams(productParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Delete a product",
         tags: ["Products"],

@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { VariantMediaController } from "../controllers/variant-media.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -135,7 +136,7 @@ export async function variantMediaRoutes(
     "/media/:assetId/variants",
     {
       preValidation: [validateParams(assetParamsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get all variants that use a specific media asset",
         tags: ["Variant Media"],
@@ -164,7 +165,7 @@ export async function variantMediaRoutes(
     "/media/:assetId/usage-count",
     {
       preValidation: [validateParams(assetParamsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get how many variants are using a specific media asset",
         tags: ["Variant Media"],
@@ -193,7 +194,7 @@ export async function variantMediaRoutes(
     "/variants/media/unused-assets",
     {
       preValidation: [validateQuery(unusedAssetsQuerySchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get media assets not associated with any variant",
         tags: ["Variant Media"],
@@ -222,7 +223,7 @@ export async function variantMediaRoutes(
     "/variants/:variantId/media/statistics",
     {
       preValidation: [validateParams(variantMediaParamsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get statistics about variant media usage",
         tags: ["Variant Media"],
@@ -251,7 +252,7 @@ export async function variantMediaRoutes(
     "/variants/:variantId/media/validation",
     {
       preValidation: [validateParams(variantMediaParamsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Validate that a variant's media associations are consistent",
         tags: ["Variant Media"],
@@ -335,7 +336,7 @@ export async function variantMediaRoutes(
   fastify.post(
     "/variants/media/copy",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(copyVariantMediaSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(copyVariantMediaSchema)],
       schema: {
         description: "Copy variant media from one product to another",
         tags: ["Variant Media"],
@@ -362,7 +363,7 @@ export async function variantMediaRoutes(
   fastify.post(
     "/variants/media/bulk-assign",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(addMediaToMultipleVariantsSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(addMediaToMultipleVariantsSchema)],
       schema: {
         description: "Add a single media asset to multiple variants",
         tags: ["Variant Media"],
@@ -390,7 +391,7 @@ export async function variantMediaRoutes(
     "/variants/:sourceVariantId/media/duplicate-to/:targetVariantId",
     {
       preValidation: [validateParams(variantDuplicateParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Duplicate all media from one variant to another",
         tags: ["Variant Media"],
@@ -418,7 +419,7 @@ export async function variantMediaRoutes(
     "/variants/:variantId/media/set",
     {
       preValidation: [validateParams(variantMediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(setVariantMediaSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(setVariantMediaSchema)],
       schema: {
         description: "Set (replace) all media assets for a variant",
         tags: ["Variant Media"],
@@ -443,7 +444,7 @@ export async function variantMediaRoutes(
     "/variants/:variantId/media/bulk",
     {
       preValidation: [validateParams(variantMediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(addMultipleMediaToVariantSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(addMultipleMediaToVariantSchema)],
       schema: {
         description: "Add multiple media assets to a variant at once",
         tags: ["Variant Media"],
@@ -472,7 +473,7 @@ export async function variantMediaRoutes(
     "/variants/:variantId/media",
     {
       preValidation: [validateParams(variantMediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(addMediaToVariantSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(addMediaToVariantSchema)],
       schema: {
         description: "Add a media asset to a product variant",
         tags: ["Variant Media"],
@@ -501,7 +502,7 @@ export async function variantMediaRoutes(
     "/variants/:variantId/media",
     {
       preValidation: [validateParams(variantMediaParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Remove all media associations from a product variant",
         tags: ["Variant Media"],
@@ -525,7 +526,7 @@ export async function variantMediaRoutes(
     "/variants/:variantId/media/:assetId",
     {
       preValidation: [validateParams(variantMediaAssetParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Remove a specific media asset from a product variant",
         tags: ["Variant Media"],

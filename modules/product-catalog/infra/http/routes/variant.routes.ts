@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { VariantController } from "../controllers/variant.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -112,7 +113,7 @@ export async function variantRoutes(
     "/products/:productId/variants",
     {
       preValidation: [validateParams(variantByProductParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(createVariantSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(createVariantSchema)],
       schema: {
         description: "Create a new variant for a product",
         tags: ["Variants"],
@@ -142,7 +143,7 @@ export async function variantRoutes(
     "/variants/:variantId",
     {
       preValidation: [validateParams(variantParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateVariantSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(updateVariantSchema)],
       schema: {
         description: "Update an existing variant",
         tags: ["Variants"],
@@ -172,7 +173,7 @@ export async function variantRoutes(
     "/variants/:variantId",
     {
       preValidation: [validateParams(variantParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Delete a variant",
         tags: ["Variants"],

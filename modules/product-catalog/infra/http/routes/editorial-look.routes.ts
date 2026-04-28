@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { EditorialLookController } from "../controllers/editorial-look.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -106,7 +107,7 @@ export async function editorialLookRoutes(
   fastify.get(
     "/editorial-looks/stats",
     {
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get editorial look statistics",
         tags: ["Editorial Looks"],
@@ -133,7 +134,7 @@ export async function editorialLookRoutes(
   fastify.get(
     "/editorial-looks/ready-to-publish",
     {
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get editorial looks that are ready to be published",
         tags: ["Editorial Looks"],
@@ -270,7 +271,7 @@ export async function editorialLookRoutes(
   fastify.post(
     "/editorial-looks/bulk",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(bulkCreateEditorialLooksSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(bulkCreateEditorialLooksSchema)],
       schema: {
         description: "Bulk create editorial looks",
         tags: ["Editorial Looks"],
@@ -298,7 +299,7 @@ export async function editorialLookRoutes(
   fastify.post(
     "/editorial-looks/bulk/publish",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(bulkPublishEditorialLooksSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(bulkPublishEditorialLooksSchema)],
       schema: {
         description: "Publish multiple editorial looks at once",
         tags: ["Editorial Looks"],
@@ -326,7 +327,7 @@ export async function editorialLookRoutes(
   fastify.post(
     "/editorial-looks/process-scheduled",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Trigger processing of scheduled editorial look publications",
         tags: ["Editorial Looks"],
@@ -353,7 +354,7 @@ export async function editorialLookRoutes(
   fastify.post(
     "/editorial-looks",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(createEditorialLookSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(createEditorialLookSchema)],
       schema: {
         description: "Create a new editorial look",
         tags: ["Editorial Looks"],
@@ -382,7 +383,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id/publish",
     {
       preValidation: [validateParams(editorialLookParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Publish an editorial look",
         tags: ["Editorial Looks"],
@@ -411,7 +412,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id/unpublish",
     {
       preValidation: [validateParams(editorialLookParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Unpublish an editorial look",
         tags: ["Editorial Looks"],
@@ -440,7 +441,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id/schedule",
     {
       preValidation: [validateParams(editorialLookParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(schedulePublicationSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(schedulePublicationSchema)],
       schema: {
         description: "Schedule an editorial look for future publication",
         tags: ["Editorial Looks"],
@@ -470,7 +471,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id/duplicate",
     {
       preValidation: [validateParams(editorialLookParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(duplicateEditorialLookSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(duplicateEditorialLookSchema)],
       schema: {
         description: "Duplicate an editorial look",
         tags: ["Editorial Looks"],
@@ -500,7 +501,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id/hero",
     {
       preValidation: [validateParams(editorialLookParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(setHeroImageSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(setHeroImageSchema)],
       schema: {
         description: "Set the hero image for an editorial look",
         tags: ["Editorial Looks"],
@@ -530,7 +531,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id/products",
     {
       preValidation: [validateParams(editorialLookParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(setLookProductsSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(setLookProductsSchema)],
       schema: {
         description: "Set (replace) all products featured in an editorial look",
         tags: ["Editorial Looks"],
@@ -560,7 +561,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id/products/:productId",
     {
       preValidation: [validateParams(editorialLookProductParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Add a product to an editorial look",
         tags: ["Editorial Looks"],
@@ -584,7 +585,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id/story",
     {
       preValidation: [validateParams(editorialLookParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateStoryContentSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(updateStoryContentSchema)],
       schema: {
         description: "Update the story HTML content of an editorial look",
         tags: ["Editorial Looks"],
@@ -614,7 +615,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id",
     {
       preValidation: [validateParams(editorialLookParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateEditorialLookSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(updateEditorialLookSchema)],
       schema: {
         description: "Update an existing editorial look",
         tags: ["Editorial Looks"],
@@ -643,7 +644,7 @@ export async function editorialLookRoutes(
   fastify.delete(
     "/editorial-looks/bulk",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(bulkDeleteEditorialLooksSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(bulkDeleteEditorialLooksSchema)],
       schema: {
         description: "Bulk delete editorial looks",
         tags: ["Editorial Looks"],
@@ -664,7 +665,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id/hero",
     {
       preValidation: [validateParams(editorialLookParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Remove the hero image from an editorial look",
         tags: ["Editorial Looks"],
@@ -685,7 +686,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id/story",
     {
       preValidation: [validateParams(editorialLookParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Clear the story HTML content of an editorial look",
         tags: ["Editorial Looks"],
@@ -706,7 +707,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id/products/:productId",
     {
       preValidation: [validateParams(editorialLookProductParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Remove a product from an editorial look",
         tags: ["Editorial Looks"],
@@ -730,7 +731,7 @@ export async function editorialLookRoutes(
     "/editorial-looks/:id",
     {
       preValidation: [validateParams(editorialLookParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Delete an editorial look",
         tags: ["Editorial Looks"],

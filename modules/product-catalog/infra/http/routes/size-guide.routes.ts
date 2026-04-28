@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { SizeGuideController } from "../controllers/size-guide.controller";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -97,7 +98,7 @@ export async function sizeGuideRoutes(
   fastify.get(
     "/size-guides/stats",
     {
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get size guide usage statistics",
         tags: ["Size Guides"],
@@ -286,7 +287,7 @@ export async function sizeGuideRoutes(
   fastify.post(
     "/size-guides/bulk",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(bulkCreateSizeGuidesSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(bulkCreateSizeGuidesSchema)],
       schema: {
         description: "Bulk create size guides",
         tags: ["Size Guides"],
@@ -315,7 +316,7 @@ export async function sizeGuideRoutes(
     "/size-guides/region/:region",
     {
       preValidation: [validateParams(regionParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(regionalSizeGuideSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(regionalSizeGuideSchema)],
       schema: {
         description: "Create a size guide for a specific region",
         tags: ["Size Guides"],
@@ -344,7 +345,7 @@ export async function sizeGuideRoutes(
   fastify.post(
     "/size-guides",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(createSizeGuideSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(createSizeGuideSchema)],
       schema: {
         description: "Create a new size guide",
         tags: ["Size Guides"],
@@ -373,7 +374,7 @@ export async function sizeGuideRoutes(
     "/size-guides/:id/content",
     {
       preValidation: [validateParams(sizeGuideParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateSizeGuideContentSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(updateSizeGuideContentSchema)],
       schema: {
         description: "Update only the HTML content of a size guide",
         tags: ["Size Guides"],
@@ -403,7 +404,7 @@ export async function sizeGuideRoutes(
     "/size-guides/:id",
     {
       preValidation: [validateParams(sizeGuideParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateSizeGuideSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(updateSizeGuideSchema)],
       schema: {
         description: "Update an existing size guide",
         tags: ["Size Guides"],
@@ -432,7 +433,7 @@ export async function sizeGuideRoutes(
   fastify.delete(
     "/size-guides/bulk",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(bulkDeleteSizeGuidesSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(bulkDeleteSizeGuidesSchema)],
       schema: {
         description: "Bulk delete size guides",
         tags: ["Size Guides"],
@@ -456,7 +457,7 @@ export async function sizeGuideRoutes(
     "/size-guides/:id/content",
     {
       preValidation: [validateParams(sizeGuideParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Clear the HTML content of a size guide",
         tags: ["Size Guides"],
@@ -480,7 +481,7 @@ export async function sizeGuideRoutes(
     "/size-guides/:id",
     {
       preValidation: [validateParams(sizeGuideParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Delete a size guide",
         tags: ["Size Guides"],
