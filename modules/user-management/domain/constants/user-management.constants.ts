@@ -1,4 +1,8 @@
 export const USER_MANAGEMENT_CONSTANTS = {
+  // Name fields (firstName, lastName, title) — entity caps at 50.
+  // Source of truth for both the entity validator and the route Zod schema.
+  USER_NAME_MAX_LENGTH: 50,
+
   // Password rules
   PASSWORD_MIN_LENGTH: 8,
   PASSWORD_MAX_LENGTH: 128,
