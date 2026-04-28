@@ -611,6 +611,7 @@ model OrderEvent {
   orderId   String   @map("order_id") @db.Uuid
   eventType String   @map("event_type")
   payload   Json     @default("{}")
+  loggedBy  String?  @map("logged_by")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -618,6 +619,7 @@ model OrderEvent {
   @@index([eventType])
   @@index([createdAt])
   @@index([orderId, eventType])
+  @@index([loggedBy])
   @@map("order_events")
   @@schema("order_management")
 }
