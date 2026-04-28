@@ -100,9 +100,6 @@ export class SocialLoginRepository
       provider: SocialProvider.fromString(row.provider),
       providerUserId: row.providerUserId,
       createdAt: row.createdAt,
-      // SocialLogin DB schema has no `updated_at` column — entity is effectively
-      // immutable after creation, so updatedAt always equals createdAt.
-      updatedAt: row.createdAt,
     });
   }
 

@@ -9,6 +9,7 @@ import {
 import { PaymentMethodType } from "../../../domain/enums/payment-method-type.enum";
 import { PaymentMethodId } from "../../../domain/value-objects/payment-method-id.vo";
 import { UserId } from "../../../domain/value-objects/user-id.vo";
+import { AddressId } from "../../../domain/value-objects/address-id.vo";
 
 export class PaymentMethodRepository
   extends PrismaRepository<PaymentMethod>
@@ -106,7 +107,7 @@ export class PaymentMethodRepository
       last4: row.last4,
       expMonth: row.expMonth,
       expYear: row.expYear,
-      billingAddressId: row.billingAddressId,
+      billingAddressId: row.billingAddressId ? AddressId.fromString(row.billingAddressId) : null,
       providerRef: row.providerRef,
       isDefault: row.isDefault,
       createdAt: row.createdAt,
@@ -128,7 +129,7 @@ export class PaymentMethodRepository
       last4: paymentMethod.last4,
       expMonth: paymentMethod.expMonth,
       expYear: paymentMethod.expYear,
-      billingAddressId: paymentMethod.billingAddressId,
+      billingAddressId: paymentMethod.billingAddressId?.getValue() ?? null,
       providerRef: paymentMethod.providerRef,
       isDefault: paymentMethod.isDefault,
       createdAt: paymentMethod.createdAt,

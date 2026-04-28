@@ -8,7 +8,9 @@ import {
   PreferredSizes,
 } from "../../../domain/entities/user-profile.entity";
 import { UserId } from "../../../domain/value-objects/user-id.vo";
-import { Currency } from "../../../domain/value-objects/currency.vo";
+import { AddressId } from "../../../domain/value-objects/address-id.vo";
+import { PaymentMethodId } from "../../../domain/value-objects/payment-method-id.vo";
+import { Currency } from "../../../domain/value-objects";
 import { Locale } from "../../../domain/value-objects/locale.vo";
 
 // UserProfile is not an aggregate root — it emits no domain events.
@@ -19,8 +21,8 @@ export class UserProfileRepository implements IUserProfileRepository {
   private toDomain(row: PrismaUserProfile): UserProfile {
     const props: UserProfileProps = {
       userId: UserId.fromString(row.userId),
-      defaultAddressId: row.defaultAddressId,
-      defaultPaymentMethodId: row.defaultPaymentMethodId,
+      defaultAddressId: row.defaultAddressId ? AddressId.fromString(row.defaultAddressId) : null,
+      defaultPaymentMethodId: row.defaultPaymentMethodId ? PaymentMethodId.fromString(row.defaultPaymentMethodId) : null,
       preferences: (row.prefs ?? {}) as UserPreferences,
       locale: row.locale ? Locale.fromString(row.locale) : null,
       currency: row.currency ? Currency.fromString(row.currency) : null,
@@ -37,8 +39,8 @@ export class UserProfileRepository implements IUserProfileRepository {
   } {
     const create = {
       userId: userProfile.userId.getValue(),
-      defaultAddressId: userProfile.defaultAddressId,
-      defaultPaymentMethodId: userProfile.defaultPaymentMethodId,
+      defaultAddressId: userProfile.defaultAddressId?.getValue() ?? null,
+      defaultPaymentMethodId: userProfile.defaultPaymentMethodId?.getValue() ?? null,
       prefs: userProfile.preferences as Prisma.InputJsonValue,
       locale: userProfile.locale?.getValue() ?? null,
       currency: userProfile.currency?.getValue() ?? null,
