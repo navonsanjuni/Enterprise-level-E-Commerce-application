@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
 import {
   createRateLimiter,
@@ -11,6 +12,7 @@ import {
   validateBody,
   validateParams,
   validateQuery,
+  toJsonSchema,
 } from "../validation/validator";
 import {
   alertParamsSchema,
@@ -18,6 +20,11 @@ import {
   createStockAlertSchema,
   stockAlertResponseSchema,
 } from "../validation/stock-alert.schema";
+
+// Pre-compute JSON Schemas from Zod (single source of truth — no drift).
+const alertParamsJson = toJsonSchema(alertParamsSchema);
+const listStockAlertsQueryJson = toJsonSchema(listStockAlertsSchema);
+const createStockAlertBodyJson = toJsonSchema(createStockAlertSchema);
 
 const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
@@ -39,20 +46,13 @@ export async function stockAlertRoutes(
     "/alerts",
     {
       preValidation: [validateQuery(listStockAlertsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "List stock alerts (Staff/Admin only)",
         tags: ["Stock Alerts"],
         summary: "List Alerts",
         security: [{ bearerAuth: [] }],
-        querystring: {
-          type: "object",
-          properties: {
-            limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
-            offset: { type: "integer", minimum: 0, default: 0 },
-            includeResolved: { type: "boolean", default: false },
-          },
-        },
+        querystring: listStockAlertsQueryJson,
         response: {
           200: {
             type: "object",
@@ -83,7 +83,7 @@ export async function stockAlertRoutes(
   fastify.get(
     "/alerts/active",
     {
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get all active stock alerts (Staff/Admin only)",
         tags: ["Stock Alerts"],
@@ -111,19 +111,13 @@ export async function stockAlertRoutes(
     "/alerts/:alertId",
     {
       preValidation: [validateParams(alertParamsSchema)],
-      preHandler: [RolePermissions.STAFF_LEVEL],
+      preHandler: [authenticate, RolePermissions.STAFF_LEVEL],
       schema: {
         description: "Get alert by ID (Staff/Admin only)",
         tags: ["Stock Alerts"],
         summary: "Get Alert",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          properties: {
-            alertId: { type: "string", format: "uuid" },
-          },
-          required: ["alertId"],
-        },
+        params: alertParamsJson,
         response: {
           200: {
             type: "object",
@@ -145,21 +139,13 @@ export async function stockAlertRoutes(
   fastify.post(
     "/alerts",
     {
-      preValidation: [validateBody(createStockAlertSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(createStockAlertSchema)],
       schema: {
         description: "Create stock alert",
         tags: ["Stock Alerts"],
         summary: "Create Alert",
         security: [{ bearerAuth: [] }],
-        body: {
-          type: "object",
-          required: ["variantId", "type"],
-          properties: {
-            variantId: { type: "string", format: "uuid" },
-            type: { type: "string", enum: ["low_stock", "oos", "overstock"] },
-          },
-        },
+        body: createStockAlertBodyJson,
         response: {
           201: {
             type: "object",
@@ -182,19 +168,13 @@ export async function stockAlertRoutes(
     "/alerts/:alertId",
     {
       preValidation: [validateParams(alertParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Delete stock alert",
         tags: ["Stock Alerts"],
         summary: "Delete Alert",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          properties: {
-            alertId: { type: "string", format: "uuid" },
-          },
-          required: ["alertId"],
-        },
+        params: alertParamsJson,
         response: {
           204: { description: "Alert deleted successfully", type: "null" },
         },
@@ -209,19 +189,13 @@ export async function stockAlertRoutes(
     "/alerts/:alertId/resolve",
     {
       preValidation: [validateParams(alertParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Resolve stock alert",
         tags: ["Stock Alerts"],
         summary: "Resolve Alert",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          properties: {
-            alertId: { type: "string", format: "uuid" },
-          },
-          required: ["alertId"],
-        },
+        params: alertParamsJson,
         response: {
           200: {
             type: "object",

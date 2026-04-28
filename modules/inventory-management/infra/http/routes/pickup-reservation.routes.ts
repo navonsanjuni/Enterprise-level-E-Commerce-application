@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
 import {
   createRateLimiter,
@@ -7,13 +8,18 @@ import {
   userKeyGenerator,
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { PickupReservationController } from "../controllers/pickup-reservation.controller";
-import { validateBody, validateParams, validateQuery } from "../validation/validator";
+import { validateBody, validateParams, validateQuery, toJsonSchema } from "../validation/validator";
 import {
   reservationParamsSchema,
   listPickupReservationsSchema,
   createPickupReservationSchema,
   pickupReservationResponseSchema,
 } from "../validation/pickup-reservation.schema";
+
+// Pre-compute JSON Schemas from Zod (single source of truth — no drift).
+const reservationParamsJson = toJsonSchema(reservationParamsSchema);
+const listPickupReservationsQueryJson = toJsonSchema(listPickupReservationsSchema);
+const createPickupReservationBodyJson = toJsonSchema(createPickupReservationSchema);
 
 const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
@@ -37,20 +43,13 @@ export async function pickupReservationRoutes(
     "/pickup-reservations",
     {
       preValidation: [validateQuery(listPickupReservationsSchema)],
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         description: "List pickup reservations",
         tags: ["Pickup Reservations"],
         summary: "List Reservations",
         security: [{ bearerAuth: [] }],
-        querystring: {
-          type: "object",
-          properties: {
-            orderId: { type: "string", format: "uuid" },
-            locationId: { type: "string", format: "uuid" },
-            activeOnly: { type: "boolean", default: true },
-          },
-        },
+        querystring: listPickupReservationsQueryJson,
         response: {
           200: {
             type: "object",
@@ -72,19 +71,13 @@ export async function pickupReservationRoutes(
     "/pickup-reservations/:reservationId",
     {
       preValidation: [validateParams(reservationParamsSchema)],
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         description: "Get reservation by ID",
         tags: ["Pickup Reservations"],
         summary: "Get Reservation",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          properties: {
-            reservationId: { type: "string", format: "uuid" },
-          },
-          required: ["reservationId"],
-        },
+        params: reservationParamsJson,
         response: {
           200: {
             type: "object",
@@ -105,24 +98,13 @@ export async function pickupReservationRoutes(
   fastify.post(
     "/pickup-reservations",
     {
-      preValidation: [validateBody(createPickupReservationSchema)],
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED, validateBody(createPickupReservationSchema)],
       schema: {
         description: "Create pickup reservation",
         tags: ["Pickup Reservations"],
         summary: "Create Reservation",
         security: [{ bearerAuth: [] }],
-        body: {
-          type: "object",
-          required: ["orderId", "variantId", "locationId", "qty"],
-          properties: {
-            orderId: { type: "string", format: "uuid" },
-            variantId: { type: "string", format: "uuid" },
-            locationId: { type: "string", format: "uuid" },
-            qty: { type: "integer", minimum: 1 },
-            expirationMinutes: { type: "integer", minimum: 1, default: 30 },
-          },
-        },
+        body: createPickupReservationBodyJson,
         response: {
           201: {
             type: "object",
@@ -144,19 +126,13 @@ export async function pickupReservationRoutes(
     "/pickup-reservations/:reservationId",
     {
       preValidation: [validateParams(reservationParamsSchema)],
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         description: "Cancel pickup reservation",
         tags: ["Pickup Reservations"],
         summary: "Cancel Reservation",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          properties: {
-            reservationId: { type: "string", format: "uuid" },
-          },
-          required: ["reservationId"],
-        },
+        params: reservationParamsJson,
         response: {
           204: { description: "Reservation cancelled successfully", type: "null" },
         },
