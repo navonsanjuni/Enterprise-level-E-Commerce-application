@@ -1,5 +1,7 @@
 import { UserId } from "../value-objects/user-id.vo";
-import { Currency } from "../value-objects/currency.vo";
+import { AddressId } from "../value-objects/address-id.vo";
+import { PaymentMethodId } from "../value-objects/payment-method-id.vo";
+import { Currency } from "../value-objects";
 import { Locale } from "../value-objects/locale.vo";
 import { InvalidOperationError } from "../errors/user-management.errors";
 
@@ -9,8 +11,8 @@ import { InvalidOperationError } from "../errors/user-management.errors";
 
 export interface UserProfileProps {
   userId: UserId;
-  defaultAddressId: string | null;
-  defaultPaymentMethodId: string | null;
+  defaultAddressId: AddressId | null;
+  defaultPaymentMethodId: PaymentMethodId | null;
   preferences: UserPreferences;
   locale: Locale | null;
   currency: Currency | null;
@@ -54,8 +56,8 @@ export class UserProfile {
   }): UserProfile {
     return new UserProfile({
       userId: UserId.fromString(params.userId),
-      defaultAddressId: params.defaultAddressId ?? null,
-      defaultPaymentMethodId: params.defaultPaymentMethodId ?? null,
+      defaultAddressId: params.defaultAddressId ? AddressId.fromString(params.defaultAddressId) : null,
+      defaultPaymentMethodId: params.defaultPaymentMethodId ? PaymentMethodId.fromString(params.defaultPaymentMethodId) : null,
       preferences: params.preferences ?? {},
       locale: params.locale ? Locale.fromString(params.locale) : null,
       currency: params.currency
@@ -73,8 +75,8 @@ export class UserProfile {
   // --- Native getters ---
 
   get userId(): UserId { return this.props.userId; }
-  get defaultAddressId(): string | null { return this.props.defaultAddressId; }
-  get defaultPaymentMethodId(): string | null { return this.props.defaultPaymentMethodId; }
+  get defaultAddressId(): AddressId | null { return this.props.defaultAddressId; }
+  get defaultPaymentMethodId(): PaymentMethodId | null { return this.props.defaultPaymentMethodId; }
   get preferences(): UserPreferences { return { ...this.props.preferences }; }
   get locale(): Locale | null { return this.props.locale; }
   get currency(): Currency | null { return this.props.currency; }
@@ -85,7 +87,7 @@ export class UserProfile {
 
   setDefaultAddress(addressId: string): void {
     if (!addressId) throw new InvalidOperationError("Address ID is required");
-    this.props.defaultAddressId = addressId;
+    this.props.defaultAddressId = AddressId.fromString(addressId);
   }
 
   removeDefaultAddress(): void {
@@ -96,7 +98,7 @@ export class UserProfile {
     if (!paymentMethodId) {
       throw new InvalidOperationError("Payment method ID is required");
     }
-    this.props.defaultPaymentMethodId = paymentMethodId;
+    this.props.defaultPaymentMethodId = PaymentMethodId.fromString(paymentMethodId);
   }
 
   removeDefaultPaymentMethod(): void {
@@ -220,8 +222,8 @@ export class UserProfile {
   static toDTO(profile: UserProfile): UserProfileDTO {
     return {
       userId: profile.props.userId.getValue(),
-      defaultAddressId: profile.props.defaultAddressId,
-      defaultPaymentMethodId: profile.props.defaultPaymentMethodId,
+      defaultAddressId: profile.props.defaultAddressId?.getValue() ?? null,
+      defaultPaymentMethodId: profile.props.defaultPaymentMethodId?.getValue() ?? null,
       preferences: { ...profile.props.preferences },
       locale: profile.props.locale?.getValue() ?? null,
       currency: profile.props.currency?.getValue() ?? null,

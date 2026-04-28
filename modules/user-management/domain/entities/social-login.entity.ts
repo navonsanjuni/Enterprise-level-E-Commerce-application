@@ -27,13 +27,15 @@ export class SocialLoginConnectedEvent extends DomainEvent {
 // Props Interface
 // ============================================================================
 
+// SocialLogin is conceptually immutable — once a user connects a social provider,
+// the connection is either present or deleted. The Prisma schema reflects this
+// with `createdAt` only (no `updated_at` column).
 export interface SocialLoginProps {
   id: SocialLoginId;
   userId: UserId;
   provider: SocialProvider;
   providerUserId: string;
   createdAt: Date;
-  updatedAt: Date;
 }
 
 // ============================================================================
@@ -47,7 +49,6 @@ export interface SocialLoginDTO {
   providerUserId: string;
   displayName: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 // ============================================================================
@@ -57,6 +58,7 @@ export interface SocialLoginDTO {
 export class SocialLogin extends AggregateRoot {
   private constructor(private props: SocialLoginProps) {
     super();
+    SocialLogin.validate(props);
   }
 
   // --- Static factories ---
@@ -66,16 +68,12 @@ export class SocialLogin extends AggregateRoot {
     provider: SocialProvider;
     providerUserId: string;
   }): SocialLogin {
-    SocialLogin.validateProviderUserId(params.providerUserId);
-
-    const now = new Date();
     const socialLogin = new SocialLogin({
       id: SocialLoginId.create(),
       userId: UserId.fromString(params.userId),
       provider: params.provider,
       providerUserId: params.providerUserId,
-      createdAt: now,
-      updatedAt: now,
+      createdAt: new Date(),
     });
     socialLogin.addDomainEvent(
       new SocialLoginConnectedEvent(
@@ -93,8 +91,9 @@ export class SocialLogin extends AggregateRoot {
 
   // --- Private static validation methods ---
 
-  private static validateProviderUserId(providerUserId: string): void {
-    if (!providerUserId || providerUserId.trim() === '') {
+  // Always-applicable invariants. Run on every construction path.
+  private static validate(props: SocialLoginProps): void {
+    if (!props.providerUserId || props.providerUserId.trim() === '') {
       throw new DomainValidationError('Provider user ID cannot be empty');
     }
   }
@@ -106,7 +105,6 @@ export class SocialLogin extends AggregateRoot {
   get provider(): SocialProvider { return this.props.provider; }
   get providerUserId(): string { return this.props.providerUserId; }
   get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
 
   // --- Query methods ---
 
@@ -136,7 +134,6 @@ export class SocialLogin extends AggregateRoot {
       providerUserId: socialLogin.providerUserId,
       displayName: socialLogin.getDisplayName(),
       createdAt: socialLogin.createdAt.toISOString(),
-      updatedAt: socialLogin.updatedAt.toISOString(),
     };
   }
 }

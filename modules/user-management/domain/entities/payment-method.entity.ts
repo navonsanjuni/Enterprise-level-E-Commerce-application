@@ -2,6 +2,7 @@ import { AggregateRoot } from '../../../../packages/core/src/domain/aggregate-ro
 import { DomainEvent } from '../../../../packages/core/src/domain/events/domain-event';
 import { UserId } from '../value-objects/user-id.vo';
 import { PaymentMethodId } from '../value-objects/payment-method-id.vo';
+import { AddressId } from '../value-objects/address-id.vo';
 import {
   DomainValidationError,
 } from '../errors/user-management.errors';
@@ -114,7 +115,7 @@ export interface PaymentMethodProps {
   last4: string | null;
   expMonth: number | null;
   expYear: number | null;
-  billingAddressId: string | null;
+  billingAddressId: AddressId | null;
   providerRef: string | null;
   isDefault: boolean;
   createdAt: Date;
@@ -150,6 +151,7 @@ export interface PaymentMethodDTO {
 export class PaymentMethod extends AggregateRoot {
   private constructor(private props: PaymentMethodProps) {
     super();
+    PaymentMethod.validate(props);
   }
 
   // --- Static factories ---
@@ -165,9 +167,6 @@ export class PaymentMethod extends AggregateRoot {
     providerRef?: string;
     isDefault?: boolean;
   }): PaymentMethod {
-    PaymentMethod.validateLast4(params.last4 ?? null, params.type);
-    PaymentMethod.validateExpiry(params.expMonth ?? null, params.expYear ?? null, params.type);
-
     const now = new Date();
     const paymentMethod = new PaymentMethod({
       id: PaymentMethodId.create(),
@@ -177,7 +176,7 @@ export class PaymentMethod extends AggregateRoot {
       last4: params.last4 ?? null,
       expMonth: params.expMonth ?? null,
       expYear: params.expYear ?? null,
-      billingAddressId: params.billingAddressId ?? null,
+      billingAddressId: params.billingAddressId ? AddressId.fromString(params.billingAddressId) : null,
       providerRef: params.providerRef ?? null,
       isDefault: params.isDefault ?? false,
       createdAt: now,
@@ -197,7 +196,10 @@ export class PaymentMethod extends AggregateRoot {
     return new PaymentMethod(props);
   }
 
-  // --- Private static validation methods ---
+    private static validate(props: PaymentMethodProps): void {
+    PaymentMethod.validateLast4(props.last4, props.type);
+    PaymentMethod.validateExpiry(props.expMonth, props.expYear, props.type);
+  }
 
   private static validateLast4(last4: string | null, type: PaymentMethodType): void {
     if (last4 && !/^\d{4}$/.test(last4)) {
@@ -242,7 +244,7 @@ export class PaymentMethod extends AggregateRoot {
   get last4(): string | null { return this.props.last4; }
   get expMonth(): number | null { return this.props.expMonth; }
   get expYear(): number | null { return this.props.expYear; }
-  get billingAddressId(): string | null { return this.props.billingAddressId; }
+  get billingAddressId(): AddressId | null { return this.props.billingAddressId; }
   get providerRef(): string | null { return this.props.providerRef; }
   get isDefault(): boolean { return this.props.isDefault; }
   get createdAt(): Date { return this.props.createdAt; }
@@ -268,8 +270,10 @@ export class PaymentMethod extends AggregateRoot {
   }
 
   updateBillingAddress(addressId: string | null): void {
-    if (this.props.billingAddressId === addressId) return;
-    this.props.billingAddressId = addressId;
+    const newId = addressId ? AddressId.fromString(addressId) : null;
+    const currentValue = this.props.billingAddressId?.getValue() ?? null;
+    if (currentValue === addressId) return;
+    this.props.billingAddressId = newId;
     this.props.updatedAt = new Date();
     this.addDomainEvent(
       new PaymentMethodBillingAddressUpdatedEvent(
@@ -396,7 +400,7 @@ export class PaymentMethod extends AggregateRoot {
       last4: pm.last4,
       expMonth: pm.expMonth,
       expYear: pm.expYear,
-      billingAddressId: pm.billingAddressId,
+      billingAddressId: pm.billingAddressId?.getValue() ?? null,
       providerRef: pm.providerRef,
       isDefault: pm.isDefault,
       displayName: pm.getDisplayName(),

@@ -177,6 +177,7 @@ export interface UserDTO {
 export class User extends AggregateRoot {
   private constructor(private props: UserProps) {
     super();
+    User.validate(props);
   }
 
   // --- Static factories ---
@@ -190,20 +191,10 @@ export class User extends AggregateRoot {
     role?: UserRole;
     isGuest?: boolean;
   }): User {
-    const isGuest = params.isGuest ?? false;
-    if (!isGuest) {
-      User.validatePasswordHash(params.passwordHash);
-    }
-    if (params.firstName !== undefined && params.firstName !== null) {
-      User.validateName(params.firstName, 'First name');
-    }
-    if (params.lastName !== undefined && params.lastName !== null) {
-      User.validateName(params.lastName, 'Last name');
-    }
-
     const id = UserId.create();
     const now = new Date();
     const role = params.role ?? UserRole.CUSTOMER;
+    const isGuest = params.isGuest ?? false;
 
     const user = new User({
       id,
@@ -265,12 +256,28 @@ export class User extends AggregateRoot {
 
   // --- Private static validation methods ---
 
+  // Always-applicable invariants. Run on every construction path.
+  // Guests are exempt from password-hash check (passwordHash is empty until convertFromGuest).
+  private static validate(props: UserProps): void {
+    if (!props.isGuest) {
+      User.validatePasswordHash(props.passwordHash);
+    }
+    if (props.firstName !== null) {
+      User.validateName(props.firstName, 'First name');
+    }
+    if (props.lastName !== null) {
+      User.validateName(props.lastName, 'Last name');
+    }
+  }
+
   private static validateName(value: string, field: string): void {
     if (value.trim().length === 0) {
       throw new DomainValidationError(`${field} cannot be empty`);
     }
-    if (value.length > 50) {
-      throw new DomainValidationError(`${field} cannot exceed 50 characters`);
+    if (value.length > USER_MANAGEMENT_CONSTANTS.USER_NAME_MAX_LENGTH) {
+      throw new DomainValidationError(
+        `${field} cannot exceed ${USER_MANAGEMENT_CONSTANTS.USER_NAME_MAX_LENGTH} characters`,
+      );
     }
   }
 
