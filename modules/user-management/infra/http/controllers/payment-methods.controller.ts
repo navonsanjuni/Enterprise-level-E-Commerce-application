@@ -51,7 +51,14 @@ export class PaymentMethodsController {
     try {
       const result = await this.addPaymentMethodHandler.handle({
         userId: request.user.userId,
-        ...request.body,
+        type: request.body.type,
+        brand: request.body.brand,
+        last4: request.body.last4,
+        expMonth: request.body.expMonth,
+        expYear: request.body.expYear,
+        billingAddressId: request.body.billingAddressId,
+        providerRef: request.body.providerRef,
+        isDefault: request.body.isDefault,
       });
       return ResponseHelper.fromCommand(reply, result, "Payment method added", 201);
     } catch (error: unknown) {
@@ -67,7 +74,11 @@ export class PaymentMethodsController {
       const result = await this.updatePaymentMethodHandler.handle({
         paymentMethodId: request.params.paymentMethodId,
         userId: request.user.userId,
-        ...request.body,
+        billingAddressId: request.body.billingAddressId,
+        isDefault: request.body.isDefault,
+        expMonth: request.body.expMonth,
+        expYear: request.body.expYear,
+        providerRef: request.body.providerRef,
       });
       return ResponseHelper.fromCommand(reply, result, "Payment method updated");
     } catch (error: unknown) {

@@ -38,7 +38,20 @@ export class ProfileController {
     try {
       const result = await this.updateProfileHandler.handle({
         userId: request.user.userId,
-        ...request.body,
+        defaultAddressId: request.body.defaultAddressId,
+        defaultPaymentMethodId: request.body.defaultPaymentMethodId,
+        prefs: request.body.prefs,
+        locale: request.body.locale,
+        currency: request.body.currency,
+        stylePreferences: request.body.stylePreferences,
+        preferredSizes: request.body.preferredSizes,
+        firstName: request.body.firstName,
+        lastName: request.body.lastName,
+        phone: request.body.phone,
+        title: request.body.title,
+        dateOfBirth: request.body.dateOfBirth,
+        residentOf: request.body.residentOf,
+        nationality: request.body.nationality,
       });
       return ResponseHelper.fromCommand(reply, result, "Profile updated");
     } catch (error: unknown) {

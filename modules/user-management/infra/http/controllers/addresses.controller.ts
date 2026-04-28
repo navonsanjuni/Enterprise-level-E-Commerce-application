@@ -49,7 +49,18 @@ export class AddressesController {
     try {
       const result = await this.addAddressHandler.handle({
         userId: request.user.userId,
-        ...request.body,
+        type: request.body.type,
+        isDefault: request.body.isDefault,
+        firstName: request.body.firstName,
+        lastName: request.body.lastName,
+        company: request.body.company,
+        addressLine1: request.body.addressLine1,
+        addressLine2: request.body.addressLine2,
+        city: request.body.city,
+        state: request.body.state,
+        postalCode: request.body.postalCode,
+        country: request.body.country,
+        phone: request.body.phone,
       });
       return ResponseHelper.fromCommand(reply, result, 'Address added successfully', 201);
     } catch (error: unknown) {
@@ -65,7 +76,18 @@ export class AddressesController {
       const result = await this.updateAddressHandler.handle({
         addressId: request.params.addressId,
         userId: request.user.userId,
-        ...request.body,
+        type: request.body.type,
+        isDefault: request.body.isDefault,
+        firstName: request.body.firstName,
+        lastName: request.body.lastName,
+        company: request.body.company,
+        addressLine1: request.body.addressLine1,
+        addressLine2: request.body.addressLine2,
+        city: request.body.city,
+        state: request.body.state,
+        postalCode: request.body.postalCode,
+        country: request.body.country,
+        phone: request.body.phone,
       });
       return ResponseHelper.fromCommand(reply, result, 'Address updated successfully');
     } catch (error: unknown) {

@@ -62,9 +62,14 @@ export class UsersController {
   ) {
     try {
       const result = await this.listUsersHandler.handle({
-        ...request.query,
+        search: request.query.search,
         role: request.query.role as UserRole | undefined,
         status: request.query.status as UserStatus | undefined,
+        emailVerified: request.query.emailVerified,
+        page: request.query.page,
+        limit: request.query.limit,
+        sortBy: request.query.sortBy,
+        sortOrder: request.query.sortOrder,
       });
       return ResponseHelper.ok(reply, 'Users retrieved', result);
     } catch (error: unknown) {
@@ -82,7 +87,6 @@ export class UsersController {
       const result = await this.updateUserStatusHandler.handle({
         userId: request.params.userId,
         status: request.body.status as UserStatus,
-        notes: request.body.notes,
       });
       return ResponseHelper.fromCommand(reply, result, 'User status updated');
     } catch (error: unknown) {
@@ -98,7 +102,6 @@ export class UsersController {
       const result = await this.updateUserRoleHandler.handle({
         userId: request.params.userId,
         role: request.body.role as UserRole,
-        reason: request.body.reason,
       });
       return ResponseHelper.fromCommand(reply, result, 'User role updated');
     } catch (error: unknown) {
@@ -114,7 +117,6 @@ export class UsersController {
       const result = await this.toggleUserEmailVerifiedHandler.handle({
         userId: request.params.userId,
         isVerified: request.body.isVerified,
-        reason: request.body.reason,
       });
       return ResponseHelper.fromCommand(reply, result, 'Email verification status updated');
     } catch (error: unknown) {

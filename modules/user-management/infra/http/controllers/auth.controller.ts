@@ -17,6 +17,7 @@ import {
 import {
   RegisterBody,
   LoginBody,
+  LogoutBody,
   RefreshTokenBody,
   ChangePasswordBody,
   ForgotPasswordBody,
@@ -77,7 +78,13 @@ export class AuthController {
     try {
       const { email, password, rememberMe } = request.body;
 
-      const result = await this.loginHandler.handle({ email, password, rememberMe });
+      // Lockout key is composite (email + IP) — see LoginUserCommand.
+      const result = await this.loginHandler.handle({
+        email,
+        password,
+        rememberMe,
+        ipAddress: request.ip,
+      });
 
       if (result.success && result.data) {
         const auth = result.data;
@@ -97,11 +104,18 @@ export class AuthController {
     }
   }
 
-  async logout(request: AuthenticatedRequest, reply: FastifyReply) {
+  async logout(
+    request: AuthenticatedRequest<{ Body: LogoutBody }>,
+    reply: FastifyReply,
+  ) {
     try {
       const result = await this.logoutHandler.handle({
         userId: request.user.userId,
         token: this.extractBearerToken(request),
+        // Optional in the schema for backwards compatibility, but clients
+        // SHOULD send it — without it, the refresh token survives logout
+        // and /auth/refresh will still issue new access tokens.
+        refreshToken: request.body?.refreshToken,
       });
 
       return ResponseHelper.ok(reply, 'Logged out successfully', result.data ?? {});
