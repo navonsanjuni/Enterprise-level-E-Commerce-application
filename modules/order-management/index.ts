@@ -38,7 +38,7 @@ export type {
   ExternalProductData,
   ExternalMediaAsset,
   ExternalStockData,
-} from "./domain/external-services";
+} from "./domain/ports/external-services";
 
 // ── Application layer ─────────────────────────────────────────────────────────
 export * from "./application";
