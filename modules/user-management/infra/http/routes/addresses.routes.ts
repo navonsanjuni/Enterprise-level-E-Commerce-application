@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AddressesController } from "../controllers/addresses.controller";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -43,7 +44,7 @@ export async function addressRoutes(
     "/users/me/addresses",
     {
       preValidation: [validateQuery(listAddressesQuerySchema)],
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         tags: ["Addresses"],
         summary: "List addresses",
@@ -71,7 +72,7 @@ export async function addressRoutes(
   fastify.post(
     "/users/me/addresses",
     {
-      preHandler: [RolePermissions.AUTHENTICATED, validateBody(addAddressSchema)],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED, validateBody(addAddressSchema)],
       schema: {
         tags: ["Addresses"],
         summary: "Add a new address",
@@ -100,7 +101,7 @@ export async function addressRoutes(
     "/users/me/addresses/:addressId",
     {
       preValidation: [validateParams(addressIdParamsSchema)],
-      preHandler: [RolePermissions.AUTHENTICATED, validateBody(updateAddressSchema)],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED, validateBody(updateAddressSchema)],
       schema: {
         tags: ["Addresses"],
         summary: "Update an address",
@@ -130,7 +131,7 @@ export async function addressRoutes(
     "/users/me/addresses/:addressId/default",
     {
       preValidation: [validateParams(addressIdParamsSchema)],
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         tags: ["Addresses"],
         summary: "Set default address",
@@ -159,7 +160,7 @@ export async function addressRoutes(
     "/users/me/addresses/:addressId",
     {
       preValidation: [validateParams(addressIdParamsSchema)],
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         tags: ["Addresses"],
         summary: "Delete an address",

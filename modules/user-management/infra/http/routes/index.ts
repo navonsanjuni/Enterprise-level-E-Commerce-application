@@ -22,22 +22,15 @@ export async function registerUserManagementRoutes(
   fastify: FastifyInstance,
   controllers: UserManagementControllers,
 ): Promise<void> {
+  // Each route file declares its own auth via the `authenticate` middleware
+  // on protected routes. No module-level auth scope is needed.
   await fastify.register(
     async (instance) => {
-      // Public + self-managed auth routes (each route opts in to auth individually).
       await authRoutes(instance, controllers.authController);
-
-      // Protected scope — JWT enforced at the boundary; downstream routes inherit auth.
-      await instance.register(async (protected_) => {
-        protected_.addHook("onRequest", async (request) => {
-          await fastify.authenticate(request);
-        });
-
-        await profileRoutes(protected_, controllers.profileController);
-        await addressRoutes(protected_, controllers.addressesController);
-        await paymentMethodRoutes(protected_, controllers.paymentMethodsController);
-        await userRoutes(protected_, controllers.usersController);
-      });
+      await profileRoutes(instance, controllers.profileController);
+      await addressRoutes(instance, controllers.addressesController);
+      await paymentMethodRoutes(instance, controllers.paymentMethodsController);
+      await userRoutes(instance, controllers.usersController);
     },
     { prefix: "/api/v1" },
   );

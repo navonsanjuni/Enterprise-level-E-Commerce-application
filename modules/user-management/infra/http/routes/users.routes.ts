@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { UsersController } from "../controllers/users.controller";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -21,6 +22,9 @@ import {
   toggleEmailVerifiedSchema,
   userDetailResponseSchema,
   userListResponseSchema,
+  userStatusUpdateResponseSchema,
+  userRoleUpdateResponseSchema,
+  userEmailVerifiedResponseSchema,
 } from "../validation/user.schema";
 import { profileResponseSchema } from "../validation/profile.schema";
 
@@ -50,7 +54,7 @@ export async function userRoutes(
   fastify.get(
     "/users/me",
     {
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         tags: ["Users"],
         summary: "Get current user",
@@ -78,7 +82,7 @@ export async function userRoutes(
     "/admin/users",
     {
       preValidation: [validateQuery(listUsersQuerySchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         tags: ["Users"],
         summary: "List all users",
@@ -107,7 +111,7 @@ export async function userRoutes(
     "/users/:userId",
     {
       preValidation: [validateParams(userIdParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         tags: ["Users"],
         summary: "Get user by ID",
@@ -137,7 +141,7 @@ export async function userRoutes(
     "/users/:userId/status",
     {
       preValidation: [validateParams(userIdParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateUserStatusSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(updateUserStatusSchema)],
       schema: {
         tags: ["Users"],
         summary: "Update user status",
@@ -153,13 +157,7 @@ export async function userRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: {
-                type: "object",
-                properties: {
-                  userId: { type: "string", format: "uuid" },
-                  status: { type: "string" },
-                },
-              },
+              data: userStatusUpdateResponseSchema,
             },
           },
         },
@@ -174,7 +172,7 @@ export async function userRoutes(
     "/users/:userId/role",
     {
       preValidation: [validateParams(userIdParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(updateUserRoleSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(updateUserRoleSchema)],
       schema: {
         tags: ["Users"],
         summary: "Update user role",
@@ -189,13 +187,7 @@ export async function userRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: {
-                type: "object",
-                properties: {
-                  userId: { type: "string", format: "uuid" },
-                  role: { type: "string" },
-                },
-              },
+              data: userRoleUpdateResponseSchema,
             },
           },
         },
@@ -210,7 +202,7 @@ export async function userRoutes(
     "/users/:userId/email-verified",
     {
       preValidation: [validateParams(userIdParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY, validateBody(toggleEmailVerifiedSchema)],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY, validateBody(toggleEmailVerifiedSchema)],
       schema: {
         tags: ["Users"],
         summary: "Toggle email verification",
@@ -225,13 +217,7 @@ export async function userRoutes(
               success: { type: "boolean" },
               statusCode: { type: "number" },
               message: { type: "string" },
-              data: {
-                type: "object",
-                properties: {
-                  userId: { type: "string", format: "uuid" },
-                  emailVerified: { type: "boolean" },
-                },
-              },
+              data: userEmailVerifiedResponseSchema,
             },
           },
         },
@@ -249,7 +235,7 @@ export async function userRoutes(
     "/users/:userId",
     {
       preValidation: [validateParams(userIdParamsSchema)],
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         tags: ["Users"],
         summary: "Delete a user",

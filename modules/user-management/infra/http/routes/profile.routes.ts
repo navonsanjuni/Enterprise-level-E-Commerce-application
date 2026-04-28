@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ProfileController } from "../controllers/profile.controller";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -35,7 +36,7 @@ export async function profileRoutes(
   fastify.get(
     "/users/me/profile",
     {
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         tags: ["Profile"],
         summary: "Get current user profile",
@@ -63,7 +64,7 @@ export async function profileRoutes(
   fastify.patch(
     "/users/me/profile",
     {
-      preHandler: [RolePermissions.AUTHENTICATED, validateBody(updateProfileSchema)],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED, validateBody(updateProfileSchema)],
       schema: {
         tags: ["Profile"],
         summary: "Update current user profile",

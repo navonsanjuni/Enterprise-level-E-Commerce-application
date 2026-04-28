@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { PaymentMethodsController } from "../controllers/payment-methods.controller";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -43,7 +44,7 @@ export async function paymentMethodRoutes(
     "/users/me/payment-methods",
     {
       preValidation: [validateQuery(listPaymentMethodsQuerySchema)],
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         tags: ["Payment Methods"],
         summary: "List payment methods",
@@ -71,7 +72,7 @@ export async function paymentMethodRoutes(
   fastify.post(
     "/users/me/payment-methods",
     {
-      preHandler: [RolePermissions.AUTHENTICATED, validateBody(addPaymentMethodSchema)],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED, validateBody(addPaymentMethodSchema)],
       schema: {
         tags: ["Payment Methods"],
         summary: "Add a payment method",
@@ -100,7 +101,7 @@ export async function paymentMethodRoutes(
     "/users/me/payment-methods/:paymentMethodId",
     {
       preValidation: [validateParams(paymentMethodIdParamsSchema)],
-      preHandler: [RolePermissions.AUTHENTICATED, validateBody(updatePaymentMethodSchema)],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED, validateBody(updatePaymentMethodSchema)],
       schema: {
         tags: ["Payment Methods"],
         summary: "Update a payment method",
@@ -130,7 +131,7 @@ export async function paymentMethodRoutes(
     "/users/me/payment-methods/:paymentMethodId/default",
     {
       preValidation: [validateParams(paymentMethodIdParamsSchema)],
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         tags: ["Payment Methods"],
         summary: "Set default payment method",
@@ -159,7 +160,7 @@ export async function paymentMethodRoutes(
     "/users/me/payment-methods/:paymentMethodId",
     {
       preValidation: [validateParams(paymentMethodIdParamsSchema)],
-      preHandler: [RolePermissions.AUTHENTICATED],
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         tags: ["Payment Methods"],
         summary: "Remove a payment method",

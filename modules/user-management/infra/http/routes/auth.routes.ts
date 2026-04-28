@@ -6,6 +6,7 @@ import { validateBody, toJsonSchema } from "../validation/validator";
 import {
   registerSchema,
   loginSchema,
+  logoutSchema,
   refreshTokenSchema,
   changePasswordSchema,
   forgotPasswordSchema,
@@ -36,6 +37,7 @@ const authRateLimiter = createRateLimiter(RateLimitPresets.auth);
 // Pre-compute JSON Schemas from Zod (single source of truth — no drift).
 const registerBodyJson = toJsonSchema(registerSchema);
 const loginBodyJson = toJsonSchema(loginSchema);
+const logoutBodyJson = toJsonSchema(logoutSchema);
 const refreshTokenBodyJson = toJsonSchema(refreshTokenSchema);
 const changePasswordBodyJson = toJsonSchema(changePasswordSchema);
 const forgotPasswordBodyJson = toJsonSchema(forgotPasswordSchema);
@@ -151,13 +153,16 @@ export async function authRoutes(
   fastify.post(
     "/auth/logout",
     {
-      preHandler: [authenticate],
+      preHandler: [authenticate, validateBody(logoutSchema)],
       schema: {
         tags: ["Authentication"],
         summary: "Logout",
         description:
-          "Invalidate the current session and revoke the refresh token.",
+          "Invalidate the current session and revoke the refresh token. " +
+          "Clients SHOULD send their refreshToken in the body so it can be " +
+          "blacklisted; otherwise the refresh token remains valid until expiry.",
         security: [{ bearerAuth: [] }],
+        body: logoutBodyJson,
         response: {
           200: {
             type: "object",
