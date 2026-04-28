@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AddressType } from "../../../domain/value-objects/address-type.vo";
 
 // ============================================================================
 // Request body schemas
@@ -8,7 +9,7 @@ import { z } from "zod";
 //   Optional: firstName, lastName, company, addressLine2, state, postalCode, phone
 
 export const addAddressSchema = z.object({
-  type: z.enum(["shipping", "billing"]),
+  type: z.enum(AddressType.VALUES),
   isDefault: z.boolean().optional(),
   firstName: z.string().max(100).optional(),
   lastName: z.string().max(100).optional(),
@@ -23,7 +24,7 @@ export const addAddressSchema = z.object({
 });
 
 export const updateAddressSchema = z.object({
-  type: z.enum(["shipping", "billing"]).optional(),
+  type: z.enum(AddressType.VALUES).optional(),
   isDefault: z.boolean().optional(),
   firstName: z.string().max(100).optional(),
   lastName: z.string().max(100).optional(),
@@ -84,7 +85,7 @@ export const addressResponseSchema = {
   properties: {
     id: { type: 'string', format: 'uuid' },
     userId: { type: 'string', format: 'uuid' },
-    type: { type: 'string', enum: ['shipping', 'billing'] },
+    type: { type: 'string', enum: [...AddressType.VALUES] },
     isDefault: { type: 'boolean' },
     firstName: { type: 'string', nullable: true },
     lastName: { type: 'string', nullable: true },

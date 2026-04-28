@@ -1,20 +1,16 @@
 import { z } from "zod";
+import { UserRole } from "../../../domain/enums/user-role.enum";
+import { UserStatus } from "../../../domain/enums/user-status.enum";
 
 // ============================================================================
 // Constants
 // ============================================================================
 
-const USER_ROLES = [
-  "GUEST",
-  "CUSTOMER",
-  "ADMIN",
-  "INVENTORY_STAFF",
-  "CUSTOMER_SERVICE",
-  "ANALYST",
-  "VENDOR",
-] as const;
-
-const USER_STATUSES = ["active", "inactive", "blocked"] as const;
+// Derive role/status enums directly from the domain TS enums so adding a value
+// to the domain (e.g., a new role) automatically widens the route validators.
+// Previous string-literal arrays would silently reject new domain values.
+const USER_ROLES = Object.values(UserRole) as [UserRole, ...UserRole[]];
+const USER_STATUSES = Object.values(UserStatus) as [UserStatus, ...UserStatus[]];
 
 const MAX_PAGE_SIZE = 100;
 
@@ -50,19 +46,23 @@ export const listUsersQuerySchema = z.object({
 // Request body schemas
 // ============================================================================
 
+// FLAG (audit log): these admin actions previously accepted `notes`/`reason`
+// fields that were dropped at the service layer and never persisted — schema
+// promised what code couldn't deliver. Removed from the wire until audit
+// logging exists. When an AuditLog entity + persistence subscriber are added
+// (see deferred items list), reintroduce these fields and pipe them through
+// the audit subscriber, NOT through UserService — UserService should remain
+// focused on user state.
 export const updateUserStatusSchema = z.object({
   status: z.enum(USER_STATUSES),
-  notes: z.string().max(500).optional(),
 });
 
 export const updateUserRoleSchema = z.object({
   role: z.enum(USER_ROLES),
-  reason: z.string().max(500).optional(),
 });
 
 export const toggleEmailVerifiedSchema = z.object({
   isVerified: z.boolean(),
-  reason: z.string().max(500).optional(),
 });
 
 // ============================================================================
@@ -79,6 +79,9 @@ export type ToggleEmailVerifiedBody = z.infer<typeof toggleEmailVerifiedSchema>;
 // JSON Schema response objects (for Swagger / Fastify schema docs)
 // ============================================================================
 
+// Mirrors UserDTO from user.entity.ts. Fastify response serialization strips
+// any properties not declared here, so missing fields = silent data loss to
+// API clients. Keep this in lockstep with UserDTO.
 export const userDetailResponseSchema = {
   type: 'object',
   properties: {
@@ -87,6 +90,10 @@ export const userDetailResponseSchema = {
     phone: { type: 'string', nullable: true },
     firstName: { type: 'string', nullable: true },
     lastName: { type: 'string', nullable: true },
+    title: { type: 'string', nullable: true },
+    dateOfBirth: { type: 'string', format: 'date-time', nullable: true },
+    residentOf: { type: 'string', nullable: true },
+    nationality: { type: 'string', nullable: true },
     role: { type: 'string' },
     status: { type: 'string' },
     emailVerified: { type: 'boolean' },
@@ -108,3 +115,30 @@ export const userListResponseSchema = {
     hasMore: { type: 'boolean' },
   },
 };
+
+// Returned by PATCH /users/:userId/status
+export const userStatusUpdateResponseSchema = {
+  type: 'object',
+  properties: {
+    userId: { type: 'string', format: 'uuid' },
+    status: { type: 'string' },
+  },
+} as const;
+
+// Returned by PATCH /users/:userId/role
+export const userRoleUpdateResponseSchema = {
+  type: 'object',
+  properties: {
+    userId: { type: 'string', format: 'uuid' },
+    role: { type: 'string' },
+  },
+} as const;
+
+// Returned by PATCH /users/:userId/email-verified
+export const userEmailVerifiedResponseSchema = {
+  type: 'object',
+  properties: {
+    userId: { type: 'string', format: 'uuid' },
+    emailVerified: { type: 'boolean' },
+  },
+} as const;

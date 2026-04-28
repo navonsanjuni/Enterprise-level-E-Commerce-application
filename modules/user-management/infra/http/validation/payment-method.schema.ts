@@ -1,8 +1,17 @@
 import { z } from "zod";
+import { PaymentMethodType } from "../../../domain/enums/payment-method-type.enum";
 
 // ============================================================================
 // Helpers
 // ============================================================================
+
+// Source of truth for the wire vocabulary — derive from the domain enum so
+// adding a new method type doesn't require grepping for string literals.
+// PaymentMethodType is a TS enum + namespace; Object.values returns string
+// values plus the namespace functions, hence the string-only filter.
+const PAYMENT_METHOD_TYPES = Object.values(PaymentMethodType).filter(
+  (v): v is PaymentMethodType => typeof v === "string",
+) as [PaymentMethodType, ...PaymentMethodType[]];
 
 // Reasonable bounds for card expiry year — entity does the strict
 // "not in the past" check per-request via Date comparison.
@@ -14,7 +23,7 @@ const MAX_EXP_YEAR = 2100;
 // ============================================================================
 
 export const addPaymentMethodSchema = z.object({
-  type: z.enum(["card", "wallet", "bank", "cod", "gift_card"]),
+  type: z.enum(PAYMENT_METHOD_TYPES),
   brand: z.string().max(50).optional(),
   last4: z.string().regex(/^\d{4}$/).optional(),
   expMonth: z.number().int().min(1).max(12).optional(),
@@ -74,6 +83,12 @@ export type ListPaymentMethodsQueryParams = z.infer<typeof listPaymentMethodsQue
 // JSON Schema response objects (for Swagger / Fastify schema docs)
 // ============================================================================
 
+// Mirrors PaymentMethodDTO from payment-method.entity.ts. Fastify response
+// serialization strips any properties not declared here, so missing fields =
+// silent data loss to API clients. Keep this in lockstep with PaymentMethodDTO.
+// FLAG (security): providerRef may expose internal gateway customer/token
+// references. Verify it's safe to surface at the API boundary, or strip it
+// in toDTO if it should remain server-side only.
 export const paymentMethodResponseSchema = {
   type: 'object',
   properties: {
@@ -85,8 +100,10 @@ export const paymentMethodResponseSchema = {
     expMonth: { type: 'integer', nullable: true },
     expYear: { type: 'integer', nullable: true },
     billingAddressId: { type: 'string', nullable: true },
+    providerRef: { type: 'string', nullable: true },
     isDefault: { type: 'boolean' },
     displayName: { type: 'string' },
+    expiryDisplay: { type: 'string' },
     isExpired: { type: 'boolean' },
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
