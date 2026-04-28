@@ -156,7 +156,8 @@ export class ProductTagController {
     try {
       const result = await this.getTagProductsHandler.handle({
         tagId: request.params.tagId,
-        ...request.query,
+        page: request.query.page,
+        limit: request.query.limit,
       });
       return ResponseHelper.ok(reply, "Tag products retrieved successfully", result);
     } catch (error: unknown) {
@@ -195,7 +196,11 @@ export class ProductTagController {
     reply: FastifyReply,
   ) {
     try {
-      const result = await this.updateProductTagHandler.handle({ id: request.params.id, ...request.body });
+      const result = await this.updateProductTagHandler.handle({
+        id: request.params.id,
+        tag: request.body.tag,
+        kind: request.body.kind,
+      });
       return ResponseHelper.fromCommand(reply, result, "Tag updated successfully");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);

@@ -186,7 +186,9 @@ export class SizeGuideController {
     try {
       const result = await this.createRegionalSizeGuideHandler.handle({
         region: request.params.region,
-        ...request.body,
+        title: request.body.title,
+        bodyHtml: request.body.bodyHtml,
+        category: request.body.category,
       });
       return ResponseHelper.fromCommand(reply, result, "Regional size guide created successfully", 201);
     } catch (error: unknown) {
@@ -202,7 +204,8 @@ export class SizeGuideController {
       const result = await this.createCategorySizeGuideHandler.handle({
         category: request.params.category,
         region: request.params.region,
-        ...request.body,
+        title: request.body.title,
+        bodyHtml: request.body.bodyHtml,
       });
       return ResponseHelper.fromCommand(reply, result, "Category size guide created successfully", 201);
     } catch (error: unknown) {
@@ -215,7 +218,13 @@ export class SizeGuideController {
     reply: FastifyReply,
   ) {
     try {
-      const result = await this.updateSizeGuideHandler.handle({ id: request.params.id, ...request.body });
+      const result = await this.updateSizeGuideHandler.handle({
+        id: request.params.id,
+        title: request.body.title,
+        bodyHtml: request.body.bodyHtml,
+        region: request.body.region,
+        category: request.body.category,
+      });
       return ResponseHelper.fromCommand(reply, result, "Size guide updated successfully");
     } catch (error: unknown) {
       return ResponseHelper.error(reply, error);

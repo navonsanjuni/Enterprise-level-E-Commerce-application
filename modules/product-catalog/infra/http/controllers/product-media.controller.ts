@@ -127,7 +127,11 @@ export class ProductMediaController {
     try {
       const result = await this.addMediaToProductHandler.handle({
         productId: request.params.productId,
-        ...request.body,
+        assetId: request.body.assetId,
+        position: request.body.position,
+        isCover: request.body.isCover,
+        alt: request.body.alt,
+        caption: request.body.caption,
       });
       return ResponseHelper.fromCommand(reply, result, "Media added to product successfully", 201);
     } catch (error: unknown) {

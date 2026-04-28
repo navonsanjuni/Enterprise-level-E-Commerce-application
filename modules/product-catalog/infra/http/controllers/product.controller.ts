@@ -86,7 +86,22 @@ export class ProductController {
     try {
       const result = await this.updateProductHandler.handle({
         productId: request.params.productId,
-        ...request.body,
+        title: request.body.title,
+        brand: request.body.brand,
+        shortDesc: request.body.shortDesc,
+        longDescHtml: request.body.longDescHtml,
+        status: request.body.status,
+        publishAt: request.body.publishAt,
+        countryOfOrigin: request.body.countryOfOrigin,
+        seoTitle: request.body.seoTitle,
+        seoDescription: request.body.seoDescription,
+        price: request.body.price,
+        currency: request.body.currency,
+        priceSgd: request.body.priceSgd,
+        priceUsd: request.body.priceUsd,
+        compareAtPrice: request.body.compareAtPrice,
+        categoryIds: request.body.categoryIds,
+        tags: request.body.tags,
       });
       return ResponseHelper.fromCommand(reply, result, "Product updated successfully");
     } catch (error: unknown) {
