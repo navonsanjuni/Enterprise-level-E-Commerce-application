@@ -13,8 +13,8 @@ export { PaymentMethodId } from "./value-objects/payment-method-id.vo";
 export { SocialLoginId } from "./value-objects/social-login-id.vo";
 export { Email } from "./value-objects/email.vo";
 export { Phone } from "./value-objects/phone.vo";
-export { Password } from "./value-objects/password.vo";
-export { Currency } from "./value-objects/currency.vo";
+// Currency is a foundational concept shared across modules; re-exported from core.
+export { Currency } from "../../../packages/core/src/domain/value-objects/currency.vo";
 export { Locale } from "./value-objects/locale.vo";
 export { Address as AddressVO } from "./value-objects/address.vo";
 export { AddressType } from "./value-objects/address-type.vo";
