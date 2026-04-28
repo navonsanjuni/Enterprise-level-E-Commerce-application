@@ -4,6 +4,11 @@ export class AddressType {
   static readonly BILLING = new AddressType('billing');
   static readonly SHIPPING = new AddressType('shipping');
 
+  // Source of truth for the enum-like wire vocabulary. Validation schemas
+  // derive their `z.enum` from this so adding a new value here automatically
+  // widens the API contract without grepping for string literals.
+  static readonly VALUES = ['billing', 'shipping'] as const;
+
   private constructor(private readonly value: string) {}
 
   static create(type: string): AddressType {
