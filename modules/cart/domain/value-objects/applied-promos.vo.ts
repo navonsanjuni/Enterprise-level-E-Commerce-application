@@ -15,10 +15,6 @@ export interface AppliedPromoData {
   appliedAt: Date;
 }
 
-// Backwards-compatibility alias. New code should import `AppliedPromoData`.
-/** @deprecated Use `AppliedPromoData`. */
-export type PromoData = AppliedPromoData;
-
 export class AppliedPromos {
   // Validation lives in the private constructor so BOTH `fromArray()`
   // (input from a service caller) and `fromJSON()` (raw DB rebuild)
@@ -76,12 +72,6 @@ export class AppliedPromos {
   // re-application of the same promo wasn't a domain error.
   static create(promos: AppliedPromoData[]): AppliedPromos {
     return new AppliedPromos(AppliedPromos.removeDuplicates(promos));
-  }
-
-  // Backwards-compatibility alias for `create`.
-  /** @deprecated Use `AppliedPromos.create(promos)`. */
-  static fromArray(promos: AppliedPromoData[]): AppliedPromos {
-    return AppliedPromos.create(promos);
   }
 
   // Repository reconstitution from a persisted JSON column. Constructor

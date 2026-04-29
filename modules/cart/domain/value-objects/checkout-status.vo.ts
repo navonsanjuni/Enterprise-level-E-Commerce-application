@@ -11,13 +11,6 @@ export enum CheckoutStatusValue {
   CANCELLED = "cancelled",
 }
 
-// Backwards-compatibility alias for code that still imports
-// `CheckoutStatusEnum` from this module. Prefer `CheckoutStatusValue`.
-/** @deprecated Use `CheckoutStatusValue`. */
-export const CheckoutStatusEnum = CheckoutStatusValue;
-/** @deprecated Use `CheckoutStatusValue`. */
-export type CheckoutStatusEnum = CheckoutStatusValue;
-
 // Pattern D (Enum-Like VO):
 // Shared static instances per allowed value — `create()`/`fromString()`
 // route through the private `ALL` array via `.find()`, returning the
@@ -60,18 +53,6 @@ export class CheckoutStatus {
   static fromString(value: string): CheckoutStatus {
     return CheckoutStatus.create(value);
   }
-
-  // ── Backwards-compatibility factory methods ───────────────────────
-  // Legacy code calls `CheckoutStatus.pending()` / `.completed()` / etc.
-  // These now return the shared static instance instead of allocating.
-  /** @deprecated Use `CheckoutStatus.PENDING`. */
-  static pending(): CheckoutStatus { return CheckoutStatus.PENDING; }
-  /** @deprecated Use `CheckoutStatus.COMPLETED`. */
-  static completed(): CheckoutStatus { return CheckoutStatus.COMPLETED; }
-  /** @deprecated Use `CheckoutStatus.EXPIRED`. */
-  static expired(): CheckoutStatus { return CheckoutStatus.EXPIRED; }
-  /** @deprecated Use `CheckoutStatus.CANCELLED`. */
-  static cancelled(): CheckoutStatus { return CheckoutStatus.CANCELLED; }
 
   getValue(): CheckoutStatusValue {
     return this.value;

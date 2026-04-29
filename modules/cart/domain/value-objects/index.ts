@@ -13,4 +13,4 @@ export { GuestToken } from "./guest-token.vo";
 export { Currency } from "../../../../packages/core/src/domain/value-objects/currency.vo";
 export { AppliedPromos } from "./applied-promos.vo";
 export { CheckoutId } from "./checkout-id.vo";
-export { CheckoutStatus, CheckoutStatusValue, CheckoutStatusEnum } from "./checkout-status.vo";
+export { CheckoutStatus, CheckoutStatusValue } from "./checkout-status.vo";

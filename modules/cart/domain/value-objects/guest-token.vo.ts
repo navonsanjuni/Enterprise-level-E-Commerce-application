@@ -3,17 +3,19 @@ import { GUEST_TOKEN_BYTE_LENGTH, GUEST_TOKEN_HEX_LENGTH } from "../constants";
 import { DomainValidationError } from "../errors/cart.errors";
 
 export class GuestToken {
-  private constructor(private readonly value: string) {}
+  // Validation lives in the constructor so BOTH `create()` (generates a fresh
+  // token) and `fromString()` (rebuilds from request/persisted value) validate.
+  // Previously validation was only in `fromString()`, so an internal bug that
+  // produced a non-hex token would slip through `create()` unchecked.
+  private constructor(private readonly value: string) {
+    const tokenRegex = new RegExp(`^[a-f0-9]{${GUEST_TOKEN_HEX_LENGTH}}$`, "i");
+    if (!tokenRegex.test(value)) {
+      throw new DomainValidationError("Invalid guest token format");
+    }
+  }
 
   private static generate(): string {
     return randomBytes(GUEST_TOKEN_BYTE_LENGTH).toString("hex");
-  }
-
-  private static validate(token: string): void {
-    const tokenRegex = new RegExp(`^[a-f0-9]{${GUEST_TOKEN_HEX_LENGTH}}$`, "i");
-    if (!tokenRegex.test(token)) {
-      throw new DomainValidationError("Invalid guest token format");
-    }
   }
 
   static create(): GuestToken {
@@ -21,7 +23,6 @@ export class GuestToken {
   }
 
   static fromString(value: string): GuestToken {
-    GuestToken.validate(value);
     return new GuestToken(value);
   }
 
