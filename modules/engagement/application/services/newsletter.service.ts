@@ -49,11 +49,10 @@ export class NewsletterService {
       );
     }
 
-    const subscription = NewsletterSubscription.create({
-      email,
-      source,
-      status: SubscriptionStatus.active(),
-    });
+    // `NewsletterSubscription.create()` always initialises `status` to
+    // `ACTIVE` internally — passing it here is redundant and now rejected
+    // by the entity's typed factory signature.
+    const subscription = NewsletterSubscription.create({ email, source });
     await this.subscriptionRepository.save(subscription);
     return NewsletterSubscription.toDTO(subscription);
   }
