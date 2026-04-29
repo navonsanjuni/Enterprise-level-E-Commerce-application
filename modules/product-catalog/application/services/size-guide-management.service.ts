@@ -5,7 +5,7 @@ import {
 } from "../../domain/repositories/size-guide.repository";
 import { SizeGuide, SizeGuideDTO } from "../../domain/entities/size-guide.entity";
 import { SizeGuideId } from "../../domain/value-objects/size-guide-id.vo";
-import { Region } from "../../domain/enums/product-catalog.enums";
+import { Region } from "../../domain/value-objects";
 import { IHtmlSanitizer } from "./ihtml-sanitizer.service";
 import {
   SizeGuideNotFoundError,
@@ -260,7 +260,7 @@ export class SizeGuideManagementService {
   }
 
   async getAvailableRegions(): Promise<Region[]> {
-    return Object.values(Region);
+    return Region.getAllValues();
   }
 
   // PERF: N queries (one per region). Acceptable while region count is bounded;

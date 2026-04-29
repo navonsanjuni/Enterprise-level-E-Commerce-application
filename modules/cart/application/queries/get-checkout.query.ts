@@ -1,5 +1,5 @@
 import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
-import { CheckoutService, CheckoutDto } from "../services/checkout.service";
+import { CheckoutService, CheckoutDTO } from "../services/checkout.service";
 import { CheckoutNotFoundError } from "../../domain/errors";
 
 export interface GetCheckoutQuery extends IQuery {
@@ -8,10 +8,10 @@ export interface GetCheckoutQuery extends IQuery {
   readonly guestToken?: string;
 }
 
-export class GetCheckoutHandler implements IQueryHandler<GetCheckoutQuery, CheckoutDto> {
+export class GetCheckoutHandler implements IQueryHandler<GetCheckoutQuery, CheckoutDTO> {
   constructor(private readonly checkoutService: CheckoutService) {}
 
-  async handle(query: GetCheckoutQuery): Promise<CheckoutDto> {
+  async handle(query: GetCheckoutQuery): Promise<CheckoutDTO> {
     const checkout = await this.checkoutService.getCheckout(
       query.checkoutId,
       query.userId,

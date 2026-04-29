@@ -2,7 +2,7 @@ import { Product } from "../entities/product.entity";
 import { ProductId } from "../value-objects/product-id.vo";
 import { Slug } from "../value-objects/slug.vo";
 import { CategoryId } from "../value-objects/category-id.vo";
-import { ProductStatus } from "../enums/product-catalog.enums";
+import { ProductStatus } from "../value-objects";
 
 // ── Enrichment projections (read models) ────────────────────────────────
 

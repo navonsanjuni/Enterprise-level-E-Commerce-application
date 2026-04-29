@@ -10,17 +10,14 @@ import { VariantId } from "../../../product-catalog/domain/value-objects/variant
  * for release). Direct lifecycle methods previously on this interface
  * were removed to enforce the aggregate boundary.
  *
- * Reporting/analytics methods (`getReservationStatistics`,
- * `getReservationsByTimeframe`, `searchReservations`) and background-job
- * batch hooks (`getReservationsFor{Cleanup,Extension,Notification}`,
- * `archiveOldReservations`) are query-side responsibilities kept here
- * for now; consider splitting into `IReservationQueryRepository` if
- * more accumulate.
+ * Inventory-reservation orchestration (availability check + create +
+ * save) lives in `ReservationOrchestrator` (application service) — it
+ * spans the repo and a domain port and is not the repository's job.
  *
- * `reserveInventory` orchestrates a stock-service call + persistence;
- * it remains because the orchestration touches an external port
- * (`IExternalStockService`) and is awkward to express purely on the
- * aggregate. A dedicated domain service would be the cleaner home.
+ * Reporting/analytics methods (`getReservationStatistics`,
+ * `getReservationsByTimeframe`) and background-job batch hooks
+ * (`getReservationsForCleanup`, `archiveOldReservations`) stay on this
+ * interface in line with the codebase's unified-repo convention.
  */
 export interface IReservationRepository {
   // ── Aggregate persistence ──────────────────────────────────────────
@@ -51,19 +48,7 @@ export interface IReservationRepository {
   getTotalReservedQuantity(variantId: VariantId): Promise<number>;
   getActiveReservedQuantity(variantId: VariantId): Promise<number>;
 
-  // ── Stock-orchestration hook ───────────────────────────────────────
-  // Calls the external stock service to atomically reserve inventory
-  // and create a reservation row. Kept because the orchestration spans
-  // a port boundary; a dedicated domain service would be the cleaner
-  // home if more such operations accumulate.
-  reserveInventory(
-    cartId: CartId,
-    variantId: VariantId,
-    quantity: number,
-    durationMinutes?: number,
-  ): Promise<Reservation>;
-
-  // ── Availability / capacity / conflict checks ──────────────────────
+  // ── Availability / conflict checks ─────────────────────────────────
   checkAvailability(
     variantId: VariantId,
     requestedQuantity: number,
@@ -73,16 +58,6 @@ export interface IReservationRepository {
     activeReserved: number;
     availableForReservation: number;
   }>;
-  validateReservationCapacity(
-    variantId: VariantId,
-    requestedQuantity: number,
-  ): Promise<boolean>;
-  canCreateReservation(
-    cartId: CartId,
-    variantId: VariantId,
-    quantity: number,
-  ): Promise<boolean>;
-  isReservationExtendable(reservationId: ReservationId): Promise<boolean>;
   findConflictingReservations(
     variantId: VariantId,
     quantity: number,
@@ -99,19 +74,6 @@ export interface IReservationRepository {
   }>;
 
   // ── Analytics / reporting ──────────────────────────────────────────
-  searchReservations(criteria: {
-    cartId?: string;
-    variantId?: string;
-    status?: "active" | "expiring_soon" | "expired" | "recently_expired";
-    minQuantity?: number;
-    maxQuantity?: number;
-    createdAfter?: Date;
-    createdBefore?: Date;
-    expiresAfter?: Date;
-    expiresBefore?: Date;
-    limit?: number;
-    offset?: number;
-  }): Promise<Reservation[]>;
   getReservationStatistics(): Promise<{
     totalReservations: number;
     activeReservations: number;
@@ -141,12 +103,4 @@ export interface IReservationRepository {
   // ── Background-job batch hooks ─────────────────────────────────────
   archiveOldReservations(olderThanDays: number): Promise<number>;
   getReservationsForCleanup(batchSize?: number): Promise<Reservation[]>;
-  getReservationsForExtension(
-    thresholdMinutes: number,
-    batchSize?: number,
-  ): Promise<Reservation[]>;
-  getReservationsForNotification(
-    thresholdMinutes: number,
-    batchSize?: number,
-  ): Promise<Reservation[]>;
 }

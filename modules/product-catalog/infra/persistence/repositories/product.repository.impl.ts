@@ -12,7 +12,7 @@ import { ProductId } from "../../../domain/value-objects/product-id.vo";
 import { Slug } from "../../../domain/value-objects/slug.vo";
 import { CategoryId } from "../../../domain/value-objects/category-id.vo";
 import { Money } from "../../../domain/value-objects/money.vo";
-import { ProductStatus } from "../../../domain/enums/product-catalog.enums";
+import { ProductStatus } from "../../../domain/value-objects";
 import { DEFAULT_CURRENCY } from "../../../../../packages/core/src/domain/value-objects/currency.constants";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";

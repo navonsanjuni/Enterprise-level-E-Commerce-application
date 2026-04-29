@@ -1,5 +1,5 @@
 import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
-import { ReservationService, ReservationDto } from "../services/reservation.service";
+import { ReservationService, ReservationDTO } from "../services/reservation.service";
 import { ReservationNotFoundError } from "../../domain/errors";
 
 export interface GetReservationByVariantQuery extends IQuery {
@@ -7,10 +7,10 @@ export interface GetReservationByVariantQuery extends IQuery {
   readonly variantId: string;
 }
 
-export class GetReservationByVariantHandler implements IQueryHandler<GetReservationByVariantQuery, ReservationDto> {
+export class GetReservationByVariantHandler implements IQueryHandler<GetReservationByVariantQuery, ReservationDTO> {
   constructor(private readonly reservationService: ReservationService) {}
 
-  async handle(query: GetReservationByVariantQuery): Promise<ReservationDto> {
+  async handle(query: GetReservationByVariantQuery): Promise<ReservationDTO> {
     const reservations = await this.reservationService.getCartReservations(query.cartId);
     const reservation = reservations.find((r) => r.variantId === query.variantId);
     if (!reservation) {

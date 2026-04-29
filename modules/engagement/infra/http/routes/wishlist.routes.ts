@@ -10,6 +10,7 @@ import {
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import {
   successResponse,
+  actionSuccessResponse,
   noContentResponse,
   paginatedResponse,
 } from "@/api/src/shared/http/response-schemas";
@@ -136,7 +137,7 @@ export async function wishlistRoutes(
       controller.getWishlistItems(request as AuthenticatedRequest, reply),
   );
 
-  // GET /engagement/users/:userId/wishlists — Get user wishlists
+  // GET /engagement/users/:userId/wishlists — Get user wishlists (authenticated)
   fastify.get(
     "/engagement/users/:userId/wishlists",
     {
@@ -144,11 +145,17 @@ export async function wishlistRoutes(
         validateParams(userIdParamsSchema),
         validateQuery(paginationQuerySchema),
       ],
-      preHandler: [optionalAuth],
+      // Authenticated-only: anyone with a valid token can request this, but
+      // the controller enforces that callers can only see their own
+      // wishlists unless they're admin. Previously this route used
+      // `optionalAuth`, which allowed anonymous enumeration of any user's
+      // wishlists by guessing userId.
+      preHandler: [authenticate, RolePermissions.AUTHENTICATED],
       schema: {
         description: "Get all wishlists for a specific user",
         summary: "Get User Wishlists",
         tags: ["Engagement - Wishlists"],
+        security: [{ bearerAuth: [] }],
         params: userIdParamsJson,
         querystring: paginationQueryJson,
         response: {
@@ -194,7 +201,7 @@ export async function wishlistRoutes(
         params: wishlistIdParamsJson,
         body: updateWishlistBodyJson,
         response: {
-          200: successResponse({ type: "object" }),
+          200: actionSuccessResponse(),
         },
       },
     },

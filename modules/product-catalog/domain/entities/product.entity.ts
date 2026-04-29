@@ -5,7 +5,7 @@ import { ProductId } from "../value-objects/product-id.vo";
 import { Slug } from "../value-objects/slug.vo";
 import { Money } from "../value-objects/money.vo";
 import { DomainValidationError, InvalidOperationError } from "../errors";
-import { ProductStatus } from "../enums/product-catalog.enums";
+import { ProductStatus } from "../value-objects";
 
 // ── Domain Events ──────────────────────────────────────────────────────
 

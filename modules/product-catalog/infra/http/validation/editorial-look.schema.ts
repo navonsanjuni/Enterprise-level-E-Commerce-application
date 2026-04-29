@@ -4,7 +4,7 @@ import {
   MIN_LIMIT,
   MAX_PAGE_SIZE,
   MAX_SUGGESTIONS_LIMIT,
-} from "../../../application/constants/pagination.constants";
+} from "../../../domain/constants/pagination.constants";
 
 // ── Request Schemas (Zod) ─────────────────────────────────────────────────────
 

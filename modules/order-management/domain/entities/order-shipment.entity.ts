@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { ShipmentId } from "../value-objects/shipment-id.vo";
 import {
   DomainValidationError,
   ShipmentAlreadyShippedError,
@@ -10,7 +10,7 @@ import {
 // entity in aggregate" — no AggregateRoot, no events, parent emits on its behalf).
 // The Prisma schema stores no audit timestamps on this table.
 export interface OrderShipmentProps {
-  shipmentId: string;
+  shipmentId: ShipmentId;
   orderId: string;
   carrier?: string;
   service?: string;
@@ -45,7 +45,7 @@ export class OrderShipment {
   ): OrderShipment {
     return new OrderShipment({
       ...params,
-      shipmentId: randomUUID(),
+      shipmentId: ShipmentId.create(),
     });
   }
 
@@ -71,7 +71,7 @@ export class OrderShipment {
     }
   }
 
-  get shipmentId(): string {
+  get shipmentId(): ShipmentId {
     return this.props.shipmentId;
   }
 
@@ -121,7 +121,7 @@ export class OrderShipment {
     trackingNumber: string,
   ): void {
     if (this.props.shippedAt) {
-      throw new ShipmentAlreadyShippedError(this.props.shipmentId);
+      throw new ShipmentAlreadyShippedError(this.props.shipmentId.getValue());
     }
     if (!carrier || carrier.trim().length === 0) {
       throw new DomainValidationError("Carrier is required to mark shipped");
@@ -148,7 +148,7 @@ export class OrderShipment {
     }
 
     if (this.props.deliveredAt) {
-      throw new ShipmentAlreadyDeliveredError(this.props.shipmentId);
+      throw new ShipmentAlreadyDeliveredError(this.props.shipmentId.getValue());
     }
 
     const when = deliveredAt ?? new Date();
@@ -189,12 +189,12 @@ export class OrderShipment {
   }
 
   equals(other: OrderShipment): boolean {
-    return this.props.shipmentId === other.props.shipmentId;
+    return this.props.shipmentId.equals(other.props.shipmentId);
   }
 
   static toDTO(entity: OrderShipment): OrderShipmentDTO {
     return {
-      shipmentId: entity.props.shipmentId,
+      shipmentId: entity.props.shipmentId.getValue(),
       orderId: entity.props.orderId,
       carrier: entity.props.carrier,
       service: entity.props.service,

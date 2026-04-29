@@ -94,3 +94,13 @@ export class InvalidReservationOperationError extends DomainError {
     super(message, "INVALID_RESERVATION_OPERATION", 422);
   }
 }
+
+export class InsufficientInventoryError extends DomainError {
+  constructor(variantId: string, requested: number) {
+    super(
+      `Insufficient inventory for variant ${variantId} (requested ${requested})`,
+      "INSUFFICIENT_INVENTORY",
+      422,
+    );
+  }
+}

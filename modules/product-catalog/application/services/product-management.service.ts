@@ -6,7 +6,7 @@ import {
 } from "../../domain/repositories/product.repository";
 import { IProductTagAssociationRepository } from "../../domain/repositories/product-tag-association.repository";
 import { Product, ProductDTO } from "../../domain/entities/product.entity";
-import { ProductStatus } from "../../domain/enums/product-catalog.enums";
+import { ProductStatus } from "../../domain/value-objects";
 import { PaginatedResult } from "../../../../packages/core/src/domain/interfaces/paginated-result.interface";
 import { ProductId } from "../../domain/value-objects/product-id.vo";
 import { CategoryId } from "../../domain/value-objects/category-id.vo";

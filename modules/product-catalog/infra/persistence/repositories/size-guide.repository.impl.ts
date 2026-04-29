@@ -6,7 +6,7 @@ import {
 } from "../../../domain/repositories/size-guide.repository";
 import { SizeGuide } from "../../../domain/entities/size-guide.entity";
 import { SizeGuideId } from "../../../domain/value-objects/size-guide-id.vo";
-import { Region } from "../../../domain/enums/product-catalog.enums";
+import { Region } from "../../../domain/value-objects";
 import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
 

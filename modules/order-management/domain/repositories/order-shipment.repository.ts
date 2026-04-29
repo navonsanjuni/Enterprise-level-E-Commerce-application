@@ -1,5 +1,6 @@
 import { OrderShipment } from "../entities/order-shipment.entity";
 import { OrderId } from "../value-objects/order-id.vo";
+import { ShipmentId } from "../value-objects/shipment-id.vo";
 
 export interface ShipmentQueryOptions {
   limit?: number;
@@ -9,17 +10,14 @@ export interface ShipmentQueryOptions {
   sortOrder?: "asc" | "desc";
 }
 
-// NOTE: `shipmentId` stays `string` — no `ShipmentId` VO exists in this module
-// yet. Adding one would be a separate refactor pass. `orderId` uses the typed
-// `OrderId` VO (already exists).
 export interface IOrderShipmentRepository {
   // Basic CRUD
   save(shipment: OrderShipment): Promise<void>;
-  delete(shipmentId: string): Promise<void>;
+  delete(shipmentId: ShipmentId): Promise<void>;
   deleteByOrderId(orderId: OrderId): Promise<void>;
 
   // Finders
-  findById(shipmentId: string): Promise<OrderShipment | null>;
+  findById(shipmentId: ShipmentId): Promise<OrderShipment | null>;
   findByOrderId(
     orderId: OrderId,
     options?: ShipmentQueryOptions,
@@ -40,6 +38,6 @@ export interface IOrderShipmentRepository {
   countDelivered(): Promise<number>;
 
   // Existence checks
-  exists(shipmentId: string): Promise<boolean>;
+  exists(shipmentId: ShipmentId): Promise<boolean>;
   existsByTrackingNumber(trackingNumber: string): Promise<boolean>;
 }

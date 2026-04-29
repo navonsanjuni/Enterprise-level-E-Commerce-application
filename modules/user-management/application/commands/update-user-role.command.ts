@@ -1,5 +1,5 @@
 import { UserService } from '../services/user.service';
-import { UserRole } from '../../domain/enums/user-role.enum';
+import { UserRole } from '../../domain/value-objects/user-role.vo';
 import { UserDTO } from '../../domain/entities/user.entity';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 

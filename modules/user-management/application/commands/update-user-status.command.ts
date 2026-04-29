@@ -1,5 +1,5 @@
 import { UserService } from '../services/user.service';
-import { UserStatus } from '../../domain/enums/user-status.enum';
+import { UserStatus } from '../../domain/value-objects/user-status.vo';
 import { UserDTO } from '../../domain/entities/user.entity';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 

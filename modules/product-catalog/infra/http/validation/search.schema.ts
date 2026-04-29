@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { ProductStatus } from "../../../domain/enums/product-catalog.enums";
+import { ProductStatus } from "../../../domain/value-objects";
 import { productResponseSchema } from "./product.schema";
 import {
   MIN_PAGE,
   MIN_LIMIT,
   MAX_PAGE_SIZE,
   MAX_SUGGESTIONS_LIMIT,
-} from "../../../application/constants/pagination.constants";
+} from "../../../domain/constants/pagination.constants";
 
 // Search excludes ARCHIVED by design — archived products should not surface in
 // search results. Update by adding entries here if that policy changes.

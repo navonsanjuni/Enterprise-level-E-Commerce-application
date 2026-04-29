@@ -3,8 +3,8 @@ import { DomainEvent } from '../../../../packages/core/src/domain/events/domain-
 import { UserId } from '../value-objects/user-id.vo';
 import { Email } from '../value-objects/email.vo';
 import { Phone } from '../value-objects/phone.vo';
-import { UserRole } from '../enums/user-role.enum';
-import { UserStatus } from '../enums/user-status.enum';
+import { UserRole } from '../value-objects/user-role.vo';
+import { UserStatus } from '../value-objects/user-status.vo';
 import { USER_MANAGEMENT_CONSTANTS } from '../constants/user-management.constants';
 import {
   InvalidPasswordError,

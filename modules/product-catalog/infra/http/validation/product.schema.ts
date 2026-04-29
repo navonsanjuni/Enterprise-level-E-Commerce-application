@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { ProductStatus } from "../../../domain/enums/product-catalog.enums";
+import { ProductStatus } from "../../../domain/value-objects";
 import {
   MIN_PAGE,
   MIN_LIMIT,
   MAX_PAGE_SIZE,
-} from "../../../application/constants/pagination.constants";
+} from "../../../domain/constants/pagination.constants";
 
 // Statuses allowed when authoring products (clients cannot create directly into ARCHIVED).
 const CREATABLE_PRODUCT_STATUSES = [

@@ -56,6 +56,33 @@ export const noContentResponse = {
 } as const;
 
 /**
+ * 200 OK response for state-change actions that have no data payload —
+ * cancel, unsubscribe, mark-as-sent, etc. Matches the body produced by
+ * `ResponseHelper.fromCommand(reply, result, msg)` when the command is
+ * `CommandResult<void>` (no `data` key in the runtime body).
+ *
+ * Prefer this over `successResponse({ type: "object" })` (untyped catch-all)
+ * for void actions. Use `noContentResponse` (204) when the route truly
+ * has no response body at all (DELETE).
+ *
+ * @example
+ *   response: {
+ *     200: actionSuccessResponse(),
+ *   }
+ */
+export const actionSuccessResponse = (statusCode: number = 200) =>
+  ({
+    type: "object",
+    required: ["success", "statusCode", "message"],
+    additionalProperties: false,
+    properties: {
+      success: { type: "boolean", const: true },
+      statusCode: { type: "number", const: statusCode },
+      message: { type: "string" },
+    },
+  }) as const;
+
+/**
  * Standard error-envelope response schema. The runtime error body
  * produced by `ResponseHelper.error(reply, error)` matches this shape:
  * `{ success: false, statusCode, message, code?, details? }`.

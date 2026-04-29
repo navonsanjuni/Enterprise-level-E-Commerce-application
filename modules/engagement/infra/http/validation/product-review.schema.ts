@@ -1,5 +1,8 @@
 import { z } from "zod";
 import { ReviewStatusValue } from "../../../domain/value-objects/review-status.vo";
+// Shared canonical pagination schema — single source of truth.
+export { paginationQuerySchema } from "./validator";
+export type { PaginationQuery } from "./validator";
 
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
@@ -13,13 +16,6 @@ export const productIdParamsSchema = z.object({
 
 export const userIdParamsSchema = z.object({
   userId: z.uuid(),
-});
-
-// ── Query Schemas ─────────────────────────────────────────────────────────────
-
-export const paginationQuerySchema = z.object({
-  limit: z.coerce.number().int().positive().optional(),
-  offset: z.coerce.number().int().min(0).optional(),
 });
 
 // ── Body Schemas ──────────────────────────────────────────────────────────────
@@ -66,6 +62,5 @@ export const productReviewResponseSchema = {
 export type ReviewIdParams = z.infer<typeof reviewIdParamsSchema>;
 export type ProductIdParams = z.infer<typeof productIdParamsSchema>;
 export type UserIdParams = z.infer<typeof userIdParamsSchema>;
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
 export type CreateProductReviewBody = z.infer<typeof createProductReviewSchema>;
 export type UpdateReviewStatusBody = z.infer<typeof updateReviewStatusSchema>;

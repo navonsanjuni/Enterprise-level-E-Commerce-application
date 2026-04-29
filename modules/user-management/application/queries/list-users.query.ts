@@ -1,10 +1,10 @@
 import { IQuery, IQueryHandler } from '../../../../packages/core/src/application/cqrs';
 import { UserService } from '../services/user.service';
-import { UserRole } from '../../domain/enums/user-role.enum';
-import { UserStatus } from '../../domain/enums/user-status.enum';
+import { UserRole } from '../../domain/value-objects/user-role.vo';
+import { UserStatus } from '../../domain/value-objects/user-status.vo';
 import { PaginatedResult } from '../../../../packages/core/src/domain/interfaces/paginated-result.interface';
 import { UserListItem } from '../../domain/repositories/iuser.repository';
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from '../constants/pagination.constants';
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from '../../domain/constants/pagination.constants';
 
 export interface ListUsersQuery extends IQuery {
   readonly search?: string;

@@ -4,7 +4,7 @@ import { AddressId } from '../../domain/value-objects/address-id.vo';
 import { Address as AddressVO } from '../../domain/value-objects/address.vo';
 import { AddressType } from '../../domain/value-objects/address-type.vo';
 import { UserId } from '../../domain/value-objects/user-id.vo';
-import { ShippingZone } from '../../domain/enums/shipping-zone.enum';
+import { ShippingZone } from '../../domain/value-objects/shipping-zone.vo';
 import {
   AddressShippingService,
 } from '../../domain/services/address-shipping.service';

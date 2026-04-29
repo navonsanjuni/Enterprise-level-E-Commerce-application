@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { UserRole } from "../../../domain/enums/user-role.enum";
-import { UserStatus } from "../../../domain/enums/user-status.enum";
+import { UserRole } from "../../../domain/value-objects/user-role.vo";
+import { UserStatus } from "../../../domain/value-objects/user-status.vo";
 
 // ============================================================================
 // Constants

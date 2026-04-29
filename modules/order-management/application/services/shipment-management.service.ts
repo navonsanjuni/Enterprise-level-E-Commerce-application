@@ -5,6 +5,7 @@ import {
 import { OrderShipment, OrderShipmentDTO } from "../../domain/entities/order-shipment.entity";
 import { OrderShipmentNotFoundError } from "../../domain/errors/order-management.errors";
 import { OrderId } from "../../domain/value-objects/order-id.vo";
+import { ShipmentId } from "../../domain/value-objects/shipment-id.vo";
 
 interface CreateShipmentParams {
   orderId: string;
@@ -74,9 +75,10 @@ export class ShipmentManagementService {
   }
 
   async deleteShipment(id: string): Promise<void> {
-    const exists = await this.shipmentRepository.exists(id);
+    const shipmentVO = ShipmentId.fromString(id);
+    const exists = await this.shipmentRepository.exists(shipmentVO);
     if (!exists) throw new OrderShipmentNotFoundError(id);
-    await this.shipmentRepository.delete(id);
+    await this.shipmentRepository.delete(shipmentVO);
   }
 
   async deleteShipmentsByOrderId(orderId: string): Promise<void> {
@@ -88,7 +90,7 @@ export class ShipmentManagementService {
   // ─── Reads ────────────────────────────────────────────────────────────────
 
   async getShipmentById(id: string): Promise<OrderShipmentDTO | null> {
-    const shipment = await this.shipmentRepository.findById(id);
+    const shipment = await this.shipmentRepository.findById(ShipmentId.fromString(id));
     return shipment ? OrderShipment.toDTO(shipment) : null;
   }
 
@@ -166,7 +168,7 @@ export class ShipmentManagementService {
   }
 
   async shipmentExists(id: string): Promise<boolean> {
-    return this.shipmentRepository.exists(id);
+    return this.shipmentRepository.exists(ShipmentId.fromString(id));
   }
 
   async trackingNumberExists(trackingNumber: string): Promise<boolean> {
@@ -178,7 +180,7 @@ export class ShipmentManagementService {
   // ─── Private helpers ──────────────────────────────────────────────────────
 
   private async requireShipment(id: string): Promise<OrderShipment> {
-    const shipment = await this.shipmentRepository.findById(id);
+    const shipment = await this.shipmentRepository.findById(ShipmentId.fromString(id));
     if (!shipment) throw new OrderShipmentNotFoundError(id);
     return shipment;
   }

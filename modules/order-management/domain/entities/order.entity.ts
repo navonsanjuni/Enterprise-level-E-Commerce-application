@@ -313,7 +313,7 @@ export class Order extends AggregateRoot {
     this.props.shipments.push(shipment);
     this.props.updatedAt = new Date();
     this.addDomainEvent(
-      new OrderShipmentCreatedEvent(this.props.id.getValue(), shipment.shipmentId),
+      new OrderShipmentCreatedEvent(this.props.id.getValue(), shipment.shipmentId.getValue()),
     );
   }
 

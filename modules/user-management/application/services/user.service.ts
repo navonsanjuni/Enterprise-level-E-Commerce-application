@@ -1,8 +1,8 @@
 import { IUserRepository, UserListItem } from '../../domain/repositories/iuser.repository';
 import { User, UserDTO } from '../../domain/entities/user.entity';
 import { UserId } from '../../domain/value-objects/user-id.vo';
-import { UserRole } from '../../domain/enums/user-role.enum';
-import { UserStatus } from '../../domain/enums/user-status.enum';
+import { UserRole } from '../../domain/value-objects/user-role.vo';
+import { UserStatus } from '../../domain/value-objects/user-status.vo';
 import { PaginatedResult } from '../../../../packages/core/src/domain/interfaces/paginated-result.interface';
 import { UserNotFoundError } from '../../domain/errors/user-management.errors';
 

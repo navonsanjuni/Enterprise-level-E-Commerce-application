@@ -3,7 +3,7 @@ import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastruct
 import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
 import { ISocialLoginRepository } from "../../../domain/repositories/isocial-login.repository";
 import { SocialLogin } from "../../../domain/entities/social-login.entity";
-import { SocialProvider } from "../../../domain/enums/social-provider.enum";
+import { SocialProvider } from "../../../domain/value-objects/social-provider.vo";
 import { SocialLoginId } from "../../../domain/value-objects/social-login-id.vo";
 import { UserId } from "../../../domain/value-objects/user-id.vo";
 

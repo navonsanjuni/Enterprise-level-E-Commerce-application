@@ -1,5 +1,6 @@
 export { OrderId } from "./order-id.vo";
 export { OrderItemId } from "./order-item-id.vo";
+export { ShipmentId } from "./shipment-id.vo";
 export { OrderNumber } from "./order-number.vo";
 export { OrderStatus } from "./order-status.vo";
 export { OrderSource } from "./order-source.vo";

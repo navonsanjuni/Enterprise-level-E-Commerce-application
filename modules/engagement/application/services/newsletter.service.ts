@@ -11,6 +11,7 @@ import {
   SubscriptionId,
   SubscriptionStatus,
 } from "../../domain/value-objects";
+import { SubscriptionStatusValue } from "../../domain/value-objects/subscription-status.vo";
 import {
   NewsletterSubscriptionNotFoundError,
   InvalidOperationError,
@@ -124,7 +125,7 @@ export class NewsletterService {
     options?: NewsletterSubscriptionQueryOptions,
   ): Promise<PaginatedSubscriptionResult> {
     const result = await this.subscriptionRepository.findByStatus(
-      status,
+      status as SubscriptionStatusValue,
       options,
     );
     return this.mapPaginated(result);
@@ -179,7 +180,7 @@ export class NewsletterService {
   }
 
   async countSubscriptionsByStatus(status: string): Promise<number> {
-    return this.subscriptionRepository.countByStatus(status);
+    return this.subscriptionRepository.countByStatus(status as SubscriptionStatusValue);
   }
 
   async countSubscriptionsBySource(source: string): Promise<number> {

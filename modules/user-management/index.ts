@@ -17,9 +17,9 @@ export {
 } from "./domain/errors/user-management.errors";
 
 // Enums (safe to share cross-module)
-export { UserRole } from "./domain/enums/user-role.enum";
-export { UserStatus } from "./domain/enums/user-status.enum";
-export { ShippingZone } from "./domain/enums/shipping-zone.enum";
+export { UserRole } from "./domain/value-objects/user-role.vo";
+export { UserStatus } from "./domain/value-objects/user-status.vo";
+export { ShippingZone } from "./domain/value-objects/shipping-zone.vo";
 
 // DTO types only (for cross-module type sharing)
 export type { UserDTO } from "./domain/entities/user.entity";

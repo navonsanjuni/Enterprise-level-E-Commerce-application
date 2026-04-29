@@ -2,7 +2,7 @@ import { IQuery, IQueryHandler } from '../../../../packages/core/src/application
 import { PaymentMethodService } from '../services/payment-method.service';
 import { PaymentMethodDTO } from '../../domain/entities/payment-method.entity';
 import { PaginatedResult } from '../../../../packages/core/src/domain/interfaces/paginated-result.interface';
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from '../constants/pagination.constants';
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from '../../domain/constants/pagination.constants';
 
 export interface ListPaymentMethodsQuery extends IQuery {
   readonly userId: string;

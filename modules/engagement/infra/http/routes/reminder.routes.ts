@@ -9,6 +9,7 @@ import {
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import {
   successResponse,
+  actionSuccessResponse,
   noContentResponse,
   paginatedResponse,
 } from "@/api/src/shared/http/response-schemas";
@@ -155,7 +156,7 @@ export async function reminderRoutes(
         security: [{ bearerAuth: [] }],
         params: reminderIdParamsJson,
         response: {
-          200: successResponse({ type: "object" }),
+          200: actionSuccessResponse(),
         },
       },
     },
@@ -176,7 +177,7 @@ export async function reminderRoutes(
         security: [{ bearerAuth: [] }],
         params: reminderIdParamsJson,
         response: {
-          200: successResponse({ type: "object" }),
+          200: actionSuccessResponse(),
         },
       },
     },

@@ -7,7 +7,7 @@ import {
   ICommandHandler,
   CommandResult,
 } from "../../../../packages/core/src/application/cqrs";
-import { UserRole } from "../../domain/enums/user-role.enum";
+import { UserRole } from "../../domain/value-objects/user-role.vo";
 
 export interface RegisterUserCommand extends ICommand {
   readonly email: string;

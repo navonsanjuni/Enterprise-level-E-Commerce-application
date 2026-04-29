@@ -9,3 +9,11 @@ export { Currency } from "../../../../packages/core/src/domain/value-objects/cur
 export { Locale } from "./locale.vo";
 export { Address } from "./address.vo";
 export { AddressType } from "./address-type.vo";
+// Enums folded into VO files (canonical pattern). Previously lived in a
+// separate `domain/enums/` directory; relocated alongside the rest of the
+// catalog VOs so consumers have a single import root.
+export { UserRole } from "./user-role.vo";
+export { UserStatus } from "./user-status.vo";
+export { PaymentMethodType } from "./payment-method-type.vo";
+export { SocialProvider } from "./social-provider.vo";
+export { ShippingZone } from "./shipping-zone.vo";

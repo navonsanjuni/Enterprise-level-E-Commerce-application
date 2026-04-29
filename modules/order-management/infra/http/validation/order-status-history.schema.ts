@@ -5,7 +5,7 @@ import {
   MIN_LIMIT,
   MIN_OFFSET,
 } from "../../../domain/constants/order-management.constants";
-import { OrderStatusEnum } from "../../../domain/enums/order.enums";
+import { OrderStatusValue } from "../../../domain/value-objects/order-status.vo";
 
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
@@ -42,7 +42,7 @@ export const getStatusHistoryQuerySchema = z.object({
 // (security — caller can't spoof the actor).
 // Only `toStatus` is client-supplied, restricted to the OrderStatusEnum vocabulary.
 export const logStatusChangeSchema = z.object({
-  toStatus: z.enum(OrderStatusEnum),
+  toStatus: z.enum(OrderStatusValue),
 });
 
 // ── Inferred Types ────────────────────────────────────────────────────────────

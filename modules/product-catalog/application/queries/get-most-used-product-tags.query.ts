@@ -1,7 +1,7 @@
 import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
 import { ProductTagDTO } from "../../domain/entities/product-tag.entity";
 import { ProductTagManagementService } from "../services/product-tag-management.service";
-import { DEFAULT_SUGGESTIONS_LIMIT, MAX_SUGGESTIONS_LIMIT, MIN_LIMIT } from "../constants/pagination.constants";
+import { DEFAULT_SUGGESTIONS_LIMIT, MAX_SUGGESTIONS_LIMIT, MIN_LIMIT } from "../../domain/constants/pagination.constants";
 
 export interface GetMostUsedProductTagsQuery extends IQuery {
   readonly limit?: number;

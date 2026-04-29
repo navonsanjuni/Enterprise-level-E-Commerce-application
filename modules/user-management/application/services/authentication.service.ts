@@ -5,7 +5,7 @@ import { IJwtService } from "./ijwt.service";
 import { Email } from "../../domain/value-objects/email.vo";
 import { UserId } from "../../domain/value-objects/user-id.vo";
 import { User, UserDTO } from "../../domain/entities/user.entity";
-import { UserStatus } from "../../domain/enums/user-status.enum";
+import { UserStatus } from "../../domain/value-objects/user-status.vo";
 import {
   UserNotFoundError,
   UserAlreadyExistsError,

@@ -1,5 +1,8 @@
 import { DomainValidationError } from "../errors/user-management.errors";
 
+ // The canonical TS enum for social login providers lives in this file
+// alongside helper methods (namespace-augmented) — not in a separate
+// `enums/` directory.
 export enum SocialProvider {
   GOOGLE = "google",
   FACEBOOK = "facebook",
@@ -9,6 +12,16 @@ export enum SocialProvider {
   GITHUB = "github",
   MICROSOFT = "microsoft",
 }
+
+const ALL_SOCIAL_PROVIDERS: readonly SocialProvider[] = [
+  SocialProvider.GOOGLE,
+  SocialProvider.FACEBOOK,
+  SocialProvider.APPLE,
+  SocialProvider.TWITTER,
+  SocialProvider.LINKEDIN,
+  SocialProvider.GITHUB,
+  SocialProvider.MICROSOFT,
+];
 
 export namespace SocialProvider {
   export function fromString(provider: string): SocialProvider {
@@ -41,15 +54,7 @@ export namespace SocialProvider {
   }
 
   export function getAllValues(): SocialProvider[] {
-    return [
-      SocialProvider.GOOGLE,
-      SocialProvider.FACEBOOK,
-      SocialProvider.APPLE,
-      SocialProvider.TWITTER,
-      SocialProvider.LINKEDIN,
-      SocialProvider.GITHUB,
-      SocialProvider.MICROSOFT,
-    ];
+    return [...ALL_SOCIAL_PROVIDERS];
   }
 
   export function getDisplayName(provider: SocialProvider): string {

@@ -1,5 +1,5 @@
 import { SocialLogin } from "../entities/social-login.entity";
-import { SocialProvider } from "../enums/social-provider.enum";
+import { SocialProvider } from "../value-objects/social-provider.vo";
 import { SocialLoginId } from "../value-objects/social-login-id.vo";
 import { UserId } from "../value-objects/user-id.vo";
 

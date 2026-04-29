@@ -2,7 +2,7 @@ import { IQuery, IQueryHandler } from '../../../../packages/core/src/application
 import { AddressManagementService } from '../services/address-management.service';
 import { AddressDTO } from '../../domain/entities/address.entity';
 import { PaginatedResult } from '../../../../packages/core/src/domain/interfaces/paginated-result.interface';
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from '../constants/pagination.constants';
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from '../../domain/constants/pagination.constants';
 
 export interface ListAddressesQuery extends IQuery {
   readonly userId: string;

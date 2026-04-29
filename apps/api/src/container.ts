@@ -12,7 +12,7 @@ import { AuthenticationService } from "../../../modules/user-management/applicat
 import { UserProfileService } from "../../../modules/user-management/application/services/user-profile.service";
 import { AddressManagementService } from "../../../modules/user-management/application/services/address-management.service";
 import { PaymentMethodService } from "../../../modules/user-management/application/services/payment-method.service";
-import { PasswordHasherService } from "../../../modules/user-management/application/services/password-hasher.service";
+import { BcryptPasswordHasherAdapter } from "../../../modules/user-management/infra/security/bcrypt-password-hasher.adapter";
 import { UserService } from "../../../modules/user-management/application/services/user.service";
 import { RegisterUserHandler } from "../../../modules/user-management/application/commands/register-user.command";
 import { LoginUserHandler } from "../../../modules/user-management/application/commands/login-user.command";
@@ -302,6 +302,7 @@ import {
 } from "../../../modules/cart/infra/persistence/repositories";
 import { CartManagementService } from "../../../modules/cart/application/services/cart-management.service";
 import { ReservationService } from "../../../modules/cart/application/services/reservation.service";
+import { ReservationOrchestrator } from "../../../modules/cart/application/services/reservation-orchestrator.service";
 import { CheckoutService } from "../../../modules/cart/application/services/checkout.service";
 import { CheckoutOrderService } from "../../../modules/cart/application/services/checkout-order.service";
 import { CheckoutCompletionPortImpl } from "../../../modules/cart/infra/persistence/repositories/checkout-completion.port.impl";
@@ -624,7 +625,7 @@ export class Container {
     const addressRepository = new AddressRepository(prisma, eventBus);
     const paymentMethodRepository = new PaymentMethodRepository(prisma, eventBus);
 
-    const passwordHasher = new PasswordHasherService();
+    const passwordHasher = new BcryptPasswordHasherAdapter();
     const jwtService = new JwtService({
       accessTokenSecret: config.jwtSecret,
       refreshTokenSecret: config.jwtSecret,
@@ -1055,6 +1056,7 @@ export class Container {
       },
     };
 
+    const reservationOrchestrator = new ReservationOrchestrator(reservationRepository);
     const cartManagementService = new CartManagementService(
       cartRepository,
       reservationRepository,
@@ -1064,6 +1066,7 @@ export class Container {
       externalProductMediaRepository,
       externalMediaAssetRepository,
       settingsService,
+      reservationOrchestrator,
     );
     const reservationService = new ReservationService(reservationRepository, cartRepository);
     const checkoutService = new CheckoutService(checkoutRepository, cartRepository, settingsService);
@@ -1188,10 +1191,20 @@ export class Container {
       },
       adjustStock: (...args) => stockManagementService.adjustStock(...args),
       reserveStock: (...args) => stockManagementService.reserveStock(...args),
+      releaseStock: (...args) => stockManagementService.releaseStock(...args),
     };
 
     const orderEventService = new OrderEventService(orderEventRepository);
-    const orderManagementService = new OrderManagementService(orderRepository, orderAddressRepository, orderShipmentRepository, orderStatusHistoryRepository, externalVariantService, externalProductService, externalStockService);
+    const orderManagementService = new OrderManagementService(
+      orderRepository,
+      orderAddressRepository,
+      orderShipmentRepository,
+      orderStatusHistoryRepository,
+      externalVariantService,
+      externalProductService,
+      externalStockService,
+      process.env.DEFAULT_STOCK_LOCATION ?? "",
+    );
     const backorderManagementService = new BackorderManagementService(backorderRepository);
     const preorderManagementService = new PreorderManagementService(preorderRepository);
 

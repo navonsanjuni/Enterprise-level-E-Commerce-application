@@ -14,6 +14,7 @@ import {
 } from "../../domain/ports/external-services";
 import { Order, OrderDTO } from "../../domain/entities/order.entity";
 import { OrderId } from "../../domain/value-objects/order-id.vo";
+import { ShipmentId } from "../../domain/value-objects/shipment-id.vo";
 import { OrderNumber } from "../../domain/value-objects/order-number.vo";
 import { OrderStatus } from "../../domain/value-objects/order-status.vo";
 import { Currency } from "../../../../packages/core/src/domain/value-objects/currency.vo";
@@ -110,6 +111,10 @@ export class OrderManagementService {
     private readonly variantManagementService: IExternalVariantService,
     private readonly productManagementService: IExternalProductService,
     private readonly stockManagementService: IExternalStockService,
+    // Default warehouse for stock reservations. Injected (rather than read
+    // from `process.env` at call time) so this service is testable without
+    // env stubbing and so config is bound once at container boot.
+    private readonly defaultWarehouseId: string,
   ) {}
 
   // ─── Order Lifecycle ───────────────────────────────────────────────────────
@@ -196,6 +201,12 @@ export class OrderManagementService {
       shippingAddress: shippingSnap,
     });
 
+    // Attach the address to the order so it rides along inside
+    // `orderRepository.saveWithStatusHistory`'s transaction. Saving the
+    // address through its own repository afterwards (the previous flow)
+    // was both redundant and broke atomicity.
+    order.setAddress(address);
+
     const statusHistory = OrderStatusHistory.create({
       orderId: realOrderId,
       fromStatus: OrderStatus.created(),
@@ -203,12 +214,10 @@ export class OrderManagementService {
       changedBy: "system",
     });
 
-    // FLAG: these three writes are sequential, not transactional. A failure
-    // between them leaves a partial order. Wrap in a Prisma `$transaction`
-    // when atomicity guarantees become a hard requirement.
-    await this.orderRepository.save(order);
-    await this.orderAddressRepository.save(address);
-    await this.orderStatusHistoryRepository.save(statusHistory);
+    // Atomic write: order + items + address + initial status-history audit
+    // in a single transaction. Failure rolls everything back so we can't
+    // end up with a CREATED order with no audit trail.
+    await this.orderRepository.saveWithStatusHistory(order, statusHistory);
 
     // Reserve stock AFTER order is committed. On failure, compensate by
     // cancelling the order so it doesn't sit in CREATED with no held stock.
@@ -291,10 +300,23 @@ export class OrderManagementService {
     this.assertCanAccessOrder(order, requestingUserId, isStaff);
     order.cancel();
     await this.orderRepository.save(order);
-    // FLAG: stock reserved at createOrder time is NOT released here. Either
-    // a domain-event handler must react to OrderStatusUpdatedEvent(cancelled)
-    // and call stockService.release(...), or this method should release it
-    // explicitly. Verify before relying on stock counts post-cancel.
+
+    
+    const defaultLocationId = this.getDefaultWarehouseId();
+    await Promise.all(
+      order.items.map(async (item) => {
+        try {
+          await this.stockManagementService.releaseStock(
+            item.variantId,
+            defaultLocationId,
+            item.quantity,
+          );
+        } catch {
+          /* best-effort release — stock may have already been fulfilled */
+        }
+      }),
+    );
+
     return Order.toDTO(order);
   }
 
@@ -689,7 +711,9 @@ export class OrderManagementService {
     orderId: string,
     shipmentId: string,
   ): Promise<OrderShipment> {
-    const shipment = await this.orderShipmentRepository.findById(shipmentId);
+    const shipment = await this.orderShipmentRepository.findById(
+      ShipmentId.fromString(shipmentId),
+    );
     if (!shipment) throw new OrderShipmentNotFoundError(shipmentId);
     if (shipment.orderId !== orderId) {
       throw new InvalidOperationError("Shipment does not belong to this order");
@@ -805,16 +829,15 @@ export class OrderManagementService {
     };
   }
 
-  // FLAG: this reads config at call time. Better as a constructor-injected
-  // value (e.g., `defaultWarehouseId: string`) so the service is testable
-  // without env stubbing and so config changes don't surprise running code.
+  // Returns the constructor-injected default warehouse id and validates
+  // it's set. Container resolves this from `process.env.DEFAULT_STOCK_LOCATION`
+  // at boot — keeping the env read out of the service itself.
   private getDefaultWarehouseId(): string {
-    const locationId = process.env.DEFAULT_STOCK_LOCATION;
-    if (!locationId) {
+    if (!this.defaultWarehouseId) {
       throw new DomainValidationError(
         "No warehouse location configured. Please set DEFAULT_STOCK_LOCATION in .env.",
       );
     }
-    return locationId;
+    return this.defaultWarehouseId;
   }
 }

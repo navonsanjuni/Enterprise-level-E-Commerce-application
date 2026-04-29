@@ -1,6 +1,6 @@
 import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
 import { ProductSearchService, ProductSearchResult } from "../services/product-search.service";
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from "../constants/pagination.constants";
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from "../../domain/constants/pagination.constants";
 
 export interface SearchProductsQuery extends IQuery {
   readonly searchTerm: string;

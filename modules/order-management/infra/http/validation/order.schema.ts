@@ -8,7 +8,8 @@ import {
   ORDER_ITEM_MAX_QUANTITY,
   ORDER_ITEM_GIFT_MESSAGE_MAX_LENGTH,
 } from "../../../domain/constants/order-management.constants";
-import { OrderStatusEnum, OrderSourceEnum } from "../../../domain/enums/order.enums";
+import { OrderStatusValue } from "../../../domain/value-objects/order-status.vo";
+import { OrderSourceValue } from "../../../domain/value-objects/order-source.vo";
 
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
@@ -97,7 +98,7 @@ export const createOrderSchema = z.object({
     .min(1),
   shippingAddress: addressFieldsSchema,
   billingAddress: addressFieldsSchema.optional(),
-  source: z.enum(OrderSourceEnum).optional().default(OrderSourceEnum.WEB),
+  source: z.enum(OrderSourceValue).optional().default(OrderSourceValue.WEB),
   // ISO 4217 alphabetic code — exactly 3 uppercase letters. The Currency VO
   // does its own check, but rejecting "abc"/"123" at the route gives a
   // cleaner 400 instead of a 422 from the domain.
@@ -108,7 +109,7 @@ export const createOrderSchema = z.object({
 // further rejects invalid transitions (e.g. paid → created); this is the
 // vocabulary-level gate.
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(OrderStatusEnum),
+  status: z.enum(OrderStatusValue),
 });
 
 export const updateOrderTotalsSchema = z.object({

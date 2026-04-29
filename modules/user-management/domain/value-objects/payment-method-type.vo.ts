@@ -1,7 +1,8 @@
-import {
-  DomainValidationError,
-} from "../errors/user-management.errors";
+import { DomainValidationError } from "../errors/user-management.errors";
 
+// The canonical TS enum for payment method types lives in this file
+// alongside helper methods (namespace-augmented) — not in a separate
+// `enums/` directory.
 export enum PaymentMethodType {
   CARD = "card",
   WALLET = "wallet",
@@ -9,6 +10,14 @@ export enum PaymentMethodType {
   COD = "cod",
   GIFT_CARD = "gift_card",
 }
+
+const ALL_PAYMENT_METHOD_TYPES: readonly PaymentMethodType[] = [
+  PaymentMethodType.CARD,
+  PaymentMethodType.WALLET,
+  PaymentMethodType.BANK,
+  PaymentMethodType.COD,
+  PaymentMethodType.GIFT_CARD,
+];
 
 export namespace PaymentMethodType {
   export function fromString(type: string): PaymentMethodType {
@@ -39,13 +48,7 @@ export namespace PaymentMethodType {
   }
 
   export function getAllValues(): PaymentMethodType[] {
-    return [
-      PaymentMethodType.CARD,
-      PaymentMethodType.WALLET,
-      PaymentMethodType.BANK,
-      PaymentMethodType.COD,
-      PaymentMethodType.GIFT_CARD,
-    ];
+    return [...ALL_PAYMENT_METHOD_TYPES];
   }
 
   export function getDisplayName(type: PaymentMethodType): string {

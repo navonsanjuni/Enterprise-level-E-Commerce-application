@@ -5,6 +5,7 @@ import {
 } from "../../../domain/repositories/order-shipment.repository";
 import { OrderShipment } from "../../../domain/entities/order-shipment.entity";
 import { OrderId } from "../../../domain/value-objects/order-id.vo";
+import { ShipmentId } from "../../../domain/value-objects/shipment-id.vo";
 
 type OrderShipmentRow = Prisma.OrderShipmentGetPayload<Record<string, never>>;
 
@@ -26,7 +27,7 @@ export class OrderShipmentRepositoryImpl implements IOrderShipmentRepository {
 
   private toEntity(row: OrderShipmentRow): OrderShipment {
     return OrderShipment.fromPersistence({
-      shipmentId: row.id,
+      shipmentId: ShipmentId.fromString(row.id),
       orderId: row.orderId,
       carrier: row.carrier ?? undefined,
       service: row.service ?? undefined,
@@ -51,16 +52,17 @@ export class OrderShipmentRepositoryImpl implements IOrderShipmentRepository {
       shippedAt: shipment.shippedAt ?? null,
       deliveredAt: shipment.deliveredAt ?? null,
     };
+    const shipmentIdStr = shipment.shipmentId.getValue();
     await this.prisma.orderShipment.upsert({
-      where: { id: shipment.shipmentId },
-      create: { id: shipment.shipmentId, ...data },
+      where: { id: shipmentIdStr },
+      create: { id: shipmentIdStr, ...data },
       update: data,
     });
   }
 
-  async delete(shipmentId: string): Promise<void> {
+  async delete(shipmentId: ShipmentId): Promise<void> {
     await this.prisma.orderShipment.delete({
-      where: { id: shipmentId },
+      where: { id: shipmentId.getValue() },
     });
   }
 
@@ -72,9 +74,9 @@ export class OrderShipmentRepositoryImpl implements IOrderShipmentRepository {
 
   // ─── Reads ────────────────────────────────────────────────────────────────
 
-  async findById(shipmentId: string): Promise<OrderShipment | null> {
+  async findById(shipmentId: ShipmentId): Promise<OrderShipment | null> {
     const row = await this.prisma.orderShipment.findUnique({
-      where: { id: shipmentId },
+      where: { id: shipmentId.getValue() },
     });
     return row ? this.toEntity(row) : null;
   }
@@ -136,9 +138,9 @@ export class OrderShipmentRepositoryImpl implements IOrderShipmentRepository {
     });
   }
 
-  async exists(shipmentId: string): Promise<boolean> {
+  async exists(shipmentId: ShipmentId): Promise<boolean> {
     const count = await this.prisma.orderShipment.count({
-      where: { id: shipmentId },
+      where: { id: shipmentId.getValue() },
     });
     return count > 0;
   }

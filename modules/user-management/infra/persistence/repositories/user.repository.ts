@@ -17,8 +17,8 @@ import { User } from '../../../domain/entities/user.entity';
 import { UserId } from '../../../domain/value-objects/user-id.vo';
 import { Email } from '../../../domain/value-objects/email.vo';
 import { Phone } from '../../../domain/value-objects/phone.vo';
-import { UserRole } from '../../../domain/enums/user-role.enum';
-import { UserStatus } from '../../../domain/enums/user-status.enum';
+import { UserRole } from '../../../domain/value-objects/user-role.vo';
+import { UserStatus } from '../../../domain/value-objects/user-status.vo';
 import { InvalidOperationError } from '../../../domain/errors/user-management.errors';
 
 export class UserRepository

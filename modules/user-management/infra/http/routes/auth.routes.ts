@@ -3,7 +3,10 @@ import { AuthController } from "../controllers/auth.controller";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import { validateBody, toJsonSchema } from "../validation/validator";
-import { successResponse } from "@/api/src/shared/http/response-schemas";
+import {
+  successResponse,
+  actionSuccessResponse,
+} from "@/api/src/shared/http/response-schemas";
 import {
   registerSchema,
   loginSchema,
@@ -141,7 +144,7 @@ export async function authRoutes(
         security: [{ bearerAuth: [] }],
         body: logoutBodyJson,
         response: {
-          200: successResponse({ type: "object" }),
+          200: actionSuccessResponse(),
         },
       },
     },
@@ -324,7 +327,7 @@ export async function authRoutes(
         security: [{ bearerAuth: [] }],
         body: deleteAccountBodyJson,
         response: {
-          200: successResponse({ type: "object" }),
+          200: actionSuccessResponse(),
         },
       },
     },

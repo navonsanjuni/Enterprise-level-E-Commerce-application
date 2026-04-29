@@ -9,6 +9,7 @@ import {
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import {
   successResponse,
+  actionSuccessResponse,
   paginatedResponse,
 } from "@/api/src/shared/http/response-schemas";
 import { NotificationController } from "../controllers/notification.controller";
@@ -117,8 +118,8 @@ export async function notificationRoutes(
         tags: ["Engagement - Notifications"],
         security: [{ bearerAuth: [] }],
         params: notificationIdParamsJson,
-        response: {
-          200: successResponse({ type: "object" }),
+        response: { 
+          200: actionSuccessResponse(),
         },
       },
     },

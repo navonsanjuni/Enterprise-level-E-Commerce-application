@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { Region } from "../../../domain/enums/product-catalog.enums";
+import { Region } from "../../../domain/value-objects";
 import {
   MIN_PAGE,
   MIN_LIMIT,
   MAX_PAGE_SIZE,
-} from "../../../application/constants/pagination.constants";
+} from "../../../domain/constants/pagination.constants";
 
 const ALL_REGIONS = Object.values(Region) as [Region, ...Region[]];
 

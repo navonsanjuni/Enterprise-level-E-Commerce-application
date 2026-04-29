@@ -6,7 +6,7 @@ import { AddressId } from '../value-objects/address-id.vo';
 import {
   DomainValidationError,
 } from '../errors/user-management.errors';
-import { PaymentMethodType } from '../enums/payment-method-type.enum';
+import { PaymentMethodType } from '../value-objects/payment-method-type.vo';
 
 // ============================================================================
 // Domain Events

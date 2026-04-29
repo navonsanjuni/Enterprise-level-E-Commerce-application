@@ -1,6 +1,6 @@
 import { PaymentMethodService } from '../services/payment-method.service';
 import { PaymentMethodDTO } from '../../domain/entities/payment-method.entity';
-import { PaymentMethodType } from '../../domain/enums/payment-method-type.enum';
+import { PaymentMethodType } from '../../domain/value-objects/payment-method-type.vo';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface AddPaymentMethodCommand extends ICommand {

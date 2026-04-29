@@ -1,7 +1,8 @@
-import { ICartRepository, CartWithCheckoutInfo } from "../../domain/repositories/cart.repository";
+import { ICartRepository } from "../../domain/repositories/cart.repository";
 import { IReservationRepository } from "../../domain/repositories/reservation.repository";
 import { Reservation } from "../../domain/entities/reservation.entity";
 import { ICheckoutRepository } from "../../domain/repositories/checkout.repository";
+import { ReservationOrchestrator } from "./reservation-orchestrator.service";
 import {
   ShoppingCart,
   CreateShoppingCartData,
@@ -169,6 +170,7 @@ export class CartManagementService {
     private readonly productMediaRepository: IExternalProductMediaRepository,
     private readonly mediaAssetRepository: IExternalMediaAssetRepository,
     private readonly settingsService: IExternalSettingsService,
+    private readonly reservationOrchestrator: ReservationOrchestrator,
   ) {}
 
   // Cart creation
@@ -337,21 +339,6 @@ export class CartManagementService {
     return cart ? await this.mapCartToDto(cart) : null;
   }
 
-  /**
-   * Explicitly renew expired reservations for all items in a cart.
-   * Must be called as a command (write operation), not during reads.
-   */
-  async refreshReservations(
-    cartId: string,
-    userId?: string,
-    guestToken?: string,
-  ): Promise<void> {
-    const cart = await this.cartRepository.findById(CartId.fromString(cartId));
-    if (!cart) throw new CartNotFoundError(cartId);
-    this.validateCartOwnership(cart, userId, guestToken);
-    await this.refreshCartReservations(cart);
-  }
-
   // Item management
   async addToCart(dto: AddToCartDto): Promise<CartDto> {
     let cart: ShoppingCart | null = null;
@@ -476,9 +463,9 @@ export class CartManagementService {
       }
     } else {
       // Create new reservation
-      await this.reservationRepository.reserveInventory(
-        cart.cartId,
-        VariantId.fromString(dto.variantId),
+      await this.reservationOrchestrator.reserveInventory(
+        cart.cartId.getValue(),
+        dto.variantId,
         dto.quantity,
       );
     }
@@ -663,9 +650,9 @@ export class CartManagementService {
 
         if (needsRenewal) {
           try {
-            await this.reservationRepository.reserveInventory(
-              cart.cartId,
-              item.variantId,
+            await this.reservationOrchestrator.reserveInventory(
+              cart.cartId.getValue(),
+              item.variantId.getValue(),
               quantity,
             );
           } catch (err) {
@@ -994,20 +981,4 @@ export class CartManagementService {
     await this.cartRepository.save(cart);
   }
 
-  async getCartWithCheckoutInfo(
-    cartId: string,
-    userId?: string,
-    guestToken?: string,
-  ): Promise<CartWithCheckoutInfo | null> {
-    const cart = await this.cartRepository.findById(CartId.fromString(cartId));
-    if (!cart) {
-      throw new CartNotFoundError(cartId);
-    }
-
-    this.validateCartOwnership(cart, userId, guestToken);
-
-    return await this.cartRepository.getCartWithCheckoutInfo(
-      cart.cartId,
-    );
-  }
 }

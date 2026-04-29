@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentMethodType } from "../../../domain/enums/payment-method-type.enum";
+import { PaymentMethodType } from "../../../domain/value-objects/payment-method-type.vo";
 
 // ============================================================================
 // Helpers

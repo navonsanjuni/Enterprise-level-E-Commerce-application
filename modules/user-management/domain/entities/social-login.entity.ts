@@ -3,7 +3,7 @@ import { DomainEvent } from '../../../../packages/core/src/domain/events/domain-
 import { UserId } from '../value-objects/user-id.vo';
 import { SocialLoginId } from '../value-objects/social-login-id.vo';
 import { DomainValidationError } from '../errors/user-management.errors';
-import { SocialProvider } from '../enums/social-provider.enum';
+import { SocialProvider } from '../value-objects/social-provider.vo';
 
 // ============================================================================
 // Domain Events

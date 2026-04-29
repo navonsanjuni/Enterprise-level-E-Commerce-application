@@ -3,7 +3,7 @@ import { ProductTagDTO } from "../../domain/entities/product-tag.entity";
 import { ProductTagManagementService } from "../services/product-tag-management.service";
 import { ProductTagQueryOptions } from "../../domain/repositories/product-tag.repository";
 import { PaginatedResult } from "../../../../packages/core/src/domain/interfaces/paginated-result.interface";
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from "../constants/pagination.constants";
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from "../../domain/constants/pagination.constants";
 
 export interface ListProductTagsQuery extends IQuery {
   readonly page?: number;

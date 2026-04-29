@@ -1,6 +1,7 @@
-import * as bcrypt from "bcryptjs";
-import { DomainValidationError } from "../../domain/errors/user-management.errors";
-
+// Port (interface only) for password hashing. The bcrypt-backed implementation
+// lives in `infra/security/bcrypt-password-hasher.adapter.ts` so that
+// third-party crypto libraries don't leak into the application layer. Service
+// callers depend on this interface; the container wires the adapter at boot.
 export interface IPasswordHasherService {
   hash(password: string | null): Promise<string | null>;
   verify(password: string, hash: string | null): Promise<boolean>;
@@ -9,84 +10,4 @@ export interface IPasswordHasherService {
     score: number;
     feedback: string[];
   };
-}
-
-export class PasswordHasherService implements IPasswordHasherService {
-  private readonly saltRounds: number;
-
-  constructor(saltRounds: number = 12) {
-    this.saltRounds = saltRounds;
-  }
-
-  async hash(password: string | null): Promise<string | null> {
-    if (password === null || password === undefined) {
-      return null;
-    }
-
-    if (password.length === 0) {
-      throw new DomainValidationError("Password cannot be empty");
-    }
-
-    return bcrypt.hash(password, this.saltRounds);
-  }
-
-  async verify(password: string, hash: string | null): Promise<boolean> {
-    if (!hash) return false;
-    if (!password) return false;
-
-    try {
-      return await bcrypt.compare(password, hash);
-    } catch {
-      return false;
-    }
-  }
-
-  validatePasswordStrength(password: string): {
-    isValid: boolean;
-    score: number;
-    feedback: string[];
-  } {
-    const feedback: string[] = [];
-    let score = 0;
-
-    if (password.length >= 8) {
-      score += 1;
-    } else {
-      feedback.push("Password must be at least 8 characters long");
-    }
-
-    if (/[a-z]/.test(password)) {
-      score += 1;
-    } else {
-      feedback.push("Password must contain at least one lowercase letter");
-    }
-
-    if (/[A-Z]/.test(password)) {
-      score += 1;
-    } else {
-      feedback.push("Password must contain at least one uppercase letter");
-    }
-
-    if (/\d/.test(password)) {
-      score += 1;
-    } else {
-      feedback.push("Password must contain at least one number");
-    }
-
-    if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-      score += 1;
-    } else {
-      feedback.push("Password must contain at least one special character");
-    }
-
-    if (password.length >= 12) {
-      score += 1;
-    }
-
-    return {
-      isValid: score >= 4,
-      score,
-      feedback,
-    };
-  }
 }

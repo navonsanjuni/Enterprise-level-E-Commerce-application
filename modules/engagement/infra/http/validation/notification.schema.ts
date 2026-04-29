@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { NotificationTypeValue } from "../../../domain/value-objects/notification-type.vo";
 import { ChannelTypeValue } from "../../../domain/value-objects/channel-type.vo";
+import { paginationQuerySchema } from "./validator";
+// Re-export the shared canonical pagination schema and type so existing
+// route imports from this schema file keep working.
+export { paginationQuerySchema };
+export type { PaginationQuery } from "./validator";
 
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
@@ -9,11 +14,6 @@ export const notificationIdParamsSchema = z.object({
 });
 
 // ── Query Schemas ─────────────────────────────────────────────────────────────
-
-export const paginationQuerySchema = z.object({
-  limit: z.coerce.number().int().positive().optional(),
-  offset: z.coerce.number().int().min(0).optional(),
-});
 
 export const notificationsByTypeQuerySchema = paginationQuerySchema.extend({
   type: z.enum(NotificationTypeValue),
@@ -53,6 +53,5 @@ export const notificationResponseSchema = {
 // ── Inferred Types ────────────────────────────────────────────────────────────
 
 export type NotificationIdParams = z.infer<typeof notificationIdParamsSchema>;
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
 export type NotificationsByTypeQuery = z.infer<typeof notificationsByTypeQuerySchema>;
 export type ScheduleNotificationBody = z.infer<typeof scheduleNotificationSchema>;

@@ -1,6 +1,6 @@
 import { IQuery, IQueryHandler } from "../../../../packages/core/src/application/cqrs";
 import { EditorialLookManagementService } from "../services/editorial-look-management.service";
-import { DEFAULT_SUGGESTIONS_LIMIT, MAX_SUGGESTIONS_LIMIT, MIN_LIMIT } from "../constants/pagination.constants";
+import { DEFAULT_SUGGESTIONS_LIMIT, MAX_SUGGESTIONS_LIMIT, MIN_LIMIT } from "../../domain/constants/pagination.constants";
 
 export interface GetPopularEditorialLookProductsQuery extends IQuery {
   readonly limit?: number;

@@ -9,6 +9,7 @@ import {
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import {
   successResponse,
+  actionSuccessResponse,
   paginatedResponse,
 } from "@/api/src/shared/http/response-schemas";
 import { AppointmentController } from "../controllers/appointment.controller";
@@ -146,7 +147,7 @@ export async function appointmentRoutes(
         security: [{ bearerAuth: [] }],
         params: appointmentIdParamsJson,
         response: {
-          200: successResponse({ type: "object" }),
+          200: actionSuccessResponse(),
         },
       },
     },
@@ -167,7 +168,7 @@ export async function appointmentRoutes(
         params: appointmentIdParamsJson,
         body: updateAppointmentBodyJson,
         response: {
-          200: successResponse({ type: "object" }),
+          200: actionSuccessResponse(),
         },
       },
     },

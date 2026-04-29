@@ -69,4 +69,9 @@ export interface IExternalStockService {
     locationId: string,
     quantity: number,
   ): Promise<unknown>;
+  releaseStock(
+    variantId: string,
+    locationId: string,
+    quantity: number,
+  ): Promise<unknown>;
 }

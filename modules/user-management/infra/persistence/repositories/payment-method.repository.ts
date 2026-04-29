@@ -6,7 +6,7 @@ import {
   PaymentMethod,
   PaymentMethodProps,
 } from "../../../domain/entities/payment-method.entity";
-import { PaymentMethodType } from "../../../domain/enums/payment-method-type.enum";
+import { PaymentMethodType } from "../../../domain/value-objects/payment-method-type.vo";
 import { PaymentMethodId } from "../../../domain/value-objects/payment-method-id.vo";
 import { UserId } from "../../../domain/value-objects/user-id.vo";
 import { AddressId } from "../../../domain/value-objects/address-id.vo";

@@ -2,7 +2,7 @@ import { AggregateRoot } from '../../../../packages/core/src/domain/aggregate-ro
 import { DomainEvent } from '../../../../packages/core/src/domain/events/domain-event';
 import { DomainValidationError } from '../errors';
 import { SizeGuideId } from '../value-objects/size-guide-id.vo';
-import { Region } from '../enums/product-catalog.enums';
+import { Region } from '../value-objects';
 
 // ── Domain Events ──────────────────────────────────────────────────────
 

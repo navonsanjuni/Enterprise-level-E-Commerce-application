@@ -2,10 +2,9 @@ import {
   IOrderEventRepository,
   OrderEventQueryOptions,
 } from "../../domain/repositories/order-event.repository";
-import { OrderEvent, OrderEventDTO } from "../../domain/entities/order-event.entity";
+import { OrderEvent, OrderEventDTO, OrderEventTypes } from "../../domain/entities/order-event.entity";
 import { OrderEventNotFoundError } from "../../domain/errors/order-management.errors";
 import { OrderId } from "../../domain/value-objects/order-id.vo";
-import { OrderEventTypes } from "../../domain/enums/order-event.enums";
 
 interface LogEventParams {
   orderId: string;

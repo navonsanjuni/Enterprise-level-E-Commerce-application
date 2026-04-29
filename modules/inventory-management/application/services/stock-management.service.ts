@@ -157,6 +157,30 @@ export class StockManagementService {
     return Stock.toDTO(stock);
   }
 
+  // Release a previously-reserved quantity back to available stock. The
+  // counterpart to `reserveStock` for cancellation flows. `unreserveStock`
+  // on the entity throws if the quantity exceeds the current `reserved`,
+  // so this is safe against double-release.
+  async releaseStock(
+    variantId: string,
+    locationId: string,
+    quantity: number,
+  ): Promise<StockDTO> {
+    const stock = await this.stockRepository.findByVariantAndLocation(
+      VariantId.fromString(variantId),
+      LocationId.fromString(locationId),
+    );
+
+    if (!stock) {
+      throw new StockNotFoundError(`${variantId} at ${locationId}`);
+    }
+
+    stock.unreserveStock(quantity);
+    await this.stockRepository.save(stock);
+
+    return Stock.toDTO(stock);
+  }
+
   async fulfillReservation(
     variantId: string,
     locationId: string,

@@ -3,7 +3,7 @@ import { MediaAssetDTO } from "../../domain/entities/media-asset.entity";
 import { MediaManagementService } from "../services/media-management.service";
 import { MediaAssetFilters } from "../../domain/repositories/media-asset.repository";
 import { PaginatedResult } from "../../../../packages/core/src/domain/interfaces/paginated-result.interface";
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from "../constants/pagination.constants";
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_LIMIT, MIN_PAGE } from "../../domain/constants/pagination.constants";
 
 export interface SearchMediaAssetsQuery extends IQuery {
   readonly page?: number;

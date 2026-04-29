@@ -10,6 +10,7 @@ import { Order } from "../../../domain/entities/order.entity";
 import { OrderItem } from "../../../domain/entities/order-item.entity";
 import { OrderAddress } from "../../../domain/entities/order-address.entity";
 import { OrderShipment } from "../../../domain/entities/order-shipment.entity";
+import { OrderStatusHistory } from "../../../domain/entities/order-status-history.entity";
 import {
   OrderId,
   OrderItemId,
@@ -20,6 +21,7 @@ import {
   OrderTotals,
   ProductSnapshot,
   AddressSnapshot,
+  ShipmentId,
   ProductSnapshotData,
   AddressSnapshotData,
 } from "../../../domain/value-objects";
@@ -104,7 +106,7 @@ export class OrderRepositoryImpl
 
     const shipments = row.shipments.map((shipment) =>
       OrderShipment.fromPersistence({
-        shipmentId: shipment.id,
+        shipmentId: ShipmentId.fromString(shipment.id),
         orderId: row.id,
         carrier: shipment.carrier ?? undefined,
         service: shipment.service ?? undefined,
@@ -140,6 +142,42 @@ export class OrderRepositoryImpl
   // saving an order will silently drop their satellite rows. Long-term: use
   // diff-based upsert/delete instead of wholesale recreation.
   async save(order: Order): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await this.persistOrderInTransaction(tx, order);
+    });
+    await this.dispatchEvents(order);
+  }
+
+  // Atomic create-time write: persists the order aggregate AND its initial
+  // status-history audit row in a single transaction. Previously the service
+  // issued three sequential, independent saves — a failure between them
+  // could leave a CREATED order with no audit trail. This collapses those
+  // writes into one rollback boundary.
+  async saveWithStatusHistory(
+    order: Order,
+    statusHistory: OrderStatusHistory,
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await this.persistOrderInTransaction(tx, order);
+      await tx.orderStatusHistory.create({
+        data: {
+          orderId: statusHistory.orderId,
+          fromStatus: (statusHistory.fromStatus?.getValue() ?? null) as PrismaOrderStatusEnum | null,
+          toStatus: statusHistory.toStatus.getValue() as PrismaOrderStatusEnum,
+          changedBy: statusHistory.changedBy ?? null,
+        },
+      });
+    });
+    await this.dispatchEvents(order);
+  }
+
+  // Shared persistence logic for `save` / `saveWithStatusHistory`. Operates
+  // on a Prisma transaction client so callers can compose it into larger
+  // atomic writes.
+  private async persistOrderInTransaction(
+    tx: Prisma.TransactionClient,
+    order: Order,
+  ): Promise<void> {
     const orderId = order.id.getValue();
     const items = order.items;
     const address = order.address;
@@ -157,59 +195,55 @@ export class OrderRepositoryImpl
       updatedAt: order.updatedAt,
     };
 
-    await this.prisma.$transaction(async (tx) => {
-      await tx.order.upsert({
-        where: { id: orderId },
-        create: { id: orderId, ...orderData },
-        update: orderData,
-      });
-
-      await tx.orderItem.deleteMany({ where: { orderId } });
-      if (items.length > 0) {
-        await tx.orderItem.createMany({
-          data: items.map((item) => ({
-            id: item.orderItemId.getValue(),
-            orderId,
-            variantId: item.variantId,
-            qty: item.quantity,
-            productSnapshot: item.productSnapshot.getValue() as unknown as Prisma.InputJsonValue,
-            isGift: item.isGift,
-            giftMessage: item.giftMessage,
-          })),
-        });
-      }
-
-      if (address) {
-        const billingSnapshot = address.billingAddress.getValue() as unknown as Prisma.InputJsonValue;
-        const shippingSnapshot = address.shippingAddress.getValue() as unknown as Prisma.InputJsonValue;
-        await tx.orderAddress.upsert({
-          where: { orderId },
-          create: { orderId, billingSnapshot, shippingSnapshot },
-          update: { billingSnapshot, shippingSnapshot },
-        });
-      } else {
-        await tx.orderAddress.deleteMany({ where: { orderId } });
-      }
-
-      await tx.orderShipment.deleteMany({ where: { orderId } });
-      if (shipments.length > 0) {
-        await tx.orderShipment.createMany({
-          data: shipments.map((shipment) => ({
-            id: shipment.shipmentId,
-            orderId,
-            carrier: shipment.carrier,
-            service: shipment.service,
-            trackingNo: shipment.trackingNumber,
-            giftReceipt: shipment.giftReceipt,
-            pickupLocationId: shipment.pickupLocationId,
-            shippedAt: shipment.shippedAt,
-            deliveredAt: shipment.deliveredAt,
-          })),
-        });
-      }
+    await tx.order.upsert({
+      where: { id: orderId },
+      create: { id: orderId, ...orderData },
+      update: orderData,
     });
 
-    await this.dispatchEvents(order);
+    await tx.orderItem.deleteMany({ where: { orderId } });
+    if (items.length > 0) {
+      await tx.orderItem.createMany({
+        data: items.map((item) => ({
+          id: item.orderItemId.getValue(),
+          orderId,
+          variantId: item.variantId,
+          qty: item.quantity,
+          productSnapshot: item.productSnapshot.getValue() as unknown as Prisma.InputJsonValue,
+          isGift: item.isGift,
+          giftMessage: item.giftMessage,
+        })),
+      });
+    }
+
+    if (address) {
+      const billingSnapshot = address.billingAddress.getValue() as unknown as Prisma.InputJsonValue;
+      const shippingSnapshot = address.shippingAddress.getValue() as unknown as Prisma.InputJsonValue;
+      await tx.orderAddress.upsert({
+        where: { orderId },
+        create: { orderId, billingSnapshot, shippingSnapshot },
+        update: { billingSnapshot, shippingSnapshot },
+      });
+    } else {
+      await tx.orderAddress.deleteMany({ where: { orderId } });
+    }
+
+    await tx.orderShipment.deleteMany({ where: { orderId } });
+    if (shipments.length > 0) {
+      await tx.orderShipment.createMany({
+        data: shipments.map((shipment) => ({
+          id: shipment.shipmentId.getValue(),
+          orderId,
+          carrier: shipment.carrier,
+          service: shipment.service,
+          trackingNo: shipment.trackingNumber,
+          giftReceipt: shipment.giftReceipt,
+          pickupLocationId: shipment.pickupLocationId,
+          shippedAt: shipment.shippedAt,
+          deliveredAt: shipment.deliveredAt,
+        })),
+      });
+    }
   }
 
   async delete(orderId: OrderId): Promise<void> {

@@ -7,6 +7,7 @@ import {
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import {
   successResponse,
+  actionSuccessResponse,
 } from "@/api/src/shared/http/response-schemas";
 import { NewsletterController } from "../controllers/newsletter.controller";
 import { validateBody, validateQuery, toJsonSchema } from "../validation/validator";
@@ -109,7 +110,7 @@ export async function newsletterRoutes(
         tags: ["Engagement - Newsletter"],
         body: unsubscribeNewsletterBodyJson,
         response: {
-          200: successResponse({ type: "object" }),
+          200: actionSuccessResponse(),
         },
       },
     },
