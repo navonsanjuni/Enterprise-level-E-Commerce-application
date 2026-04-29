@@ -10,6 +10,9 @@ import {
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { validateQuery, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   searchQuerySchema,
   searchSuggestionsQuerySchema,
   searchFiltersQuerySchema,
@@ -53,15 +56,7 @@ export async function searchRoutes(
         summary: "Search Products",
         querystring: searchQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: searchResultsResponseSchema,
-            },
-          },
+          200: successResponse(searchResultsResponseSchema),
         },
       },
     },
@@ -80,15 +75,7 @@ export async function searchRoutes(
         summary: "Get Search Suggestions",
         querystring: searchSuggestionsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: searchSuggestionsResponseSchema,
-            },
-          },
+          200: successResponse(searchSuggestionsResponseSchema),
         },
       },
     },
@@ -105,15 +92,7 @@ export async function searchRoutes(
         tags: ["Search"],
         summary: "Get Popular Searches",
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: popularSearchesResponseSchema,
-            },
-          },
+          200: successResponse(popularSearchesResponseSchema),
         },
       },
     },
@@ -132,15 +111,7 @@ export async function searchRoutes(
         summary: "Get Search Filters",
         querystring: searchFiltersQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: searchFiltersResponseSchema,
-            },
-          },
+          200: successResponse(searchFiltersResponseSchema),
         },
       },
     },
@@ -159,15 +130,7 @@ export async function searchRoutes(
         summary: "Get Search Statistics",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: searchStatsResponseSchema,
-            },
-          },
+          200: successResponse(searchStatsResponseSchema),
         },
       },
     },

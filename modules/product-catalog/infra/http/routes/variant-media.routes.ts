@@ -15,6 +15,10 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   variantMediaParamsSchema,
   variantMediaAssetParamsSchema,
   variantDuplicateParamsSchema,
@@ -84,15 +88,7 @@ export async function variantMediaRoutes(
         summary: "Get Variant Media",
         params: variantMediaParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: variantMediaSummaryResponseSchema,
-            },
-          },
+          200: successResponse(variantMediaSummaryResponseSchema),
         },
       },
     },
@@ -115,15 +111,7 @@ export async function variantMediaRoutes(
         params: productVariantMediaParamsJson,
         querystring: productVariantMediaQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: productVariantMediaResponseSchema,
-            },
-          },
+          200: successResponse(productVariantMediaResponseSchema),
         },
       },
     },
@@ -144,15 +132,7 @@ export async function variantMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: assetParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: variantsUsingAssetResponseSchema,
-            },
-          },
+          200: successResponse(variantsUsingAssetResponseSchema),
         },
       },
     },
@@ -173,15 +153,7 @@ export async function variantMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: assetParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: assetUsageCountResponseSchema,
-            },
-          },
+          200: successResponse(assetUsageCountResponseSchema),
         },
       },
     },
@@ -202,15 +174,7 @@ export async function variantMediaRoutes(
         security: [{ bearerAuth: [] }],
         querystring: unusedAssetsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: unusedAssetsResponseSchema,
-            },
-          },
+          200: successResponse(unusedAssetsResponseSchema),
         },
       },
     },
@@ -231,15 +195,7 @@ export async function variantMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: variantMediaParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: variantMediaStatisticsResponseSchema,
-            },
-          },
+          200: successResponse(variantMediaStatisticsResponseSchema),
         },
       },
     },
@@ -260,15 +216,7 @@ export async function variantMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: variantMediaParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: validateVariantMediaResponseSchema,
-            },
-          },
+          200: successResponse(validateVariantMediaResponseSchema),
         },
       },
     },
@@ -287,15 +235,7 @@ export async function variantMediaRoutes(
         summary: "Get Color Variant Media",
         params: colorVariantParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: colorVariantMediaResponseSchema,
-            },
-          },
+          200: successResponse(colorVariantMediaResponseSchema),
         },
       },
     },
@@ -314,15 +254,7 @@ export async function variantMediaRoutes(
         summary: "Get Size Variant Media",
         params: sizeVariantParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: sizeVariantMediaResponseSchema,
-            },
-          },
+          200: successResponse(sizeVariantMediaResponseSchema),
         },
       },
     },
@@ -344,14 +276,7 @@ export async function variantMediaRoutes(
         security: [{ bearerAuth: [] }],
         body: copyVariantMediaBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-            },
-          },
+          201: successResponse({ type: "object" }, 201),
         },
       },
     },
@@ -371,14 +296,7 @@ export async function variantMediaRoutes(
         security: [{ bearerAuth: [] }],
         body: addMediaToMultipleVariantsBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-            },
-          },
+          201: successResponse({ type: "object" }, 201),
         },
       },
     },
@@ -399,14 +317,7 @@ export async function variantMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: variantDuplicateParamsJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-            },
-          },
+          201: successResponse({ type: "object" }, 201),
         },
       },
     },
@@ -428,10 +339,7 @@ export async function variantMediaRoutes(
         params: variantMediaParamsJson,
         body: setVariantMediaBodyJson,
         response: {
-          204: {
-            description: "Variant media set successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -453,14 +361,7 @@ export async function variantMediaRoutes(
         params: variantMediaParamsJson,
         body: addMultipleMediaToVariantBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-            },
-          },
+          201: successResponse({ type: "object" }, 201),
         },
       },
     },
@@ -482,14 +383,7 @@ export async function variantMediaRoutes(
         params: variantMediaParamsJson,
         body: addMediaToVariantBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-            },
-          },
+          201: successResponse({ type: "object" }, 201),
         },
       },
     },
@@ -510,10 +404,7 @@ export async function variantMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: variantMediaParamsJson,
         response: {
-          204: {
-            description: "All variant media removed successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -534,10 +425,7 @@ export async function variantMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: variantMediaAssetParamsJson,
         response: {
-          204: {
-            description: "Media removed from variant successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },

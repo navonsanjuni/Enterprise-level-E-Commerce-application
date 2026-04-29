@@ -15,6 +15,10 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   tagParamsSchema,
   tagByTagIdParamsSchema,
   tagNameParamsSchema,
@@ -82,15 +86,7 @@ export async function productTagRoutes(
         summary: "List Product Tags",
         querystring: listTagsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedTagsResponseSchema,
-            },
-          },
+          200: successResponse(paginatedTagsResponseSchema),
         },
       },
     },
@@ -109,15 +105,7 @@ export async function productTagRoutes(
         summary: "Get Tag by Name",
         params: tagNameParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: tagResponseSchema,
-            },
-          },
+          200: successResponse(tagResponseSchema),
         },
       },
     },
@@ -136,15 +124,7 @@ export async function productTagRoutes(
         summary: "Validate Tag Name",
         params: tagNameParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: tagValidationResponseSchema,
-            },
-          },
+          200: successResponse(tagValidationResponseSchema),
         },
       },
     },
@@ -163,15 +143,7 @@ export async function productTagRoutes(
         summary: "Get Tag Suggestions",
         querystring: tagSuggestionsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: tagsArrayResponseSchema,
-            },
-          },
+          200: successResponse(tagsArrayResponseSchema),
         },
       },
     },
@@ -190,15 +162,7 @@ export async function productTagRoutes(
         summary: "Get Tag Statistics",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: tagStatsResponseSchema,
-            },
-          },
+          200: successResponse(tagStatsResponseSchema),
         },
       },
     },
@@ -217,15 +181,7 @@ export async function productTagRoutes(
         summary: "Get Most Used Tags",
         querystring: mostUsedTagsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: mostUsedTagsResponseSchema,
-            },
-          },
+          200: successResponse(mostUsedTagsResponseSchema),
         },
       },
     },
@@ -244,15 +200,7 @@ export async function productTagRoutes(
         summary: "Get Product Tag",
         params: tagParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: tagResponseSchema,
-            },
-          },
+          200: successResponse(tagResponseSchema),
         },
       },
     },
@@ -275,15 +223,7 @@ export async function productTagRoutes(
         params: tagByTagIdParamsJson,
         querystring: tagProductsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedTagProductsResponseSchema,
-            },
-          },
+          200: successResponse(paginatedTagProductsResponseSchema),
         },
       },
     },
@@ -302,15 +242,7 @@ export async function productTagRoutes(
         summary: "Get Product Tags",
         params: productTagParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: tagsArrayResponseSchema,
-            },
-          },
+          200: successResponse(tagsArrayResponseSchema),
         },
       },
     },
@@ -332,15 +264,7 @@ export async function productTagRoutes(
         security: [{ bearerAuth: [] }],
         body: bulkCreateTagsBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: tagsArrayResponseSchema,
-            },
-          },
+          201: successResponse(tagsArrayResponseSchema, 201),
         },
       },
     },
@@ -360,15 +284,7 @@ export async function productTagRoutes(
         security: [{ bearerAuth: [] }],
         body: createTagBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: tagResponseSchema,
-            },
-          },
+          201: successResponse(tagResponseSchema, 201),
         },
       },
     },
@@ -390,10 +306,7 @@ export async function productTagRoutes(
         params: productTagParamsJson,
         body: associateTagsBodyJson,
         response: {
-          204: {
-            description: "Tags associated with product successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -415,15 +328,7 @@ export async function productTagRoutes(
         params: tagParamsJson,
         body: updateTagBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: tagResponseSchema,
-            },
-          },
+          200: successResponse(tagResponseSchema),
         },
       },
     },
@@ -443,10 +348,7 @@ export async function productTagRoutes(
         security: [{ bearerAuth: [] }],
         body: bulkDeleteTagsBodyJson,
         response: {
-          204: {
-            description: "Tags bulk deleted successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -467,10 +369,7 @@ export async function productTagRoutes(
         security: [{ bearerAuth: [] }],
         params: tagParamsJson,
         response: {
-          204: {
-            description: "Tag deleted successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -491,10 +390,7 @@ export async function productTagRoutes(
         security: [{ bearerAuth: [] }],
         params: productTagAssocParamsJson,
         response: {
-          204: {
-            description: "Tag removed from product successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },

@@ -15,6 +15,10 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   listProductsSchema,
   createProductSchema,
   updateProductSchema,
@@ -60,15 +64,7 @@ export async function productRoutes(
         summary: "List Products",
         querystring: listProductsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedProductsResponseSchema,
-            },
-          },
+          200: successResponse(paginatedProductsResponseSchema),
         },
       },
     },
@@ -87,15 +83,7 @@ export async function productRoutes(
         summary: "Get Product by Slug",
         params: productSlugParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: productResponseSchema,
-            },
-          },
+          200: successResponse(productResponseSchema),
         },
       },
     },
@@ -114,15 +102,7 @@ export async function productRoutes(
         summary: "Get Product by ID",
         params: productParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: productResponseSchema,
-            },
-          },
+          200: successResponse(productResponseSchema),
         },
       },
     },
@@ -144,15 +124,7 @@ export async function productRoutes(
         security: [{ bearerAuth: [] }],
         body: createProductBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: productResponseSchema,
-            },
-          },
+          201: successResponse(productResponseSchema, 201),
         },
       },
     },
@@ -174,15 +146,7 @@ export async function productRoutes(
         params: productParamsJson,
         body: updateProductBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: productResponseSchema,
-            },
-          },
+          200: successResponse(productResponseSchema),
         },
       },
     },
@@ -203,10 +167,7 @@ export async function productRoutes(
         security: [{ bearerAuth: [] }],
         params: productParamsJson,
         response: {
-          204: {
-            description: "Product deleted successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },

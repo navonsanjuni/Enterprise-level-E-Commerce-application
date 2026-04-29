@@ -15,6 +15,10 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   productMediaParamsSchema,
   productMediaAssetParamsSchema,
   assetIdParamsSchema,
@@ -75,15 +79,7 @@ export async function productMediaRoutes(
         params: productMediaParamsJson,
         querystring: getProductMediaQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: productMediaSummaryResponseSchema,
-            },
-          },
+          200: successResponse(productMediaSummaryResponseSchema),
         },
       },
     },
@@ -104,15 +100,7 @@ export async function productMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: productMediaParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: productMediaStatisticsResponseSchema,
-            },
-          },
+          200: successResponse(productMediaStatisticsResponseSchema),
         },
       },
     },
@@ -133,15 +121,7 @@ export async function productMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: productMediaParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: productMediaValidationResponseSchema,
-            },
-          },
+          200: successResponse(productMediaValidationResponseSchema),
         },
       },
     },
@@ -162,15 +142,7 @@ export async function productMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: assetIdParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: productsUsingAssetResponseSchema,
-            },
-          },
+          200: successResponse(productsUsingAssetResponseSchema),
         },
       },
     },
@@ -191,15 +163,7 @@ export async function productMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: assetIdParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: productMediaAssetUsageCountResponseSchema,
-            },
-          },
+          200: successResponse(productMediaAssetUsageCountResponseSchema),
         },
       },
     },
@@ -223,10 +187,7 @@ export async function productMediaRoutes(
         params: productMediaParamsJson,
         body: setProductCoverImageBodyJson,
         response: {
-          204: {
-            description: "Product cover image set successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -248,10 +209,7 @@ export async function productMediaRoutes(
         params: productMediaParamsJson,
         body: reorderProductMediaBodyJson,
         response: {
-          204: {
-            description: "Product media reordered successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -272,14 +230,7 @@ export async function productMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: duplicateProductMediaParamsJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-            },
-          },
+          201: successResponse({ type: "object" }, 201),
         },
       },
     },
@@ -301,15 +252,7 @@ export async function productMediaRoutes(
         params: productMediaParamsJson,
         body: addMediaToProductBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: addMediaToProductResponseSchema,
-            },
-          },
+          201: successResponse(addMediaToProductResponseSchema, 201),
         },
       },
     },
@@ -331,10 +274,7 @@ export async function productMediaRoutes(
         params: productMediaParamsJson,
         body: setProductMediaBodyJson,
         response: {
-          204: {
-            description: "Product media set successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -355,10 +295,7 @@ export async function productMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: productMediaParamsJson,
         response: {
-          204: {
-            description: "Product cover image removed successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -379,10 +316,7 @@ export async function productMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: productMediaParamsJson,
         response: {
-          204: {
-            description: "All product media removed successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -403,10 +337,7 @@ export async function productMediaRoutes(
         security: [{ bearerAuth: [] }],
         params: productMediaAssetParamsJson,
         response: {
-          204: {
-            description: "Media removed from product successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },

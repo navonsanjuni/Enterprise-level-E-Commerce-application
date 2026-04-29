@@ -15,6 +15,10 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   mediaParamsSchema,
   listMediaSchema,
   createMediaSchema,
@@ -59,15 +63,7 @@ export async function mediaRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listMediaQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedMediaResponseSchema,
-            },
-          },
+          200: successResponse(paginatedMediaResponseSchema),
         },
       },
     },
@@ -87,15 +83,7 @@ export async function mediaRoutes(
         security: [{ bearerAuth: [] }],
         params: mediaParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: mediaResponseSchema,
-            },
-          },
+          200: successResponse(mediaResponseSchema),
         },
       },
     },
@@ -116,15 +104,7 @@ export async function mediaRoutes(
         security: [{ bearerAuth: [] }],
         body: createMediaBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: mediaResponseSchema,
-            },
-          },
+          201: successResponse(mediaResponseSchema, 201),
         },
       },
     },
@@ -145,15 +125,7 @@ export async function mediaRoutes(
         params: mediaParamsJson,
         body: updateMediaBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: mediaResponseSchema,
-            },
-          },
+          200: successResponse(mediaResponseSchema),
         },
       },
     },
@@ -173,10 +145,7 @@ export async function mediaRoutes(
         security: [{ bearerAuth: [] }],
         params: mediaParamsJson,
         response: {
-          204: {
-            description: "Media asset deleted successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },

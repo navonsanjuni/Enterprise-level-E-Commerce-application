@@ -15,6 +15,10 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   editorialLookParamsSchema,
   editorialLookProductParamsSchema,
   productLooksParamsSchema,
@@ -87,15 +91,7 @@ export async function editorialLookRoutes(
         summary: "List Editorial Looks",
         querystring: listEditorialLooksQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedEditorialLooksResponseSchema,
-            },
-          },
+          200: successResponse(paginatedEditorialLooksResponseSchema),
         },
       },
     },
@@ -114,15 +110,7 @@ export async function editorialLookRoutes(
         summary: "Get Editorial Look Statistics",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLookStatsResponseSchema,
-            },
-          },
+          200: successResponse(editorialLookStatsResponseSchema),
         },
       },
     },
@@ -141,15 +129,7 @@ export async function editorialLookRoutes(
         summary: "Get Ready to Publish Looks",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: readyToPublishLooksResponseSchema,
-            },
-          },
+          200: successResponse(readyToPublishLooksResponseSchema),
         },
       },
     },
@@ -168,15 +148,7 @@ export async function editorialLookRoutes(
         summary: "Get Popular Products in Looks",
         querystring: popularProductsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: popularProductsResponseSchema,
-            },
-          },
+          200: successResponse(popularProductsResponseSchema),
         },
       },
     },
@@ -195,15 +167,7 @@ export async function editorialLookRoutes(
         summary: "Get Editorial Look",
         params: editorialLookParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLookResponseSchema,
-            },
-          },
+          200: successResponse(editorialLookResponseSchema),
         },
       },
     },
@@ -222,15 +186,7 @@ export async function editorialLookRoutes(
         summary: "Get Look Products",
         params: editorialLookParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: lookProductsResponseSchema,
-            },
-          },
+          200: successResponse(lookProductsResponseSchema),
         },
       },
     },
@@ -249,15 +205,7 @@ export async function editorialLookRoutes(
         summary: "Get Product Editorial Looks",
         params: productLooksParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: productLooksResponseSchema,
-            },
-          },
+          200: successResponse(productLooksResponseSchema),
         },
       },
     },
@@ -279,15 +227,7 @@ export async function editorialLookRoutes(
         security: [{ bearerAuth: [] }],
         body: bulkCreateEditorialLooksBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLooksArrayResponseSchema,
-            },
-          },
+          201: successResponse(editorialLooksArrayResponseSchema, 201),
         },
       },
     },
@@ -307,15 +247,7 @@ export async function editorialLookRoutes(
         security: [{ bearerAuth: [] }],
         body: bulkPublishEditorialLooksBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: bulkPublishLooksResponseSchema,
-            },
-          },
+          200: successResponse(bulkPublishLooksResponseSchema),
         },
       },
     },
@@ -334,15 +266,7 @@ export async function editorialLookRoutes(
         summary: "Process Scheduled Publications",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: scheduledPublicationsResponseSchema,
-            },
-          },
+          200: successResponse(scheduledPublicationsResponseSchema),
         },
       },
     },
@@ -362,15 +286,7 @@ export async function editorialLookRoutes(
         security: [{ bearerAuth: [] }],
         body: createEditorialLookBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLookResponseSchema,
-            },
-          },
+          201: successResponse(editorialLookResponseSchema, 201),
         },
       },
     },
@@ -391,15 +307,7 @@ export async function editorialLookRoutes(
         security: [{ bearerAuth: [] }],
         params: editorialLookParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLookResponseSchema,
-            },
-          },
+          200: successResponse(editorialLookResponseSchema),
         },
       },
     },
@@ -420,15 +328,7 @@ export async function editorialLookRoutes(
         security: [{ bearerAuth: [] }],
         params: editorialLookParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLookResponseSchema,
-            },
-          },
+          200: successResponse(editorialLookResponseSchema),
         },
       },
     },
@@ -450,15 +350,7 @@ export async function editorialLookRoutes(
         params: editorialLookParamsJson,
         body: schedulePublicationBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLookResponseSchema,
-            },
-          },
+          200: successResponse(editorialLookResponseSchema),
         },
       },
     },
@@ -480,15 +372,7 @@ export async function editorialLookRoutes(
         params: editorialLookParamsJson,
         body: duplicateEditorialLookBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLookResponseSchema,
-            },
-          },
+          201: successResponse(editorialLookResponseSchema, 201),
         },
       },
     },
@@ -510,15 +394,7 @@ export async function editorialLookRoutes(
         params: editorialLookParamsJson,
         body: setHeroImageBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLookResponseSchema,
-            },
-          },
+          200: successResponse(editorialLookResponseSchema),
         },
       },
     },
@@ -540,15 +416,7 @@ export async function editorialLookRoutes(
         params: editorialLookParamsJson,
         body: setLookProductsBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLookResponseSchema,
-            },
-          },
+          200: successResponse(editorialLookResponseSchema),
         },
       },
     },
@@ -569,10 +437,7 @@ export async function editorialLookRoutes(
         security: [{ bearerAuth: [] }],
         params: editorialLookProductParamsJson,
         response: {
-          204: {
-            description: "Product added to editorial look successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -594,15 +459,7 @@ export async function editorialLookRoutes(
         params: editorialLookParamsJson,
         body: updateStoryContentBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLookResponseSchema,
-            },
-          },
+          200: successResponse(editorialLookResponseSchema),
         },
       },
     },
@@ -624,15 +481,7 @@ export async function editorialLookRoutes(
         params: editorialLookParamsJson,
         body: updateEditorialLookBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: editorialLookResponseSchema,
-            },
-          },
+          200: successResponse(editorialLookResponseSchema),
         },
       },
     },
@@ -652,7 +501,7 @@ export async function editorialLookRoutes(
         security: [{ bearerAuth: [] }],
         body: bulkDeleteEditorialLooksBodyJson,
         response: {
-          204: { type: "null", description: "Editorial looks deleted successfully" },
+          204: noContentResponse,
         },
       },
     },
@@ -673,7 +522,7 @@ export async function editorialLookRoutes(
         security: [{ bearerAuth: [] }],
         params: editorialLookParamsJson,
         response: {
-          204: { description: "Hero image removed successfully", type: "null" },
+          204: noContentResponse,
         },
       },
     },
@@ -694,7 +543,7 @@ export async function editorialLookRoutes(
         security: [{ bearerAuth: [] }],
         params: editorialLookParamsJson,
         response: {
-          204: { description: "Story content cleared successfully", type: "null" },
+          204: noContentResponse,
         },
       },
     },
@@ -715,10 +564,7 @@ export async function editorialLookRoutes(
         security: [{ bearerAuth: [] }],
         params: editorialLookProductParamsJson,
         response: {
-          204: {
-            description: "Product removed from editorial look successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -739,7 +585,7 @@ export async function editorialLookRoutes(
         security: [{ bearerAuth: [] }],
         params: editorialLookParamsJson,
         response: {
-          204: { description: "Editorial look deleted successfully", type: "null" },
+          204: noContentResponse,
         },
       },
     },

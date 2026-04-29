@@ -15,6 +15,10 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   listCategoriesSchema,
   createCategorySchema,
   updateCategorySchema,
@@ -60,15 +64,7 @@ export async function categoryRoutes(
         summary: "List Categories",
         querystring: listCategoriesQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedCategoriesResponseSchema,
-            },
-          },
+          200: successResponse(paginatedCategoriesResponseSchema),
         },
       },
     },
@@ -85,15 +81,7 @@ export async function categoryRoutes(
         tags: ["Categories"],
         summary: "Get Category Hierarchy",
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: categoryListResponseSchema,
-            },
-          },
+          200: successResponse(categoryListResponseSchema),
         },
       },
     },
@@ -112,15 +100,7 @@ export async function categoryRoutes(
         summary: "Get Category by Slug",
         params: categorySlugParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: categoryResponseSchema,
-            },
-          },
+          200: successResponse(categoryResponseSchema),
         },
       },
     },
@@ -139,15 +119,7 @@ export async function categoryRoutes(
         summary: "Get Category",
         params: categoryParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: categoryResponseSchema,
-            },
-          },
+          200: successResponse(categoryResponseSchema),
         },
       },
     },
@@ -167,10 +139,7 @@ export async function categoryRoutes(
         security: [{ bearerAuth: [] }],
         body: reorderCategoriesBodyJson,
         response: {
-          204: {
-            description: "Categories reordered successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -190,15 +159,7 @@ export async function categoryRoutes(
         security: [{ bearerAuth: [] }],
         body: createCategoryBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: categoryResponseSchema,
-            },
-          },
+          201: successResponse(categoryResponseSchema, 201),
         },
       },
     },
@@ -220,15 +181,7 @@ export async function categoryRoutes(
         params: categoryParamsJson,
         body: updateCategoryBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: categoryResponseSchema,
-            },
-          },
+          200: successResponse(categoryResponseSchema),
         },
       },
     },
@@ -249,10 +202,7 @@ export async function categoryRoutes(
         security: [{ bearerAuth: [] }],
         params: categoryParamsJson,
         response: {
-          204: {
-            description: "Category deleted successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },

@@ -15,6 +15,10 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   listVariantsSchema,
   createVariantSchema,
   updateVariantSchema,
@@ -63,15 +67,7 @@ export async function variantRoutes(
         params: variantByProductParamsJson,
         querystring: listVariantsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedVariantsResponseSchema,
-            },
-          },
+          200: successResponse(paginatedVariantsResponseSchema),
         },
       },
     },
@@ -90,15 +86,7 @@ export async function variantRoutes(
         summary: "Get Variant",
         params: variantParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: variantResponseSchema,
-            },
-          },
+          200: successResponse(variantResponseSchema),
         },
       },
     },
@@ -122,15 +110,7 @@ export async function variantRoutes(
         params: variantByProductParamsJson,
         body: createVariantBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: variantResponseSchema,
-            },
-          },
+          201: successResponse(variantResponseSchema, 201),
         },
       },
     },
@@ -152,15 +132,7 @@ export async function variantRoutes(
         params: variantParamsJson,
         body: updateVariantBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: variantResponseSchema,
-            },
-          },
+          200: successResponse(variantResponseSchema),
         },
       },
     },
@@ -181,10 +153,7 @@ export async function variantRoutes(
         security: [{ bearerAuth: [] }],
         params: variantParamsJson,
         response: {
-          204: {
-            description: "Variant deleted successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },

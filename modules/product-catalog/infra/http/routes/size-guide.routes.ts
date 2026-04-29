@@ -15,6 +15,10 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   sizeGuideParamsSchema,
   regionParamsSchema,
   listSizeGuidesSchema,
@@ -78,15 +82,7 @@ export async function sizeGuideRoutes(
         summary: "List Size Guides",
         querystring: listSizeGuidesQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedSizeGuidesResponseSchema,
-            },
-          },
+          200: successResponse(paginatedSizeGuidesResponseSchema),
         },
       },
     },
@@ -105,15 +101,7 @@ export async function sizeGuideRoutes(
         summary: "Get Size Guide Statistics",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: sizeGuideStatsResponseSchema,
-            },
-          },
+          200: successResponse(sizeGuideStatsResponseSchema),
         },
       },
     },
@@ -130,15 +118,7 @@ export async function sizeGuideRoutes(
         tags: ["Size Guides"],
         summary: "Get Available Regions",
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: availableRegionsResponseSchema,
-            },
-          },
+          200: successResponse(availableRegionsResponseSchema),
         },
       },
     },
@@ -157,15 +137,7 @@ export async function sizeGuideRoutes(
         summary: "Get Available Categories",
         querystring: categoriesQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: availableCategoriesResponseSchema,
-            },
-          },
+          200: successResponse(availableCategoriesResponseSchema),
         },
       },
     },
@@ -184,15 +156,7 @@ export async function sizeGuideRoutes(
         summary: "Get General Size Guides",
         params: regionParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: generalSizeGuidesResponseSchema,
-            },
-          },
+          200: successResponse(generalSizeGuidesResponseSchema),
         },
       },
     },
@@ -211,15 +175,7 @@ export async function sizeGuideRoutes(
         summary: "Validate Size Guide Uniqueness",
         querystring: validateSizeGuideQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: validateSizeGuideUniquenessResponseSchema,
-            },
-          },
+          200: successResponse(validateSizeGuideUniquenessResponseSchema),
         },
       },
     },
@@ -238,15 +194,7 @@ export async function sizeGuideRoutes(
         summary: "Get Regional Size Guides",
         params: regionParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: regionalSizeGuidesResponseSchema,
-            },
-          },
+          200: successResponse(regionalSizeGuidesResponseSchema),
         },
       },
     },
@@ -265,15 +213,7 @@ export async function sizeGuideRoutes(
         summary: "Get Size Guide",
         params: sizeGuideParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: sizeGuideResponseSchema,
-            },
-          },
+          200: successResponse(sizeGuideResponseSchema),
         },
       },
     },
@@ -295,15 +235,7 @@ export async function sizeGuideRoutes(
         security: [{ bearerAuth: [] }],
         body: bulkCreateSizeGuidesBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: sizeGuidesArrayResponseSchema,
-            },
-          },
+          201: successResponse(sizeGuidesArrayResponseSchema, 201),
         },
       },
     },
@@ -325,15 +257,7 @@ export async function sizeGuideRoutes(
         params: regionParamsJson,
         body: regionalSizeGuideBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: sizeGuideResponseSchema,
-            },
-          },
+          201: successResponse(sizeGuideResponseSchema, 201),
         },
       },
     },
@@ -353,15 +277,7 @@ export async function sizeGuideRoutes(
         security: [{ bearerAuth: [] }],
         body: createSizeGuideBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: sizeGuideResponseSchema,
-            },
-          },
+          201: successResponse(sizeGuideResponseSchema, 201),
         },
       },
     },
@@ -383,15 +299,7 @@ export async function sizeGuideRoutes(
         params: sizeGuideParamsJson,
         body: updateSizeGuideContentBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: sizeGuideResponseSchema,
-            },
-          },
+          200: successResponse(sizeGuideResponseSchema),
         },
       },
     },
@@ -413,15 +321,7 @@ export async function sizeGuideRoutes(
         params: sizeGuideParamsJson,
         body: updateSizeGuideBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: sizeGuideResponseSchema,
-            },
-          },
+          200: successResponse(sizeGuideResponseSchema),
         },
       },
     },
@@ -441,10 +341,7 @@ export async function sizeGuideRoutes(
         security: [{ bearerAuth: [] }],
         body: bulkDeleteSizeGuidesBodyJson,
         response: {
-          204: {
-            description: "Size guides bulk deleted successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -465,10 +362,7 @@ export async function sizeGuideRoutes(
         security: [{ bearerAuth: [] }],
         params: sizeGuideParamsJson,
         response: {
-          204: {
-            description: "Size guide content cleared successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -489,10 +383,7 @@ export async function sizeGuideRoutes(
         security: [{ bearerAuth: [] }],
         params: sizeGuideParamsJson,
         response: {
-          204: {
-            description: "Size guide deleted successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
