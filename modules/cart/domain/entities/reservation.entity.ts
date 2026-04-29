@@ -291,11 +291,7 @@ export class Reservation extends AggregateRoot {
   }
 
   equals(other: Reservation): boolean {
-    return (
-      this.props.reservationId.equals(other.props.reservationId) &&
-      this.props.cartId.equals(other.props.cartId) &&
-      this.props.variantId.equals(other.props.variantId)
-    );
+    return this.props.reservationId.equals(other.props.reservationId);
   }
 
   toSnapshot(): ReservationEntityData {

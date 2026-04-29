@@ -87,7 +87,7 @@ export class CartItem {
       variantId: VariantId.fromString(data.variantId),
       quantity: Quantity.fromNumber(data.quantity),
       unitPriceSnapshot: data.unitPrice,
-      appliedPromos: AppliedPromos.fromArray(data.appliedPromos || []),
+      appliedPromos: AppliedPromos.create(data.appliedPromos || []),
       isGift: data.isGift || false,
       giftMessage: data.giftMessage,
       createdAt: now,
@@ -102,7 +102,7 @@ export class CartItem {
       variantId: VariantId.fromString(data.variantId),
       quantity: Quantity.fromNumber(data.quantity),
       unitPriceSnapshot: data.unitPriceSnapshot,
-      appliedPromos: AppliedPromos.fromArray(data.appliedPromos),
+      appliedPromos: AppliedPromos.fromPersistence(data.appliedPromos),
       isGift: data.isGift,
       giftMessage: data.giftMessage,
       createdAt: data.createdAt,
@@ -233,11 +233,7 @@ export class CartItem {
   }
 
   equals(other: CartItem): boolean {
-    return (
-      this.props.id === other.props.id &&
-      this.props.cartId === other.props.cartId &&
-      this.props.variantId.equals(other.props.variantId)
-    );
+    return this.props.id === other.props.id;
   }
 
   toSnapshot(): CartItemEntityData {
