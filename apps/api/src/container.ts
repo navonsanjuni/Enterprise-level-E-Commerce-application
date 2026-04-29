@@ -980,8 +980,8 @@ export class Container {
     // Cart Module
     // ============================================================
 
-    const cartRepository = new CartRepositoryImpl(prisma);
-    const checkoutRepository = new CheckoutRepositoryImpl(prisma);
+    const cartRepository = new CartRepositoryImpl(prisma, eventBus);
+    const checkoutRepository = new CheckoutRepositoryImpl(prisma, eventBus);
     const checkoutCompletionPort = new CheckoutCompletionPortImpl(prisma);
     const settingsService = new SettingsService();
 
@@ -995,7 +995,7 @@ export class Container {
       },
     };
 
-    const reservationRepository = new ReservationRepositoryImpl(prisma, stockServiceAdapter);
+    const reservationRepository = new ReservationRepositoryImpl(prisma, stockServiceAdapter, eventBus);
 
     const externalProductVariantRepository: IExternalProductVariantRepository = {
       findById: async (variantId) => {
@@ -1370,7 +1370,10 @@ export class Container {
     // ============================================================
 
     const wishlistRepository = new WishlistRepositoryImpl(prisma, eventBus);
-    const wishlistItemRepository = new WishlistItemRepositoryImpl(prisma, eventBus);
+    // `WishlistItemRepositoryImpl` is read-only (no event dispatch);
+    // writes flow through `WishlistRepositoryImpl.save()` after mutating
+    // items via the `Wishlist` aggregate root.
+    const wishlistItemRepository = new WishlistItemRepositoryImpl(prisma);
     const reminderRepository = new ReminderRepositoryImpl(prisma, eventBus);
     const notificationRepository = new NotificationRepositoryImpl(prisma, eventBus);
     const appointmentRepository = new AppointmentRepositoryImpl(prisma, eventBus);
