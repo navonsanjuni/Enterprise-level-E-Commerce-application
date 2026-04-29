@@ -10,6 +10,10 @@ import {
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { validateBody, validateParams, validateQuery, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   addAddressSchema,
   updateAddressSchema,
   addressIdParamsSchema,
@@ -52,15 +56,7 @@ export async function addressRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listAddressesQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: addressListResponseSchema,
-            },
-          },
+          200: successResponse(addressListResponseSchema),
         },
       },
     },
@@ -80,15 +76,7 @@ export async function addressRoutes(
         security: [{ bearerAuth: [] }],
         body: addAddressBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: addressResponseSchema,
-            },
-          },
+          201: successResponse(addressResponseSchema, 201),
         },
       },
     },
@@ -110,15 +98,7 @@ export async function addressRoutes(
         params: addressIdParamsJson,
         body: updateAddressBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: addressResponseSchema,
-            },
-          },
+          200: successResponse(addressResponseSchema),
         },
       },
     },
@@ -139,15 +119,7 @@ export async function addressRoutes(
         security: [{ bearerAuth: [] }],
         params: addressIdParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: addressResponseSchema,
-            },
-          },
+          200: successResponse(addressResponseSchema),
         },
       },
     },
@@ -168,10 +140,7 @@ export async function addressRoutes(
         security: [{ bearerAuth: [] }],
         params: addressIdParamsJson,
         response: {
-          204: {
-            type: "null",
-            description: "Address deleted successfully",
-          },
+          204: noContentResponse,
         },
       },
     },

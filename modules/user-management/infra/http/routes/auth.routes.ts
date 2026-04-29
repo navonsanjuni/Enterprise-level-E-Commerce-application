@@ -3,6 +3,7 @@ import { AuthController } from "../controllers/auth.controller";
 import { AuthenticatedRequest } from "@/api/src/shared/interfaces/authenticated-request.interface";
 import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import { validateBody, toJsonSchema } from "../validation/validator";
+import { successResponse } from "@/api/src/shared/http/response-schemas";
 import {
   registerSchema,
   loginSchema,
@@ -69,15 +70,7 @@ export async function authRoutes(
           "Register a new user account. Returns JWT tokens on success. New accounts are always created with the CUSTOMER role; staff/admin roles are assigned via separate admin endpoints.",
         body: registerBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: authResultResponseSchema,
-            },
-          },
+          201: successResponse(authResultResponseSchema, 201),
         },
       },
     },
@@ -100,15 +93,7 @@ export async function authRoutes(
           "Authenticate with email and password. Returns JWT tokens on success.",
         body: loginBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: authResultResponseSchema,
-            },
-          },
+          200: successResponse(authResultResponseSchema),
         },
       },
     },
@@ -130,15 +115,7 @@ export async function authRoutes(
         description: "Exchange a valid refresh token for a new access token.",
         body: refreshTokenBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: refreshTokenResponseSchema,
-            },
-          },
+          200: successResponse(refreshTokenResponseSchema),
         },
       },
     },
@@ -164,15 +141,7 @@ export async function authRoutes(
         security: [{ bearerAuth: [] }],
         body: logoutBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "object" },
-            },
-          },
+          200: successResponse({ type: "object" }),
         },
       },
     },
@@ -192,15 +161,7 @@ export async function authRoutes(
           "Returns the authenticated user's basic identity from the JWT payload.",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: userIdentityResponseSchema,
-            },
-          },
+          200: successResponse(userIdentityResponseSchema),
         },
       },
     },
@@ -223,15 +184,7 @@ export async function authRoutes(
         security: [{ bearerAuth: [] }],
         body: changePasswordBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: actionResponseSchema,
-            },
-          },
+          200: successResponse(actionResponseSchema),
         },
       },
     },
@@ -251,15 +204,7 @@ export async function authRoutes(
           "Send a password reset link to the given email. Always returns 200 to prevent email enumeration.",
         body: forgotPasswordBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: actionResponseSchema,
-            },
-          },
+          200: successResponse(actionResponseSchema),
         },
       },
     },
@@ -282,15 +227,7 @@ export async function authRoutes(
           "Set a new password using the reset token received by email.",
         body: resetPasswordBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: actionResponseSchema,
-            },
-          },
+          200: successResponse(actionResponseSchema),
         },
       },
     },
@@ -313,15 +250,7 @@ export async function authRoutes(
           "Verify a user's email address using the token sent to their inbox.",
         body: verifyEmailBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: actionResponseSchema,
-            },
-          },
+          200: successResponse(actionResponseSchema),
         },
       },
     },
@@ -344,15 +273,7 @@ export async function authRoutes(
           "Resend the email verification link to the user's email address. Always returns 200 to prevent email enumeration.",
         body: resendVerificationBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: actionResponseSchema,
-            },
-          },
+          200: successResponse(actionResponseSchema),
         },
       },
     },
@@ -379,15 +300,7 @@ export async function authRoutes(
         security: [{ bearerAuth: [] }],
         body: changeEmailBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: actionResponseSchema,
-            },
-          },
+          200: successResponse(actionResponseSchema),
         },
       },
     },
@@ -411,15 +324,7 @@ export async function authRoutes(
         security: [{ bearerAuth: [] }],
         body: deleteAccountBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "object" },
-            },
-          },
+          200: successResponse({ type: "object" }),
         },
       },
     },

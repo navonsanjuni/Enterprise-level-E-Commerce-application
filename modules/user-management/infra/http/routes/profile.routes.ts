@@ -9,6 +9,7 @@ import {
   userKeyGenerator,
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { validateBody, toJsonSchema } from "../validation/validator";
+import { successResponse } from "@/api/src/shared/http/response-schemas";
 import {
   updateProfileSchema,
   profileResponseSchema,
@@ -44,15 +45,7 @@ export async function profileRoutes(
           "Retrieve the authenticated user's full profile including preferences and sizes.",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: profileResponseSchema,
-            },
-          },
+          200: successResponse(profileResponseSchema),
         },
       },
     },
@@ -73,15 +66,7 @@ export async function profileRoutes(
         security: [{ bearerAuth: [] }],
         body: updateProfileBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: profileResponseSchema,
-            },
-          },
+          200: successResponse(profileResponseSchema),
         },
       },
     },

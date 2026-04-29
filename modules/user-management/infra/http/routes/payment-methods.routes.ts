@@ -10,6 +10,10 @@ import {
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { validateBody, validateParams, validateQuery, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   addPaymentMethodSchema,
   updatePaymentMethodSchema,
   paymentMethodIdParamsSchema,
@@ -52,15 +56,7 @@ export async function paymentMethodRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listPaymentMethodsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paymentMethodListResponseSchema,
-            },
-          },
+          200: successResponse(paymentMethodListResponseSchema),
         },
       },
     },
@@ -80,15 +76,7 @@ export async function paymentMethodRoutes(
         security: [{ bearerAuth: [] }],
         body: addPaymentMethodBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paymentMethodResponseSchema,
-            },
-          },
+          201: successResponse(paymentMethodResponseSchema, 201),
         },
       },
     },
@@ -110,15 +98,7 @@ export async function paymentMethodRoutes(
         params: paymentMethodIdParamsJson,
         body: updatePaymentMethodBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paymentMethodResponseSchema,
-            },
-          },
+          200: successResponse(paymentMethodResponseSchema),
         },
       },
     },
@@ -139,15 +119,7 @@ export async function paymentMethodRoutes(
         security: [{ bearerAuth: [] }],
         params: paymentMethodIdParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paymentMethodResponseSchema,
-            },
-          },
+          200: successResponse(paymentMethodResponseSchema),
         },
       },
     },
@@ -168,10 +140,7 @@ export async function paymentMethodRoutes(
         security: [{ bearerAuth: [] }],
         params: paymentMethodIdParamsJson,
         response: {
-          204: {
-            type: "null",
-            description: "Payment method deleted successfully",
-          },
+          204: noContentResponse,
         },
       },
     },

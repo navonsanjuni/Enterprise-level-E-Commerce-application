@@ -15,6 +15,10 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   userIdParamsSchema,
   listUsersQuerySchema,
   updateUserStatusSchema,
@@ -61,15 +65,7 @@ export async function userRoutes(
         description: "Returns the authenticated user's full profile.",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: profileResponseSchema,
-            },
-          },
+          200: successResponse(profileResponseSchema),
         },
       },
     },
@@ -90,15 +86,7 @@ export async function userRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listUsersQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: userListResponseSchema,
-            },
-          },
+          200: successResponse(userListResponseSchema),
         },
       },
     },
@@ -120,15 +108,7 @@ export async function userRoutes(
         security: [{ bearerAuth: [] }],
         params: userIdParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: userDetailResponseSchema,
-            },
-          },
+          200: successResponse(userDetailResponseSchema),
         },
       },
     },
@@ -151,15 +131,7 @@ export async function userRoutes(
         params: userIdParamsJson,
         body: updateUserStatusBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: userStatusUpdateResponseSchema,
-            },
-          },
+          200: successResponse(userStatusUpdateResponseSchema),
         },
       },
     },
@@ -181,15 +153,7 @@ export async function userRoutes(
         params: userIdParamsJson,
         body: updateUserRoleBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: userRoleUpdateResponseSchema,
-            },
-          },
+          200: successResponse(userRoleUpdateResponseSchema),
         },
       },
     },
@@ -211,15 +175,7 @@ export async function userRoutes(
         params: userIdParamsJson,
         body: toggleEmailVerifiedBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: userEmailVerifiedResponseSchema,
-            },
-          },
+          200: successResponse(userEmailVerifiedResponseSchema),
         },
       },
     },
@@ -243,10 +199,7 @@ export async function userRoutes(
         security: [{ bearerAuth: [] }],
         params: userIdParamsJson,
         response: {
-          204: {
-            type: "null",
-            description: "User deleted successfully",
-          },
+          204: noContentResponse,
         },
       },
     },
