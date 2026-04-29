@@ -15,6 +15,11 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+  paginatedResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   alertParamsSchema,
   listStockAlertsSchema,
   createStockAlertSchema,
@@ -54,24 +59,7 @@ export async function stockAlertRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listStockAlertsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: {
-                type: "object",
-                properties: {
-                  items: { type: "array", items: stockAlertResponseSchema },
-                  total: { type: "integer" },
-                  limit: { type: "integer" },
-                  offset: { type: "integer" },
-                  hasMore: { type: "boolean" },
-                },
-              },
-            },
-          },
+          200: successResponse(paginatedResponse(stockAlertResponseSchema)),
         },
       },
     },
@@ -90,15 +78,7 @@ export async function stockAlertRoutes(
         summary: "Get Active Alerts",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: stockAlertResponseSchema },
-            },
-          },
+          200: successResponse({ type: "array", items: stockAlertResponseSchema }),
         },
       },
     },
@@ -119,15 +99,7 @@ export async function stockAlertRoutes(
         security: [{ bearerAuth: [] }],
         params: alertParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: stockAlertResponseSchema,
-            },
-          },
+          200: successResponse(stockAlertResponseSchema),
         },
       },
     },
@@ -147,15 +119,7 @@ export async function stockAlertRoutes(
         security: [{ bearerAuth: [] }],
         body: createStockAlertBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: stockAlertResponseSchema,
-            },
-          },
+          201: successResponse(stockAlertResponseSchema, 201),
         },
       },
     },
@@ -176,7 +140,7 @@ export async function stockAlertRoutes(
         security: [{ bearerAuth: [] }],
         params: alertParamsJson,
         response: {
-          204: { description: "Alert deleted successfully", type: "null" },
+          204: noContentResponse,
         },
       },
     },
@@ -197,15 +161,7 @@ export async function stockAlertRoutes(
         security: [{ bearerAuth: [] }],
         params: alertParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: stockAlertResponseSchema,
-            },
-          },
+          200: successResponse(stockAlertResponseSchema),
         },
       },
     },

@@ -10,6 +10,10 @@ import {
 import { PickupReservationController } from "../controllers/pickup-reservation.controller";
 import { validateBody, validateParams, validateQuery, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   reservationParamsSchema,
   listPickupReservationsSchema,
   createPickupReservationSchema,
@@ -51,15 +55,7 @@ export async function pickupReservationRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listPickupReservationsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: pickupReservationResponseSchema },
-            },
-          },
+          200: successResponse({ type: "array", items: pickupReservationResponseSchema }),
         },
       },
     },
@@ -79,15 +75,7 @@ export async function pickupReservationRoutes(
         security: [{ bearerAuth: [] }],
         params: reservationParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: pickupReservationResponseSchema,
-            },
-          },
+          200: successResponse(pickupReservationResponseSchema),
         },
       },
     },
@@ -106,15 +94,7 @@ export async function pickupReservationRoutes(
         security: [{ bearerAuth: [] }],
         body: createPickupReservationBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: pickupReservationResponseSchema,
-            },
-          },
+          201: successResponse(pickupReservationResponseSchema, 201),
         },
       },
     },
@@ -134,7 +114,7 @@ export async function pickupReservationRoutes(
         security: [{ bearerAuth: [] }],
         params: reservationParamsJson,
         response: {
-          204: { description: "Reservation cancelled successfully", type: "null" },
+          204: noContentResponse,
         },
       },
     },

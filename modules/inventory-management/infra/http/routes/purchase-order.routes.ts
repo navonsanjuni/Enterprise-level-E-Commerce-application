@@ -10,6 +10,11 @@ import {
 import { PurchaseOrderController } from "../controllers/purchase-order.controller";
 import { validateBody, validateParams, validateQuery, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+  paginatedResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   poParamsSchema,
   listPurchaseOrdersSchema,
   createPurchaseOrderSchema,
@@ -57,24 +62,7 @@ export async function purchaseOrderRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listPurchaseOrdersQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: {
-                type: "object",
-                properties: {
-                  items: { type: "array", items: purchaseOrderResponseSchema },
-                  total: { type: "integer" },
-                  limit: { type: "integer" },
-                  offset: { type: "integer" },
-                  hasMore: { type: "boolean" },
-                },
-              },
-            },
-          },
+          200: successResponse(paginatedResponse(purchaseOrderResponseSchema)),
         },
       },
     },
@@ -92,15 +80,7 @@ export async function purchaseOrderRoutes(
         summary: "Get Overdue Purchase Orders",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: purchaseOrderResponseSchema },
-            },
-          },
+          200: successResponse({ type: "array", items: purchaseOrderResponseSchema }),
         },
       },
     },
@@ -118,15 +98,7 @@ export async function purchaseOrderRoutes(
         summary: "Get Pending Receival",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: purchaseOrderResponseSchema },
-            },
-          },
+          200: successResponse({ type: "array", items: purchaseOrderResponseSchema }),
         },
       },
     },
@@ -146,15 +118,7 @@ export async function purchaseOrderRoutes(
         security: [{ bearerAuth: [] }],
         params: poParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: purchaseOrderResponseSchema,
-            },
-          },
+          200: successResponse(purchaseOrderResponseSchema),
         },
       },
     },
@@ -173,15 +137,7 @@ export async function purchaseOrderRoutes(
         security: [{ bearerAuth: [] }],
         body: createPurchaseOrderBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: purchaseOrderResponseSchema,
-            },
-          },
+          201: successResponse(purchaseOrderResponseSchema, 201),
         },
       },
     },
@@ -200,15 +156,7 @@ export async function purchaseOrderRoutes(
         security: [{ bearerAuth: [] }],
         body: createPurchaseOrderWithItemsBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: purchaseOrderResponseSchema,
-            },
-          },
+          201: successResponse(purchaseOrderResponseSchema, 201),
         },
       },
     },
@@ -229,15 +177,7 @@ export async function purchaseOrderRoutes(
         params: poParamsJson,
         body: updatePOStatusBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: purchaseOrderResponseSchema,
-            },
-          },
+          200: successResponse(purchaseOrderResponseSchema),
         },
       },
     },
@@ -258,15 +198,7 @@ export async function purchaseOrderRoutes(
         params: poParamsJson,
         body: updatePOEtaBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: purchaseOrderResponseSchema,
-            },
-          },
+          200: successResponse(purchaseOrderResponseSchema),
         },
       },
     },
@@ -287,15 +219,7 @@ export async function purchaseOrderRoutes(
         params: poParamsJson,
         body: receivePOItemsBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: purchaseOrderResponseSchema,
-            },
-          },
+          200: successResponse(purchaseOrderResponseSchema),
         },
       },
     },
@@ -315,7 +239,7 @@ export async function purchaseOrderRoutes(
         security: [{ bearerAuth: [] }],
         params: poParamsJson,
         response: {
-          204: { description: "Purchase order deleted successfully", type: "null" },
+          204: noContentResponse,
         },
       },
     },

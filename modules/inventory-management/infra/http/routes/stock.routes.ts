@@ -10,6 +10,10 @@ import {
 import { StockController } from "../controllers/stock.controller";
 import { validateBody, validateParams, validateQuery, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+  paginatedResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   listStocksSchema,
   addStockSchema,
   adjustStockSchema,
@@ -62,24 +66,7 @@ export async function stockRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listStocksQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: {
-                type: "object",
-                properties: {
-                  items: { type: "array", items: stockResponseSchema },
-                  total: { type: "integer" },
-                  limit: { type: "integer" },
-                  offset: { type: "integer" },
-                  hasMore: { type: "boolean" },
-                },
-              },
-            },
-          },
+          200: successResponse(paginatedResponse(stockResponseSchema)),
         },
       },
     },
@@ -97,15 +84,7 @@ export async function stockRoutes(
         summary: "Get Stock Stats",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: stockStatsResponseSchema,
-            },
-          },
+          200: successResponse(stockStatsResponseSchema),
         },
       },
     },
@@ -123,15 +102,7 @@ export async function stockRoutes(
         summary: "Get Low Stock Items",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: stockResponseSchema },
-            },
-          },
+          200: successResponse({ type: "array", items: stockResponseSchema }),
         },
       },
     },
@@ -149,15 +120,7 @@ export async function stockRoutes(
         summary: "Get Out Of Stock Items",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: stockResponseSchema },
-            },
-          },
+          200: successResponse({ type: "array", items: stockResponseSchema }),
         },
       },
     },
@@ -177,18 +140,10 @@ export async function stockRoutes(
         security: [{ bearerAuth: [] }],
         params: variantParamsJson,
         response: {
-          200: {
+          200: successResponse({
             type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: {
-                type: "object",
-                properties: { total: { type: "integer" } },
-              },
-            },
-          },
+            properties: { total: { type: "integer" } },
+          }),
         },
       },
     },
@@ -208,15 +163,7 @@ export async function stockRoutes(
         security: [{ bearerAuth: [] }],
         params: variantParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: stockResponseSchema },
-            },
-          },
+          200: successResponse({ type: "array", items: stockResponseSchema }),
         },
       },
     },
@@ -236,15 +183,7 @@ export async function stockRoutes(
         security: [{ bearerAuth: [] }],
         params: stockParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: stockResponseSchema,
-            },
-          },
+          200: successResponse(stockResponseSchema),
         },
       },
     },
@@ -263,15 +202,7 @@ export async function stockRoutes(
         security: [{ bearerAuth: [] }],
         body: addStockBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: stockResponseSchema,
-            },
-          },
+          201: successResponse(stockResponseSchema, 201),
         },
       },
     },
@@ -290,15 +221,7 @@ export async function stockRoutes(
         security: [{ bearerAuth: [] }],
         body: adjustStockBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: stockResponseSchema,
-            },
-          },
+          200: successResponse(stockResponseSchema),
         },
       },
     },
@@ -317,21 +240,13 @@ export async function stockRoutes(
         security: [{ bearerAuth: [] }],
         body: transferStockBodyJson,
         response: {
-          200: {
+          200: successResponse({
             type: "object",
             properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: {
-                type: "object",
-                properties: {
-                  fromStock: stockResponseSchema,
-                  toStock: stockResponseSchema,
-                },
-              },
+              fromStock: stockResponseSchema,
+              toStock: stockResponseSchema,
             },
-          },
+          }),
         },
       },
     },
@@ -350,15 +265,7 @@ export async function stockRoutes(
         security: [{ bearerAuth: [] }],
         body: reserveStockBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: stockResponseSchema,
-            },
-          },
+          200: successResponse(stockResponseSchema),
         },
       },
     },
@@ -377,15 +284,7 @@ export async function stockRoutes(
         security: [{ bearerAuth: [] }],
         body: fulfillReservationBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: stockResponseSchema,
-            },
-          },
+          200: successResponse(stockResponseSchema),
         },
       },
     },
@@ -406,15 +305,7 @@ export async function stockRoutes(
         params: stockParamsJson,
         body: setStockThresholdsBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: stockResponseSchema,
-            },
-          },
+          200: successResponse(stockResponseSchema),
         },
       },
     },

@@ -10,6 +10,10 @@ import {
 import { InventoryTransactionController } from "../controllers/inventory-transaction.controller";
 import { validateParams, validateQuery, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+  paginatedResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   transactionParamsSchema,
   transactionVariantParamsSchema,
   transactionsByVariantSchema,
@@ -27,17 +31,6 @@ const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
   keyGenerator: userKeyGenerator,
 });
-
-const paginatedTransactionsSchema = {
-  type: "object",
-  properties: {
-    items: { type: "array", items: inventoryTransactionResponseSchema },
-    total: { type: "integer" },
-    limit: { type: "integer" },
-    offset: { type: "integer" },
-    hasMore: { type: "boolean" },
-  },
-} as const;
 
 export async function inventoryTransactionRoutes(
   fastify: FastifyInstance,
@@ -63,15 +56,7 @@ export async function inventoryTransactionRoutes(
         params: transactionVariantParamsJson,
         querystring: transactionsByVariantQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedTransactionsSchema,
-            },
-          },
+          200: successResponse(paginatedResponse(inventoryTransactionResponseSchema)),
         },
       },
     },
@@ -91,15 +76,7 @@ export async function inventoryTransactionRoutes(
         security: [{ bearerAuth: [] }],
         params: transactionParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: inventoryTransactionResponseSchema,
-            },
-          },
+          200: successResponse(inventoryTransactionResponseSchema),
         },
       },
     },
@@ -119,15 +96,7 @@ export async function inventoryTransactionRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listTransactionsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedTransactionsSchema,
-            },
-          },
+          200: successResponse(paginatedResponse(inventoryTransactionResponseSchema)),
         },
       },
     },

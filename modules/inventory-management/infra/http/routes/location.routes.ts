@@ -10,6 +10,11 @@ import {
 import { LocationController } from "../controllers/location.controller";
 import { validateBody, validateParams, validateQuery, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+  paginatedResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   locationParamsSchema,
   listLocationsSchema,
   createLocationSchema,
@@ -51,24 +56,7 @@ export async function locationRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listLocationsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: {
-                type: "object",
-                properties: {
-                  items: { type: "array", items: locationResponseSchema },
-                  total: { type: "integer" },
-                  limit: { type: "integer" },
-                  offset: { type: "integer" },
-                  hasMore: { type: "boolean" },
-                },
-              },
-            },
-          },
+          200: successResponse(paginatedResponse(locationResponseSchema)),
         },
       },
     },
@@ -88,15 +76,7 @@ export async function locationRoutes(
         security: [{ bearerAuth: [] }],
         params: locationParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: locationResponseSchema,
-            },
-          },
+          200: successResponse(locationResponseSchema),
         },
       },
     },
@@ -115,15 +95,7 @@ export async function locationRoutes(
         security: [{ bearerAuth: [] }],
         body: createLocationBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: locationResponseSchema,
-            },
-          },
+          201: successResponse(locationResponseSchema, 201),
         },
       },
     },
@@ -144,15 +116,7 @@ export async function locationRoutes(
         params: locationParamsJson,
         body: updateLocationBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: locationResponseSchema,
-            },
-          },
+          200: successResponse(locationResponseSchema),
         },
       },
     },
@@ -172,7 +136,7 @@ export async function locationRoutes(
         security: [{ bearerAuth: [] }],
         params: locationParamsJson,
         response: {
-          204: { description: "Location deleted successfully", type: "null" },
+          204: noContentResponse,
         },
       },
     },

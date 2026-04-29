@@ -10,6 +10,10 @@ import {
 import { PurchaseOrderItemController } from "../controllers/purchase-order-item.controller";
 import { validateBody, validateParams, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   poParamsSchema,
   poItemParamsSchema,
   addPOItemSchema,
@@ -51,15 +55,7 @@ export async function purchaseOrderItemRoutes(
         security: [{ bearerAuth: [] }],
         params: poParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: purchaseOrderItemResponseSchema },
-            },
-          },
+          200: successResponse({ type: "array", items: purchaseOrderItemResponseSchema }),
         },
       },
     },
@@ -80,15 +76,7 @@ export async function purchaseOrderItemRoutes(
         params: poParamsJson,
         body: addPOItemBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: purchaseOrderItemResponseSchema,
-            },
-          },
+          201: successResponse(purchaseOrderItemResponseSchema, 201),
         },
       },
     },
@@ -109,15 +97,7 @@ export async function purchaseOrderItemRoutes(
         params: poItemParamsJson,
         body: updatePOItemBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: purchaseOrderItemResponseSchema,
-            },
-          },
+          200: successResponse(purchaseOrderItemResponseSchema),
         },
       },
     },
@@ -137,7 +117,7 @@ export async function purchaseOrderItemRoutes(
         security: [{ bearerAuth: [] }],
         params: poItemParamsJson,
         response: {
-          204: { description: "Item removed successfully", type: "null" },
+          204: noContentResponse,
         },
       },
     },
