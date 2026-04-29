@@ -8,13 +8,18 @@ import {
 import {
   createRateLimiter,
   RateLimitPresets,
-  userKeyGenerator,
+  userOrIpKeyGenerator,
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import {
   validateBody,
   validateParams,
   validateQuery,
+  toJsonSchema,
 } from "../validation/validator";
+import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
 import {
   reservationIdParamsSchema,
   cartIdParamsSchema,
@@ -37,9 +42,27 @@ import {
   bulkReservationResultResponseSchema,
 } from "../validation/reservation.schema";
 
+// Pre-compute JSON Schemas from Zod (single source of truth — no drift).
+const reservationIdParamsJson = toJsonSchema(reservationIdParamsSchema);
+const cartIdParamsJson = toJsonSchema(cartIdParamsSchema);
+const variantIdParamsJson = toJsonSchema(variantIdParamsSchema);
+const cartReservationParamsJson = toJsonSchema(cartReservationParamsSchema);
+const variantAdminParamsJson = toJsonSchema(variantAdminParamsSchema);
+const cartReservationsQueryJson = toJsonSchema(cartReservationsQuerySchema);
+const checkAvailabilityQueryJson = toJsonSchema(checkAvailabilityQuerySchema);
+const reservationsByStatusQueryJson = toJsonSchema(reservationsByStatusQuerySchema);
+const createReservationBodyJson = toJsonSchema(createReservationSchema);
+const extendReservationBodyJson = toJsonSchema(extendReservationSchema);
+const renewReservationBodyJson = toJsonSchema(renewReservationSchema);
+const adjustReservationBodyJson = toJsonSchema(adjustReservationSchema);
+const createBulkReservationsBodyJson = toJsonSchema(createBulkReservationsSchema);
+
 const writeRateLimiter = createRateLimiter({
   ...RateLimitPresets.writeOperations,
-  keyGenerator: userKeyGenerator,
+  // Reservation writes are role-gated, but the cart module overall mixes
+  // auth + guest traffic; use IP-fallback keying for consistency with the
+  // sibling cart/checkout routes.
+  keyGenerator: userOrIpKeyGenerator,
 });
 
 export async function reservationRoutes(
@@ -62,26 +85,9 @@ export async function reservationRoutes(
         tags: ["Reservations"],
         summary: "Create Reservation",
         security: [{ bearerAuth: [] }],
-        body: {
-          type: "object",
-          required: ["cartId", "variantId", "quantity"],
-          properties: {
-            cartId: { type: "string", format: "uuid" },
-            variantId: { type: "string", format: "uuid" },
-            quantity: { type: "integer", minimum: 1 },
-            durationMinutes: { type: "integer" },
-          },
-        },
+        body: createReservationBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: reservationResponseSchema,
-            },
-          },
+          201: successResponse(reservationResponseSchema, 201),
         },
       },
     },
@@ -100,23 +106,9 @@ export async function reservationRoutes(
         tags: ["Reservations"],
         summary: "Get Reservation",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["reservationId"],
-          properties: {
-            reservationId: { type: "string", format: "uuid" },
-          },
-        },
+        params: reservationIdParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: reservationResponseSchema,
-            },
-          },
+          200: successResponse(reservationResponseSchema),
         },
       },
     },
@@ -128,36 +120,20 @@ export async function reservationRoutes(
   fastify.get(
     "/carts/:cartId/reservations",
     {
-      preValidation: [validateParams(cartIdParamsSchema)],
-      preHandler: [validateQuery(cartReservationsQuerySchema), requireRole(["ADMIN", "CUSTOMER"])],
+      preValidation: [validateParams(cartIdParamsSchema), validateQuery(cartReservationsQuerySchema)],
+      preHandler: [requireRole(["ADMIN", "CUSTOMER"])],
       schema: {
         description: "Get all reservations for a cart",
         tags: ["Reservations"],
         summary: "Get Cart Reservations",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["cartId"],
-          properties: {
-            cartId: { type: "string", format: "uuid" },
-          },
-        },
-        querystring: {
-          type: "object",
-          properties: {
-            activeOnly: { type: "boolean", default: false },
-          },
-        },
+        params: cartIdParamsJson,
+        querystring: cartReservationsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: reservationResponseSchema },
-            },
-          },
+          200: successResponse({
+            type: "array",
+            items: reservationResponseSchema,
+          }),
         },
       },
     },
@@ -174,23 +150,12 @@ export async function reservationRoutes(
         description: "Get all reservations for a variant",
         tags: ["Reservations"],
         summary: "Get Variant Reservations",
-        params: {
-          type: "object",
-          required: ["variantId"],
-          properties: {
-            variantId: { type: "string", format: "uuid" },
-          },
-        },
+        params: variantIdParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: reservationResponseSchema },
-            },
-          },
+          200: successResponse({
+            type: "array",
+            items: reservationResponseSchema,
+          }),
         },
       },
     },
@@ -209,30 +174,10 @@ export async function reservationRoutes(
         tags: ["Reservations"],
         summary: "Extend Reservation",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["reservationId"],
-          properties: {
-            reservationId: { type: "string", format: "uuid" },
-          },
-        },
-        body: {
-          type: "object",
-          required: ["additionalMinutes"],
-          properties: {
-            additionalMinutes: { type: "integer", minimum: 1 },
-          },
-        },
+        params: reservationIdParamsJson,
+        body: extendReservationBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: reservationResponseSchema,
-            },
-          },
+          200: successResponse(reservationResponseSchema),
         },
       },
     },
@@ -251,18 +196,9 @@ export async function reservationRoutes(
         tags: ["Reservations"],
         summary: "Release Reservation",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["reservationId"],
-          properties: {
-            reservationId: { type: "string", format: "uuid" },
-          },
-        },
+        params: reservationIdParamsJson,
         response: {
-          204: {
-            description: "Reservation released successfully",
-            type: "null",
-          },
+          204: noContentResponse,
         },
       },
     },
@@ -274,29 +210,14 @@ export async function reservationRoutes(
   fastify.get(
     "/availability",
     {
-      preHandler: [validateQuery(checkAvailabilityQuerySchema)],
+      preValidation: [validateQuery(checkAvailabilityQuerySchema)],
       schema: {
         description: "Check variant availability",
         tags: ["Reservations"],
         summary: "Check Availability",
-        querystring: {
-          type: "object",
-          required: ["variantId", "requestedQuantity"],
-          properties: {
-            variantId: { type: "string", format: "uuid" },
-            requestedQuantity: { type: "integer", minimum: 1 },
-          },
-        },
+        querystring: checkAvailabilityQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: availabilityResponseSchema,
-            },
-          },
+          200: successResponse(availabilityResponseSchema),
         },
       },
     },
@@ -315,15 +236,7 @@ export async function reservationRoutes(
         summary: "Reservation Statistics",
         security: [{ bearerAuth: [] }],
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: reservationStatisticsResponseSchema,
-            },
-          },
+          200: successResponse(reservationStatisticsResponseSchema),
         },
       },
     },
@@ -342,24 +255,9 @@ export async function reservationRoutes(
         tags: ["Reservations"],
         summary: "Get Reservation By Variant",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["cartId", "variantId"],
-          properties: {
-            cartId: { type: "string", format: "uuid" },
-            variantId: { type: "string", format: "uuid" },
-          },
-        },
+        params: cartReservationParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: reservationResponseSchema,
-            },
-          },
+          200: successResponse(reservationResponseSchema),
         },
       },
     },
@@ -378,29 +276,10 @@ export async function reservationRoutes(
         tags: ["Reservations"],
         summary: "Renew Reservation",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["reservationId"],
-          properties: {
-            reservationId: { type: "string", format: "uuid" },
-          },
-        },
-        body: {
-          type: "object",
-          properties: {
-            durationMinutes: { type: "integer", minimum: 1 },
-          },
-        },
+        params: reservationIdParamsJson,
+        body: renewReservationBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: reservationResponseSchema,
-            },
-          },
+          200: successResponse(reservationResponseSchema),
         },
       },
     },
@@ -419,31 +298,10 @@ export async function reservationRoutes(
         tags: ["Reservations"],
         summary: "Adjust Reservation",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["cartId", "variantId"],
-          properties: {
-            cartId: { type: "string", format: "uuid" },
-            variantId: { type: "string", format: "uuid" },
-          },
-        },
-        body: {
-          type: "object",
-          required: ["newQuantity"],
-          properties: {
-            newQuantity: { type: "integer", minimum: 1 },
-          },
-        },
+        params: cartReservationParamsJson,
+        body: adjustReservationBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: reservationResponseSchema,
-            },
-          },
+          200: successResponse(reservationResponseSchema),
         },
       },
     },
@@ -460,23 +318,9 @@ export async function reservationRoutes(
         description: "Get total reserved quantity for a variant",
         tags: ["Reservations"],
         summary: "Get Total Reserved Quantity",
-        params: {
-          type: "object",
-          required: ["variantId"],
-          properties: {
-            variantId: { type: "string", format: "uuid" },
-          },
-        },
+        params: variantIdParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: reservedQuantityTotalResponseSchema,
-            },
-          },
+          200: successResponse(reservedQuantityTotalResponseSchema),
         },
       },
     },
@@ -493,23 +337,9 @@ export async function reservationRoutes(
         description: "Get active reserved quantity for a variant",
         tags: ["Reservations"],
         summary: "Get Active Reserved Quantity",
-        params: {
-          type: "object",
-          required: ["variantId"],
-          properties: {
-            variantId: { type: "string", format: "uuid" },
-          },
-        },
+        params: variantIdParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: reservedQuantityActiveResponseSchema,
-            },
-          },
+          200: successResponse(reservedQuantityActiveResponseSchema),
         },
       },
     },
@@ -527,36 +357,9 @@ export async function reservationRoutes(
         tags: ["Reservations"],
         summary: "Create Bulk Reservations",
         security: [{ bearerAuth: [] }],
-        body: {
-          type: "object",
-          required: ["cartId", "items"],
-          properties: {
-            cartId: { type: "string", format: "uuid" },
-            items: {
-              type: "array",
-              minItems: 1,
-              items: {
-                type: "object",
-                required: ["variantId", "quantity"],
-                properties: {
-                  variantId: { type: "string", format: "uuid" },
-                  quantity: { type: "integer", minimum: 1 },
-                },
-              },
-            },
-            durationMinutes: { type: "integer", minimum: 1 },
-          },
-        },
+        body: createBulkReservationsBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: bulkReservationResultResponseSchema,
-            },
-          },
+          201: successResponse(bulkReservationResultResponseSchema, 201),
         },
       },
     },
@@ -568,29 +371,19 @@ export async function reservationRoutes(
   fastify.get(
     "/admin/reservations/by-status",
     {
-      preHandler: [validateQuery(reservationsByStatusQuerySchema), RolePermissions.ADMIN_ONLY],
+      preValidation: [validateQuery(reservationsByStatusQuerySchema)],
+      preHandler: [RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Get reservations filtered by status (admin only)",
         tags: ["Reservations Admin"],
         summary: "Get Reservations By Status",
         security: [{ bearerAuth: [] }],
-        querystring: {
-          type: "object",
-          required: ["status"],
-          properties: {
-            status: { type: "string", enum: ["active", "expiring_soon", "expired", "recently_expired"] },
-          },
-        },
+        querystring: reservationsByStatusQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: reservationResponseSchema },
-            },
-          },
+          200: successResponse({
+            type: "array",
+            items: reservationResponseSchema,
+          }),
         },
       },
     },
@@ -609,23 +402,12 @@ export async function reservationRoutes(
         tags: ["Reservations Admin"],
         summary: "Resolve Reservation Conflicts",
         security: [{ bearerAuth: [] }],
-        params: {
-          type: "object",
-          required: ["variantId"],
-          properties: {
-            variantId: { type: "string", format: "uuid" },
-          },
-        },
+        params: variantAdminParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: { type: "array", items: reservationResponseSchema },
-            },
-          },
+          200: successResponse({
+            type: "array",
+            items: reservationResponseSchema,
+          }),
         },
       },
     },
