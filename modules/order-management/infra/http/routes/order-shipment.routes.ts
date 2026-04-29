@@ -9,6 +9,7 @@ import {
   userKeyGenerator,
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { validateBody, validateParams, toJsonSchema } from "../validation/validator";
+import { successResponse } from "@/api/src/shared/http/response-schemas";
 import {
   orderShipmentsParamsSchema,
   orderShipmentParamsSchema,
@@ -59,18 +60,10 @@ export async function registerOrderShipmentRoutes(
         security: [{ bearerAuth: [] }],
         params: orderShipmentsParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: {
-                type: "array",
-                items: shipmentResponseSchema,
-              },
-            },
-          },
+          200: successResponse({
+            type: "array",
+            items: shipmentResponseSchema,
+          }),
         },
       },
     },
@@ -94,15 +87,7 @@ export async function registerOrderShipmentRoutes(
         security: [{ bearerAuth: [] }],
         params: orderShipmentParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: shipmentResponseSchema,
-            },
-          },
+          200: successResponse(shipmentResponseSchema),
         },
       },
     },
@@ -129,15 +114,7 @@ export async function registerOrderShipmentRoutes(
         params: orderShipmentsParamsJson,
         body: createShipmentBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: shipmentResponseSchema,
-            },
-          },
+          201: successResponse(shipmentResponseSchema, 201),
         },
       },
     },
@@ -163,15 +140,7 @@ export async function registerOrderShipmentRoutes(
         params: orderShipmentParamsJson,
         body: markShippedBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: shipmentResponseSchema,
-            },
-          },
+          200: successResponse(shipmentResponseSchema),
         },
       },
     },
@@ -196,15 +165,7 @@ export async function registerOrderShipmentRoutes(
         params: orderShipmentParamsJson,
         body: updateShipmentTrackingBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: shipmentResponseSchema,
-            },
-          },
+          200: successResponse(shipmentResponseSchema),
         },
       },
     },
@@ -229,15 +190,7 @@ export async function registerOrderShipmentRoutes(
         params: orderShipmentParamsJson,
         body: markDeliveredBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: shipmentResponseSchema,
-            },
-          },
+          200: successResponse(shipmentResponseSchema),
         },
       },
     },

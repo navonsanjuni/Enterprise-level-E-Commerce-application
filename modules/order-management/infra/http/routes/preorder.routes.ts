@@ -10,6 +10,10 @@ import {
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { validateBody, validateParams, validateQuery, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   preorderParamsSchema,
   listPreordersQuerySchema,
   createPreorderSchema,
@@ -57,15 +61,7 @@ export async function registerPreorderRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listPreordersQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedPreordersResponseSchema,
-            },
-          },
+          200: successResponse(paginatedPreordersResponseSchema),
         },
       },
     },
@@ -86,15 +82,7 @@ export async function registerPreorderRoutes(
         security: [{ bearerAuth: [] }],
         params: preorderParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: preorderResponseSchema,
-            },
-          },
+          200: successResponse(preorderResponseSchema),
         },
       },
     },
@@ -117,15 +105,7 @@ export async function registerPreorderRoutes(
         security: [{ bearerAuth: [] }],
         body: createPreorderBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: preorderResponseSchema,
-            },
-          },
+          201: successResponse(preorderResponseSchema, 201),
         },
       },
     },
@@ -147,15 +127,7 @@ export async function registerPreorderRoutes(
         params: preorderParamsJson,
         body: updatePreorderReleaseDateBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: preorderResponseSchema,
-            },
-          },
+          200: successResponse(preorderResponseSchema),
         },
       },
     },
@@ -176,15 +148,7 @@ export async function registerPreorderRoutes(
         security: [{ bearerAuth: [] }],
         params: preorderParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: preorderResponseSchema,
-            },
-          },
+          200: successResponse(preorderResponseSchema),
         },
       },
     },
@@ -205,7 +169,7 @@ export async function registerPreorderRoutes(
         security: [{ bearerAuth: [] }],
         params: preorderParamsJson,
         response: {
-          204: { type: "null", description: "No Content" },
+          204: noContentResponse,
         },
       },
     },

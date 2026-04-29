@@ -10,6 +10,10 @@ import {
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { validateBody, validateParams, validateQuery, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   backorderParamsSchema,
   listBackordersQuerySchema,
   createBackorderSchema,
@@ -57,15 +61,7 @@ export async function registerBackorderRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listBackordersQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: paginatedBackordersResponseSchema,
-            },
-          },
+          200: successResponse(paginatedBackordersResponseSchema),
         },
       },
     },
@@ -86,15 +82,7 @@ export async function registerBackorderRoutes(
         security: [{ bearerAuth: [] }],
         params: backorderParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: backorderResponseSchema,
-            },
-          },
+          200: successResponse(backorderResponseSchema),
         },
       },
     },
@@ -117,15 +105,7 @@ export async function registerBackorderRoutes(
         security: [{ bearerAuth: [] }],
         body: createBackorderBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: backorderResponseSchema,
-            },
-          },
+          201: successResponse(backorderResponseSchema, 201),
         },
       },
     },
@@ -147,15 +127,7 @@ export async function registerBackorderRoutes(
         params: backorderParamsJson,
         body: updateBackorderEtaBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: backorderResponseSchema,
-            },
-          },
+          200: successResponse(backorderResponseSchema),
         },
       },
     },
@@ -176,15 +148,7 @@ export async function registerBackorderRoutes(
         security: [{ bearerAuth: [] }],
         params: backorderParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: backorderResponseSchema,
-            },
-          },
+          200: successResponse(backorderResponseSchema),
         },
       },
     },
@@ -205,7 +169,7 @@ export async function registerBackorderRoutes(
         security: [{ bearerAuth: [] }],
         params: backorderParamsJson,
         response: {
-          204: { type: "null", description: "No Content" },
+          204: noContentResponse,
         },
       },
     },

@@ -8,6 +8,7 @@ import {
   userKeyGenerator,
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { validateBody, validateParams, toJsonSchema } from "../validation/validator";
+import { successResponse } from "@/api/src/shared/http/response-schemas";
 import {
   orderAddressParamsSchema,
   setOrderAddressesSchema,
@@ -54,15 +55,7 @@ export async function registerOrderAddressRoutes(
         security: [{ bearerAuth: [] }],
         params: orderAddressParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: orderAddressResponseSchema,
-            },
-          },
+          200: successResponse(orderAddressResponseSchema),
         },
       },
     },
@@ -90,15 +83,7 @@ export async function registerOrderAddressRoutes(
         params: orderAddressParamsJson,
         body: setOrderAddressesBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: orderAddressResponseSchema,
-            },
-          },
+          201: successResponse(orderAddressResponseSchema, 201),
         },
       },
     },
@@ -124,15 +109,7 @@ export async function registerOrderAddressRoutes(
         params: orderAddressParamsJson,
         body: updateBillingAddressBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: orderAddressResponseSchema,
-            },
-          },
+          200: successResponse(orderAddressResponseSchema),
         },
       },
     },
@@ -158,15 +135,7 @@ export async function registerOrderAddressRoutes(
         params: orderAddressParamsJson,
         body: updateShippingAddressBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: orderAddressResponseSchema,
-            },
-          },
+          200: successResponse(orderAddressResponseSchema),
         },
       },
     },

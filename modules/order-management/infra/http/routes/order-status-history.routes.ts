@@ -9,6 +9,7 @@ import {
   userKeyGenerator,
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { validateBody, validateParams, validateQuery, toJsonSchema } from "../validation/validator";
+import { successResponse } from "@/api/src/shared/http/response-schemas";
 import {
   orderStatusHistoryParamsSchema,
   getStatusHistoryQuerySchema,
@@ -54,18 +55,10 @@ export async function registerOrderStatusHistoryRoutes(
         params: orderStatusHistoryParamsJson,
         querystring: getStatusHistoryQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: {
-                type: "array",
-                items: statusHistoryEntryResponseSchema,
-              },
-            },
-          },
+          200: successResponse({
+            type: "array",
+            items: statusHistoryEntryResponseSchema,
+          }),
         },
       },
     },
@@ -90,15 +83,7 @@ export async function registerOrderStatusHistoryRoutes(
         params: orderStatusHistoryParamsJson,
         body: logStatusChangeBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: statusHistoryEntryResponseSchema,
-            },
-          },
+          201: successResponse(statusHistoryEntryResponseSchema, 201),
         },
       },
     },

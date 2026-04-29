@@ -15,6 +15,11 @@ import {
   toJsonSchema,
 } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+  paginatedResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   supplierParamsSchema,
   listSuppliersSchema,
   createSupplierSchema,
@@ -56,24 +61,7 @@ export async function supplierRoutes(
         security: [{ bearerAuth: [] }],
         querystring: listSuppliersQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: {
-                type: "object",
-                properties: {
-                  items: { type: "array", items: supplierResponseSchema },
-                  total: { type: "integer" },
-                  limit: { type: "integer" },
-                  offset: { type: "integer" },
-                  hasMore: { type: "boolean" },
-                },
-              },
-            },
-          },
+          200: successResponse(paginatedResponse(supplierResponseSchema)),
         },
       },
     },
@@ -94,15 +82,7 @@ export async function supplierRoutes(
         security: [{ bearerAuth: [] }],
         params: supplierParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: supplierResponseSchema,
-            },
-          },
+          200: successResponse(supplierResponseSchema),
         },
       },
     },
@@ -122,15 +102,7 @@ export async function supplierRoutes(
         security: [{ bearerAuth: [] }],
         body: createSupplierBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: supplierResponseSchema,
-            },
-          },
+          201: successResponse(supplierResponseSchema, 201),
         },
       },
     },
@@ -152,15 +124,7 @@ export async function supplierRoutes(
         params: supplierParamsJson,
         body: updateSupplierBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: supplierResponseSchema,
-            },
-          },
+          200: successResponse(supplierResponseSchema),
         },
       },
     },
@@ -181,7 +145,7 @@ export async function supplierRoutes(
         security: [{ bearerAuth: [] }],
         params: supplierParamsJson,
         response: {
-          204: { description: "Supplier deleted successfully", type: "null" },
+          204: noContentResponse,
         },
       },
     },

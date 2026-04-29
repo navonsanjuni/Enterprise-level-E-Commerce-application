@@ -9,6 +9,7 @@ import {
   userKeyGenerator,
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { validateBody, validateParams, validateQuery, toJsonSchema } from "../validation/validator";
+import { successResponse } from "@/api/src/shared/http/response-schemas";
 import {
   orderEventsParamsSchema,
   orderEventParamsSchema,
@@ -56,18 +57,10 @@ export async function registerOrderEventRoutes(
         params: orderEventsParamsJson,
         querystring: listOrderEventsQueryJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: {
-                type: "array",
-                items: orderEventResponseSchema,
-              },
-            },
-          },
+          200: successResponse({
+            type: "array",
+            items: orderEventResponseSchema,
+          }),
         },
       },
     },
@@ -88,15 +81,7 @@ export async function registerOrderEventRoutes(
         security: [{ bearerAuth: [] }],
         params: orderEventParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: orderEventResponseSchema,
-            },
-          },
+          200: successResponse(orderEventResponseSchema),
         },
       },
     },
@@ -121,15 +106,7 @@ export async function registerOrderEventRoutes(
         params: orderEventsParamsJson,
         body: logOrderEventBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: orderEventResponseSchema,
-            },
-          },
+          201: successResponse(orderEventResponseSchema, 201),
         },
       },
     },

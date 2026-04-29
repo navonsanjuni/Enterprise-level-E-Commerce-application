@@ -9,6 +9,10 @@ import {
 } from "@/api/src/shared/middleware/rate-limiter.middleware";
 import { validateBody, validateParams, toJsonSchema } from "../validation/validator";
 import {
+  successResponse,
+  noContentResponse,
+} from "@/api/src/shared/http/response-schemas";
+import {
   orderItemsParamsSchema,
   orderItemParamsSchema,
   addOrderItemSchema,
@@ -54,18 +58,10 @@ export async function registerOrderItemRoutes(
         security: [{ bearerAuth: [] }],
         params: orderItemsParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: {
-                type: "array",
-                items: orderItemResponseSchema,
-              },
-            },
-          },
+          200: successResponse({
+            type: "array",
+            items: orderItemResponseSchema,
+          }),
         },
       },
     },
@@ -86,15 +82,7 @@ export async function registerOrderItemRoutes(
         security: [{ bearerAuth: [] }],
         params: orderItemParamsJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: orderItemResponseSchema,
-            },
-          },
+          200: successResponse(orderItemResponseSchema),
         },
       },
     },
@@ -119,15 +107,7 @@ export async function registerOrderItemRoutes(
         params: orderItemsParamsJson,
         body: addOrderItemBodyJson,
         response: {
-          201: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: orderItemResponseSchema,
-            },
-          },
+          201: successResponse(orderItemResponseSchema, 201),
         },
       },
     },
@@ -150,15 +130,7 @@ export async function registerOrderItemRoutes(
         params: orderItemParamsJson,
         body: updateOrderItemBodyJson,
         response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              statusCode: { type: "number" },
-              message: { type: "string" },
-              data: orderItemResponseSchema,
-            },
-          },
+          200: successResponse(orderItemResponseSchema),
         },
       },
     },
@@ -180,7 +152,7 @@ export async function registerOrderItemRoutes(
         security: [{ bearerAuth: [] }],
         params: orderItemParamsJson,
         response: {
-          204: { type: "null", description: "No Content" },
+          204: noContentResponse,
         },
       },
     },
