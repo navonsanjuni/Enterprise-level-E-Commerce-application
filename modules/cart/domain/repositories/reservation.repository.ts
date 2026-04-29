@@ -1,58 +1,69 @@
 import { Reservation } from "../entities/reservation.entity";
 import { ReservationId } from "../value-objects/reservation-id.vo";
 import { CartId } from "../value-objects/cart-id.vo";
-import { VariantId } from "../value-objects/variant-id.vo";
-import { Quantity } from "../value-objects/quantity.vo";
+import { VariantId } from "../../../product-catalog/domain/value-objects/variant-id.vo";
 
+/**
+ * Reservation lifecycle changes (`create`, `extend`, `renew`,
+ * `release`, `adjust`) flow through the `Reservation` aggregate root
+ * via its domain methods followed by `save(reservation)` (or `delete()`
+ * for release). Direct lifecycle methods previously on this interface
+ * were removed to enforce the aggregate boundary.
+ *
+ * Reporting/analytics methods (`getReservationStatistics`,
+ * `getReservationsByTimeframe`, `searchReservations`) and background-job
+ * batch hooks (`getReservationsFor{Cleanup,Extension,Notification}`,
+ * `archiveOldReservations`) are query-side responsibilities kept here
+ * for now; consider splitting into `IReservationQueryRepository` if
+ * more accumulate.
+ *
+ * `reserveInventory` orchestrates a stock-service call + persistence;
+ * it remains because the orchestration touches an external port
+ * (`IExternalStockService`) and is awkward to express purely on the
+ * aggregate. A dedicated domain service would be the cleaner home.
+ */
 export interface IReservationRepository {
+  // ── Aggregate persistence ──────────────────────────────────────────
   save(reservation: Reservation): Promise<void>;
   findById(reservationId: ReservationId): Promise<Reservation | null>;
   delete(reservationId: ReservationId): Promise<void>;
+
+  // ── Lookups by alternate key ───────────────────────────────────────
   findByCartId(cartId: CartId): Promise<Reservation[]>;
   findActiveByCartId(cartId: CartId): Promise<Reservation[]>;
-  deleteByCartId(cartId: CartId): Promise<number>;
-  countByCartId(cartId: CartId): Promise<number>;
-  findByVariantId(variantId: VariantId): Promise<Reservation[]>;
-  findActiveByVariantId(variantId: VariantId): Promise<Reservation[]>;
-  getTotalReservedQuantity(variantId: VariantId): Promise<number>;
-  getActiveReservedQuantity(variantId: VariantId): Promise<number>;
   findByCartAndVariant(
     cartId: CartId,
     variantId: VariantId,
   ): Promise<Reservation | null>;
-  existsForCartAndVariant(
-    cartId: CartId,
-    variantId: VariantId,
-  ): Promise<boolean>;
+  findByVariantId(variantId: VariantId): Promise<Reservation[]>;
+  findByStatus(
+    status: "active" | "expiring_soon" | "expired" | "recently_expired",
+  ): Promise<Reservation[]>;
+
+  // ── Bulk delete (cart cleanup) ─────────────────────────────────────
+  deleteByCartId(cartId: CartId): Promise<number>;
   deleteByCartAndVariant(
     cartId: CartId,
     variantId: VariantId,
   ): Promise<boolean>;
-  findExpiredReservations(): Promise<Reservation[]>;
-  findExpiringSoon(thresholdMinutes?: number): Promise<Reservation[]>;
-  findReservationsExpiringBetween(
-    startTime: Date,
-    endTime: Date,
-  ): Promise<Reservation[]>;
-  saveBulk(reservations: Reservation[]): Promise<void>;
-  findByIds(reservationIds: ReservationId[]): Promise<Reservation[]>;
-  deleteExpiredBefore(date: Date): Promise<number>;
-  createReservation(
+
+  // ── Quantity aggregates ────────────────────────────────────────────
+  getTotalReservedQuantity(variantId: VariantId): Promise<number>;
+  getActiveReservedQuantity(variantId: VariantId): Promise<number>;
+
+  // ── Stock-orchestration hook ───────────────────────────────────────
+  // Calls the external stock service to atomically reserve inventory
+  // and create a reservation row. Kept because the orchestration spans
+  // a port boundary; a dedicated domain service would be the cleaner
+  // home if more such operations accumulate.
+  reserveInventory(
     cartId: CartId,
     variantId: VariantId,
-    quantity: Quantity,
+    quantity: number,
     durationMinutes?: number,
   ): Promise<Reservation>;
 
-  extendReservation(
-    reservationId: ReservationId,
-    additionalMinutes: number,
-  ): Promise<boolean>;
-  renewReservation(
-    reservationId: ReservationId,
-    durationMinutes?: number,
-  ): Promise<boolean>;
-  releaseReservation(reservationId: ReservationId): Promise<boolean>;
+  // ── Availability / capacity / conflict checks ──────────────────────
   checkAvailability(
     variantId: VariantId,
     requestedQuantity: number,
@@ -62,27 +73,32 @@ export interface IReservationRepository {
     activeReserved: number;
     availableForReservation: number;
   }>;
-
-  reserveInventory(
+  validateReservationCapacity(
+    variantId: VariantId,
+    requestedQuantity: number,
+  ): Promise<boolean>;
+  canCreateReservation(
     cartId: CartId,
     variantId: VariantId,
     quantity: number,
-    durationMinutes?: number,
-  ): Promise<Reservation>;
-
-  adjustReservation(
-    cartId: CartId,
+  ): Promise<boolean>;
+  isReservationExtendable(reservationId: ReservationId): Promise<boolean>;
+  findConflictingReservations(
     variantId: VariantId,
-    newQuantity: number,
-  ): Promise<Reservation | null>;
-  findByStatus(
-    status: "active" | "expiring_soon" | "expired" | "recently_expired",
+    quantity: number,
+    excludeCartId?: CartId,
   ): Promise<Reservation[]>;
-  findRecentReservations(hours: number, limit?: number): Promise<Reservation[]>;
-  findReservationsByDateRange(
-    startDate: Date,
-    endDate: Date,
-  ): Promise<Reservation[]>;
+  resolveReservationConflicts(variantId: VariantId): Promise<{
+    resolved: number;
+    conflicts: number;
+    actions: Array<{
+      action: "extended" | "reduced" | "cancelled";
+      reservationId: string;
+      details: string;
+    }>;
+  }>;
+
+  // ── Analytics / reporting ──────────────────────────────────────────
   searchReservations(criteria: {
     cartId?: string;
     variantId?: string;
@@ -109,7 +125,6 @@ export interface IReservationRepository {
       reservationCount: number;
     }>;
   }>;
-
   getReservationsByTimeframe(
     timeframe: "hour" | "day" | "week" | "month",
     count?: number,
@@ -122,44 +137,9 @@ export interface IReservationRepository {
       uniqueCarts: number;
     }>
   >;
-  optimizeReservations(): Promise<number>;
-  consolidateExpiredReservations(): Promise<number>;
-  archiveOldReservations(olderThanDays: number): Promise<number>;
-  validateReservationCapacity(
-    variantId: VariantId,
-    requestedQuantity: number,
-  ): Promise<boolean>;
-  isReservationExtendable(reservationId: ReservationId): Promise<boolean>;
-  canCreateReservation(
-    cartId: CartId,
-    variantId: VariantId,
-    quantity: number,
-  ): Promise<boolean>;
-  findConflictingReservations(
-    variantId: VariantId,
-    quantity: number,
-    excludeCartId?: CartId,
-  ): Promise<Reservation[]>;
 
-  resolveReservationConflicts(variantId: VariantId): Promise<{
-    resolved: number;
-    conflicts: number;
-    actions: Array<{
-      action: "extended" | "reduced" | "cancelled";
-      reservationId: string;
-      details: string;
-    }>;
-  }>;
-  getReservationSummary(reservationId: ReservationId): Promise<{
-    reservationId: string;
-    cartId: string;
-    variantId: string;
-    quantity: number;
-    status: string;
-    expiresAt: Date;
-    timeUntilExpiryMinutes: number;
-    canBeExtended: boolean;
-  } | null>;
+  // ── Background-job batch hooks ─────────────────────────────────────
+  archiveOldReservations(olderThanDays: number): Promise<number>;
   getReservationsForCleanup(batchSize?: number): Promise<Reservation[]>;
   getReservationsForExtension(
     thresholdMinutes: number,

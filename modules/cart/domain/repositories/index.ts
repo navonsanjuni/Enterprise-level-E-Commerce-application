@@ -1,7 +1,7 @@
 export type {
   ICartRepository,
   CartWithCheckoutInfo,
-  CartSearchCriteria,
+  CartStatistics,
   CartAddressData,
 } from "./cart.repository";
 export type { IReservationRepository } from "./reservation.repository";

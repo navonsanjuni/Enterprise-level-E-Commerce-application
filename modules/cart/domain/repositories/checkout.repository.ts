@@ -4,6 +4,11 @@ import { CartId } from "../value-objects/cart-id.vo";
 import { CartOwnerId } from "../value-objects/cart-owner-id.vo";
 import { GuestToken } from "../value-objects/guest-token.vo";
 
+// State transitions (`markAsCompleted`, `markAsExpired`, `markAsCancelled`)
+// belong on the `Checkout` aggregate root — the service should call
+// `checkout.markAsX()` then `save(checkout)`. This repository persists; it
+// does NOT mutate. Direct status-mutating methods were removed from this
+// interface to enforce the aggregate boundary.
 export interface ICheckoutRepository {
   save(checkout: Checkout): Promise<void>;
   findById(checkoutId: CheckoutId): Promise<Checkout | null>;
@@ -14,10 +19,6 @@ export interface ICheckoutRepository {
   findByGuestToken(guestToken: GuestToken): Promise<Checkout[]>;
   findPendingCheckouts(): Promise<Checkout[]>;
   findExpiredCheckouts(): Promise<Checkout[]>;
-
-  markAsCompleted(checkoutId: CheckoutId, completedAt: Date): Promise<void>;
-  markAsExpired(checkoutId: CheckoutId): Promise<void>;
-  markAsCancelled(checkoutId: CheckoutId): Promise<void>;
 
   cleanupExpiredCheckouts(): Promise<number>;
 }
