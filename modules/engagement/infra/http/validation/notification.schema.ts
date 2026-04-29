@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { NotificationTypeValue } from "../../../domain/value-objects/notification-type.vo";
+import { ChannelTypeValue } from "../../../domain/value-objects/channel-type.vo";
 
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
@@ -14,14 +16,16 @@ export const paginationQuerySchema = z.object({
 });
 
 export const notificationsByTypeQuerySchema = paginationQuerySchema.extend({
-  type: z.string().min(1),
+  type: z.enum(NotificationTypeValue),
 });
 
 // ── Body Schemas ──────────────────────────────────────────────────────────────
 
+// Enums derive from the domain VOs so the wire schema stays in sync with
+// the Pattern D value objects.
 export const scheduleNotificationSchema = z.object({
-  type: z.string().min(1),
-  channel: z.string().min(1).optional(),
+  type: z.enum(NotificationTypeValue),
+  channel: z.enum(ChannelTypeValue).optional(),
   templateId: z.string().optional(),
   payload: z.record(z.string(), z.unknown()).optional(),
   scheduledAt: z.coerce.date(),

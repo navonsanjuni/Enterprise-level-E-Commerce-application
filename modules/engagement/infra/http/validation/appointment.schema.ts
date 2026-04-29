@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AppointmentTypeValue } from "../../../domain/value-objects/appointment-type.vo";
 
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
@@ -23,9 +24,10 @@ export const paginationQuerySchema = z.object({
 
 // ── Body Schemas ──────────────────────────────────────────────────────────────
 
+// Enum derives from the domain VO so the wire schema stays in sync.
 export const createAppointmentSchema = z.object({
   userId: z.uuid(),
-  type: z.string().min(1),
+  type: z.enum(AppointmentTypeValue),
   locationId: z.uuid().optional(),
   startAt: z.coerce.date(),
   endAt: z.coerce.date(),

@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { ReminderTypeValue } from "../../../domain/value-objects/reminder-type.vo";
+import { ContactTypeValue } from "../../../domain/value-objects/contact-type.vo";
+import { ChannelTypeValue } from "../../../domain/value-objects/channel-type.vo";
 
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
@@ -23,12 +26,15 @@ export const paginationQuerySchema = z.object({
 
 // ── Body Schemas ──────────────────────────────────────────────────────────────
 
+// Enums derive from the domain VOs so the wire schema stays in sync with
+// the Pattern D value objects — adding a new reminder type only requires
+// editing the VO, not chasing string literals across schemas.
 export const createReminderSchema = z.object({
-  type: z.string().min(1),
+  type: z.enum(ReminderTypeValue),
   variantId: z.uuid(),
-  contact: z.string().min(1),
-  channel: z.string().min(1),
-  optInAt: z.coerce.date().optional(),
+  contact: z.enum(ContactTypeValue),
+  channel: z.enum(ChannelTypeValue),
+   optInAt: z.coerce.date().optional(),
 });
 
 // ── JSON Schema for Swagger docs ─────────────────────────────────────────────

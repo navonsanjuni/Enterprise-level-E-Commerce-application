@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ReviewStatusValue } from "../../../domain/value-objects/review-status.vo";
 
 // ── Params Schemas ────────────────────────────────────────────────────────────
 
@@ -31,8 +32,16 @@ export const createProductReviewSchema = z.object({
   body: z.string().max(5000).optional(),
 });
 
+// Subset of `ReviewStatusValue` — `pending` is the initial state set
+// internally and not user-mutable, so it's excluded from the patchable set.
+const REVIEW_STATUS_TRANSITIONS = [
+  ReviewStatusValue.APPROVED,
+  ReviewStatusValue.REJECTED,
+  ReviewStatusValue.FLAGGED,
+] as const;
+
 export const updateReviewStatusSchema = z.object({
-  status: z.enum(["approved", "rejected", "flagged"]),
+  status: z.enum(REVIEW_STATUS_TRANSITIONS),
 });
 
 // ── JSON Schema for Swagger docs ─────────────────────────────────────────────
