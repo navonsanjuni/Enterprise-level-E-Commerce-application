@@ -191,7 +191,7 @@ export class PurchaseOrderNotDeletableError extends DomainError {
     );
   }
 }
-
+ 
 export class InvalidPurchaseOrderStatusTransitionError extends DomainError {
   constructor(from: string, to: string) {
     super(
