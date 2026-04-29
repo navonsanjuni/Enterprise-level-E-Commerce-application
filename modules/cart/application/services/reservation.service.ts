@@ -3,8 +3,7 @@ import { ICartRepository } from "../../domain/repositories/cart.repository";
 import { Reservation } from "../../domain/entities/reservation.entity";
 import { CartId } from "../../domain/value-objects/cart-id.vo";
 import { ReservationId } from "../../domain/value-objects/reservation-id.vo";
-import { VariantId } from "../../domain/value-objects/variant-id.vo";
-import { Quantity } from "../../domain/value-objects/quantity.vo";
+import { VariantId } from "../../../product-catalog/domain/value-objects/variant-id.vo";
 import { RESERVATION_CLEANUP_BATCH_SIZE } from "../../domain/constants";
 import {
   CartNotFoundError,
@@ -133,13 +132,14 @@ export class ReservationService {
       return this.mapReservationToDto(existingReservation);
     }
 
-    // Create new reservation
-    const reservation = await this.reservationRepository.createReservation(
-      CartId.fromString(dto.cartId),
-      VariantId.fromString(dto.variantId),
-      Quantity.fromNumber(dto.quantity),
-      dto.durationMinutes,
-    );
+    // Create new reservation via the aggregate then persist.
+    const reservation = Reservation.create({
+      cartId: dto.cartId,
+      variantId: dto.variantId,
+      quantity: dto.quantity,
+      durationMinutes: dto.durationMinutes,
+    });
+    await this.reservationRepository.save(reservation);
 
     return this.mapReservationToDto(reservation);
   }
@@ -171,7 +171,12 @@ export class ReservationService {
     return reservations.map((r) => this.mapReservationToDto(r));
   }
 
-  // Reservation management
+  // ── Reservation lifecycle ────────────────────────────────────────────
+  // Mutations flow through the `Reservation` aggregate (`extend`, `renew`,
+  // `updateQuantity`) followed by `save(reservation)`. Release means
+  // delete. Direct `repo.extendReservation()`/`renewReservation()`/etc.
+  // were removed in favour of the entity-then-save pattern.
+
   async extendReservation(dto: ExtendReservationDto): Promise<ReservationDto> {
     const reservationId = ReservationId.fromString(dto.reservationId);
     const reservation = await this.reservationRepository.findById(reservationId);
@@ -185,17 +190,9 @@ export class ReservationService {
       );
     }
 
-    const success = await this.reservationRepository.extendReservation(
-      reservationId,
-      dto.additionalMinutes,
-    );
-
-    if (!success) {
-      throw new InvalidOperationError("Failed to extend reservation");
-    }
-
-    const updatedReservation = await this.reservationRepository.findById(reservationId);
-    return this.mapReservationToDto(updatedReservation!);
+    reservation.extend(dto.additionalMinutes);
+    await this.reservationRepository.save(reservation);
+    return this.mapReservationToDto(reservation);
   }
 
   async renewReservation(dto: RenewReservationDto): Promise<ReservationDto> {
@@ -205,17 +202,9 @@ export class ReservationService {
       throw new ReservationNotFoundError(dto.reservationId);
     }
 
-    const success = await this.reservationRepository.renewReservation(
-      reservationId,
-      dto.durationMinutes,
-    );
-
-    if (!success) {
-      throw new InvalidOperationError("Failed to renew reservation");
-    }
-
-    const updatedReservation = await this.reservationRepository.findById(reservationId);
-    return this.mapReservationToDto(updatedReservation!);
+    reservation.renew(dto.durationMinutes);
+    await this.reservationRepository.save(reservation);
+    return this.mapReservationToDto(reservation);
   }
 
   async releaseReservation(reservationId: string): Promise<void> {
@@ -224,20 +213,29 @@ export class ReservationService {
     if (!reservation) {
       throw new ReservationNotFoundError(reservationId);
     }
-
-    await this.reservationRepository.releaseReservation(id);
+    // Release == delete the reservation row. There is no soft-delete here;
+    // the `Reservation` aggregate has no tombstone state.
+    await this.reservationRepository.delete(id);
   }
 
   async adjustReservation(
     dto: AdjustReservationDto,
   ): Promise<ReservationDto | null> {
-    const reservation = await this.reservationRepository.adjustReservation(
+    const reservation = await this.reservationRepository.findByCartAndVariant(
       CartId.fromString(dto.cartId),
       VariantId.fromString(dto.variantId),
-      dto.newQuantity,
     );
-
-    return reservation ? this.mapReservationToDto(reservation) : null;
+    if (!reservation) {
+      return null;
+    }
+    if (dto.newQuantity <= 0) {
+      throw new InvalidOperationError(
+        "Cannot adjust reservation to zero or below; release it instead.",
+      );
+    }
+    reservation.updateQuantity(dto.newQuantity);
+    await this.reservationRepository.save(reservation);
+    return this.mapReservationToDto(reservation);
   }
 
   // Inventory management

@@ -1,5 +1,6 @@
 import { ICartRepository, CartWithCheckoutInfo } from "../../domain/repositories/cart.repository";
 import { IReservationRepository } from "../../domain/repositories/reservation.repository";
+import { Reservation } from "../../domain/entities/reservation.entity";
 import { ICheckoutRepository } from "../../domain/repositories/checkout.repository";
 import {
   ShoppingCart,
@@ -12,8 +13,10 @@ import {
 import { CartId } from "../../domain/value-objects/cart-id.vo";
 import { CartOwnerId } from "../../domain/value-objects/cart-owner-id.vo";
 import { GuestToken } from "../../domain/value-objects/guest-token.vo";
-import { VariantId } from "../../domain/value-objects/variant-id.vo";
-import { PromoData } from "../../domain/value-objects/applied-promos.vo";
+import { VariantId } from "../../../product-catalog/domain/value-objects/variant-id.vo";
+import { ProductId } from "../../../product-catalog/domain/value-objects/product-id.vo";
+import { MediaAssetId } from "../../../product-catalog/domain/value-objects/media-asset-id.vo";
+import { AppliedPromoData } from "../../domain/value-objects/applied-promos.vo";
 import {
   IExternalProductVariantRepository,
   IExternalProductRepository,
@@ -46,7 +49,7 @@ interface AddToCartDto {
   guestToken?: string;
   variantId: string;
   quantity: number;
-  appliedPromos?: PromoData[];
+  appliedPromos?: AppliedPromoData[];
   isGift?: boolean;
   giftMessage?: string;
 }
@@ -99,7 +102,7 @@ interface CartItemDto {
   subtotal: number;
   discountAmount: number;
   totalPrice: number;
-  appliedPromos: PromoData[];
+  appliedPromos: AppliedPromoData[];
   isGift: boolean;
   giftMessage?: string;
   hasPromosApplied: boolean;
@@ -353,10 +356,12 @@ export class CartManagementService {
   async addToCart(dto: AddToCartDto): Promise<CartDto> {
     let cart: ShoppingCart | null = null;
 
-    // Fetch product variant
-    const productVariant = await this.productVariantRepository.findById({
-      getValue: () => dto.variantId,
-    });
+    // Fetch product variant. The external port accepts any object with
+    // `getValue(): string` (a structural ACL); `VariantId` satisfies that
+    // contract via its inherited `getValue()`.
+    const productVariant = await this.productVariantRepository.findById(
+      VariantId.fromString(dto.variantId),
+    );
 
     if (!productVariant) {
       throw new DomainValidationError("Product variant not found");
@@ -463,12 +468,11 @@ export class CartManagementService {
       const newTotalQty = currentCartQty + dto.quantity;
 
       if (newTotalQty > currentReservedQty) {
-        // Need to reserve additional quantity
-        await this.reservationRepository.adjustReservation(
-          cart.cartId,
-          VariantId.fromString(dto.variantId),
-          newTotalQty,
-        );
+        // Need to reserve additional quantity. Mutate via the aggregate
+        // (`updateQuantity`) and persist through `save()` so the
+        // domain event fires and aggregate invariants run.
+        existingReservation.updateQuantity(newTotalQty);
+        await this.reservationRepository.save(existingReservation);
       }
     } else {
       // Create new reservation
@@ -601,12 +605,15 @@ export class CartManagementService {
             guestCart.cartId,
           );
         for (const reservation of guestReservations) {
-          // Create new reservations for user cart
-          await this.reservationRepository.createReservation(
-            userCart.cartId,
-            reservation.variantId,
-            reservation.quantity,
-          );
+          // Create a new reservation against the user cart via the
+          // aggregate-then-save pattern (drops the old repo-side
+          // factory in favour of `Reservation.create()` + `save()`).
+          const transferred = Reservation.create({
+            cartId: userCart.cartId.getValue(),
+            variantId: reservation.variantId.getValue(),
+            quantity: reservation.quantity.getValue(),
+          });
+          await this.reservationRepository.save(transferred);
         }
 
         // Delete guest cart and its reservations
@@ -786,13 +793,11 @@ export class CartManagementService {
   private async mapCartItemsBatched(items: CartItem[]): Promise<CartItemDto[]> {
     if (items.length === 0) return [];
 
-    // 1. Fetch all variants in parallel
+    // 1. Fetch all variants in parallel. The external port accepts any
+    // object with `getValue(): string` (structural ACL) — `VariantId` from
+    // product-catalog satisfies that contract directly.
     const variantResults = await Promise.all(
-      items.map((item) =>
-        this.productVariantRepository.findById({
-          getValue: () => item.variantId.getValue(),
-        }),
-      ),
+      items.map((item) => this.productVariantRepository.findById(item.variantId)),
     );
 
     // 2. Collect unique product IDs, then fetch all products in parallel
@@ -804,7 +809,7 @@ export class CartManagementService {
 
     const productResults = await Promise.all(
       uniqueProductIds.map((pid) =>
-        this.productRepository.findById({ getValue: () => pid }),
+        this.productRepository.findById(ProductId.fromString(pid)),
       ),
     );
     const productMap = new Map(
@@ -817,7 +822,7 @@ export class CartManagementService {
     const mediaListResults = await Promise.all(
       uniqueProductIds.map((pid) =>
         this.productMediaRepository.findByProductId(
-          { getValue: () => pid },
+          ProductId.fromString(pid),
           { sortBy: "position", sortOrder: "asc" },
         ),
       ),
@@ -835,7 +840,7 @@ export class CartManagementService {
     }
     const assetResults = await Promise.all(
       [...assetIdSet].map((aid) =>
-        this.mediaAssetRepository.findById({ getValue: () => aid }),
+        this.mediaAssetRepository.findById(MediaAssetId.fromString(aid)),
       ),
     );
     const assetMap = new Map(
@@ -915,7 +920,11 @@ export class CartManagementService {
     return await this.cartRepository.getCartStatistics();
   }
 
-  // Checkout field updates
+  // ── Pre-checkout field updates ──────────────────────────────────────
+  // Mutations flow through the `ShoppingCart` aggregate (`updateEmail`,
+  // `updateShippingInfo`, `updateAddresses`) followed by `save(cart)`.
+  // The repo no longer exposes direct `updateXxx` methods.
+
   async updateCartEmail(
     cartId: string,
     email: string,
@@ -926,10 +935,9 @@ export class CartManagementService {
     if (!cart) {
       throw new CartNotFoundError(cartId);
     }
-
     this.validateCartOwnership(cart, userId, guestToken);
-
-    await this.cartRepository.updateEmail(CartId.fromString(cartId), email);
+    cart.updateEmail(email);
+    await this.cartRepository.save(cart);
   }
 
   async updateCartShippingInfo(
@@ -946,13 +954,9 @@ export class CartManagementService {
     if (!cart) {
       throw new CartNotFoundError(cartId);
     }
-
     this.validateCartOwnership(cart, userId, guestToken);
-
-    await this.cartRepository.updateShippingInfo(
-      CartId.fromString(cartId),
-      data,
-    );
+    cart.updateShippingInfo(data);
+    await this.cartRepository.save(cart);
   }
 
   async updateCartAddresses(
@@ -985,10 +989,9 @@ export class CartManagementService {
     if (!cart) {
       throw new CartNotFoundError(cartId);
     }
-
     this.validateCartOwnership(cart, userId, guestToken);
-
-    await this.cartRepository.updateAddresses(CartId.fromString(cartId), data);
+    cart.updateAddresses(data);
+    await this.cartRepository.save(cart);
   }
 
   async getCartWithCheckoutInfo(
