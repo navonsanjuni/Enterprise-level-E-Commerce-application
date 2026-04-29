@@ -1,4 +1,6 @@
 import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaRepository } from "../../../../../apps/api/src/shared/infrastructure/persistence/prisma-repository.base";
+import { IEventBus } from "../../../../../packages/core/src/domain/events/domain-event";
 import { IReservationRepository } from "../../../domain/repositories/reservation.repository";
 import {
   Reservation,
@@ -6,15 +8,20 @@ import {
 } from "../../../domain/entities/reservation.entity";
 import { CartId } from "../../../domain/value-objects/cart-id.vo";
 import { ReservationId } from "../../../domain/value-objects/reservation-id.vo";
-import { VariantId } from "../../../domain/value-objects/variant-id.vo";
-import { Quantity } from "../../../domain/value-objects/quantity.vo";
+import { VariantId } from "../../../../product-catalog/domain/value-objects/variant-id.vo";
 import { IExternalStockService } from "../../../domain/ports/external-services";
 
-export class ReservationRepositoryImpl implements IReservationRepository {
+export class ReservationRepositoryImpl
+  extends PrismaRepository<Reservation>
+  implements IReservationRepository
+{
   constructor(
-    private readonly prisma: PrismaClient,
+    prisma: PrismaClient,
     private readonly stockService?: IExternalStockService,
-  ) {}
+    eventBus?: IEventBus,
+  ) {
+    super(prisma, eventBus);
+  }
 
   // Core CRUD operations
   async save(reservation: Reservation): Promise<void> {
@@ -34,6 +41,8 @@ export class ReservationRepositoryImpl implements IReservationRepository {
         expiresAt: data.expiresAt,
       },
     });
+
+    await this.dispatchEvents(reservation);
   }
 
   async findById(reservationId: ReservationId): Promise<Reservation | null> {
@@ -288,76 +297,6 @@ export class ReservationRepositoryImpl implements IReservationRepository {
     return result.count;
   }
 
-  // Business operations
-  async createReservation(
-    cartId: CartId,
-    variantId: VariantId,
-    quantity: Quantity,
-    durationMinutes: number = 30,
-  ): Promise<Reservation> {
-    const reservation = Reservation.create({
-      cartId: cartId.getValue(),
-      variantId: variantId.getValue(),
-      quantity: quantity.getValue(),
-      durationMinutes,
-    });
-
-    await this.save(reservation);
-    return reservation;
-  }
-
-  async extendReservation(
-    reservationId: ReservationId,
-    additionalMinutes: number,
-  ): Promise<boolean> {
-    const reservation = await this.findById(reservationId);
-    if (!reservation) {
-      return false;
-    }
-
-    const currentExpiry = reservation.expiresAt;
-    const newExpiry = new Date(
-      currentExpiry.getTime() + additionalMinutes * 60 * 1000,
-    );
-
-    await this.prisma.reservation.update({
-      where: { id: reservationId.getValue() },
-      data: { expiresAt: newExpiry },
-    });
-
-    return true;
-  }
-
-  async renewReservation(
-    reservationId: ReservationId,
-    durationMinutes?: number,
-  ): Promise<boolean> {
-    const reservation = await this.findById(reservationId);
-    if (!reservation) {
-      return false;
-    }
-
-    const now = new Date();
-    const actualDuration = durationMinutes ?? 30;
-    const newExpiry = new Date(now.getTime() + actualDuration * 60 * 1000);
-
-    await this.prisma.reservation.update({
-      where: { id: reservationId.getValue() },
-      data: { expiresAt: newExpiry },
-    });
-
-    return true;
-  }
-
-  async releaseReservation(reservationId: ReservationId): Promise<boolean> {
-    try {
-      await this.delete(reservationId);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
   // Inventory management
   async checkAvailability(
     variantId: VariantId,
@@ -414,41 +353,16 @@ export class ReservationRepositoryImpl implements IReservationRepository {
       throw new Error("Insufficient inventory available for reservation");
     }
 
-    const quantityVo = Quantity.fromNumber(quantity);
-    return this.createReservation(
-      cartId,
-      variantId,
-      quantityVo,
+    // Build the aggregate then persist via the canonical save path so
+    // domain events fire.
+    const reservation = Reservation.create({
+      cartId: cartId.getValue(),
+      variantId: variantId.getValue(),
+      quantity,
       durationMinutes,
-    );
-  }
-
-  async adjustReservation(
-    cartId: CartId,
-    variantId: VariantId,
-    newQuantity: number,
-  ): Promise<Reservation | null> {
-    const existingReservation = await this.findByCartAndVariant(
-      cartId,
-      variantId,
-    );
-    if (!existingReservation) {
-      return null;
-    }
-
-    if (newQuantity <= 0) {
-      await this.deleteByCartAndVariant(cartId, variantId);
-      return null;
-    }
-
-    const reservationId = existingReservation.reservationId;
-
-    await this.prisma.reservation.update({
-      where: { id: reservationId.getValue() },
-      data: { qty: newQuantity },
     });
-
-    return this.findById(reservationId);
+    await this.save(reservation);
+    return reservation;
   }
 
   // Query operations
