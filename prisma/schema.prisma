@@ -417,6 +417,8 @@ model CartItem {
   appliedPromos     Json           @default("[]") @map("applied_promos")
   isGift            Boolean        @default(false) @map("is_gift")
   giftMessage       String?        @map("gift_message")
+  createdAt         DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   cart              ShoppingCart   @relation(fields: [cartId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   variant           ProductVariant @relation(fields: [variantId], references: [id], onUpdate: NoAction)
 
@@ -1238,6 +1240,8 @@ model Wishlist {
 model WishlistItem {
   wishlistId String         @map("wishlist_id") @db.Uuid
   variantId  String         @map("variant_id") @db.Uuid
+  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   variant    ProductVariant @relation(fields: [variantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   wishlist   Wishlist       @relation(fields: [wishlistId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -1256,6 +1260,8 @@ model Reminder {
   channel   ChannelEnum
   optInAt   DateTime?          @map("opt_in_at") @db.Timestamptz(6)
   status    ReminderStatusEnum @default(pending)
+  createdAt DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   users     User?              @relation(fields: [userId], references: [id], onUpdate: NoAction)
   variant   ProductVariant     @relation(fields: [variantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -1278,6 +1284,8 @@ model Notification {
   scheduledAt DateTime?            @map("scheduled_at") @db.Timestamptz(6)
   sentAt      DateTime?            @map("sent_at") @db.Timestamptz(6)
   error       String?
+  createdAt   DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([type])
   @@index([channel])
@@ -1299,6 +1307,7 @@ model ProductReview {
   body      String?
   status    String   @default("pending")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users     User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -1320,6 +1329,8 @@ model Appointment {
   startAt    DateTime            @map("start_at") @db.Timestamptz(6)
   endAt      DateTime            @map("end_at") @db.Timestamptz(6)
   notes      String?
+  createdAt  DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   location   Location?           @relation(fields: [locationId], references: [id], onUpdate: NoAction)
   users      User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -1338,6 +1349,7 @@ model NewsletterSubscription {
   status    String?
   source    String?
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([status])
   @@index([source])
