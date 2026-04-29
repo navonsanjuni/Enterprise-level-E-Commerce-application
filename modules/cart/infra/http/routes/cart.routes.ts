@@ -5,6 +5,7 @@ import {
   requireRole,
   RolePermissions,
 } from "@/api/src/shared/middleware/role-authorization.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
 import {
   createRateLimiter,
   RateLimitPresets,
@@ -34,6 +35,7 @@ import {
   updateCartShippingInfoSchema,
   updateCartAddressesSchema,
   cartResponseSchema,
+  cartSummaryEndpointResponseSchema,
   cartStatisticsResponseSchema,
   guestTokenResponseSchema,
   cleanupCartsResponseSchema,
@@ -123,7 +125,7 @@ export async function cartRoutes(
         security: [{ bearerAuth: [] }],
         params: cartIdParamsJson,
         response: {
-          200: successResponse(cartResponseSchema),
+          200: successResponse(cartSummaryEndpointResponseSchema),
         },
       },
     },
@@ -136,7 +138,7 @@ export async function cartRoutes(
     "/users/:userId/cart",
     {
       preValidation: [validateParams(userIdParamsSchema)],
-      preHandler: [requireRole(["ADMIN", "CUSTOMER"])],
+      preHandler: [authenticate, requireRole(["ADMIN", "CUSTOMER"])],
       schema: {
         description: "Get active cart for a user",
         tags: ["Cart"],
@@ -183,7 +185,7 @@ export async function cartRoutes(
     "/users/:userId/cart",
     {
       preValidation: [validateParams(userIdParamsSchema)],
-      preHandler: [validateBody(createUserCartSchema), requireRole(["ADMIN", "CUSTOMER"])],
+      preHandler: [authenticate, requireRole(["ADMIN", "CUSTOMER"]), validateBody(createUserCartSchema)],
       schema: {
         description: "Create a new cart for a user",
         tags: ["Cart"],
@@ -289,7 +291,7 @@ export async function cartRoutes(
     "/users/:userId/cart",
     {
       preValidation: [validateParams(userIdParamsSchema)],
-      preHandler: [requireRole(["ADMIN", "CUSTOMER"])],
+      preHandler: [authenticate, requireRole(["ADMIN", "CUSTOMER"])],
       schema: {
         description: "Clear all items from user cart",
         tags: ["Cart"],
@@ -354,7 +356,7 @@ export async function cartRoutes(
   fastify.get(
     "/admin/carts/statistics",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Get cart statistics (admin only)",
         tags: ["Cart Admin"],
@@ -373,7 +375,7 @@ export async function cartRoutes(
   fastify.post(
     "/admin/carts/cleanup",
     {
-      preHandler: [RolePermissions.ADMIN_ONLY],
+      preHandler: [authenticate, RolePermissions.ADMIN_ONLY],
       schema: {
         description: "Cleanup expired carts (admin only)",
         tags: ["Cart Admin"],
