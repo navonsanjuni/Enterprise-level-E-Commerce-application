@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
-import { VariantId } from "../value-objects/variant-id.vo";
+import { VariantId } from "../../../product-catalog/domain/value-objects/variant-id.vo";
 import { Quantity } from "../value-objects/quantity.vo";
-import { AppliedPromos, PromoData } from "../value-objects/applied-promos.vo";
+import { AppliedPromos, AppliedPromoData } from "../value-objects/applied-promos.vo";
 import { DomainValidationError, InvalidOperationError } from "../errors";
 
 // ============================================================================
@@ -26,7 +26,7 @@ export interface CreateCartItemData {
   variantId: string;
   quantity: number;
   unitPrice: number;
-  appliedPromos?: PromoData[];
+  appliedPromos?: AppliedPromoData[];
   isGift?: boolean;
   giftMessage?: string;
 }
@@ -37,7 +37,7 @@ export interface CartItemEntityData {
   variantId: string;
   quantity: number;
   unitPriceSnapshot: number;
-  appliedPromos: PromoData[];
+  appliedPromos: AppliedPromoData[];
   isGift: boolean;
   giftMessage?: string;
   createdAt: Date;
@@ -54,7 +54,7 @@ export interface CartItemDTO {
   variantId: string;
   quantity: number;
   unitPriceSnapshot: number;
-  appliedPromos: PromoData[];
+  appliedPromos: AppliedPromoData[];
   isGift: boolean;
   giftMessage?: string;
   subtotal: number;
@@ -165,7 +165,7 @@ export class CartItem {
     this.updateQuantity(this.props.quantity.getValue() - amount);
   }
 
-  addPromo(promo: PromoData): void {
+  addPromo(promo: AppliedPromoData): void {
     this.props.appliedPromos = this.props.appliedPromos.addPromo(promo);
     this.props.updatedAt = new Date();
   }

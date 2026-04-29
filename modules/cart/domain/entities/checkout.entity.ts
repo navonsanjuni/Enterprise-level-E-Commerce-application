@@ -4,7 +4,7 @@ import { CheckoutId } from "../value-objects/checkout-id.vo";
 import { CartId } from "../value-objects/cart-id.vo";
 import { CartOwnerId } from "../value-objects/cart-owner-id.vo";
 import { GuestToken } from "../value-objects/guest-token.vo";
-import { Currency } from "../value-objects/currency.vo";
+import { Currency } from "../../../../packages/core/src/domain/value-objects/currency.vo";
 import { CheckoutStatus } from "../value-objects/checkout-status.vo";
 import {
   DomainValidationError,

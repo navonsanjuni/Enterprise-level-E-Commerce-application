@@ -2,7 +2,7 @@ import { AggregateRoot } from "../../../../packages/core/src/domain/aggregate-ro
 import { DomainEvent } from "../../../../packages/core/src/domain/events/domain-event";
 import { ReservationId } from "../value-objects/reservation-id.vo";
 import { CartId } from "../value-objects/cart-id.vo";
-import { VariantId } from "../value-objects/variant-id.vo";
+import { VariantId } from "../../../product-catalog/domain/value-objects/variant-id.vo";
 import { Quantity } from "../value-objects/quantity.vo";
 import { DomainValidationError, InvalidReservationOperationError } from "../errors";
 import {
@@ -308,25 +308,6 @@ export class Reservation extends AggregateRoot {
       createdAt: this.props.createdAt,
       updatedAt: this.props.updatedAt,
     };
-  }
-
-  // Static utility methods
-  static createBulkReservations(
-    cartId: string,
-    items: Array<{ variantId: string; quantity: number }>,
-    durationMinutes?: number,
-  ): Reservation[] {
-    return items.map((item) =>
-      Reservation.create({ cartId, variantId: item.variantId, quantity: item.quantity, durationMinutes }),
-    );
-  }
-
-  static getDefaultDurationMinutes(): number {
-    return RESERVATION_DEFAULT_DURATION_MINUTES;
-  }
-
-  static getMaxDurationMinutes(): number {
-    return RESERVATION_MAX_DURATION_MINUTES;
   }
 
   static toDTO(reservation: Reservation): ReservationDTO {
