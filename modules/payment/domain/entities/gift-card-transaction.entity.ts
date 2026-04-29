@@ -52,6 +52,12 @@ export interface GiftCardTransactionDTO {
 // ============================================================================
 // 4. Entity Class
 // ============================================================================
+// Aggregate root: this is an immutable ledger entry recording one gift-card
+// movement (issue / redeem / refund). It has its own identity, independent
+// lifecycle, and a single creation event. Same canonical "ledger aggregate"
+// shape as `InventoryTransaction` and `PromotionUsage` — NOT a child of
+// `GiftCard`. Transactions can be queried independently for audit and
+// reconciliation, which is why they live behind their own repository.
 export class GiftCardTransaction extends AggregateRoot {
 
   private constructor(private props: GiftCardTransactionProps) {

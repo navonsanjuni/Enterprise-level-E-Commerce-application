@@ -55,6 +55,13 @@ export interface PromotionUsageDTO {
 // ============================================================================
 // 4. Entity Class
 // ============================================================================
+// Aggregate root: this is an immutable ledger entry recording one promotion
+// redemption against an order. It has its own identity, independent
+// lifecycle, and a single creation event. Same canonical "ledger aggregate"
+// shape as `InventoryTransaction` and `GiftCardTransaction` — NOT a child
+// of `Promotion`. Usage records are queried independently for analytics
+// (redemption rate, per-promotion totals), which is why they live behind
+// their own repository.
 export class PromotionUsage extends AggregateRoot {
   private constructor(private props: PromotionUsageProps) {
     super();
