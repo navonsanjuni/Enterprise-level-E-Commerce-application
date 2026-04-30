@@ -1,8 +1,6 @@
 import { DomainValidationError } from "../errors/product-catalog.errors";
 
-// The canonical TS enum for storefront regions used to scope size guides
-// (and potentially pricing) lives in this file alongside helper methods
-// (namespace-augmented).
+
 export enum Region {
   UK = "UK",
   US = "US",
