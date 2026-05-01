@@ -6,7 +6,7 @@ import {
   MAX_PAGE_SIZE,
 } from "../../../domain/constants/pagination.constants";
 
-const ALL_REGIONS = Object.values(Region) as [Region, ...Region[]];
+const ALL_REGIONS = [Region.UK, Region.US, Region.EU] as [Region, ...Region[]];
 
 // ── Request Schemas (Zod) ─────────────────────────────────────────────────────
 
@@ -19,11 +19,11 @@ export const regionParamsSchema = z.object({
 });
 
 export const listSizeGuidesSchema = z.object({
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
+  page: z.coerce.number().int().min(MIN_PAGE).optional().default(MIN_PAGE),
+  limit: z.coerce.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE).optional().default(20),
   region: z.enum(ALL_REGIONS).optional(),
   category: z.string().optional(),
-  hasContent: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
+  hasContent: z.coerce.boolean().optional(),
   sortBy: z.enum(["title", "region", "category"]).optional().default("title"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
 });

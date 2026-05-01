@@ -16,11 +16,12 @@ export const categorySlugParamsSchema = z.object({
 });
 
 export const listCategoriesSchema = z.object({
-  // Bounded so handler-level clamps become visible 400s instead of silent truncation.
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
+  // Use coercion and direct constraints instead of complex .pipe() chains to avoid
+  // JSON-schema generation crashes in some environments.
+  page: z.coerce.number().int().min(MIN_PAGE).optional().default(MIN_PAGE),
+  limit: z.coerce.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE).optional().default(20),
   parentId: z.uuid().optional(),
-  includeChildren: z.string().optional().transform((v) => v === "true"),
+  includeChildren: z.coerce.boolean().optional(),
   sortBy: z.enum(["name", "position"]).optional().default("position"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
 });

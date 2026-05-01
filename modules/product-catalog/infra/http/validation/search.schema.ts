@@ -20,23 +20,21 @@ const SEARCHABLE_PRODUCT_STATUSES = [
 
 export const searchQuerySchema = z.object({
   q: z.string().min(2),
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
+  page: z.coerce.number().int().min(MIN_PAGE).optional().default(MIN_PAGE),
+  limit: z.coerce.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE).optional().default(20),
   category: z.string().optional(),
   brand: z.string().optional(),
-  minPrice: z.string().regex(/^\d+(\.\d+)?$/).optional().transform(Number),
-  maxPrice: z.string().regex(/^\d+(\.\d+)?$/).optional().transform(Number),
+  minPrice: z.coerce.number().optional(),
+  maxPrice: z.coerce.number().optional(),
   status: z.enum(SEARCHABLE_PRODUCT_STATUSES).optional(),
-  tags: z.union([z.string(), z.array(z.string())]).optional().transform((v) =>
-    v === undefined ? undefined : Array.isArray(v) ? v : [v],
-  ),
+  tags: z.array(z.string()).optional(),
   sortBy: z.enum(["relevance", "price", "title", "createdAt"]).optional().default("relevance"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
 export const searchSuggestionsQuerySchema = z.object({
   q: z.string().min(1),
-  limit: z.string().regex(/^\d+$/).optional().default("5").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_SUGGESTIONS_LIMIT)),
+  limit: z.coerce.number().int().min(MIN_LIMIT).max(MAX_SUGGESTIONS_LIMIT).optional().default(5),
   type: z.enum(["products", "categories", "brands", "all"]).optional().default("all"),
 });
 

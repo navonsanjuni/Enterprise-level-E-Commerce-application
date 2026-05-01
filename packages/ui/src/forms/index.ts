@@ -1,3 +1,5 @@
-// Form-shaped components: editorial inputs (gold underline, no boxes), OTP,
-// password strength meter, swatch picker. Add as authored.
-export {};
+export { FormField, type FormFieldProps } from "./FormField";
+export {
+  PasswordStrengthMeter,
+  type PasswordStrengthMeterProps,
+} from "./PasswordStrengthMeter";

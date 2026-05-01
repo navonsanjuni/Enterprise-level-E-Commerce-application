@@ -15,12 +15,12 @@
 
 import createClient, { type Middleware } from "openapi-fetch";
 import type { ApiEnvelope } from "@tasheen/types";
+import type { paths } from "./generated/schema";
 
-// Until the generator runs the first time, fall back to an `any`-typed
-// schema so consumers can still import. Once `pnpm generate` runs the
-// import below resolves to the generated types.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Paths = any;
+// `paths` resolves to the generated OpenAPI typings after the first
+// `pnpm --filter @tasheen/api-client generate` run; until then it falls
+// back to the placeholder `Record<string, any>` in `generated/schema.ts`.
+type Paths = paths;
 
 export interface CreateApiClientOptions {
   baseUrl: string;

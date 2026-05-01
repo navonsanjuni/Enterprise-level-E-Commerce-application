@@ -6,6 +6,7 @@
  */
 
 const TOKEN_KEY = "tasheen.access_token";
+const REFRESH_KEY = "tasheen.refresh_token";
 
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -17,9 +18,20 @@ export function setAuthToken(token: string): void {
   window.localStorage.setItem(TOKEN_KEY, token);
 }
 
+export function getRefreshToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(REFRESH_KEY);
+}
+
+export function setRefreshToken(token: string): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(REFRESH_KEY, token);
+}
+
 export function clearAuthToken(): void {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(TOKEN_KEY);
+  window.localStorage.removeItem(REFRESH_KEY);
 }
 
 export async function onUnauthorized(): Promise<void> {
@@ -29,6 +41,6 @@ export async function onUnauthorized(): Promise<void> {
   clearAuthToken();
   if (typeof window !== "undefined") {
     const next = encodeURIComponent(window.location.pathname);
-    window.location.href = `/signin?next=${next}`;
+    window.location.href = `/sign-in?next=${next}`;
   }
 }

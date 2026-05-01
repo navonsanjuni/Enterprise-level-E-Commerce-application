@@ -26,51 +26,51 @@ export default fp(
     // ============================================
     // 2. Product Catalog Module
     // ============================================
-    // const productCatalogServices = container.getProductCatalogServices();
-    // await registerProductCatalogRoutes(fastify, productCatalogServices);
-    // fastify.log.info("✓ Product Catalog module registered");
+    const productCatalogServices = container.getProductCatalogServices();
+    await registerProductCatalogRoutes(fastify, productCatalogServices);
+    fastify.log.info("✓ Product Catalog module registered");
 
     // ============================================
     // 3. Inventory Management Module
     // ============================================
-    // const inventoryManagementServices = container.getInventoryManagementServices();
-    // await registerInventoryManagementRoutes(fastify, inventoryManagementServices);
-    // fastify.log.info("✓ Inventory Management module registered");
+    const inventoryManagementServices = container.getInventoryManagementServices();
+    await registerInventoryManagementRoutes(fastify, inventoryManagementServices);
+    fastify.log.info("✓ Inventory Management module registered");
 
     // ============================================
     // 4. Cart Module
     // ============================================
-    // const cartServices = container.getCartServices();
-    // await registerCartModuleRoutes(fastify, cartServices);
-    // fastify.log.info("✓ Cart module registered");
+    const cartServices = container.getCartServices();
+    await registerCartModuleRoutes(fastify, cartServices);
+    fastify.log.info("✓ Cart module registered");
 
     // ============================================
     // 5. Order Management Module
     // ============================================
-    // const orderManagementServices = container.getOrderManagementServices();
-    // await registerOrderManagementRoutes(fastify, orderManagementServices);
-    // fastify.log.info("✓ Order Management module registered");
+    const orderManagementServices = container.getOrderManagementServices();
+    await registerOrderManagementRoutes(fastify, orderManagementServices);
+    fastify.log.info("✓ Order Management module registered");
 
     // ============================================
     // 6. Payment Module
     // ============================================
-    // const paymentServices = container.getPaymentServices();
-    // await registerPaymentRoutes(fastify, paymentServices);
-    // fastify.log.info("✓ Payment module registered");
+    const paymentServices = container.getPaymentServices();
+    await registerPaymentRoutes(fastify, paymentServices);
+    fastify.log.info("✓ Payment module registered");
 
     // ============================================
     // 7. Loyalty Module
     // ============================================
-    // const loyaltyServices = container.getLoyaltyServices();
-    // await registerLoyaltyRoutes(fastify, loyaltyServices);
-    // fastify.log.info("✓ Loyalty module registered");
+    const loyaltyServices = container.getLoyaltyServices();
+    await registerLoyaltyRoutes(fastify, loyaltyServices);
+    fastify.log.info("✓ Loyalty module registered");
 
     // ============================================
     // 8. Engagement Module
     // ============================================
-    // const engagementServices = container.getEngagementServices();
-    // await registerEngagementRoutes(fastify, engagementServices);
-    // fastify.log.info("✓ Engagement module registered");
+    const engagementServices = container.getEngagementServices();
+    await registerEngagementRoutes(fastify, engagementServices);
+    fastify.log.info("✓ Engagement module registered");
 
     fastify.log.info("All 8 modules registered successfully");
   },

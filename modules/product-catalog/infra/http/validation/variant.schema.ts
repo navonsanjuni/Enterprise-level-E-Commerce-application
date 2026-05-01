@@ -16,8 +16,8 @@ export const variantByProductParamsSchema = z.object({
 });
 
 export const listVariantsSchema = z.object({
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
+  page: z.coerce.number().int().min(MIN_PAGE).optional().default(MIN_PAGE),
+  limit: z.coerce.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE).optional().default(20),
   size: z.string().optional(),
   color: z.string().optional(),
   sortBy: z.enum(["sku", "createdAt", "size", "color"]).optional().default("createdAt"),
@@ -40,7 +40,7 @@ export const createVariantSchema = z.object({
   taxClass: z.string().optional(),
   allowBackorder: z.boolean().optional().default(false),
   allowPreorder: z.boolean().optional().default(false),
-  restockEta: z.iso.datetime().optional().transform((v) => v ? new Date(v) : undefined),
+  restockEta: z.string().optional(),
 });
 
 export const updateVariantSchema = z.object({
@@ -53,7 +53,7 @@ export const updateVariantSchema = z.object({
   taxClass: z.string().optional(),
   allowBackorder: z.boolean().optional(),
   allowPreorder: z.boolean().optional(),
-  restockEta: z.iso.datetime().optional().transform((v) => v ? new Date(v) : undefined),
+  restockEta: z.string().optional(),
 });
 
 // ── Inferred Types ────────────────────────────────────────────────────────────

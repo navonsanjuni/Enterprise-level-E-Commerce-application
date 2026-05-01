@@ -16,7 +16,7 @@ export const productMediaIdParamsSchema = z.object({
 });
 
 export const getProductMediaQuerySchema = z.object({
-  includeAssetDetails: z.string().optional().transform((v) => v === undefined ? true : v === "true"),
+  includeAssetDetails: z.coerce.boolean().optional().default(true),
   sortBy: z.enum(["position", "createdAt"]).optional().default("position"),
 });
 

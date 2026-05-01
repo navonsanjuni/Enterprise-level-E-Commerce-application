@@ -13,7 +13,12 @@ const CREATABLE_PRODUCT_STATUSES = [
   ProductStatus.SCHEDULED,
 ] as const;
 
-const ALL_PRODUCT_STATUSES = Object.values(ProductStatus) as [ProductStatus, ...ProductStatus[]];
+const ALL_PRODUCT_STATUSES = [
+  ProductStatus.DRAFT,
+  ProductStatus.PUBLISHED,
+  ProductStatus.SCHEDULED,
+  ProductStatus.ARCHIVED,
+] as [ProductStatus, ...ProductStatus[]];
 
 // ── Request Schemas (Zod) ─────────────────────────────────────────────────────
 
@@ -26,13 +31,12 @@ export const productSlugParamsSchema = z.object({
 });
 
 export const listProductsSchema = z.object({
-  // Bounded so handler-level clamps become visible 400s instead of silent truncation.
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
+  page: z.coerce.number().int().min(MIN_PAGE).optional().default(MIN_PAGE),
+  limit: z.coerce.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE).optional().default(20),
   status: z.enum(ALL_PRODUCT_STATUSES).optional(),
   categoryId: z.uuid().optional(),
   brand: z.string().optional(),
-  includeDrafts: z.string().optional().transform((v) => v === "true"),
+  includeDrafts: z.coerce.boolean().optional(),
   sortBy: z.enum(["title", "createdAt", "updatedAt", "publishAt"]).optional().default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
@@ -43,7 +47,7 @@ export const createProductSchema = z.object({
   shortDesc: z.string().optional(),
   longDescHtml: z.string().optional(),
   status: z.enum(CREATABLE_PRODUCT_STATUSES).optional().default(ProductStatus.DRAFT),
-  publishAt: z.iso.datetime().optional().transform((v) => v ? new Date(v) : undefined),
+  publishAt: z.string().optional(),
   countryOfOrigin: z.string().optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
@@ -62,7 +66,7 @@ export const updateProductSchema = z.object({
   shortDesc: z.string().optional(),
   longDescHtml: z.string().optional(),
   status: z.enum(ALL_PRODUCT_STATUSES).optional(),
-  publishAt: z.iso.datetime().optional().transform((v) => v ? new Date(v) : undefined),
+  publishAt: z.string().optional(),
   countryOfOrigin: z.string().optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),

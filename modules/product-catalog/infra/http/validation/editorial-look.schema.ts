@@ -26,27 +26,27 @@ export const heroAssetParamsSchema = z.object({
 });
 
 export const listEditorialLooksSchema = z.object({
-  page: z.string().regex(/^\d+$/).optional().default("1").transform(Number).pipe(z.number().int().min(MIN_PAGE)),
-  limit: z.string().regex(/^\d+$/).optional().default("20").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE)),
-  published: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
-  scheduled: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
-  draft: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
-  hasContent: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
-  hasHeroImage: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
-  includeUnpublished: z.string().optional().transform((v) => v === undefined ? undefined : v === "true"),
+  page: z.coerce.number().int().min(MIN_PAGE).optional().default(MIN_PAGE),
+  limit: z.coerce.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE).optional().default(20),
+  published: z.coerce.boolean().optional(),
+  scheduled: z.coerce.boolean().optional(),
+  draft: z.coerce.boolean().optional(),
+  hasContent: z.coerce.boolean().optional(),
+  hasHeroImage: z.coerce.boolean().optional(),
+  includeUnpublished: z.coerce.boolean().optional(),
   sortBy: z.enum(["title", "publishedAt", "id"]).optional().default("publishedAt"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
 export const popularProductsQuerySchema = z.object({
-  limit: z.string().regex(/^\d+$/).optional().default("10").transform(Number).pipe(z.number().int().min(MIN_LIMIT).max(MAX_SUGGESTIONS_LIMIT)),
+  limit: z.coerce.number().int().min(MIN_LIMIT).max(MAX_SUGGESTIONS_LIMIT).optional().default(10),
 });
 
 export const createEditorialLookSchema = z.object({
   title: z.string().min(1),
   storyHtml: z.string().optional(),
   heroAssetId: z.uuid().optional(),
-  publishedAt: z.iso.datetime().optional().transform((v) => v ? new Date(v) : undefined),
+  publishedAt: z.string().optional(),
   productIds: z.array(z.uuid()).optional().default([]),
 });
 
@@ -54,11 +54,11 @@ export const updateEditorialLookSchema = z.object({
   title: z.string().min(1).optional(),
   storyHtml: z.string().optional(),
   heroAssetId: z.uuid().nullable().optional(),
-  publishedAt: z.iso.datetime().nullable().optional().transform((v) => v === null ? null : v ? new Date(v) : undefined),
+  publishedAt: z.string().nullable().optional(),
 });
 
 export const schedulePublicationSchema = z.object({
-  publishDate: z.iso.datetime().transform((v) => new Date(v)),
+  publishDate: z.string(),
 });
 
 export const setHeroImageSchema = z.object({
@@ -83,7 +83,7 @@ export const bulkCreateEditorialLooksSchema = z.object({
       title: z.string().min(1),
       storyHtml: z.string().optional(),
       heroAssetId: z.uuid().optional(),
-      publishedAt: z.iso.datetime().transform((v) => new Date(v)).optional(),
+      publishedAt: z.string().optional(),
       productIds: z.array(z.uuid()).optional(),
     }),
   ).min(1),

@@ -71,18 +71,8 @@ export const sizeVariantParamsSchema = z.object({
 export const productVariantMediaQuerySchema = z.object({
   // The optional-without-default pattern preserves the existing service contract
   // (undefined = no pagination applied). Bounds only apply when client supplies a value.
-  page: z
-    .string()
-    .regex(/^\d+$/)
-    .optional()
-    .transform((v) => (v === undefined ? undefined : Number(v)))
-    .pipe(z.number().int().min(MIN_PAGE).optional()),
-  limit: z
-    .string()
-    .regex(/^\d+$/)
-    .optional()
-    .transform((v) => (v === undefined ? undefined : Number(v)))
-    .pipe(z.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE).optional()),
+  page: z.coerce.number().int().min(MIN_PAGE).optional(),
+  limit: z.coerce.number().int().min(MIN_LIMIT).max(MAX_PAGE_SIZE).optional(),
   sortBy: z.enum(["variantId", "assetId"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });
