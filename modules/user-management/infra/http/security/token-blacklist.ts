@@ -55,7 +55,10 @@ setInterval(() => {
   }
 }, 60 * 1000).unref();
 
-export const TokenBlacklistService: ITokenBlacklistService = {
+export const TokenBlacklistService: ITokenBlacklistService & {
+  __getVerificationTokens(): Map<string, VerificationTokenEntry>;
+  __getPasswordResetTokens(): Map<string, PasswordResetTokenEntry>;
+} = {
   blacklistToken(token: string, ttlMs = BLACKLIST_TOKEN_DEFAULT_TTL_MS): void {
     blacklistedTokens.set(token, { expiresAt: Date.now() + ttlMs });
   },
@@ -133,5 +136,13 @@ export const TokenBlacklistService: ITokenBlacklistService = {
 
   clearFailedAttempts(identifier: string): void {
     failedAttempts.delete(identifier);
+  },
+
+  __getVerificationTokens() {
+    return verificationTokens;
+  },
+
+  __getPasswordResetTokens() {
+    return passwordResetTokens;
   },
 };

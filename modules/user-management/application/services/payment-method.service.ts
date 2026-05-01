@@ -1,4 +1,5 @@
 import { IPaymentMethodRepository } from "../../domain/repositories/ipayment-method.repository";
+import { IUserProfileRepository } from "../../domain/repositories/iuser-profile.repository";
 import { IUserRepository } from "../../domain/repositories/iuser.repository";
 import { IAddressRepository } from "../../domain/repositories/iaddress.repository";
 import {
@@ -52,6 +53,7 @@ export class PaymentMethodService {
     private readonly paymentMethodRepository: IPaymentMethodRepository,
     private readonly userRepository: IUserRepository,
     private readonly addressRepository: IAddressRepository,
+    private readonly userProfileRepository: IUserProfileRepository,
   ) {}
 
   async addPaymentMethod(dto: AddPaymentMethodDto): Promise<PaymentMethodDTO> {
@@ -86,6 +88,10 @@ export class PaymentMethodService {
     });
 
     await this.paymentMethodRepository.save(paymentMethod);
+    if (dto.isDefault === true || (typeof shouldBeDefault !== 'undefined' && shouldBeDefault)) {
+      await this.syncUserProfileDefault(userId, paymentMethod.id);
+    }
+
     return PaymentMethod.toDTO(paymentMethod);
   }
 
@@ -123,6 +129,9 @@ export class PaymentMethodService {
     }
 
     await this.paymentMethodRepository.save(paymentMethod);
+    if (dto.isDefault === true) {
+      await this.syncUserProfileDefault(userId, paymentMethod.id);
+    }
     return PaymentMethod.toDTO(paymentMethod);
   }
 
@@ -145,6 +154,9 @@ export class PaymentMethodService {
       if (remaining.length > 0) {
         remaining[0].setAsDefault();
         await this.paymentMethodRepository.save(remaining[0]);
+        await this.syncUserProfileDefault(userIdVo, remaining[0].id);
+      } else {
+        await this.clearUserProfileDefault(userIdVo);
       }
     }
   }
@@ -167,7 +179,7 @@ export class PaymentMethodService {
     return { items, total, limit, offset, hasMore: offset + items.length < total };
   }
 
-  async setDefaultPaymentMethod(paymentMethodId: string, userId: string): Promise<void> {
+  async setDefaultPaymentMethod(paymentMethodId: string, userId: string): Promise<PaymentMethodDTO> {
     const userIdVo = UserId.fromString(userId);
     const paymentMethodIdVo = PaymentMethodId.fromString(paymentMethodId);
     const paymentMethod = await this.paymentMethodRepository.findById(paymentMethodIdVo);
@@ -180,6 +192,8 @@ export class PaymentMethodService {
     await this.clearOtherDefaults(userIdVo, paymentMethod.id);
     paymentMethod.setAsDefault();
     await this.paymentMethodRepository.save(paymentMethod);
+    await this.syncUserProfileDefault(userIdVo, paymentMethod.id);
+    return PaymentMethod.toDTO(paymentMethod);
   }
 
   // --- Private helpers ---
@@ -213,6 +227,22 @@ export class PaymentMethodService {
     }
     if (!address.isValidForBilling()) {
       throw new InvalidOperationError("Address is not valid for billing");
+    }
+  }
+
+  private async syncUserProfileDefault(userId: UserId, paymentMethodId: PaymentMethodId): Promise<void> {
+    const profile = await this.userProfileRepository.findByUserId(userId);
+    if (profile) {
+      profile.setDefaultPaymentMethod(paymentMethodId.getValue());
+      await this.userProfileRepository.save(profile);
+    }
+  }
+
+  private async clearUserProfileDefault(userId: UserId): Promise<void> {
+    const profile = await this.userProfileRepository.findByUserId(userId);
+    if (profile) {
+      profile.removeDefaultPaymentMethod();
+      await this.userProfileRepository.save(profile);
     }
   }
 }

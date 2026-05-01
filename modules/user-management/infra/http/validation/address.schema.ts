@@ -53,18 +53,8 @@ export const addressIdParamsSchema = z.object({
 const MAX_PAGE_SIZE = 100;
 
 export const listAddressesQuerySchema = z.object({
-  page: z
-    .string()
-    .regex(/^\d+$/)
-    .transform(Number)
-    .pipe(z.number().int().min(1))
-    .optional(),
-  limit: z
-    .string()
-    .regex(/^\d+$/)
-    .transform(Number)
-    .pipe(z.number().int().min(1).max(MAX_PAGE_SIZE))
-    .optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
 });
 
 // ============================================================================

@@ -9,8 +9,8 @@ import { UserStatus } from "../../../domain/value-objects/user-status.vo";
 // Derive role/status enums directly from the domain TS enums so adding a value
 // to the domain (e.g., a new role) automatically widens the route validators.
 // Previous string-literal arrays would silently reject new domain values.
-const USER_ROLES = Object.values(UserRole) as [UserRole, ...UserRole[]];
-const USER_STATUSES = Object.values(UserStatus) as [UserStatus, ...UserStatus[]];
+const USER_ROLES = UserRole.getAllValues() as unknown as [UserRole, ...UserRole[]];
+const USER_STATUSES = UserStatus.getAllValues() as unknown as [UserStatus, ...UserStatus[]];
 
 const MAX_PAGE_SIZE = 100;
 
@@ -27,17 +27,12 @@ export const userIdParamsSchema = z.object({
 // ============================================================================
 
 export const listUsersQuerySchema = z.object({
-  page: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().min(1)).optional(),
-  limit: z
-    .string()
-    .regex(/^\d+$/)
-    .transform(Number)
-    .pipe(z.number().int().min(1).max(MAX_PAGE_SIZE))
-    .optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
   role: z.enum(USER_ROLES).optional(),
   status: z.enum(USER_STATUSES).optional(),
   search: z.string().max(200).optional(),
-  emailVerified: z.enum(["true", "false"]).transform((v) => v === "true").optional(),
+  emailVerified: z.coerce.boolean().optional(),
   sortBy: z.enum(["createdAt", "email"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });

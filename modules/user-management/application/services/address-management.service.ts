@@ -1,4 +1,5 @@
 import { IAddressRepository } from '../../domain/repositories/iaddress.repository';
+import { IUserProfileRepository } from '../../domain/repositories/iuser-profile.repository';
 import { Address, AddressDTO } from '../../domain/entities/address.entity';
 import { AddressId } from '../../domain/value-objects/address-id.vo';
 import { Address as AddressVO } from '../../domain/value-objects/address.vo';
@@ -37,7 +38,10 @@ interface UpdateAddressParams {
 }
 
 export class AddressManagementService {
-  constructor(private readonly addressRepository: IAddressRepository) {}
+  constructor(
+    private readonly addressRepository: IAddressRepository,
+    private readonly userProfileRepository: IUserProfileRepository,
+  ) {}
 
   async addAddress(params: AddAddressParams): Promise<AddressDTO> {
     const userId = UserId.fromString(params.userId);
@@ -69,6 +73,10 @@ export class AddressManagementService {
     });
 
     await this.addressRepository.save(address);
+    if (shouldBeDefault) {
+      await this.syncUserProfileDefault(userId, address.id);
+    }
+
     return Address.toDTO(address);
   }
 
@@ -113,6 +121,10 @@ export class AddressManagementService {
     }
 
     await this.addressRepository.save(address);
+    if (params.isDefault === true) {
+      await this.syncUserProfileDefault(userId, address.id);
+    }
+
     return Address.toDTO(address);
   }
 
@@ -135,6 +147,9 @@ export class AddressManagementService {
       if (remaining.length > 0) {
         remaining[0].setAsDefault();
         await this.addressRepository.save(remaining[0]);
+        await this.syncUserProfileDefault(userIdVo, remaining[0].id);
+      } else {
+        await this.clearUserProfileDefault(userIdVo);
       }
     }
   }
@@ -183,6 +198,7 @@ export class AddressManagementService {
     await this.clearOtherDefaults(userIdVo, address.id);
     address.setAsDefault();
     await this.addressRepository.save(address);
+    await this.syncUserProfileDefault(userIdVo, address.id);
   }
 
   async validateAddress(addressData: AddressInput): Promise<{
@@ -250,6 +266,22 @@ export class AddressManagementService {
       if (exceptAddressId && existing.id.equals(exceptAddressId)) continue;
       existing.removeAsDefault();
       await this.addressRepository.save(existing);
+    }
+  }
+
+  private async syncUserProfileDefault(userId: UserId, addressId: AddressId): Promise<void> {
+    const profile = await this.userProfileRepository.findByUserId(userId);
+    if (profile) {
+      profile.setDefaultAddress(addressId.getValue());
+      await this.userProfileRepository.save(profile);
+    }
+  }
+
+  private async clearUserProfileDefault(userId: UserId): Promise<void> {
+    const profile = await this.userProfileRepository.findByUserId(userId);
+    if (profile) {
+      profile.removeDefaultAddress();
+      await this.userProfileRepository.save(profile);
     }
   }
 }

@@ -22,8 +22,6 @@ export async function registerUserManagementRoutes(
   fastify: FastifyInstance,
   controllers: UserManagementControllers,
 ): Promise<void> {
-  // Each route file declares its own auth via the `authenticate` middleware
-  // on protected routes. No module-level auth scope is needed.
   await fastify.register(
     async (instance) => {
       await authRoutes(instance, controllers.authController);

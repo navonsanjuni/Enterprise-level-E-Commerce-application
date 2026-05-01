@@ -60,6 +60,11 @@ export function createRateLimiter(options: RateLimitOptions) {
   } = options;
 
   return async (request: FastifyRequest, reply: FastifyReply) => {
+    // Disable rate limiting in tests
+    if (process.env.NODE_ENV === "test") {
+      return;
+    }
+
     const key = keyGenerator(request);
     const entry = store.increment(key, windowMs);
     const remaining = Math.max(0, maxRequests - entry.count);

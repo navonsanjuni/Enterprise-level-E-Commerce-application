@@ -634,8 +634,8 @@ export class Container {
     });
     const authService = new AuthenticationService(userRepository, passwordHasher, jwtService);
     const profileService = new UserProfileService(userRepository, userProfileRepository, addressRepository, paymentMethodRepository);
-    const addressService = new AddressManagementService(addressRepository);
-    const paymentMethodService = new PaymentMethodService(paymentMethodRepository, userRepository, addressRepository);
+    const addressService = new AddressManagementService(addressRepository, userProfileRepository);
+    const paymentMethodService = new PaymentMethodService(paymentMethodRepository, userRepository, addressRepository, userProfileRepository);
     const userService = new UserService(userRepository);
 
     const authController = new AuthController(
