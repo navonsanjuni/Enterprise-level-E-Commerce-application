@@ -5,10 +5,12 @@ import {
 } from "./controllers";
 import { ShipmentService } from "../../application/services/shipment.service";
 import { ShipmentItemService } from "../../application/services/shipment-item.service";
-import {
-  authenticateUser,
-  authenticateStaff,
-} from "../../../user-management/infra/http/middleware/auth.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
+import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+
+// Staff-only preHandler chain — authenticate first, then enforce role.
+// Mirrors the canonical pattern from cart/order routes.
+const authenticateStaff = [authenticate, RolePermissions.STAFF_LEVEL];
 
 export interface FulfillmentServices {
   shipmentService: ShipmentService;

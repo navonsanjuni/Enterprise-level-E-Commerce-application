@@ -1,5 +1,6 @@
 import { AuthenticationService } from '../services/authentication.service';
 import { ITokenBlacklistService } from '../services/itoken-blacklist.service';
+import { IEmailService } from '../services/iemail.service';
 import { ICommand, ICommandHandler, CommandResult } from '../../../../packages/core/src/application/cqrs';
 
 export interface ResendVerificationCommand extends ICommand {
@@ -12,6 +13,7 @@ export class ResendVerificationHandler
   constructor(
     private readonly authService: AuthenticationService,
     private readonly tokenBlacklistService: ITokenBlacklistService,
+    private readonly emailService: IEmailService,
   ) {}
 
   async handle(command: ResendVerificationCommand): Promise<CommandResult<void>> {
@@ -26,7 +28,7 @@ export class ResendVerificationHandler
       result.userId,
       command.email,
     );
-    // TODO: trigger email notification event with the token
+    await this.emailService.sendVerificationEmail(command.email, result.verificationToken);
 
     return CommandResult.success();
   }

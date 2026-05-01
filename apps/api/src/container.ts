@@ -13,6 +13,7 @@ import { UserProfileService } from "../../../modules/user-management/application
 import { AddressManagementService } from "../../../modules/user-management/application/services/address-management.service";
 import { PaymentMethodService } from "../../../modules/user-management/application/services/payment-method.service";
 import { BcryptPasswordHasherAdapter } from "../../../modules/user-management/infra/security/bcrypt-password-hasher.adapter";
+import { NodemailerEmailService } from "../../../modules/user-management/infra/security/nodemailer-email.adapter";
 import { UserService } from "../../../modules/user-management/application/services/user.service";
 import { RegisterUserHandler } from "../../../modules/user-management/application/commands/register-user.command";
 import { LoginUserHandler } from "../../../modules/user-management/application/commands/login-user.command";
@@ -637,6 +638,7 @@ export class Container {
     const addressService = new AddressManagementService(addressRepository, userProfileRepository);
     const paymentMethodService = new PaymentMethodService(paymentMethodRepository, userRepository, addressRepository, userProfileRepository);
     const userService = new UserService(userRepository);
+    const emailService = new NodemailerEmailService();
 
     const authController = new AuthController(
       new RegisterUserHandler(authService),
@@ -645,11 +647,11 @@ export class Container {
       new RefreshTokenHandler(authService, TokenBlacklistService),
       new ChangePasswordHandler(authService),
       new ChangeEmailHandler(authService),
-      new InitiatePasswordResetHandler(authService, TokenBlacklistService),
+      new InitiatePasswordResetHandler(authService, TokenBlacklistService, emailService),
       new ResetPasswordHandler(authService, TokenBlacklistService),
       new VerifyEmailHandler(authService, TokenBlacklistService),
       new DeleteAccountHandler(authService, TokenBlacklistService),
-      new ResendVerificationHandler(authService, TokenBlacklistService),
+      new ResendVerificationHandler(authService, TokenBlacklistService, emailService),
     );
     const profileController = new ProfileController(
       new GetUserProfileHandler(profileService),

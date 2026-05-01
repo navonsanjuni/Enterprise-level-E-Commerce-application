@@ -22,7 +22,8 @@ function formatZodErrors(error: ZodError) {
  *   }, ...);
  */
 export function toJsonSchema(schema: ZodSchema): object {
-  return z.toJSONSchema(schema, { target: "draft-7" });
+
+  return z.toJSONSchema(schema, { target: "draft-7", unrepresentable: "any" });
 }
 
 /**

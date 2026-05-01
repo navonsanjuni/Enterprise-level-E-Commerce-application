@@ -21,12 +21,14 @@ import { ReturnItemService } from "../../application/services/return-item.servic
 import { RepairService } from "../../application/services/repair.service";
 import { GoodwillRecordService } from "../../application/services/goodwill-record.service";
 import { CustomerFeedbackService } from "../../application/services/customer-feedback.service";
-import {
-  authenticateUser,
-  optionalAuth,
-  authenticateAdmin,
-  authenticateStaff,
-} from "../../../user-management/infra/http/middleware/auth.middleware";
+import { authenticate } from "@/api/src/shared/middleware/authenticate.middleware";
+import { optionalAuth } from "@/api/src/shared/middleware/optional-auth.middleware";
+import { RolePermissions } from "@/api/src/shared/middleware/role-authorization.middleware";
+
+// Local preHandler chains — authenticate first, then enforce role.
+// Mirrors the canonical pattern from cart/order routes.
+const authenticateAdmin = [authenticate, RolePermissions.ADMIN_ONLY];
+const authenticateStaff = [authenticate, RolePermissions.STAFF_LEVEL];
 
 // Standard error responses for Swagger/OpenAPI
 const errorResponses = {
