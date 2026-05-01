@@ -14,6 +14,10 @@
   "exports": {
     "./tailwind.preset": "./tailwind.preset.ts",
     "./eslint.preset": "./eslint.preset.cjs",
-    "./prettier.preset": "./prettier.preset.cjs"
+    "./prettier.preset": "./prettier.preset.cjs",
+    "./*": "./*"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
   }
 }
