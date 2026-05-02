@@ -2,6 +2,7 @@ export const SUPPORTED_CURRENCIES = [
   "USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "CNY", "SEK", "NZD",
   "MXN", "SGD", "HKD", "NOK", "TRY", "ZAR", "BRL", "INR", "KRW", "PLN",
   "DKK", "CZK", "HUF", "RUB", "THB", "ILS", "CLP", "PHP", "AED", "SAR",
+  "LKR",
 ] as const;
 
 export const CRYPTO_CURRENCIES = ["BTC", "ETH", "LTC"] as const;
@@ -37,6 +38,7 @@ export const CURRENCY_NAMES: Record<string, string> = {
   PHP: "Philippine Peso",
   AED: "UAE Dirham",
   SAR: "Saudi Riyal",
+  LKR: "Sri Lankan Rupee",
 };
 
 export const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -70,6 +72,7 @@ export const CURRENCY_SYMBOLS: Record<string, string> = {
   PHP: "₱",
   AED: "د.إ",
   SAR: "﷼",
+  LKR: "Rs",
 };
 
 export const CURRENCY_REGIONS: Record<string, string> = {
@@ -103,6 +106,7 @@ export const CURRENCY_REGIONS: Record<string, string> = {
   SAR: "Middle East",
   ILS: "Middle East",
   TRY: "Middle East",
+  LKR: "Asia",
 };
 
 export const DEFAULT_CURRENCY = "USD";

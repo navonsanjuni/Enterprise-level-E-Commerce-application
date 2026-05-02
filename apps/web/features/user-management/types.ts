@@ -21,6 +21,8 @@ export interface UserIdentity {
   userId: string;
   email: string;
   role: string;
+  emailVerified: boolean;
+  phoneVerified: boolean;
 }
 
 export interface RefreshTokenResult {

@@ -67,24 +67,24 @@ export function EditProfileForm() {
       </header>
 
       <form onSubmit={onSubmit} className="space-y-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {/* Identity Section */}
           <div className="space-y-6">
-            <h3 className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-400 flex items-center gap-2">
-              <User className="h-3 w-3" /> Identity
+            <h3 className="text-[11px] font-bold tracking-[0.25em] uppercase text-stone-500 flex items-center gap-2 border-b border-stone-100 pb-2">
+              <User className="h-3.5 w-3.5" /> Identity
             </h3>
             
             <div className="grid grid-cols-1 gap-6">
               <FormField id="title" label="Title (e.g. Mr, Ms)" error={errors.title?.message}>
-                <Input id="title" placeholder="Mr." {...register("title")} />
+                <Input id="title" placeholder="e.g. MS" className="text-base" {...register("title")} />
               </FormField>
 
               <div className="grid grid-cols-2 gap-4">
                 <FormField id="firstName" label="First Name" error={errors.firstName?.message}>
-                  <Input id="firstName" {...register("firstName")} />
+                  <Input id="firstName" placeholder="e.g. Navon" className="text-base" {...register("firstName")} />
                 </FormField>
                 <FormField id="lastName" label="Last Name" error={errors.lastName?.message}>
-                  <Input id="lastName" {...register("lastName")} />
+                  <Input id="lastName" placeholder="e.g. Sanjuni" className="text-base" {...register("lastName")} />
                 </FormField>
               </div>
             </div>
@@ -92,51 +92,53 @@ export function EditProfileForm() {
 
           {/* Contact Section */}
           <div className="space-y-6">
-            <h3 className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-400 flex items-center gap-2">
-              <Phone className="h-3 w-3" /> Contact
+            <h3 className="text-[11px] font-bold tracking-[0.25em] uppercase text-stone-500 flex items-center gap-2 border-b border-stone-100 pb-2">
+              <Phone className="h-3.5 w-3.5" /> Contact
             </h3>
             
             <div className="grid grid-cols-1 gap-6">
               <FormField id="phone" label="Phone Number" error={errors.phone?.message}>
-                <Input id="phone" placeholder="+44 ..." {...register("phone")} />
+                <Input id="phone" placeholder="e.g. +44 ..." className="text-base" {...register("phone")} />
               </FormField>
 
               <FormField id="dateOfBirth" label="Date of Birth" error={errors.dateOfBirth?.message}>
-                <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} />
+                <Input id="dateOfBirth" type="date" className="text-base" {...register("dateOfBirth")} />
               </FormField>
             </div>
           </div>
 
           {/* Location Section */}
           <div className="space-y-6">
-            <h3 className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-400 flex items-center gap-2">
-              <Globe className="h-3 w-3" /> Location & Origin
+            <h3 className="text-[11px] font-bold tracking-[0.25em] uppercase text-stone-500 flex items-center gap-2 border-b border-stone-100 pb-2">
+              <Globe className="h-3.5 w-3.5" /> Location & Origin
             </h3>
             
             <div className="grid grid-cols-1 gap-6">
-              <FormField id="nationality" label="Nationality" error={errors.nationality?.message}>
-                <Input id="nationality" placeholder="British" {...register("nationality")} />
-              </FormField>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField id="nationality" label="Nationality" error={errors.nationality?.message}>
+                  <Input id="nationality" placeholder="e.g. British" className="text-base" {...register("nationality")} />
+                </FormField>
 
-              <FormField id="residentOf" label="Resident Of" error={errors.residentOf?.message}>
-                <Input id="residentOf" placeholder="United Kingdom" {...register("residentOf")} />
-              </FormField>
+                <FormField id="residentOf" label="Resident Of" error={errors.residentOf?.message}>
+                  <Input id="residentOf" placeholder="e.g. United Kingdom" className="text-base" {...register("residentOf")} />
+                </FormField>
+              </div>
             </div>
           </div>
 
           {/* Preferences Section */}
           <div className="space-y-6">
-            <h3 className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-400 flex items-center gap-2">
-              <CreditCard className="h-3 w-3" /> Preferences
+            <h3 className="text-[11px] font-bold tracking-[0.25em] uppercase text-stone-500 flex items-center gap-2 border-b border-stone-100 pb-2">
+              <CreditCard className="h-3.5 w-3.5" /> Preferences
             </h3>
             
             <div className="grid grid-cols-1 gap-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField id="currency" label="Preferred Currency" error={errors.currency?.message}>
-                  <Input id="currency" placeholder="e.g. GBP" {...register("currency")} />
+                  <Input id="currency" placeholder="e.g. GBP" className="text-base" {...register("currency")} />
                 </FormField>
                 <FormField id="locale" label="Language (Locale)" error={errors.locale?.message}>
-                  <Input id="locale" placeholder="e.g. en-GB" {...register("locale")} />
+                  <Input id="locale" placeholder="e.g. en-GB" className="text-base" {...register("locale")} />
                 </FormField>
               </div>
             </div>

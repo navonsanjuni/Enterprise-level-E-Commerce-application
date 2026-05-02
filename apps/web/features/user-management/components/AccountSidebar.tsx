@@ -9,8 +9,10 @@ import {
   BookUser, 
   CreditCard, 
   ShieldCheck, 
-  UserX 
+  UserX,
+  LogOut
 } from "lucide-react";
+import { useLogout } from "../hooks/useLogout";
 
 const navItems = [
   { label: "Dashboard", href: "/account", icon: LayoutDashboard },
@@ -23,9 +25,10 @@ const navItems = [
 
 export function AccountSidebar() {
   const pathname = usePathname();
+  const logout = useLogout();
 
   return (
-    <aside className="w-full lg:w-72 flex flex-col bg-stone-50/30 border-r border-stone-100 min-h-[calc(100vh-10rem)]">
+    <aside className="w-full lg:w-72 flex flex-col bg-stone-50/30 border-r border-stone-100 lg:sticky lg:top-0 lg:h-[calc(100vh-4rem)]">
       <div className="p-8 border-b border-stone-100">
         <h2 className="font-serif text-lg tracking-widest uppercase text-charcoal">
           Tasheen Member
@@ -60,6 +63,17 @@ export function AccountSidebar() {
           })}
         </ul>
       </nav>
+
+      <div className="p-4 border-t border-stone-100">
+        <button
+          onClick={() => logout.mutate()}
+          disabled={logout.isPending}
+          className="w-full flex items-center gap-4 px-4 py-4 text-[11px] tracking-widest uppercase text-stone-400 hover:text-burgundy transition-all duration-300 group"
+        >
+          <LogOut className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+          {logout.isPending ? "Signing out..." : "Sign Out"}
+        </button>
+      </div>
     </aside>
   );
 }

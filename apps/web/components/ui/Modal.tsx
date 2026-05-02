@@ -27,10 +27,10 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-charcoal/40 backdrop-blur-sm animate-in fade-in duration-300" 
+        className="fixed inset-0 bg-charcoal/60 backdrop-blur-md animate-in fade-in duration-500" 
         onClick={onClose} 
       />
       
