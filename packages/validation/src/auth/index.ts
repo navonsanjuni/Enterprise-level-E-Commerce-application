@@ -1,15 +1,5 @@
 import { z } from "zod";
 
-/**
- * Auth wire schemas — kept in lockstep with
- * `modules/user-management/infra/http/validation/auth.schema.ts`.
- *
- * The bounds (password 8–128, name max 50) come from
- * `USER_MANAGEMENT_CONSTANTS` on the backend; we re-declare them here so
- * the validation package stays self-contained (no cross-imports from the
- * backend modules into the frontend bundle).
- */
-
 const PASSWORD_MIN = 8;
 const PASSWORD_MAX = 128;
 const NAME_MAX = 50;
@@ -60,6 +50,30 @@ export const resendVerificationRequestSchema = z.object({
   email: z.string().email(),
 });
 
+export const updateProfileRequestSchema = z.object({
+  firstName: z.string().max(100).optional(),
+  lastName: z.string().max(100).optional(),
+  phone: z.string().max(20).optional(),
+  title: z.string().max(50).optional(),
+  dateOfBirth: z.string().optional(), // We'll validate date string format in the UI
+  residentOf: z.string().max(100).optional(),
+  nationality: z.string().max(100).optional(),
+  locale: z.string().regex(/^[a-z]{2}-[A-Z]{2}$/).optional(),
+  currency: z.string().regex(/^[A-Z]{3}$/).optional(),
+  prefs: z.record(z.string(), z.unknown()).optional(),
+  stylePreferences: z.record(z.string(), z.unknown()).optional(),
+  preferredSizes: z.record(z.string(), z.string().optional()).optional(),
+});
+
+export const changeEmailRequestSchema = z.object({
+  newEmail: z.string().email(),
+  password: z.string().min(1),
+});
+
+export const deleteAccountRequestSchema = z.object({
+  password: z.string().min(1),
+});
+
 // ─── Form-level schemas (extend wire schemas with UI-only fields) ───────────
 // Sign-up form adds confirmPassword + agreeToTerms which are UI-only — they
 // never hit the wire. The submit handler picks the wire fields off this
@@ -102,6 +116,9 @@ export type VerifyEmailRequest = z.infer<typeof verifyEmailRequestSchema>;
 export type ResendVerificationRequest = z.infer<
   typeof resendVerificationRequestSchema
 >;
+export type UpdateProfileRequest = z.infer<typeof updateProfileRequestSchema>;
+export type ChangeEmailRequest = z.infer<typeof changeEmailRequestSchema>;
+export type DeleteAccountRequest = z.infer<typeof deleteAccountRequestSchema>;
 
 export type SignUpFormValues = z.infer<typeof signUpFormSchema>;
 export type SignInFormValues = z.infer<typeof signInFormSchema>;

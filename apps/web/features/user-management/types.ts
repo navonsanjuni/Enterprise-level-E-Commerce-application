@@ -1,13 +1,3 @@
-/**
- * Wire types for the user-management feature. These mirror the response
- * shapes returned by `modules/user-management/infra/http/controllers/*`
- * and the JSON Schema response objects in `validation/auth.schema.ts`.
- *
- * Keeping these here (rather than in `@tasheen/types`) because they're
- * feature-local — only this slice consumes them. Promote to the shared
- * package when a second feature needs them.
- */
-
 export type UserRole = "CUSTOMER" | "ADMIN" | "STAFF" | "GUEST";
 
 export interface AuthUser {
@@ -37,4 +27,22 @@ export interface RefreshTokenResult {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
+}
+
+export interface UserProfile {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  title?: string;
+  dateOfBirth?: string;
+  residentOf?: string;
+  nationality?: string;
+  locale: string;
+  currency: string;
+  createdAt: string;
+  defaultAddressId?: string;
+  defaultPaymentMethodId?: string;
+  prefs?: Record<string, unknown>;
+  stylePreferences?: Record<string, unknown>;
+  preferredSizes?: Record<string, string | undefined>;
 }

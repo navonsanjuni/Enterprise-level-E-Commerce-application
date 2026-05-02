@@ -25,6 +25,7 @@ import {
 interface LoginCredentials {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 interface RegisterUserData {
@@ -134,7 +135,7 @@ export class AuthenticationService {
     if (user.status === UserStatus.BLOCKED) throw new UserBlockedError();
     if (user.status === UserStatus.INACTIVE) throw new UserInactiveError();
 
-    return this.buildAuthResult(user);
+    return this.buildAuthResult(user, credentials.rememberMe);
   }
 
   async loginAsGuest(email?: string): Promise<AuthResult> {
@@ -408,7 +409,7 @@ export class AuthenticationService {
     return user;
   }
 
-  private buildAuthResult(user: User): AuthResult {
+  private buildAuthResult(user: User, rememberMe: boolean = false): AuthResult {
     const base = {
       userId: user.id.getValue(),
       email: user.email.getValue(),
@@ -417,7 +418,7 @@ export class AuthenticationService {
 
     return {
       accessToken: this.jwtService.signAccess(base),
-      refreshToken: this.jwtService.signRefresh(base),
+      refreshToken: this.jwtService.signRefresh(base, rememberMe),
       user: {
         id: user.id.getValue(),
         email: user.email.getValue(),

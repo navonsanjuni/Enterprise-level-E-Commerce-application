@@ -44,6 +44,7 @@ export class LoginUserHandler
       const authResult = await this.authService.login({
         email: command.email,
         password: command.password,
+        rememberMe: command.rememberMe,
       });
       this.tokenBlacklistService.clearFailedAttempts(lockoutKey);
       return CommandResult.success(authResult);

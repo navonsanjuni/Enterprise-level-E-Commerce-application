@@ -35,11 +35,12 @@ export class JwtService implements IJwtService {
     );
   }
 
-  signRefresh(payload: Omit<TokenPayload, 'type'>): string {
+  signRefresh(payload: Omit<TokenPayload, 'type'>, rememberMe?: boolean): string {
+    const expiresIn = rememberMe ? '30d' : this.refreshTokenExpiresIn;
     return jwt.sign(
       { ...payload, type: 'refresh' },
       this.refreshTokenSecret,
-      { expiresIn: this.refreshTokenExpiresIn } as SignOptions
+      { expiresIn } as SignOptions
     );
   }
 

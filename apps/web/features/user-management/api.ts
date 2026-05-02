@@ -3,8 +3,17 @@ import { setAuthToken, setRefreshToken } from "@/lib/auth";
 import type {
   LoginRequest,
   RegisterRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  RefreshTokenRequest,
+  VerifyEmailRequest,
+  ResendVerificationRequest,
+  ChangePasswordRequest,
+  ChangeEmailRequest,
+  DeleteAccountRequest,
 } from "@tasheen/validation/auth";
-import type { AuthResult } from "./types";
+import type { AuthResult, UserIdentity, RefreshTokenResult, UserProfile } from "./types";
+import { getAuthToken } from "@/lib/auth";
 
 
 
@@ -53,11 +62,13 @@ async function request<T>(
   path: string,
   init: RequestInit & { body?: BodyInit | null },
 ): Promise<T> {
+  const token = getAuthToken();
   const response = await fetch(`${config.apiBaseUrl}${API_PREFIX}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init.headers ?? {}),
     },
   });
@@ -142,4 +153,84 @@ function persistTokens(result: AuthResult): void {
   if (result.refreshToken) {
     setRefreshToken(result.refreshToken);
   }
+}
+
+export async function forgotPassword(input: ForgotPasswordRequest): Promise<void> {
+  await request<void>("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function resetPassword(input: ResetPasswordRequest): Promise<void> {
+  await request<void>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getCurrentUser(): Promise<UserIdentity> {
+  return request<UserIdentity>("/auth/me", {
+    method: "GET",
+  });
+}
+
+export async function refreshToken(input: RefreshTokenRequest): Promise<RefreshTokenResult> {
+  const result = await request<RefreshTokenResult>("/auth/refresh", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  setAuthToken(result.accessToken);
+  if (result.refreshToken) {
+    setRefreshToken(result.refreshToken);
+  }
+  return result;
+}
+
+export async function verifyEmail(input: VerifyEmailRequest): Promise<void> {
+  await request<void>("/auth/verify-email", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function resendVerification(input: ResendVerificationRequest): Promise<void> {
+  await request<void>("/auth/resend-verification", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function changePassword(input: ChangePasswordRequest): Promise<void> {
+  await request<void>("/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function changeEmail(input: ChangeEmailRequest): Promise<void> {
+  await request<void>("/auth/change-email", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteAccount(input: DeleteAccountRequest): Promise<void> {
+  await request<void>("/auth/delete", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getUserProfile(): Promise<UserProfile> {
+  return request<UserProfile>("/users/me/profile", {
+    method: "GET",
+  });
+}
+
+export async function updateUserProfile(input: Partial<UserProfile>): Promise<UserProfile> {
+  return request<UserProfile>("/users/me/profile", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
 }

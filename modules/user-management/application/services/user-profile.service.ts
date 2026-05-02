@@ -46,6 +46,7 @@ export interface UserProfileViewDTO extends UserProfileDTO {
   dateOfBirth: string | null;
   residentOf: string | null;
   nationality: string | null;
+  createdAt: string;
 }
 
 export class UserProfileService {
@@ -194,6 +195,7 @@ export class UserProfileService {
       dateOfBirth: user.dateOfBirth?.toISOString() ?? null,
       residentOf: user.residentOf,
       nationality: user.nationality,
+      createdAt: user.createdAt.toISOString(),
     };
   }
 }

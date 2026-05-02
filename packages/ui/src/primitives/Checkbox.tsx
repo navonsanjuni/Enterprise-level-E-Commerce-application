@@ -13,30 +13,30 @@ export interface CheckboxProps
  * box) so we keep keyboard/screen-reader semantics intact.
  */
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ className, hasError, checked, ...props }, ref) => {
+  ({ className, hasError, ...props }, ref) => {
     return (
       <span className="relative inline-flex h-4 w-4 shrink-0">
         <input
           ref={ref}
           type="checkbox"
-          checked={checked}
-          className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
+          className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0 z-10"
           {...props}
         />
         <span
           aria-hidden="true"
           className={cn(
-            "pointer-events-none flex h-4 w-4 items-center justify-center border transition-colors duration-300 ease-editorial",
-            hasError
-              ? "border-burgundy"
-              : "border-charcoal/40 peer-hover:border-charcoal peer-focus-visible:ring-2 peer-focus-visible:ring-gold peer-focus-visible:ring-offset-1 peer-focus-visible:ring-offset-cream",
-            checked && !hasError && "border-charcoal bg-charcoal",
+            "pointer-events-none flex h-4 w-4 items-center justify-center border transition-all duration-300 ease-editorial",
+            "border-charcoal/40 bg-transparent",
+            "peer-hover:border-charcoal peer-focus-visible:ring-2 peer-focus-visible:ring-gold",
+            "peer-checked:border-charcoal peer-checked:bg-charcoal",
+            hasError && "border-burgundy",
             className,
           )}
         >
-          {checked ? (
-            <Check className="h-3 w-3 text-cream" strokeWidth={3} />
-          ) : null}
+          <Check 
+            className="h-2.5 w-2.5 text-cream opacity-0 scale-50 transition-all duration-300 peer-checked:opacity-100 peer-checked:scale-100" 
+            strokeWidth={4} 
+          />
         </span>
       </span>
     );
