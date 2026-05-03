@@ -17,7 +17,8 @@ export function useRegister() {
   return useMutation<AuthResult, ApiCallError, RegisterRequest>({
     mutationFn: register,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: authQueryKeys.identity() });
+      // Invalidate everything for a fresh session state
+      queryClient.invalidateQueries();
     },
   });
 }

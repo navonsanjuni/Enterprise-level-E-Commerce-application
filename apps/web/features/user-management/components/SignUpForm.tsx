@@ -18,6 +18,8 @@ import {
   PasswordStrengthMeter,
 } from "@tasheen/ui";
 import { useRegister } from "../hooks/useRegister";
+import { useResendVerification } from "../hooks/useResendVerification";
+import { toast } from "sonner";
 
 const TERMS_HREF = "/legal/terms";
 const PRIVACY_HREF = "/legal/privacy";
@@ -25,6 +27,7 @@ const PRIVACY_HREF = "/legal/privacy";
 export function SignUpForm() {
   const router = useRouter();
   const register = useRegister();
+  const resendVerification = useResendVerification();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -57,8 +60,16 @@ export function SignUpForm() {
         firstName: values.firstName,
         lastName: values.lastName,
       });
-      router.push("/account");
-    } catch (err) {
+      toast.success("Welcome to the Slipperze community");
+      
+      // Explicitly trigger verification email since register doesn't do it automatically
+      await resendVerification.mutateAsync({ email: values.email });
+      
+      router.push("/verify-email");
+    } catch (err: any) {
+      const message = err.message || "Sign up failed";
+      setServerError(message);
+      toast.error(message);
       if (
         err instanceof Error &&
         "fieldErrors" in err &&
@@ -83,49 +94,51 @@ export function SignUpForm() {
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-6">
-      <header className="space-y-3">
-        <h1 className="font-serif text-4xl text-charcoal">Begin your story</h1>
-        <p className="text-sm text-slate-muted">
-          Create an account to access bespoke services and artisanal collections.
+      <header className="space-y-4 text-center pb-10 border-b border-stone-100">
+        <h1 className="font-serif text-6xl text-charcoal tracking-tight italic">Registry</h1>
+        <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-bold leading-relaxed">
+          Commission your artisanal member portfolio.
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-x-6">
+      <div className="grid grid-cols-2 gap-x-10">
         <FormField
           id="firstName"
-          label="First Name"
+          label="Given Name"
           error={errors.firstName?.message}
+          className="uppercase tracking-[0.2em] text-[9px] font-bold text-stone-400"
         >
-          <Input
+          <input
             id="firstName"
-            placeholder="First Name"
+            placeholder="e.g. Julian"
             autoComplete="given-name"
-            hasError={Boolean(errors.firstName)}
+            className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
             {...registerField("firstName")}
           />
         </FormField>
         <FormField
           id="lastName"
-          label="Last Name"
+          label="Surname"
           error={errors.lastName?.message}
+          className="uppercase tracking-[0.2em] text-[9px] font-bold text-stone-400"
         >
-          <Input
+          <input
             id="lastName"
-            placeholder="Last Name"
+            placeholder="e.g. Bennett"
             autoComplete="family-name"
-            hasError={Boolean(errors.lastName)}
+            className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
             {...registerField("lastName")}
           />
         </FormField>
       </div>
 
-      <FormField id="email" label="Email Address" error={errors.email?.message}>
-        <Input
+      <FormField id="email" label="Correspondence / Email" error={errors.email?.message} className="uppercase tracking-[0.2em] text-[9px] font-bold text-stone-400">
+        <input
           id="email"
           type="email"
-          placeholder="Email Address"
+          placeholder="member@slipperze.com"
           autoComplete="email"
-          hasError={Boolean(errors.email)}
+          className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
           {...registerField("email")}
         />
       </FormField>
@@ -133,14 +146,16 @@ export function SignUpForm() {
       <div>
         <FormField
           id="password"
-          label="Password"
+          label="Security Key / Password"
           error={errors.password?.message}
+          className="uppercase tracking-[0.2em] text-[9px] font-bold text-stone-400"
         >
-          <PasswordInput
+          <input
             id="password"
-            placeholder="Password"
+            type="password"
+            placeholder="••••••••"
             autoComplete="new-password"
-            hasError={Boolean(errors.password)}
+            className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
             {...registerField("password")}
           />
         </FormField>
@@ -149,14 +164,16 @@ export function SignUpForm() {
 
       <FormField
         id="confirmPassword"
-        label="Confirm Password"
+        label="Verify Security Key"
         error={errors.confirmPassword?.message}
+        className="uppercase tracking-[0.2em] text-[9px] font-bold text-stone-400"
       >
-        <PasswordInput
+        <input
           id="confirmPassword"
-          placeholder="Confirm Password"
+          type="password"
+          placeholder="••••••••"
           autoComplete="new-password"
-          hasError={Boolean(errors.confirmPassword)}
+          className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
           {...registerField("confirmPassword")}
         />
       </FormField>
@@ -211,11 +228,11 @@ export function SignUpForm() {
       <Button
         type="submit"
         variant="primary"
-        size="lg"
+        className="h-16 uppercase tracking-[0.4em] text-[10px] font-bold transition-all duration-700 hover:tracking-[0.5em] rounded-none shadow-md"
         fullWidth
         isLoading={isSubmitting || register.isPending}
       >
-        Create Account
+        Commission Account
       </Button>
 
       <p className="text-center text-xs text-slate-muted">

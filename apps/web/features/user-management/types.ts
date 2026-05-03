@@ -48,3 +48,67 @@ export interface UserProfile {
   stylePreferences?: Record<string, unknown>;
   preferredSizes?: Record<string, string | undefined>;
 }
+
+export type AddressType = "shipping" | "billing";
+
+export interface Address {
+  id: string;
+  userId: string;
+  type: AddressType;
+  isDefault: boolean;
+  firstName: string;
+  lastName: string;
+  company?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone: string;
+  createdAt: string;
+}
+
+export interface AddressRequest {
+  type: AddressType;
+  isDefault?: boolean;
+  firstName?: string;
+  lastName?: string;
+  company?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state?: string;
+  postalCode?: string;
+  country: string;
+  phone?: string;
+}
+
+export type PaymentMethodType = "CARD" | "PAYPAL" | "STRIPE_IDEAL";
+
+export interface PaymentMethod {
+  id: string;
+  userId: string;
+  type: PaymentMethodType;
+  brand?: string;
+  last4?: string;
+  expMonth?: number;
+  expYear?: number;
+  billingAddressId?: string;
+  isDefault: boolean;
+  displayName: string;
+  expiryDisplay: string;
+  isExpired: boolean;
+  createdAt: string;
+}
+
+export interface PaymentMethodRequest {
+  type: PaymentMethodType;
+  brand?: string;
+  last4?: string;
+  expMonth?: number;
+  expYear?: number;
+  billingAddressId?: string;
+  isDefault?: boolean;
+  providerRef?: string;
+}

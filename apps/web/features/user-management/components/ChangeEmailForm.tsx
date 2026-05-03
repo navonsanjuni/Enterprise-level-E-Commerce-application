@@ -49,39 +49,42 @@ export function ChangeEmailForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6 pt-4 pb-2">
-      <div className="text-center space-y-1 mb-8">
-        <p className="text-xs text-stone-500 uppercase tracking-widest font-medium">
-          Security Verification
+      <div className="text-center space-y-3 mb-10 pb-8 border-b border-stone-50">
+        <p className="text-[9px] text-gold uppercase tracking-[0.4em] font-bold">
+          Credential Migration
         </p>
-        <p className="text-sm text-stone-400">
-          Enter your new email and authorize with your password.
+        <p className="font-serif text-3xl text-charcoal italic leading-tight">
+          Update Correspondence
         </p>
       </div>
 
       <div className="space-y-8">
         <FormField 
           id="newEmail" 
-          label="New Email Address" 
+          label="New Correspondence / Email" 
           error={errors.newEmail?.message}
+          className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400"
         >
-          <Input 
+          <input 
             id="newEmail" 
             type="email"
-            placeholder="example@tasheen.com" 
-            className="text-base"
+            placeholder="member@slipperze.com" 
+            className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
             {...register("newEmail")} 
           />
         </FormField>
 
         <FormField 
           id="password" 
-          label="Current Password" 
+          label="Verify Identity (Password)" 
           error={errors.password?.message}
+          className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400"
         >
-          <PasswordInput 
+          <input 
             id="password" 
+            type="password"
             placeholder="••••••••" 
-            className="text-base"
+            className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
             {...register("password")} 
           />
         </FormField>
@@ -94,22 +97,21 @@ export function ChangeEmailForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
       )}
 
-      <div className="pt-6">
+      <div className="pt-8">
         <Button
           type="submit"
           variant="primary"
           fullWidth
-          size="lg"
-          className="uppercase tracking-widest font-bold h-14"
+          className="h-16 uppercase tracking-[0.4em] text-[10px] font-bold rounded-none shadow-md hover:tracking-[0.5em] transition-all duration-700"
           disabled={isSubmitting}
           isLoading={isSubmitting}
         >
-          Update Email
+          Verify Credential Migration
         </Button>
       </div>
       
-      <p className="text-[10px] text-stone-400 text-center uppercase tracking-tighter leading-tight mt-4">
-        A verification link will be sent to your new address to finalize the process.
+      <p className="text-[9px] text-stone-400 text-center uppercase tracking-[0.2em] leading-relaxed mt-6 italic">
+        A secure verification link will be issued to finalize this migration.
       </p>
     </form>
   );

@@ -53,51 +53,57 @@ export function ChangePasswordForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6 pt-4 pb-2">
-      <div className="text-center space-y-1 mb-6">
-        <p className="text-xs text-stone-500 uppercase tracking-widest font-medium">
-          Authorization Required
+      <div className="text-center space-y-3 mb-10 pb-8 border-b border-stone-50">
+        <p className="text-[9px] text-gold uppercase tracking-[0.4em] font-bold">
+          Security Protocol
         </p>
-        <p className="text-sm text-stone-400">
-          Please enter your credentials to authorize changes.
+        <p className="font-serif text-3xl text-charcoal italic leading-tight">
+          Authorize Credential Change
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         <FormField 
           id="currentPassword" 
-          label="Current Password" 
+          label="Verify Identity (Current)" 
           error={errors.currentPassword?.message}
+          className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400"
         >
-          <PasswordInput 
+          <input 
             id="currentPassword" 
+            type="password"
             placeholder="••••••••" 
-            className="text-base"
+            className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
             {...register("currentPassword")} 
           />
         </FormField>
 
         <FormField 
           id="newPassword" 
-          label="New Value (Password)" 
+          label="New Security Key" 
           error={errors.newPassword?.message}
+          className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400"
         >
-          <PasswordInput 
+          <input 
             id="newPassword" 
+            type="password"
             placeholder="Enter new credential" 
-            className="text-base"
+            className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
             {...register("newPassword")} 
           />
         </FormField>
 
         <FormField 
           id="confirmPassword" 
-          label="Confirm New Value" 
+          label="Confirm Security Key" 
           error={errors.confirmPassword?.message}
+          className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400"
         >
-          <PasswordInput 
+          <input 
             id="confirmPassword" 
+            type="password"
             placeholder="Re-enter for confirmation" 
-            className="text-base border-stone-200"
+            className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
             {...register("confirmPassword")} 
           />
         </FormField>
@@ -110,17 +116,16 @@ export function ChangePasswordForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
       )}
 
-      <div className="pt-6">
+      <div className="pt-8">
         <Button
           type="submit"
           variant="primary"
           fullWidth
-          size="lg"
-          className="uppercase tracking-widest font-bold h-14"
+          className="h-16 uppercase tracking-[0.4em] text-[10px] font-bold rounded-none shadow-md hover:tracking-[0.5em] transition-all duration-700"
           disabled={isSubmitting}
           isLoading={isSubmitting}
         >
-          Save Changes
+          Verify Security Update
         </Button>
       </div>
     </form>

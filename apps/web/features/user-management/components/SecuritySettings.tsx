@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { 
   ShieldCheck, 
   Key, 
@@ -42,14 +43,14 @@ export function SecuritySettings() {
     <div className="max-w-4xl space-y-12 animate-in fade-in duration-700">
       <header className="space-y-4">
         <div className="flex items-center gap-3 text-gold">
-          <ShieldCheck className="h-6 w-6" />
-          <h1 className="text-[10px] font-bold tracking-[0.3em] uppercase">Security Portal</h1>
+          <ShieldCheck className="h-6 w-6 stroke-[1.5]" />
+          <h1 className="text-[9px] font-bold tracking-[0.4em] uppercase">Vault Security</h1>
         </div>
-        <h2 className="font-serif text-4xl text-charcoal leading-tight">
-          Security Settings
+        <h2 className="font-serif text-5xl text-charcoal leading-tight italic">
+          Security & Access
         </h2>
-        <p className="text-stone-400 max-w-2xl text-sm leading-relaxed">
-          Manage your credentials, authentication methods, and review active sessions to ensure the uncompromising security of your Tasheen account.
+        <p className="text-stone-400 max-w-2xl text-[11px] uppercase tracking-[0.2em] font-bold leading-relaxed">
+          Safeguard your artisanal credentials and review active member sessions.
         </p>
       </header>
 
@@ -60,15 +61,15 @@ export function SecuritySettings() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-0 border border-stone-100 bg-white shadow-sm divide-y divide-stone-100">
         {/* Authentication Card */}
-        <section className="bg-white border border-stone-100 p-8 lg:p-12 space-y-10 shadow-sm">
+        <section className="p-10 lg:p-16 space-y-12">
           <div className="space-y-2">
-            <h3 className="font-serif text-2xl text-charcoal">Authentication</h3>
-            <p className="text-xs text-stone-400 uppercase tracking-widest font-medium">Primary Access Methods</p>
+            <h3 className="font-serif text-3xl text-charcoal italic">Authentication</h3>
+            <p className="text-[9px] text-stone-400 uppercase tracking-[0.3em] font-bold">Primary Member Access</p>
           </div>
 
-          <div className="divide-y divide-stone-100">
+          <div className="divide-y divide-stone-50">
             {/* Password Item */}
             <div className="py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 group">
               <div className="flex items-start gap-5">
@@ -98,16 +99,9 @@ export function SecuritySettings() {
                   <Mail className="h-5 w-5" />
                 </div>
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-charcoal uppercase tracking-wider">Email Address</p>
-                    {identity?.emailVerified && (
-                      <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-tighter">
-                        <CheckCircle2 className="h-2.5 w-2.5" /> Verified
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-charcoal font-medium">{identity?.email}</p>
-                  <p className="text-sm text-stone-400">Used for notifications and account recovery.</p>
+                  <p className="text-[10px] font-bold text-charcoal uppercase tracking-[0.2em]">Email Correspondence</p>
+                  <p className="text-sm text-charcoal font-serif italic">{identity?.email}</p>
+                  <p className="text-[11px] text-stone-400 leading-relaxed">Primary channel for artisanal notifications.</p>
                 </div>
               </div>
               <Button 
@@ -123,33 +117,36 @@ export function SecuritySettings() {
         </section>
 
         {/* Account Integrity Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 divide-x divide-stone-100 border-t border-stone-100">
           {/* Recovery Card */}
-          <div className="bg-stone-50/50 border border-stone-100 p-8 space-y-6">
+          <div className="p-12 space-y-6 hover:bg-stone-50/50 transition-colors duration-700">
              <div className="flex items-center gap-3 text-charcoal">
-                <ShieldAlert className="h-5 w-5" />
-                <h4 className="font-serif text-xl">Account Integrity</h4>
+                <ShieldAlert className="h-5 w-5 stroke-[1.5]" />
+                <h4 className="font-serif text-2xl italic text-charcoal">Account Integrity</h4>
              </div>
-             <p className="text-sm text-stone-500 leading-relaxed">
-               Ensure your account remains accessible by verifying your primary contact methods and review recent security alerts.
+             <p className="text-[10px] text-stone-500 uppercase tracking-[0.15em] leading-relaxed font-bold">
+               Monitor your member access logs and verify recovery protocols.
              </p>
-             <button className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-charcoal transition-colors flex items-center gap-2 group">
+             <button className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold hover:text-charcoal transition-colors flex items-center gap-3 group">
                Review Security Log <ChevronRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
              </button>
           </div>
 
           {/* Deletion Card */}
-          <div className="bg-stone-50/50 border border-stone-100 p-8 space-y-6">
+          <div className="p-12 space-y-6 hover:bg-burgundy/[0.02] transition-colors duration-700">
              <div className="flex items-center gap-3 text-burgundy">
-                <AlertTriangle className="h-5 w-5" />
-                <h4 className="font-serif text-xl">Privacy & Data</h4>
+                <AlertTriangle className="h-5 w-5 stroke-[1.5]" />
+                <h4 className="font-serif text-2xl italic">Privacy & Data</h4>
              </div>
-             <p className="text-sm text-stone-500 leading-relaxed">
-               Manage your data preferences or permanently close your account and remove all personal information.
+             <p className="text-[10px] text-stone-500 uppercase tracking-[0.15em] leading-relaxed font-bold">
+               Manage your artisanal preferences or permanently close your registry.
              </p>
-             <button className="text-[10px] font-bold uppercase tracking-widest text-burgundy/60 hover:text-burgundy transition-colors flex items-center gap-2 group">
+             <Link 
+               href="/account/delete"
+               className="text-[9px] font-bold uppercase tracking-[0.3em] text-burgundy/60 hover:text-burgundy transition-colors flex items-center gap-3 group"
+             >
                Account Deletion <ExternalLink className="h-3 w-3" />
-             </button>
+             </Link>
           </div>
         </div>
       </div>

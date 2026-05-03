@@ -17,6 +17,7 @@ import {
   FormField,
 } from "@tasheen/ui";
 import { useLogin } from "../hooks/useLogin";
+import { toast } from "sonner";
 
 export function SignInForm() {
   const router = useRouter();
@@ -44,28 +45,31 @@ export function SignInForm() {
         password: values.password,
         rememberMe: values.rememberMe,
       });
+      toast.success("Welcome back to Slipperze");
       router.push("/account");
-    } catch (err) {
-      setServerError(err instanceof Error ? err.message : "Sign in failed");
+    } catch (err: any) {
+      const message = err.message || "Sign in failed";
+      setServerError(message);
+      toast.error(message);
     }
   });
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-6">
-      <header className="space-y-3">
-        <h1 className="font-serif text-4xl text-charcoal">Welcome back</h1>
-        <p className="text-sm text-slate-muted">
-          Sign in to access your artisanal heritage account.
+      <header className="space-y-4 text-center pb-8 border-b border-stone-100">
+        <h1 className="font-serif text-6xl text-charcoal tracking-tight italic">Identity</h1>
+        <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-bold">
+          Slipperze Artisanal Member
         </p>
       </header>
 
-      <FormField id="email" label="Email address" error={errors.email?.message}>
-        <Input
+      <FormField id="email" label="Correspondence / Email" error={errors.email?.message} className="uppercase tracking-[0.2em] text-[9px] font-bold text-stone-400">
+        <input
           id="email"
           type="email"
-          placeholder="Email address"
+          placeholder="e.g. member@slipperze.com"
           autoComplete="email"
-          hasError={Boolean(errors.email)}
+          className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
           {...register("email")}
         />
       </FormField>
@@ -73,14 +77,16 @@ export function SignInForm() {
       <div className="space-y-2">
         <FormField
           id="password"
-          label="Password"
+          label="Security Key / Password"
           error={errors.password?.message}
+          className="uppercase tracking-[0.2em] text-[9px] font-bold text-stone-400"
         >
-          <PasswordInput
+          <input
             id="password"
-            placeholder="Password"
+            type="password"
+            placeholder="••••••••"
             autoComplete="current-password"
-            hasError={Boolean(errors.password)}
+            className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
             {...register("password")}
           />
         </FormField>
@@ -89,16 +95,16 @@ export function SignInForm() {
       <div className="flex items-center justify-between">
         <label 
           htmlFor="rememberMe" 
-          className="flex items-center gap-2 text-xs text-charcoal cursor-pointer group select-none"
+          className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-stone-400 cursor-pointer group select-none font-bold"
         >
           <Checkbox id="rememberMe" {...register("rememberMe")} />
-          <span className="group-hover:text-gold transition-colors">Remember me</span>
+          <span className="group-hover:text-charcoal transition-colors">Maintain Access</span>
         </label>
         <Link
           href="/forgot-password"
-          className="text-xs font-medium text-burgundy hover:text-gold underline underline-offset-4"
+          className="text-[10px] font-bold text-burgundy uppercase tracking-[0.15em] hover:text-gold transition-colors"
         >
-          Forgot password?
+          Recovery?
         </Link>
       </div>
 
@@ -111,11 +117,11 @@ export function SignInForm() {
       <Button
         type="submit"
         variant="primary"
-        size="lg"
+        className="h-16 uppercase tracking-[0.4em] text-[10px] font-bold transition-all duration-700 hover:tracking-[0.5em] rounded-none"
         fullWidth
         isLoading={isSubmitting || login.isPending}
       >
-        Sign In
+        Authenticate Identity
       </Button>
 
       <div className="relative py-4">

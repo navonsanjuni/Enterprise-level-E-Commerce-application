@@ -61,84 +61,126 @@ export function EditProfileForm() {
 
   return (
     <div className="max-w-4xl space-y-12">
-      <header className="space-y-2">
-        <h2 className="font-serif text-3xl text-charcoal">Personal Information</h2>
-        <p className="text-sm text-stone-400">Update your details and preferences to personalize your experience.</p>
+      <header className="space-y-4 text-center pb-12 border-b border-stone-100">
+        <h2 className="font-serif text-6xl text-charcoal tracking-tight italic">Portfolio Registry</h2>
+        <p className="text-[10px] tracking-[0.3em] uppercase text-gold font-bold leading-relaxed">
+          Commissioned Details & Personalization
+        </p>
       </header>
 
       <form onSubmit={onSubmit} className="space-y-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 gap-12">
           {/* Identity Section */}
-          <div className="space-y-6">
-            <h3 className="text-[11px] font-bold tracking-[0.25em] uppercase text-stone-500 flex items-center gap-2 border-b border-stone-100 pb-2">
-              <User className="h-3.5 w-3.5" /> Identity
+          <div className="space-y-10">
+            <h3 className="text-[9px] font-bold tracking-[0.3em] uppercase text-gold flex items-center gap-3 border-b border-stone-100 pb-5">
+              <User className="h-4 w-4 stroke-[1.5]" /> Identity Registry
             </h3>
             
-            <div className="grid grid-cols-1 gap-6">
-              <FormField id="title" label="Title (e.g. Mr, Ms)" error={errors.title?.message}>
-                <Input id="title" placeholder="e.g. MS" className="text-base" {...register("title")} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <FormField id="title" label="Honorific" error={errors.title?.message} className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400">
+                <input 
+                  id="title" 
+                  placeholder="e.g. MR / MS" 
+                  className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none" 
+                  {...register("title")} 
+                />
+              </FormField>
+              <FormField id="firstName" label="Given Name" error={errors.firstName?.message} className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400">
+                <input 
+                  id="firstName" 
+                  placeholder="First name" 
+                  className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none" 
+                  {...register("firstName")} 
+                />
+              </FormField>
+              <FormField id="lastName" label="Surname" error={errors.lastName?.message} className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400">
+                <input 
+                  id="lastName" 
+                  placeholder="Last name" 
+                  className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none" 
+                  {...register("lastName")} 
+                />
+              </FormField>
+            </div>
+          </div>
+
+          {/* Correspondence Section */}
+          <div className="space-y-10">
+            <h3 className="text-[9px] font-bold tracking-[0.3em] uppercase text-gold flex items-center gap-3 border-b border-stone-100 pb-5">
+              <Phone className="h-4 w-4 stroke-[1.5]" /> Correspondence
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <FormField id="phone" label="Primary Phone" error={errors.phone?.message} className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400">
+                <input 
+                  id="phone" 
+                  placeholder="+44 ..." 
+                  className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none" 
+                  {...register("phone")} 
+                />
               </FormField>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField id="firstName" label="First Name" error={errors.firstName?.message}>
-                  <Input id="firstName" placeholder="e.g. Navon" className="text-base" {...register("firstName")} />
+              <FormField id="dateOfBirth" label="Date of Birth" error={errors.dateOfBirth?.message} className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400">
+                <input 
+                  id="dateOfBirth" 
+                  type="date" 
+                  className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none" 
+                  {...register("dateOfBirth")} 
+                />
+              </FormField>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+            {/* Location Section */}
+            <div className="space-y-10">
+              <h3 className="text-[9px] font-bold tracking-[0.3em] uppercase text-gold flex items-center gap-3 border-b border-stone-100 pb-5">
+                <Globe className="h-4 w-4 stroke-[1.5]" /> Global Residence
+              </h3>
+              
+              <div className="grid grid-cols-1 gap-8">
+                <FormField id="nationality" label="Nationality" error={errors.nationality?.message} className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400">
+                  <input 
+                    id="nationality" 
+                    placeholder="e.g. British" 
+                    className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none" 
+                    {...register("nationality")} 
+                  />
                 </FormField>
-                <FormField id="lastName" label="Last Name" error={errors.lastName?.message}>
-                  <Input id="lastName" placeholder="e.g. Sanjuni" className="text-base" {...register("lastName")} />
+
+                <FormField id="residentOf" label="Resident Of" error={errors.residentOf?.message} className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400">
+                  <input 
+                    id="residentOf" 
+                    placeholder="e.g. United Kingdom" 
+                    className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none" 
+                    {...register("residentOf")} 
+                  />
                 </FormField>
               </div>
             </div>
-          </div>
 
-          {/* Contact Section */}
-          <div className="space-y-6">
-            <h3 className="text-[11px] font-bold tracking-[0.25em] uppercase text-stone-500 flex items-center gap-2 border-b border-stone-100 pb-2">
-              <Phone className="h-3.5 w-3.5" /> Contact
-            </h3>
-            
-            <div className="grid grid-cols-1 gap-6">
-              <FormField id="phone" label="Phone Number" error={errors.phone?.message}>
-                <Input id="phone" placeholder="e.g. +44 ..." className="text-base" {...register("phone")} />
-              </FormField>
-
-              <FormField id="dateOfBirth" label="Date of Birth" error={errors.dateOfBirth?.message}>
-                <Input id="dateOfBirth" type="date" className="text-base" {...register("dateOfBirth")} />
-              </FormField>
-            </div>
-          </div>
-
-          {/* Location Section */}
-          <div className="space-y-6">
-            <h3 className="text-[11px] font-bold tracking-[0.25em] uppercase text-stone-500 flex items-center gap-2 border-b border-stone-100 pb-2">
-              <Globe className="h-3.5 w-3.5" /> Location & Origin
-            </h3>
-            
-            <div className="grid grid-cols-1 gap-6">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField id="nationality" label="Nationality" error={errors.nationality?.message}>
-                  <Input id="nationality" placeholder="e.g. British" className="text-base" {...register("nationality")} />
+            {/* Preferences Section */}
+            <div className="space-y-10">
+              <h3 className="text-[9px] font-bold tracking-[0.3em] uppercase text-gold flex items-center gap-3 border-b border-stone-100 pb-5">
+                <CreditCard className="h-4 w-4 stroke-[1.5]" /> Preferences
+              </h3>
+              
+              <div className="grid grid-cols-1 gap-8">
+                <FormField id="currency" label="Preferred Currency" error={errors.currency?.message} className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400">
+                  <input 
+                    id="currency" 
+                    placeholder="GBP" 
+                    className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none" 
+                    {...register("currency")} 
+                  />
                 </FormField>
-
-                <FormField id="residentOf" label="Resident Of" error={errors.residentOf?.message}>
-                  <Input id="residentOf" placeholder="e.g. United Kingdom" className="text-base" {...register("residentOf")} />
-                </FormField>
-              </div>
-            </div>
-          </div>
-
-          {/* Preferences Section */}
-          <div className="space-y-6">
-            <h3 className="text-[11px] font-bold tracking-[0.25em] uppercase text-stone-500 flex items-center gap-2 border-b border-stone-100 pb-2">
-              <CreditCard className="h-3.5 w-3.5" /> Preferences
-            </h3>
-            
-            <div className="grid grid-cols-1 gap-8">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField id="currency" label="Preferred Currency" error={errors.currency?.message}>
-                  <Input id="currency" placeholder="e.g. GBP" className="text-base" {...register("currency")} />
-                </FormField>
-                <FormField id="locale" label="Language (Locale)" error={errors.locale?.message}>
-                  <Input id="locale" placeholder="e.g. en-GB" className="text-base" {...register("locale")} />
+                <FormField id="locale" label="Language (Locale)" error={errors.locale?.message} className="uppercase tracking-[0.15em] text-[9px] font-bold text-stone-400">
+                  <input 
+                    id="locale" 
+                    placeholder="en-GB" 
+                    className="w-full bg-stone-50 border border-stone-100 px-6 py-5 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none" 
+                    {...register("locale")} 
+                  />
                 </FormField>
               </div>
             </div>
@@ -160,12 +202,11 @@ export function EditProfileForm() {
             <Button
               type="submit"
               variant="primary"
-              size="lg"
-              className="min-w-[160px]"
+              className="min-w-[240px] h-16 uppercase tracking-[0.4em] text-[10px] font-bold rounded-none shadow-md hover:tracking-[0.5em] transition-all duration-700"
               disabled={!isDirty || isSubmitting}
               isLoading={isSubmitting}
             >
-              Save Changes
+              Update Registry Portfolio
             </Button>
           </div>
         </div>

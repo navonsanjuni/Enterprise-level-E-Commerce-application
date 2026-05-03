@@ -18,7 +18,7 @@ export const config = {
   ),
   appUrl:
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001",
-  brand: process.env.NEXT_PUBLIC_BRAND ?? "Tasheen",
+  brand: process.env.NEXT_PUBLIC_BRAND ?? "Slipperze",
   imageCdn: process.env.NEXT_PUBLIC_IMAGE_CDN ?? "",
   stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "",
 } as const;

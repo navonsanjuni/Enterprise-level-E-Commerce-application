@@ -12,7 +12,8 @@ export function useLogin() {
   return useMutation<AuthResult, ApiCallError, LoginRequest>({
     mutationFn: login,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: authQueryKeys.identity() });
+      // Invalidate everything to ensure no stale data remains from previous sessions or guest state
+      queryClient.invalidateQueries();
     },
   });
 }

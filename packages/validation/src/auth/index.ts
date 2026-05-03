@@ -58,7 +58,7 @@ export const updateProfileRequestSchema = z.object({
   dateOfBirth: z.string().optional(), // We'll validate date string format in the UI
   residentOf: z.string().max(100).optional(),
   nationality: z.string().max(100).optional(),
-  locale: z.string().regex(/^[a-z]{2}-[A-Z]{2}$/).optional(),
+  locale: z.string().regex(/^[a-z]{2}(-[A-Z]{2,3})?$/).optional(),
   currency: z.string().regex(/^[A-Z]{3}$/).optional(),
   prefs: z.record(z.string(), z.unknown()).optional(),
   stylePreferences: z.record(z.string(), z.unknown()).optional(),

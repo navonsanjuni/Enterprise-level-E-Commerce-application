@@ -15,6 +15,7 @@ export const SUPPORTED_LOCALES = [
   "hi-IN", "ar-SA", "ar-AE", "ar-EG", "he-IL",
   // Other regions
   "id-ID", "ms-MY", "tl-PH",
+  "si-LK",
 ] as const;
 
 export const LOCALE_NAMES: Record<string, string> = {
@@ -70,6 +71,7 @@ export const LOCALE_NAMES: Record<string, string> = {
   "id-ID": "Bahasa Indonesia (Indonesia)",
   "ms-MY": "Bahasa Melayu (Malaysia)",
   "tl-PH": "Filipino (Pilipinas)",
+  "si-LK": "Sinhala (Sri Lanka)",
 };
 
 export const LANGUAGE_NAMES: Record<string, string> = {
@@ -100,6 +102,7 @@ export const LANGUAGE_NAMES: Record<string, string> = {
   id: "Bahasa Indonesia",
   ms: "Bahasa Melayu",
   tl: "Filipino",
+  si: "Sinhala",
 };
 
 export const COUNTRY_REGIONS: Record<string, string> = {
@@ -150,6 +153,7 @@ export const COUNTRY_REGIONS: Record<string, string> = {
   AE: "Middle East",
   EG: "Africa",
   IL: "Middle East",
+  LK: "Asia",
 };
 
 export const LOCALE_CURRENCY_MAP: Record<string, string> = {
@@ -205,6 +209,7 @@ export const LOCALE_CURRENCY_MAP: Record<string, string> = {
   "id-ID": "IDR",
   "ms-MY": "MYR",
   "tl-PH": "PHP",
+  "si-LK": "LKR",
 };
 
 export const RTL_LANGUAGES = ["ar", "he"] as const;

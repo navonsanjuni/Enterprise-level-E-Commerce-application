@@ -15,13 +15,13 @@ export function BrandWordmark({ href = "/", className }: BrandWordmarkProps) {
   return (
     <Link
       href={href}
-      aria-label="Tasheen — home"
+      aria-label="Slipperze — home"
       className={cn(
         "inline-block font-serif text-2xl tracking-[0.32em] text-charcoal transition-colors hover:text-gold",
         className,
       )}
     >
-      TASHEEN
+      SLIPPERZE
     </Link>
   );
 }

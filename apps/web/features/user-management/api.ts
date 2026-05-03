@@ -12,7 +12,7 @@ import type {
   ChangeEmailRequest,
   DeleteAccountRequest,
 } from "@tasheen/validation/auth";
-import type { AuthResult, UserIdentity, RefreshTokenResult, UserProfile } from "./types";
+import type { AuthResult, UserIdentity, RefreshTokenResult, UserProfile, Address, AddressRequest, PaymentMethod, PaymentMethodRequest } from "./types";
 import { getAuthToken } from "@/lib/auth";
 
 
@@ -66,16 +66,22 @@ async function request<T>(
   const response = await fetch(`${config.apiBaseUrl}${API_PREFIX}${path}`, {
     ...init,
     headers: {
-      "Content-Type": "application/json",
+      ...(init.body ? { "Content-Type": "application/json" } : {}),
       Accept: "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init.headers ?? {}),
     },
   });
 
+  if (response.status === 204) {
+    return {} as T;
+  }
+
   let body: BackendBody<T>;
   try {
-    body = (await response.json()) as BackendBody<T>;
+    const text = await response.text();
+    if (!text) return {} as T;
+    body = JSON.parse(text) as BackendBody<T>;
   } catch {
     throw new ApiCallError(
       "The server returned an unreadable response.",
@@ -216,7 +222,7 @@ export async function changeEmail(input: ChangeEmailRequest): Promise<void> {
 }
 
 export async function deleteAccount(input: DeleteAccountRequest): Promise<void> {
-  await request<void>("/auth/delete", {
+  await request<void>("/auth/delete-account", {
     method: "POST",
     body: JSON.stringify(input),
   });
@@ -232,5 +238,73 @@ export async function updateUserProfile(input: Partial<UserProfile>): Promise<Us
   return request<UserProfile>("/users/me/profile", {
     method: "PATCH",
     body: JSON.stringify(input),
+  });
+}
+
+// --- Addresses ---
+
+export async function getAddresses(): Promise<{ items: Address[]; total: number }> {
+  return request<{ items: Address[]; total: number }>("/users/me/addresses", {
+    method: "GET",
+  });
+}
+
+export async function addAddress(input: AddressRequest): Promise<Address> {
+  return request<Address>("/users/me/addresses", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateAddress(id: string, input: Partial<AddressRequest>): Promise<Address> {
+  return request<Address>(`/users/me/addresses/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteAddress(id: string): Promise<void> {
+  await request<void>(`/users/me/addresses/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function setDefaultAddress(id: string): Promise<void> {
+  await request<void>(`/users/me/addresses/${id}/default`, {
+    method: "PATCH",
+  });
+}
+
+// --- Payment Methods ---
+
+export async function getPaymentMethods(): Promise<{ items: PaymentMethod[]; total: number }> {
+  return request<{ items: PaymentMethod[]; total: number }>("/users/me/payment-methods", {
+    method: "GET",
+  });
+}
+
+export async function addPaymentMethod(input: PaymentMethodRequest): Promise<PaymentMethod> {
+  return request<PaymentMethod>("/users/me/payment-methods", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updatePaymentMethod(id: string, input: Partial<PaymentMethodRequest>): Promise<PaymentMethod> {
+  return request<PaymentMethod>(`/users/me/payment-methods/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deletePaymentMethod(id: string): Promise<void> {
+  await request<void>(`/users/me/payment-methods/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function setDefaultPaymentMethod(id: string): Promise<void> {
+  await request<void>(`/users/me/payment-methods/${id}/default`, {
+    method: "PATCH",
   });
 }

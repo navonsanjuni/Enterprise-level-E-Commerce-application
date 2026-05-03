@@ -57,7 +57,7 @@ export function AccountDashboard() {
   };
 
   return (
-    <div className="flex-1 p-8 lg:p-16 space-y-16">
+    <div className="flex-1 p-10 lg:p-20 space-y-20 bg-stone-50/20">
       {/* Header Profile Section */}
       <div className="flex flex-col lg:flex-row items-center gap-12">
         <div 
@@ -89,7 +89,7 @@ export function AccountDashboard() {
         </div>
 
         <div className="text-center lg:text-left space-y-2">
-          <h1 className="font-serif text-5xl lg:text-6xl text-charcoal">
+          <h1 className="font-serif text-5xl lg:text-7xl text-charcoal tracking-tight italic">
             {user.firstName} {user.lastName}
           </h1>
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
@@ -134,7 +134,7 @@ export function AccountDashboard() {
       <section className="space-y-8">
         <h2 className="font-serif text-2xl text-charcoal tracking-wide">Recent Activity</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-stone-100 divide-x divide-stone-100 bg-white shadow-sm">
           <ActivityCard 
             icon={Package} 
             label="Active Orders" 
@@ -216,17 +216,17 @@ function ActivityCard({
   return (
     <a 
       href={href}
-      className="group flex flex-col p-8 bg-stone-50/50 border border-stone-100 rounded-lg transition-all duration-300 hover:bg-white hover:shadow-lg hover:-translate-y-1"
+      className="group flex flex-col p-10 transition-all duration-500 hover:bg-stone-50/50"
     >
-      <div className="flex justify-between items-start mb-6">
-        <div className="p-3 bg-white rounded-md shadow-sm group-hover:text-gold transition-colors">
-          <Icon className="h-5 w-5" />
+      <div className="flex justify-between items-start mb-10">
+        <div className="text-stone-300 group-hover:text-gold transition-colors duration-500">
+          <Icon className="h-6 w-6 stroke-[1.5]" />
         </div>
-        <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-gold group-hover:translate-x-1 transition-all" />
+        <ChevronRight className="h-4 w-4 text-stone-200 group-hover:text-gold group-hover:translate-x-1 transition-all" />
       </div>
-      <div className="space-y-1">
-        <p className="text-[10px] font-bold tracking-widest text-stone-400 uppercase">{label}</p>
-        <p className="text-4xl font-serif text-charcoal">{value}</p>
+      <div className="space-y-2">
+        <p className="text-[9px] font-bold tracking-[0.3em] text-stone-400 uppercase">{label}</p>
+        <p className="text-5xl font-serif text-charcoal">{value}</p>
       </div>
     </a>
   );

@@ -26,6 +26,8 @@ export const metadata: Metadata = buildMetadata({
     "The everyday made remarkable. Discover Tasheen — premium leather footwear with editorial soul.",
 });
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: {
@@ -42,6 +44,26 @@ export default function RootLayout({
           <QueryProvider>
             <AuthProvider>
               <ModalProvider>{children}</ModalProvider>
+              <Toaster 
+                position="top-center"
+                expand={false}
+                richColors
+                closeButton
+                toastOptions={{
+                  style: {
+                    background: 'white',
+                    border: '1px solid #f5f5f4', // stone-100
+                    borderRadius: '0px',
+                    fontFamily: 'var(--ts-font-sans)',
+                    fontSize: '11px',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    fontWeight: '600',
+                    color: '#1c1917', // charcoal
+                    boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+                  },
+                }}
+              />
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>
