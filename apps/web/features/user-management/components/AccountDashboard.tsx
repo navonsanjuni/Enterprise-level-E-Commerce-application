@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Modal } from "@/components/ui/Modal";
 import { EditProfileForm } from "./EditProfileForm";
 import { useCurrentIdentity } from "../hooks/useCurrentIdentity";
@@ -15,7 +16,8 @@ import {
   Star,
   Loader2,
   Settings,
-  Camera
+  Camera,
+  ArrowLeft
 } from "lucide-react";
 
 export function AccountDashboard() {
@@ -57,7 +59,17 @@ export function AccountDashboard() {
   };
 
   return (
-    <div className="flex-1 p-10 lg:p-20 space-y-20 bg-stone-50/20">
+    <div className="flex-1 p-10 lg:p-20 space-y-16 bg-stone-50/20">
+      {/* Utility Return Link */}
+      <div className="mb-8">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-3 text-[9px] uppercase tracking-[0.4em] font-bold text-stone-400 hover:text-gold transition-all duration-500 group"
+        >
+          <ArrowLeft className="h-3 w-3 transition-transform group-hover:-translate-x-1" />
+          Return to Boutique
+        </Link>
+      </div>
       {/* Header Profile Section */}
       <div className="flex flex-col lg:flex-row items-center gap-12">
         <div 

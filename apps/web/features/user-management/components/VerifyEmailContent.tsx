@@ -18,6 +18,7 @@ export function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
+  const email = searchParams.get("email");
   const verifyEmail = useVerifyEmail();
   const [manualToken, setManualToken] = useState("");
 
@@ -55,7 +56,11 @@ export function VerifyEmailContent() {
         <p className="text-sm text-stone-400 leading-relaxed max-w-[280px] mx-auto uppercase tracking-widest font-medium">
           {verifyEmail.isPending ? "Confirming your artisanal heritage credentials." : 
            verifyEmail.isSuccess ? "Your Slipperze account is now fully activated." : 
-           verifyEmail.isError ? "The link may have expired or is invalid." : "We've sent a secure link to your inbox."}
+           verifyEmail.isError ? "The link may have expired or is invalid." : (
+             <>
+               We've sent a secure link to <span className="text-charcoal font-bold lowercase tracking-normal">{email || "your inbox"}</span>.
+             </>
+           )}
         </p>
       </header>
 

@@ -641,7 +641,7 @@ export class Container {
     const emailService = new NodemailerEmailService();
 
     const authController = new AuthController(
-      new RegisterUserHandler(authService),
+      new RegisterUserHandler(authService, TokenBlacklistService, emailService),
       new LoginUserHandler(authService, TokenBlacklistService),
       new LogoutHandler(authService, TokenBlacklistService),
       new RefreshTokenHandler(authService, TokenBlacklistService),

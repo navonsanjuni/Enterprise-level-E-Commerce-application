@@ -18,11 +18,13 @@ import {
 } from "@tasheen/ui";
 import { useLogin } from "../hooks/useLogin";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 export function SignInForm() {
   const router = useRouter();
   const login = useLogin();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -81,14 +83,23 @@ export function SignInForm() {
           error={errors.password?.message}
           className="uppercase tracking-[0.2em] text-[9px] font-bold text-stone-400"
         >
-          <input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            autoComplete="current-password"
-            className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
-            {...register("password")}
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none pr-12"
+              {...register("password")}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-300 hover:text-gold transition-colors"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </FormField>
       </div>
 

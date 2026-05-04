@@ -29,14 +29,14 @@ export function AccountSidebar() {
 
   return (
     <aside className="w-full lg:w-72 flex flex-col bg-stone-50/30 border-r border-stone-100 lg:sticky lg:top-0 lg:h-[calc(100vh-4rem)]">
-      <div className="p-8 border-b border-stone-100">
-        <h2 className="font-serif text-lg tracking-widest uppercase text-charcoal">
+      <Link href="/" className="p-8 border-b border-stone-100 block group cursor-pointer hover:bg-stone-50 transition-colors">
+        <h2 className="font-serif text-lg tracking-widest uppercase text-charcoal group-hover:text-gold transition-colors">
           Slipperze Member
         </h2>
         <p className="text-[10px] tracking-widest uppercase text-stone-400 mt-1">
           Artisanal Excellence
         </p>
-      </div>
+      </Link>
 
       <nav className="flex-1 py-4">
         <ul className="space-y-1">

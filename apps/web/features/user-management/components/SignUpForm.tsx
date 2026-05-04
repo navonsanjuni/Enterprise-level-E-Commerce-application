@@ -20,6 +20,7 @@ import {
 import { useRegister } from "../hooks/useRegister";
 import { useResendVerification } from "../hooks/useResendVerification";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 const TERMS_HREF = "/legal/terms";
 const PRIVACY_HREF = "/legal/privacy";
@@ -29,6 +30,8 @@ export function SignUpForm() {
   const register = useRegister();
   const resendVerification = useResendVerification();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register: registerField,
@@ -60,12 +63,11 @@ export function SignUpForm() {
         firstName: values.firstName,
         lastName: values.lastName,
       });
-      toast.success("Welcome to the Slipperze community");
+      toast.success("Welcome to the Slipperze community. Preparing your artisanal welcome...");
       
-      // Explicitly trigger verification email since register doesn't do it automatically
-      await resendVerification.mutateAsync({ email: values.email });
-      
-      router.push("/verify-email");
+      // Redirect immediately to the verification page
+      // We pass the email in the query param so the next page can show it
+      router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
     } catch (err: any) {
       const message = err.message || "Sign up failed";
       setServerError(message);
@@ -150,14 +152,23 @@ export function SignUpForm() {
           error={errors.password?.message}
           className="uppercase tracking-[0.2em] text-[9px] font-bold text-stone-400"
         >
-          <input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            autoComplete="new-password"
-            className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
-            {...registerField("password")}
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              autoComplete="new-password"
+              className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none pr-12"
+              {...registerField("password")}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-300 hover:text-gold transition-colors"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </FormField>
         <PasswordStrengthMeter password={passwordValue ?? ""} />
       </div>
@@ -168,14 +179,23 @@ export function SignUpForm() {
         error={errors.confirmPassword?.message}
         className="uppercase tracking-[0.2em] text-[9px] font-bold text-stone-400"
       >
-        <input
-          id="confirmPassword"
-          type="password"
-          placeholder="••••••••"
-          autoComplete="new-password"
-          className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none"
-          {...registerField("confirmPassword")}
-        />
+        <div className="relative">
+          <input
+            id="confirmPassword"
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="••••••••"
+            autoComplete="new-password"
+            className="w-full bg-stone-50 border border-stone-100 px-6 py-4 text-sm text-charcoal placeholder:text-stone-300 focus:bg-white focus:border-gold focus:outline-none transition-all duration-500 rounded-none pr-12"
+            {...registerField("confirmPassword")}
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-300 hover:text-gold transition-colors"
+          >
+            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
       </FormField>
 
       <Controller

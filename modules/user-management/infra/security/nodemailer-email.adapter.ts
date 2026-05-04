@@ -46,17 +46,26 @@ export class NodemailerEmailService implements IEmailService {
   async sendEmail(options: SendEmailOptions): Promise<void> {
     const transporter = await this.getTransporter();
 
-    const info = await transporter.sendMail({
-      from: `"Tasheen Shop" <${process.env.SMTP_FROM || "noreply@tasheen.com"}>`,
-      to: options.to,
-      subject: options.subject,
-      text: options.text,
-      html: options.html,
-    });
+    try {
+      const info = await transporter.sendMail({
+        from: `"Slipperze Boutique" <${process.env.SMTP_FROM || "concierge@slipperze.com"}>`,
+        to: options.to,
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
+      });
 
-    if (this.isDevelopment) {
-      console.log(`[EmailService] Email sent: ${info.messageId}`);
-      console.log(`[EmailService] Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+      if (this.isDevelopment) {
+        console.log(`[EmailService] Email sent: ${info.messageId}`);
+        console.log(`[EmailService] Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+      }
+
+    } catch (err: any) {
+      if (this.isDevelopment) {
+        console.warn(`[EmailService] SMTP delivery failed but link was logged. (Reason: ${err.message})`);
+      } else {
+        throw err;
+      }
     }
   }
 
@@ -65,30 +74,37 @@ export class NodemailerEmailService implements IEmailService {
     
     await this.sendEmail({
       to: email,
-      subject: "Reset your password",
-      text: `You requested a password reset. Please use this link: ${resetUrl}`,
+      subject: "Commission your member security key",
+      text: `A request to reset your Slipperze security key has been initiated. Please use this link: ${resetUrl}`,
       html: `
-        <h1>Password Reset Request</h1>
-        <p>You requested a password reset for your Tasheen account.</p>
-        <p>Click the link below to set a new password:</p>
-        <a href="${resetUrl}">${resetUrl}</a>
-        <p>If you didn't request this, you can safely ignore this email.</p>
+        <h1 style="font-family: serif; font-style: italic;">Heritage Portfolio Security</h1>
+        <p>A request to reset your Slipperze artisanal security key has been initiated.</p>
+        <p>Follow the link below to commission a new key:</p>
+        <a href="${resetUrl}" style="color: #c5a059; text-decoration: none; font-weight: bold; letter-spacing: 0.1em;">RESET SECURITY KEY</a>
+        <p style="font-size: 10px; color: #999;">If you did not initiate this request, your portfolio remains secure and no action is required.</p>
       `,
     });
   }
 
   async sendVerificationEmail(email: string, token: string): Promise<void> {
     const verifyUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/verify-email?token=${token}`;
+    
+    if (this.isDevelopment) {
+      console.log("----------------------------------------------------------------");
+      console.log(`[EmailService] VERIFICATION LINK GENERATED:`);
+      console.log(`${verifyUrl}`);
+      console.log("----------------------------------------------------------------");
+    }
 
     await this.sendEmail({
       to: email,
-      subject: "Verify your email address",
-      text: `Welcome to Tasheen! Please verify your email using this link: ${verifyUrl}`,
+      subject: "Verify your artisanal credentials",
+      text: `Welcome to the Slipperze community! Please verify your identity using this link: ${verifyUrl}`,
       html: `
-        <h1>Welcome to Tasheen!</h1>
-        <p>Please verify your email address to complete your registration:</p>
-        <a href="${verifyUrl}">${verifyUrl}</a>
-        <p>Thank you!</p>
+        <h1 style="font-family: serif; font-style: italic;">Welcome to Slipperze</h1>
+        <p>To finalize your member portfolio and gain full boutique access, please verify your credentials:</p>
+        <a href="${verifyUrl}" style="color: #c5a059; text-decoration: none; font-weight: bold; letter-spacing: 0.1em;">CONFIRM IDENTITY</a>
+        <p style="font-size: 10px; color: #999; margin-top: 20px;">Artisanal Excellence since 2024</p>
       `,
     });
   }
